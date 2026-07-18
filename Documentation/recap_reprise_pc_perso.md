@@ -34,24 +34,40 @@ Documents de référence dans `projet perso/` :
 - Git initialisé, `.gitignore` créé (`node_modules/`, `dist/`, `.env`, `.astro/`)
 - Premier commit fait et **poussé avec succès** sur `main` → `github.com/saber-abd/reservation-platform`
 
-### ⚠️ Point d'attention technique important
-Le scaffold Astro actuel a été fait "à la main" (contournement) car le PC d'entreprise a des **restrictions GPO/AppLocker** qui bloquent l'exécution de `npx` et des scripts `.cmd`/`.ps1` depuis le cache npm. Résultat :
-- `package.json` est générique (`"type": "commonjs"`, pas de scripts `dev`/`build`/`preview`) au lieu d'un vrai package.json généré par `create-astro`.
-- Seuls `astro.config.mjs` et `src/pages/index.astro` existent, structure minimale.
+### ⚠️ Point d'attention technique (résolu sur PC perso)
+Le scaffold Astro initial avait été fait "à la main" (contournement) car le PC d'entreprise a des **restrictions GPO/AppLocker** qui bloquent l'exécution de `npx` et des scripts `.cmd`/`.ps1` depuis le cache npm. Résultat à l'époque :
+- `package.json` générique (`"type": "commonjs"`, pas de scripts `dev`/`build`/`preview`) au lieu d'un vrai package.json généré par `create-astro`.
+- Seuls `astro.config.mjs` et `src/pages/index.astro` existaient, structure minimale.
 
-**Sur le PC perso (sans ces restrictions), il faut régénérer proprement le projet** :
-1. Cloner le repo existant : `git clone https://github.com/saber-abd/reservation-platform.git`
-2. Idéalement, relancer `npm create astro@latest` dans un dossier temporaire et comparer/remplacer la config (ou demander à Copilot de corriger le `package.json` pour avoir les bons scripts npm et `"type": "module"`).
-3. Une fois la base propre : `npx astro add tailwind`, `npx astro add react`, puis initialiser shadcn/ui.
+Ce point est maintenant corrigé (voir section suivante).
 
-## Prochaines étapes (reprise de la Phase 2)
+## Où en est le code (fait sur le PC perso — session du 2026-07-18)
 
-1. Cloner le repo sur le PC perso (dans un dossier hors sync cloud si possible, ex. `C:\Dev\`).
-2. Corriger/régénérer le `package.json` et la structure Astro proprement (pas de restrictions attendues ici).
-3. `npx astro add tailwind`
-4. `npx astro add react`
-5. Initialiser shadcn/ui
-6. Commit + push
-7. Connecter le repo à Cloudflare Pages (build automatique à chaque push)
+Repo cloné dans `C:\Users\cash31\Desktop\reservation-platform\reservation-platform` (aucune restriction GPO rencontrée, `npx` fonctionne normalement).
+
+Étapes réalisées :
+1. **`package.json` corrigé à la main** : passage à `"type": "module"`, ajout des scripts `dev`/`start`/`build`/`preview`/`astro`.
+2. `npm install` — scaffold validé, 0 vulnérabilité.
+3. **Tailwind CSS** ajouté via `npx astro add tailwind` (intégration officielle, `@tailwindcss/vite`, génère `src/styles/global.css`).
+4. **React** ajouté via `npx astro add react` (`@astrojs/react`, met à jour `tsconfig.json` avec `jsx: react-jsx`).
+5. **shadcn/ui** initialisé via `npx shadcn@latest init` :
+   - Choix : librairie **Base UI** (recommandé), preset **Nova** (Lucide / Geist).
+   - Ajout de l'alias `@/*` → `./src/*` dans `tsconfig.json` (`baseUrl` + `paths`), requis par shadcn.
+   - Fichiers créés : `components.json`, `src/components/ui/button.tsx`, `src/lib/utils.ts` ; `src/styles/global.css` mis à jour avec les variables de thème shadcn.
+6. Création de `src/layouts/Layout.astro` (importe `../styles/global.css`) et mise à jour de `src/pages/index.astro` pour utiliser ce layout + un composant `Button` shadcn (validation de la chaîne complète Astro/Tailwind/React/shadcn).
+7. `npm run build` : ✅ build réussi sans erreur.
+8. Commit + push effectués sur `main` → `github.com/saber-abd/reservation-platform` (commit `7bd6ecf`).
+
+**Le scaffold est maintenant propre et 100% fonctionnel.** Plus besoin de comparer avec un `create-astro` généré ailleurs.
+
+## Prochaines étapes
+
+1. ~~Cloner le repo sur le PC perso~~ ✅ fait
+2. ~~Corriger/régénérer le `package.json` et la structure Astro~~ ✅ fait
+3. ~~`npx astro add tailwind`~~ ✅ fait
+4. ~~`npx astro add react`~~ ✅ fait
+5. ~~Initialiser shadcn/ui~~ ✅ fait
+6. ~~Commit + push~~ ✅ fait
+7. Connecter le repo à Cloudflare Pages (build automatique à chaque push) — **à faire**
 
 Puis suite du plan : **Phase 3** (mise en place Supabase — tables `professionals`, `services`, `availabilities`, `appointments`, `clients`, RLS policies).
