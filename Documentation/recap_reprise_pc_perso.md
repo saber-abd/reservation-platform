@@ -21,7 +21,7 @@ Documents de référence dans `projet perso/` :
 - **GitHub hébergement** (différent du compte GitHub connecté à Copilot) : `saber-abd`, email `fatima.72@hotmail.it`
 - **Repo GitHub** : public, créé et déjà poussé → https://github.com/saber-abd/reservation-platform
 - **Cloudflare** : compte créé (l'intégration Postgres/Hyperdrive proposée par défaut n'est pas utilisée, on garde Supabase comme BDD)
-- **Supabase** : compte créé, encore vierge → à configurer en Phase 3
+- **Supabase** : compte créé, projet configuré en Phase 3 → id `rmhsnuvrwdmiolrhahrp`, région `eu-west-1`, URL `https://rmhsnuvrwdmiolrhahrp.supabase.co`
 - **Google Cloud Platform** : compte créé, Cloud Shell activé (pas utilisé pour l'instant) → utilisé en Phase 6 (API Google Calendar)
 
 ⚠️ **Sécurité** : ne jamais partager de token/PAT/mot de passe dans le chat Copilot. Toute authentification Git doit passer par Git Credential Manager (popup navigateur) ou saisie directe par toi-même dans le terminal.
@@ -60,7 +60,7 @@ Repo cloné dans `C:\Users\cash31\Desktop\reservation-platform\reservation-platf
 
 **Le scaffold est maintenant propre et 100% fonctionnel.** Plus besoin de comparer avec un `create-astro` généré ailleurs.
 
-## Prochaines étapes
+## Prochaines étapes (Phase 2)
 
 1. ~~Cloner le repo sur le PC perso~~ ✅ fait
 2. ~~Corriger/régénérer le `package.json` et la structure Astro~~ ✅ fait
@@ -68,6 +68,29 @@ Repo cloné dans `C:\Users\cash31\Desktop\reservation-platform\reservation-platf
 4. ~~`npx astro add react`~~ ✅ fait
 5. ~~Initialiser shadcn/ui~~ ✅ fait
 6. ~~Commit + push~~ ✅ fait
-7. Connecter le repo à Cloudflare Pages (build automatique à chaque push) — **à faire**
+7. Connecter le repo à Cloudflare Pages (build automatique à chaque push) — **toujours à faire, pas bloquant**
 
-Puis suite du plan : **Phase 3** (mise en place Supabase — tables `professionals`, `services`, `availabilities`, `appointments`, `clients`, RLS policies).
+## Phase 3 — Supabase (fait — session du 2026-07-18)
+
+- Projet Supabase créé : id `rmhsnuvrwdmiolrhahrp`, région `eu-west-1`.
+- Schéma SQL écrit dans `supabase/schema.sql` : tables `professionals`, `services`, `availabilities`, `clients`, `appointments` + toutes les Row Level Security policies (lecture publique pour la vitrine, écriture réservée au propriétaire via `auth.uid()`).
+- Schéma exécuté avec succès dans le SQL Editor Supabase (vérifié via Table Editor).
+- `@supabase/supabase-js` installé, client créé dans `src/lib/supabase.ts` (utilise `import.meta.env.PUBLIC_SUPABASE_URL` / `PUBLIC_SUPABASE_ANON_KEY`, typés dans `src/env.d.ts`).
+- `.env` créé en local avec les vraies clés (ignoré par Git) ; `.env.example` versionné comme template.
+- Connexion testée avec succès via un script Node temporaire (table `professionals` accessible, 0 ligne — normal, base vierge).
+- Commit + push effectués sur `main` (commit `37d17a0`).
+
+⚠️ Clé utilisée : la clé **`anon`/`public`** uniquement (jamais la `service_role`, qui reste secrète et ne doit jamais être partagée dans le chat ni committée).
+
+## Prochaine étape en cours : activation de l'authentification Supabase
+
+Objectif Phase 3 (suite) : activer et configurer l'auth (email/mot de passe) pour l'espace professionnel, avec policies RLS déjà prêtes à s'appuyer sur `auth.uid()`.
+
+**Fait (session du 2026-07-18)** :
+- Provider **Email** activé (par défaut) dans Authentication > Sign In / Providers.
+- Option **Confirm email** désactivée (pratique pour le dev local ; ⚠️ à réactiver avant la mise en prod réelle).
+- **Site URL** réglé sur `http://localhost:4321` (Authentication > URL Configuration).
+- Helper `src/lib/auth.ts` créé : `signUp`, `signIn`, `signOut`, `getSession`, `getUser`.
+- Testé avec succès via script temporaire (signUp + signIn immédiats, sans confirmation email).
+
+Puis : **Phase 4** — développement du site vitrine (pages statiques Accueil/Services/À propos/Contact avec Tailwind).
