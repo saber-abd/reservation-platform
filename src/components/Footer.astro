@@ -1,0 +1,41 @@
+---
+import { siteConfig } from '@/config/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-border bg-gray-50">
+	<div class="mx-auto grid max-w-6xl gap-10 px-6 py-12 md:grid-cols-3">
+		<div>
+			<p class="text-lg font-bold text-gray-900">{siteConfig.business.name}</p>
+			<p class="mt-2 text-sm text-gray-500">{siteConfig.business.tagline}</p>
+		</div>
+
+		<div>
+			<p class="text-sm font-semibold text-gray-900">Contact</p>
+			<ul class="mt-2 space-y-1 text-sm text-gray-500">
+				<li>{siteConfig.business.address}</li>
+				<li>{siteConfig.business.phone}</li>
+				<li>{siteConfig.business.email}</li>
+			</ul>
+		</div>
+
+		<div>
+			<p class="text-sm font-semibold text-gray-900">Horaires</p>
+			<ul class="mt-2 space-y-1 text-sm text-gray-500">
+				{
+					siteConfig.business.openingHours.map((slot) => (
+						<li class="flex justify-between gap-4">
+							<span>{slot.day}</span>
+							<span>{slot.hours}</span>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+	</div>
+
+	<div class="border-t border-border px-6 py-4 text-center text-xs text-gray-400">
+		© {year} {siteConfig.business.name}. Tous droits réservés.
+	</div>
+</footer>

@@ -1,0 +1,28 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { siteConfig } from '@/config/site';
+---
+
+<Layout title="À propos" description={`En savoir plus sur ${siteConfig.business.name}.`}>
+	<section class="mx-auto max-w-6xl px-6 py-20">
+		<div class="grid items-center gap-10 md:grid-cols-2">
+			<div>
+				<h1 class="text-3xl font-bold text-gray-900 md:text-4xl">À propos</h1>
+				<p class="mt-4 text-gray-500">{siteConfig.business.description}</p>
+				<p class="mt-4 text-gray-500">
+					Notre équipe met un point d'honneur à vous offrir un accueil chaleureux et des prestations
+					de qualité, dans un cadre pensé pour votre confort.
+				</p>
+				<a
+					href="/reservation"
+					class="mt-6 inline-block rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
+				>
+					Réserver maintenant
+				</a>
+			</div>
+			<div class="flex aspect-square items-center justify-center rounded-xl bg-gray-100 text-gray-400">
+				Photo de l'équipe
+			</div>
+		</div>
+	</section>
+</Layout>
