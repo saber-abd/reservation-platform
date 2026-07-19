@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import 'aos/dist/aos.css';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
 import { siteConfig } from '@/config/site';
@@ -29,5 +30,15 @@ const {
 			<slot />
 		</main>
 		<Footer />
+		<script>
+			import AOS from 'aos';
+
+			AOS.init({
+				duration: 600,
+				easing: 'ease-out',
+				once: true,
+				offset: 80,
+			});
+		</script>
 	</body>
 </html>
