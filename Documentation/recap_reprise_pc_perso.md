@@ -20,7 +20,7 @@ Documents de référence dans `projet perso/` :
 
 - **GitHub hébergement** (différent du compte GitHub connecté à Copilot) : `saber-abd`, email `fatima.72@hotmail.it`
 - **Repo GitHub** : public, créé et déjà poussé → https://github.com/saber-abd/reservation-platform
-- **Cloudflare** : compte créé (l'intégration Postgres/Hyperdrive proposée par défaut n'est pas utilisée, on garde Supabase comme BDD)
+- **Cloudflare** : compte créé, projet Workers "reservation-platform" connecté au repo GitHub → déployé en Phase 7 (voir section dédiée plus bas). URL de prod : https://reservation-platform.fatima-72.workers.dev
 - **Supabase** : compte créé, projet configuré en Phase 3 → id `rmhsnuvrwdmiolrhahrp`, région `eu-west-1`, URL `https://rmhsnuvrwdmiolrhahrp.supabase.co`
 - **Google Cloud Platform** : compte créé, Cloud Shell activé (pas utilisé pour l'instant) → utilisé en Phase 6 (API Google Calendar)
 
@@ -126,8 +126,26 @@ Tout fait d'un coup (formulaire de réservation + dashboard complet), comme dema
 - Test end-to-end validé dans le navigateur : inscription pro → ajout service → ajout créneau → réservation publique → apparition du RDV dans le dashboard (statut "Confirmé") → modification du profil. Tout fonctionne.
 - Build (`npm run build`) validé, aucune erreur TypeScript/Astro.
 - Commit + push effectués sur `main` (commit `e36ad76`).
+- Migration SQL `0002_booking_trigger.sql` exécutée avec succès dans Supabase (session du 2026-07-19, après la Phase 7) — le trigger anti-double-booking est bien actif.
 
-Prochaine étape : **Phase 6** (voir `plan_dev_projet.md`).
+## Phase 7 — Déploiement Cloudflare (fait — session du 2026-07-19)
+
+Choix fait : connexion du repo GitHub à Cloudflare via le **Dashboard** (build automatique à chaque push), plutôt que Wrangler CLI en local.
+
+⚠️ Point important découvert pendant cette phase : Cloudflare a fusionné son ancien produit "Pages" dans **Workers** (nouvelle interface unifiée). Le projet a donc été créé comme un **Worker avec assets statiques**, pas comme une "Page" classique.
+
+- **Build command** : `npm run build` (output `dist/`)
+- **Deploy command** : `npx wrangler deploy` (généré automatiquement par Cloudflare)
+- **Variables d'environnement** : à renseigner dans l'onglet **Build** (pas "Runtime"/"Variables and secrets", qui ne sert qu'à l'exécution du Worker) : `PUBLIC_SUPABASE_URL` et `PUBLIC_SUPABASE_ANON_KEY`, mêmes valeurs que le `.env` local. Sans ça, `astro build` plante (les variables sont injectées en dur dans le JS au moment du build, pas à l'exécution).
+- **Adaptateur Cloudflare requis** : `npx astro add cloudflare` exécuté en local pour installer `@astrojs/cloudflare` + générer `wrangler.jsonc` (config committée dans le repo). Sans ce fichier déjà présent, la première tentative de déploiement automatique (`npx wrangler deploy` scaffoldant tout à la volée en mode non-interactif) échouait avec une erreur `Missing file or directory: public/.assetsignore`.
+- `.gitignore` mis à jour pour exclure `.wrangler/` (cache local de build, ne doit jamais être commité).
+- Build reste en mode `output: "static"` (aucune fonctionnalité serveur nécessaire, tout le fetching de données passe par Supabase JS côté client) — l'adaptateur Cloudflare sert uniquement à générer la config de déploiement Workers/assets.
+- Commits : `aafd7e8` (config Cloudflare/wrangler.jsonc).
+- **URL de production** : https://reservation-platform.fatima-72.workers.dev
+- Supabase Auth reconfiguré : Site URL + Redirect URLs mis à jour avec l'URL de prod (en plus de `http://localhost:4321` gardé pour le dev local).
+- Testé en production dans le navigateur : site vitrine ✅, réservation publique (données Supabase live) ✅, connexion pro → dashboard (RDV existant affiché) ✅.
+
+Prochaine étape : **Phase 6** (version alternative Google Calendar, à faire seulement si souhaité — voir `plan_dev_projet.md`) ou finitions (Phase 8).
 
 ## Comment lancer le site en local et naviguer entre les pages
 
