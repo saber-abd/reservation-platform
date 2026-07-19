@@ -1,0 +1,16 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { siteConfig } from '@/config/site';
+import ReservationForm from '@/components/reservation/ReservationForm';
+---
+
+<Layout title="Réservation" description={`Réservez votre créneau chez ${siteConfig.business.name}.`}>
+	<section class="mx-auto max-w-3xl px-6 py-20">
+		<h1 class="text-3xl font-bold text-gray-900 md:text-4xl">Réserver un rendez-vous</h1>
+		<p class="mt-3 text-gray-500">Choisissez une prestation, un créneau, puis renseignez vos coordonnées.</p>
+
+		<div class="mt-10">
+			<ReservationForm client:load />
+		</div>
+	</section>
+</Layout>

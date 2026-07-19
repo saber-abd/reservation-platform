@@ -1,0 +1,12 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import DashboardNav from '@/components/dashboard/DashboardNav';
+import AppointmentsPanel from '@/components/dashboard/AppointmentsPanel';
+---
+
+<Layout title="Dashboard" description="Espace professionnel.">
+	<section class="mx-auto max-w-5xl px-6 py-12">
+		<DashboardNav client:load />
+		<AppointmentsPanel client:load />
+	</section>
+</Layout>
