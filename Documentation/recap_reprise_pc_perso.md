@@ -93,4 +93,35 @@ Objectif Phase 3 (suite) : activer et configurer l'auth (email/mot de passe) pou
 - Helper `src/lib/auth.ts` créé : `signUp`, `signIn`, `signOut`, `getSession`, `getUser`.
 - Testé avec succès via script temporaire (signUp + signIn immédiats, sans confirmation email).
 
-Puis : **Phase 4** — développement du site vitrine (pages statiques Accueil/Services/À propos/Contact avec Tailwind).
+## Phase 4 — Site vitrine (fait — session du 2026-07-18)
+
+- Contenu centralisé dans `src/config/site.ts` (jamais codé en dur dans les composants, conformément au cadrage) : démo thème **coiffeur** ("Salon Éclat") avec textes, services, avis clients, horaires.
+- Composants partagés créés : `src/components/Header.astro` (nav sticky + CTA "Réserver") et `src/components/Footer.astro` (contact + horaires), tous deux importés dans `src/layouts/Layout.astro`.
+- Pages créées, toutes accessibles via le menu du Header :
+  - `/` (`src/pages/index.astro`) — Hero, aperçu services, à propos résumé, avis clients, CTA final
+  - `/services` (`src/pages/services.astro`) — liste complète des prestations
+  - `/a-propos` (`src/pages/a-propos.astro`)
+  - `/contact` (`src/pages/contact.astro`) — coordonnées + formulaire (visuel, pas encore branché à un backend)
+- Build (`npm run build`) validé sans erreur, rendu vérifié visuellement (navigateur intégré Copilot).
+- Commit + push effectués sur `main` (commit `99bb22f`).
+
+⚠️ Rappel navigation : le site a plusieurs pages, accessibles via les liens du Header (`Accueil`, `Services`, `À propos`, `Contact`) — voir section "Comment naviguer" plus bas si une seule page semble visible.
+
+Puis : **Phase 5** — formulaire de réservation (React Hook Form + Zod, insertion dans `appointments`) et dashboard pro (gestion créneaux/services/RDV).
+
+## Comment lancer le site en local et naviguer entre les pages
+
+1. Dans le terminal, à la racine du projet (`cd reservation-platform` si besoin) : `npm run dev`.
+2. Astro affiche `Dev server running at http://localhost:4321`.
+3. Ouvrir cette URL dans un navigateur : la page `/` (Accueil) s'affiche, avec un **Header** en haut contenant les liens `Accueil`, `Services`, `À propos`, `Contact` + un bouton `Réserver`.
+4. Cliquer sur ces liens change de page (routing par fichiers d'Astro : chaque fichier dans `src/pages/` = une URL). Il n'y a pas de page unique : il suffit de cliquer sur les liens du menu, ou de taper directement `http://localhost:4321/services` etc. dans la barre d'adresse.
+5. `npx astro dev stop` arrête le serveur de dev lancé en arrière-plan si besoin (utile si le port reste occupé).
+
+### ⚠️ Souci "devtunnel" au lieu de localhost (VS Code)
+Si VS Code redirige automatiquement le port 4321 vers une URL type `https://xxxx.devtunnels.ms` au lieu de proposer `http://localhost:4321` :
+- C'est le **Port Forwarding** de VS Code (panneau "Ports", à côté du terminal) qui expose le port via un tunnel Microsoft (utile pour partager un lien avec quelqu'un d'autre, pas nécessaire ici).
+- Solutions :
+  1. Toujours possible de taper directement `http://localhost:4321` dans un navigateur ouvert sur la même machine — ça fonctionne indépendamment du tunnel.
+  2. Dans l'onglet **Ports** de VS Code (Terminal > onglet "Ports"), clic droit sur le port 4321 → **Port Visibility** → vérifier qu'il n'est pas mis en "Public" par erreur (le mode "Private" suffit en local).
+  3. Si le port a été forwardé automatiquement, on peut le retirer de la liste (bouton "Forward a Port" / poubelle à côté de la ligne 4321) : VS Code arrêtera de proposer le lien devtunnel et le navigateur local pourra utiliser `http://localhost:4321` directement.
+  4. Le lien devtunnel fonctionne aussi (il proxy vers le même serveur), mais il est plus lent et dépend d'une connexion internet — à réserver pour tester depuis un autre appareil (téléphone, etc.).
