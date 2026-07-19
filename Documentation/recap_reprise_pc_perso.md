@@ -107,7 +107,27 @@ Objectif Phase 3 (suite) : activer et configurer l'auth (email/mot de passe) pou
 
 ⚠️ Rappel navigation : le site a plusieurs pages, accessibles via les liens du Header (`Accueil`, `Services`, `À propos`, `Contact`) — voir section "Comment naviguer" plus bas si une seule page semble visible.
 
-Puis : **Phase 5** — formulaire de réservation (React Hook Form + Zod, insertion dans `appointments`) et dashboard pro (gestion créneaux/services/RDV).
+## Phase 5 — Réservation publique + espace pro (fait — session du 2026-07-19)
+
+Tout fait d'un coup (formulaire de réservation + dashboard complet), comme demandé.
+
+- Packages ajoutés : `react-hook-form`, `zod`, `@hookform/resolvers` (validation de formulaires).
+- **`src/lib/queries.ts`** : toutes les fonctions d'accès aux données Supabase (professionals, services, availabilities, appointments — lecture et écriture).
+- **`src/lib/useAuthedProfessional.ts`** : hook React qui vérifie la session (sinon redirige vers `/connexion`) et charge le professionnel lié au compte (sinon redirige vers `/inscription`). Utilisé par toutes les pages du dashboard.
+- **Réservation publique** : `/reservation` → composant `ReservationForm.tsx` (3 étapes : choix prestation → choix créneau → coordonnées client), insère dans `appointments`.
+- **Authentification pro** : `/inscription` (création de compte + fiche `professionals`) et `/connexion` (`LoginForm.tsx`/`SignupForm.tsx`).
+- **Dashboard pro**, protégé par `useAuthedProfessional` :
+  - `/dashboard` — liste des rendez-vous, bouton "Annuler"
+  - `/dashboard/services` — CRUD des prestations (ajout, activer/désactiver, suppression)
+  - `/dashboard/disponibilites` — CRUD des créneaux (ajout, suppression si non réservé)
+  - `/dashboard/profil` — édition des infos du professionnel
+- **Header.astro** : ajout d'un lien "Espace professionnel" → `/connexion`.
+- ⚠️ **Migration SQL à exécuter dans Supabase** : `supabase/migrations/0002_booking_trigger.sql` (même procédure que `schema.sql` en Phase 3 : SQL Editor → New query → coller → Run). Ce trigger empêche le double-booking en marquant automatiquement un créneau `is_booked = true` de façon atomique à la création d'un rendez-vous. **Tant que cette migration n'est pas exécutée, un même créneau peut être réservé plusieurs fois** (vérifié pendant les tests : le créneau restait affiché "Libre" après une réservation réussie).
+- Test end-to-end validé dans le navigateur : inscription pro → ajout service → ajout créneau → réservation publique → apparition du RDV dans le dashboard (statut "Confirmé") → modification du profil. Tout fonctionne.
+- Build (`npm run build`) validé, aucune erreur TypeScript/Astro.
+- Commit + push effectués sur `main` (commit `e36ad76`).
+
+Prochaine étape : **Phase 6** (voir `plan_dev_projet.md`).
 
 ## Comment lancer le site en local et naviguer entre les pages
 
