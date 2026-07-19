@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /dashboard
+Disallow: /connexion
+Disallow: /inscription
+
+Sitemap: https://reservation-platform.demonstration-pro.workers.dev/sitemap-index.xml

@@ -17,6 +17,7 @@ export interface Testimonial {
 }
 
 export const siteConfig = {
+	url: 'https://reservation-platform.demonstration-pro.workers.dev',
 	business: {
 		name: 'Salon Éclat',
 		activity: 'Coiffeur',
