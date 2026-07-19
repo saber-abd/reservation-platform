@@ -20,7 +20,7 @@ Documents de référence dans `projet perso/` :
 
 - **GitHub hébergement** (différent du compte GitHub connecté à Copilot) : `saber-abd`, email `fatima.72@hotmail.it`
 - **Repo GitHub** : public, créé et déjà poussé → https://github.com/saber-abd/reservation-platform
-- **Cloudflare** : compte créé, projet Workers "reservation-platform" connecté au repo GitHub → déployé en Phase 7 (voir section dédiée plus bas). URL de prod : https://reservation-platform.fatima-72.workers.dev
+- **Cloudflare** : compte créé, projet Workers "reservation-platform" connecté au repo GitHub → déployé en Phase 7 (voir section dédiée plus bas). URL de prod : https://reservation-platform.demonstration-pro.workers.dev (sous-domaine de compte renommé de `fatima-72` vers `demonstration-pro` pour une URL plus neutre)
 - **Supabase** : compte créé, projet configuré en Phase 3 → id `rmhsnuvrwdmiolrhahrp`, région `eu-west-1`, URL `https://rmhsnuvrwdmiolrhahrp.supabase.co`
 - **Google Cloud Platform** : compte créé, Cloud Shell activé (pas utilisé pour l'instant) → utilisé en Phase 6 (API Google Calendar)
 
@@ -140,9 +140,9 @@ Choix fait : connexion du repo GitHub à Cloudflare via le **Dashboard** (build 
 - **Adaptateur Cloudflare requis** : `npx astro add cloudflare` exécuté en local pour installer `@astrojs/cloudflare` + générer `wrangler.jsonc` (config committée dans le repo). Sans ce fichier déjà présent, la première tentative de déploiement automatique (`npx wrangler deploy` scaffoldant tout à la volée en mode non-interactif) échouait avec une erreur `Missing file or directory: public/.assetsignore`.
 - `.gitignore` mis à jour pour exclure `.wrangler/` (cache local de build, ne doit jamais être commité).
 - Build reste en mode `output: "static"` (aucune fonctionnalité serveur nécessaire, tout le fetching de données passe par Supabase JS côté client) — l'adaptateur Cloudflare sert uniquement à générer la config de déploiement Workers/assets.
-- Commits : `aafd7e8` (config Cloudflare/wrangler.jsonc).
-- **URL de production** : https://reservation-platform.fatima-72.workers.dev
-- Supabase Auth reconfiguré : Site URL + Redirect URLs mis à jour avec l'URL de prod (en plus de `http://localhost:4321` gardé pour le dev local).
+- Commits : `aafd7e8` (config Cloudflare/wrangler.jsonc), `b85ae34` (nom final du Worker après renommage du sous-domaine).
+- **URL de production** : https://reservation-platform.demonstration-pro.workers.dev (sous-domaine de compte Cloudflare renommé de `fatima-72` vers `demonstration-pro` pour une URL plus neutre/pro — modifiable dans Workers & Pages → paramètres du compte).
+- Supabase Auth reconfiguré : Site URL + Redirect URLs mis à jour avec l'URL de prod finale (en plus de `http://localhost:4321` gardé pour le dev local).
 - Testé en production dans le navigateur : site vitrine ✅, réservation publique (données Supabase live) ✅, connexion pro → dashboard (RDV existant affiché) ✅.
 
 Prochaine étape : **Phase 6** (version alternative Google Calendar, à faire seulement si souhaité — voir `plan_dev_projet.md`) ou finitions (Phase 8).
