@@ -36,25 +36,25 @@ export default function LoginForm() {
 	return (
 		<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 			<div>
-				<label className="text-sm text-gray-700" htmlFor="email">
+				<label className="text-sm text-stone-700" htmlFor="email">
 					Email
 				</label>
 				<input
 					id="email"
 					type="email"
-					className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+					className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 					{...register('email')}
 				/>
 				{errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
 			</div>
 			<div>
-				<label className="text-sm text-gray-700" htmlFor="password">
+				<label className="text-sm text-stone-700" htmlFor="password">
 					Mot de passe
 				</label>
 				<input
 					id="password"
 					type="password"
-					className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+					className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 					{...register('password')}
 				/>
 				{errors.password && <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>}
@@ -63,7 +63,7 @@ export default function LoginForm() {
 			<button
 				type="submit"
 				disabled={submitting}
-				className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+				className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700 disabled:opacity-50"
 			>
 				{submitting ? 'Connexion...' : 'Se connecter'}
 			</button>

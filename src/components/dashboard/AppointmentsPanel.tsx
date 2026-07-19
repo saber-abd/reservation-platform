@@ -19,7 +19,7 @@ const statusLabels: Record<Appointment['status'], string> = {
 };
 
 const statusStyles: Record<Appointment['status'], string> = {
-	confirmed: 'bg-blue-50 text-blue-700',
+	confirmed: 'bg-rose-50 text-rose-700',
 	cancelled: 'bg-red-50 text-red-700',
 	completed: 'bg-green-50 text-green-700',
 };
@@ -41,17 +41,17 @@ export default function AppointmentsPanel() {
 		setAppointments((prev) => prev.map((a) => (a.id === id ? updated : a)));
 	}
 
-	if (loading) return <p className="text-sm text-gray-500">Chargement...</p>;
+	if (loading) return <p className="text-sm text-stone-500">Chargement...</p>;
 	if (error) return <p className="text-sm text-red-600">{error}</p>;
 
 	return (
 		<div>
-			<h1 className="text-2xl font-bold text-gray-900">Rendez-vous</h1>
-			<p className="mt-1 text-sm text-gray-500">Bienvenue, {professional?.business_name}.</p>
+			<h1 className="text-2xl font-bold text-stone-900">Rendez-vous</h1>
+			<p className="mt-1 text-sm text-stone-500">Bienvenue, {professional?.business_name}.</p>
 
 			<div className="mt-6 overflow-x-auto rounded-xl border border-border">
 				<table className="w-full text-left text-sm">
-					<thead className="bg-gray-50 text-xs uppercase text-gray-500">
+					<thead className="bg-stone-50 text-xs uppercase text-stone-500">
 						<tr>
 							<th className="px-4 py-3">Client</th>
 							<th className="px-4 py-3">Créneau</th>
@@ -62,14 +62,14 @@ export default function AppointmentsPanel() {
 					<tbody>
 						{loadingAppointments && (
 							<tr>
-								<td className="px-4 py-4 text-gray-500" colSpan={4}>
+								<td className="px-4 py-4 text-stone-500" colSpan={4}>
 									Chargement des rendez-vous...
 								</td>
 							</tr>
 						)}
 						{!loadingAppointments && appointments.length === 0 && (
 							<tr>
-								<td className="px-4 py-4 text-gray-500" colSpan={4}>
+								<td className="px-4 py-4 text-stone-500" colSpan={4}>
 									Aucun rendez-vous pour le moment.
 								</td>
 							</tr>
@@ -77,10 +77,10 @@ export default function AppointmentsPanel() {
 						{appointments.map((appointment) => (
 							<tr key={appointment.id} className="border-t border-border">
 								<td className="px-4 py-3">
-									<p className="font-medium text-gray-900">{appointment.client_name}</p>
-									<p className="text-xs text-gray-500">{appointment.client_email}</p>
+									<p className="font-medium text-stone-900">{appointment.client_name}</p>
+									<p className="text-xs text-stone-500">{appointment.client_email}</p>
 								</td>
-								<td className="px-4 py-3 text-gray-600">{formatDate(appointment.start_time)}</td>
+								<td className="px-4 py-3 text-stone-600">{formatDate(appointment.start_time)}</td>
 								<td className="px-4 py-3">
 									<span
 										className={`rounded-full px-2 py-1 text-xs font-medium ${statusStyles[appointment.status]}`}

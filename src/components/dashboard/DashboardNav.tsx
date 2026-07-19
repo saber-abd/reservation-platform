@@ -29,8 +29,8 @@ export default function DashboardNav() {
 						href={link.href}
 						className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
 							currentPath === link.href
-								? 'bg-blue-50 text-blue-600'
-								: 'text-gray-600 hover:bg-gray-50'
+								? 'bg-rose-50 text-rose-600'
+								: 'text-stone-600 hover:bg-stone-50'
 						}`}
 					>
 						{link.label}
@@ -39,7 +39,7 @@ export default function DashboardNav() {
 			</div>
 			<button
 				onClick={handleSignOut}
-				className="text-sm font-medium text-gray-500 hover:text-gray-900"
+				className="text-sm font-medium text-stone-500 hover:text-stone-900"
 			>
 				Se déconnecter
 			</button>

@@ -68,21 +68,21 @@ export default function AvailabilitiesPanel() {
 		setSlots((prev) => prev.filter((s) => s.id !== id));
 	}
 
-	if (loading) return <p className="text-sm text-gray-500">Chargement...</p>;
+	if (loading) return <p className="text-sm text-stone-500">Chargement...</p>;
 	if (error) return <p className="text-sm text-red-600">{error}</p>;
 
 	return (
 		<div>
-			<h1 className="text-2xl font-bold text-gray-900">Mes disponibilités</h1>
+			<h1 className="text-2xl font-bold text-stone-900">Mes disponibilités</h1>
 
 			<div className="mt-6 grid gap-2">
-				{slots.length === 0 && <p className="text-sm text-gray-500">Aucun créneau créé pour le moment.</p>}
+				{slots.length === 0 && <p className="text-sm text-stone-500">Aucun créneau créé pour le moment.</p>}
 				{slots.map((slot) => (
 					<div
 						key={slot.id}
 						className="flex items-center justify-between rounded-xl border border-border bg-white px-4 py-3 text-sm"
 					>
-						<span className="capitalize text-gray-700">{formatSlot(slot)}</span>
+						<span className="capitalize text-stone-700">{formatSlot(slot)}</span>
 						<div className="flex items-center gap-3">
 							<span
 								className={`rounded-full px-2 py-1 text-xs font-medium ${
@@ -105,39 +105,39 @@ export default function AvailabilitiesPanel() {
 			</div>
 
 			<form onSubmit={handleSubmit(onSubmit)} className="mt-8 grid gap-4 rounded-xl border border-border p-6 sm:grid-cols-3">
-				<p className="col-span-full text-sm font-semibold text-gray-900">Ajouter un créneau</p>
+				<p className="col-span-full text-sm font-semibold text-stone-900">Ajouter un créneau</p>
 				<div>
-					<label className="text-sm text-gray-700" htmlFor="date">
+					<label className="text-sm text-stone-700" htmlFor="date">
 						Date
 					</label>
 					<input
 						id="date"
 						type="date"
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('date')}
 					/>
 					{errors.date && <p className="mt-1 text-xs text-red-600">{errors.date.message}</p>}
 				</div>
 				<div>
-					<label className="text-sm text-gray-700" htmlFor="startTime">
+					<label className="text-sm text-stone-700" htmlFor="startTime">
 						Heure de début
 					</label>
 					<input
 						id="startTime"
 						type="time"
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('startTime')}
 					/>
 					{errors.startTime && <p className="mt-1 text-xs text-red-600">{errors.startTime.message}</p>}
 				</div>
 				<div>
-					<label className="text-sm text-gray-700" htmlFor="endTime">
+					<label className="text-sm text-stone-700" htmlFor="endTime">
 						Heure de fin
 					</label>
 					<input
 						id="endTime"
 						type="time"
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('endTime')}
 					/>
 					{errors.endTime && <p className="mt-1 text-xs text-red-600">{errors.endTime.message}</p>}
@@ -145,7 +145,7 @@ export default function AvailabilitiesPanel() {
 				{formError && <p className="col-span-full text-sm text-red-600">{formError}</p>}
 				<button
 					type="submit"
-					className="col-span-full rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+					className="col-span-full rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700"
 				>
 					Ajouter le créneau
 				</button>

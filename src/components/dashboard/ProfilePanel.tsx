@@ -60,76 +60,76 @@ export default function ProfilePanel() {
 		}
 	}
 
-	if (loading) return <p className="text-sm text-gray-500">Chargement...</p>;
+	if (loading) return <p className="text-sm text-stone-500">Chargement...</p>;
 	if (error) return <p className="text-sm text-red-600">{error}</p>;
 
 	return (
 		<div>
-			<h1 className="text-2xl font-bold text-gray-900">Mon profil</h1>
+			<h1 className="text-2xl font-bold text-stone-900">Mon profil</h1>
 
 			<form onSubmit={handleSubmit(onSubmit)} className="mt-6 grid max-w-xl gap-4">
 				<div>
-					<label className="text-sm text-gray-700" htmlFor="businessName">
+					<label className="text-sm text-stone-700" htmlFor="businessName">
 						Nom de l'activité
 					</label>
 					<input
 						id="businessName"
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('businessName')}
 					/>
 					{errors.businessName && <p className="mt-1 text-xs text-red-600">{errors.businessName.message}</p>}
 				</div>
 				<div>
-					<label className="text-sm text-gray-700" htmlFor="activity">
+					<label className="text-sm text-stone-700" htmlFor="activity">
 						Activité
 					</label>
 					<input
 						id="activity"
 						placeholder="Coiffeur, fleuriste, coach..."
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('activity')}
 					/>
 				</div>
 				<div>
-					<label className="text-sm text-gray-700" htmlFor="description">
+					<label className="text-sm text-stone-700" htmlFor="description">
 						Description
 					</label>
 					<textarea
 						id="description"
 						rows={4}
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('description')}
 					/>
 				</div>
 				<div>
-					<label className="text-sm text-gray-700" htmlFor="phone">
+					<label className="text-sm text-stone-700" htmlFor="phone">
 						Téléphone
 					</label>
 					<input
 						id="phone"
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('phone')}
 					/>
 				</div>
 				<div>
-					<label className="text-sm text-gray-700" htmlFor="email">
+					<label className="text-sm text-stone-700" htmlFor="email">
 						Email de contact
 					</label>
 					<input
 						id="email"
 						type="email"
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('email')}
 					/>
 					{errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
 				</div>
 				<div>
-					<label className="text-sm text-gray-700" htmlFor="address">
+					<label className="text-sm text-stone-700" htmlFor="address">
 						Adresse
 					</label>
 					<input
 						id="address"
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('address')}
 					/>
 				</div>
@@ -137,7 +137,7 @@ export default function ProfilePanel() {
 				{saved && <p className="text-sm text-green-700">Profil mis à jour.</p>}
 				<button
 					type="submit"
-					className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+					className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700"
 				>
 					Enregistrer
 				</button>

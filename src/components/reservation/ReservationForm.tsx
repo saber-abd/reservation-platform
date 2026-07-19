@@ -110,12 +110,12 @@ export default function ReservationForm() {
 	}
 
 	if (loading) {
-		return <p className="text-sm text-gray-500">Chargement des disponibilités...</p>;
+		return <p className="text-sm text-stone-500">Chargement des disponibilités...</p>;
 	}
 
 	if (!professional) {
 		return (
-			<p className="text-sm text-gray-500">
+			<p className="text-sm text-stone-500">
 				La réservation en ligne n'est pas encore disponible. Merci de nous contacter directement.
 			</p>
 		);
@@ -134,7 +134,7 @@ export default function ReservationForm() {
 		<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
 			{/* Étape 1 : service */}
 			<div>
-				<p className="text-sm font-semibold text-gray-900">1. Choisissez une prestation</p>
+				<p className="text-sm font-semibold text-stone-900">1. Choisissez une prestation</p>
 				<div className="mt-3 grid gap-3 sm:grid-cols-2">
 					{services.map((service) => (
 						<button
@@ -143,25 +143,25 @@ export default function ReservationForm() {
 							onClick={() => setSelectedServiceId(service.id)}
 							className={`rounded-xl border p-4 text-left transition-colors ${
 								selectedServiceId === service.id
-									? 'border-blue-600 bg-blue-50'
-									: 'border-border bg-white hover:border-blue-300'
+									? 'border-rose-600 bg-rose-50'
+									: 'border-border bg-white hover:border-rose-300'
 							}`}
 						>
-							<p className="font-medium text-gray-900">{service.name}</p>
-							<p className="mt-1 text-xs text-gray-500">
+							<p className="font-medium text-stone-900">{service.name}</p>
+							<p className="mt-1 text-xs text-stone-500">
 								{service.duration_minutes} min — {service.price} €
 							</p>
 						</button>
 					))}
 					{services.length === 0 && (
-						<p className="text-sm text-gray-500">Aucune prestation disponible pour le moment.</p>
+						<p className="text-sm text-stone-500">Aucune prestation disponible pour le moment.</p>
 					)}
 				</div>
 			</div>
 
 			{/* Étape 2 : créneau */}
 			<div>
-				<p className="text-sm font-semibold text-gray-900">2. Choisissez un créneau</p>
+				<p className="text-sm font-semibold text-stone-900">2. Choisissez un créneau</p>
 				<div className="mt-3 grid gap-2 sm:grid-cols-2">
 					{slots.map((slot) => (
 						<button
@@ -170,53 +170,53 @@ export default function ReservationForm() {
 							onClick={() => setSelectedSlotId(slot.id)}
 							className={`rounded-xl border p-3 text-left text-sm capitalize transition-colors ${
 								selectedSlotId === slot.id
-									? 'border-blue-600 bg-blue-50'
-									: 'border-border bg-white hover:border-blue-300'
+									? 'border-rose-600 bg-rose-50'
+									: 'border-border bg-white hover:border-rose-300'
 							}`}
 						>
 							{formatSlot(slot)}
 						</button>
 					))}
 					{slots.length === 0 && (
-						<p className="text-sm text-gray-500">Aucun créneau disponible pour le moment.</p>
+						<p className="text-sm text-stone-500">Aucun créneau disponible pour le moment.</p>
 					)}
 				</div>
 			</div>
 
 			{/* Étape 3 : coordonnées */}
 			<div>
-				<p className="text-sm font-semibold text-gray-900">3. Vos coordonnées</p>
+				<p className="text-sm font-semibold text-stone-900">3. Vos coordonnées</p>
 				<div className="mt-3 flex flex-col gap-4">
 					<div>
-						<label className="text-sm text-gray-700" htmlFor="clientName">
+						<label className="text-sm text-stone-700" htmlFor="clientName">
 							Nom complet
 						</label>
 						<input
 							id="clientName"
-							className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+							className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 							{...register('clientName')}
 						/>
 						{errors.clientName && <p className="mt-1 text-xs text-red-600">{errors.clientName.message}</p>}
 					</div>
 					<div>
-						<label className="text-sm text-gray-700" htmlFor="clientEmail">
+						<label className="text-sm text-stone-700" htmlFor="clientEmail">
 							Email
 						</label>
 						<input
 							id="clientEmail"
 							type="email"
-							className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+							className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 							{...register('clientEmail')}
 						/>
 						{errors.clientEmail && <p className="mt-1 text-xs text-red-600">{errors.clientEmail.message}</p>}
 					</div>
 					<div>
-						<label className="text-sm text-gray-700" htmlFor="clientPhone">
+						<label className="text-sm text-stone-700" htmlFor="clientPhone">
 							Téléphone (optionnel)
 						</label>
 						<input
 							id="clientPhone"
-							className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+							className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 							{...register('clientPhone')}
 						/>
 					</div>
@@ -228,7 +228,7 @@ export default function ReservationForm() {
 			<button
 				type="submit"
 				disabled={!selectedService || !selectedSlot || submitting}
-				className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+				className="rounded-xl bg-rose-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
 			>
 				{submitting ? 'Confirmation en cours...' : 'Confirmer la réservation'}
 			</button>

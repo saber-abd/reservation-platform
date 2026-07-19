@@ -6,7 +6,7 @@ const currentPath = Astro.url.pathname;
 
 <header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
 	<div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-		<a href="/" class="text-lg font-bold tracking-tight text-gray-900">
+		<a href="/" class="text-lg font-bold tracking-tight text-stone-900">
 			{siteConfig.business.name}
 		</a>
 
@@ -16,8 +16,8 @@ const currentPath = Astro.url.pathname;
 					<a
 						href={item.href}
 						class:list={[
-							'text-sm font-medium transition-colors hover:text-blue-600',
-							currentPath === item.href ? 'text-blue-600' : 'text-gray-600',
+							'text-sm font-medium transition-colors hover:text-rose-600',
+							currentPath === item.href ? 'text-rose-600' : 'text-stone-600',
 						]}
 					>
 						{item.label}
@@ -28,14 +28,14 @@ const currentPath = Astro.url.pathname;
 
 		<a
 			href="/reservation"
-			class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
+			class="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-rose-700"
 		>
 			Réserver
 		</a>
 	</div>
 
-	<div class="border-t border-border bg-gray-50 px-6 py-1.5 text-right">
-		<a href="/connexion" class="text-xs font-medium text-gray-500 hover:text-blue-600">
+	<div class="border-t border-border bg-stone-50 px-6 py-1.5 text-right">
+		<a href="/connexion" class="text-xs font-medium text-stone-500 hover:text-rose-600">
 			Espace professionnel
 		</a>
 	</div>
