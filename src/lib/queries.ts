@@ -31,6 +31,13 @@ export interface Availability {
 	is_booked: boolean;
 }
 
+export interface Client {
+	id: string;
+	full_name: string | null;
+	phone: string | null;
+	created_at: string;
+}
+
 export interface Appointment {
 	id: string;
 	professional_id: string;
@@ -153,6 +160,7 @@ export async function createAppointment(appointment: {
 	professional_id: string;
 	service_id: string;
 	availability_id: string;
+	client_id?: string;
 	client_name: string;
 	client_email: string;
 	client_phone?: string;
@@ -178,4 +186,42 @@ export async function updateAppointmentStatus(id: string, status: Appointment['s
 	const { data, error } = await supabase.from('appointments').update({ status }).eq('id', id).select().single();
 	if (error) throw error;
 	return data as Appointment;
+}
+
+/** Profil client (espace "mes rendez-vous"), id = auth.users.id. */
+export async function getClientById(userId: string): Promise<Client | null> {
+	const { data, error } = await supabase.from('clients').select('*').eq('id', userId).maybeSingle();
+	if (error) throw error;
+	return data;
+}
+
+export async function createClient(client: Pick<Client, 'id'> & Partial<Client>) {
+	const { data, error } = await supabase.from('clients').insert(client).select().single();
+	if (error) throw error;
+	return data as Client;
+}
+
+export async function updateClient(id: string, changes: Partial<Client>) {
+	const { data, error } = await supabase.from('clients').update(changes).eq('id', id).select().single();
+	if (error) throw error;
+	return data as Client;
+}
+
+export async function getAppointmentsForClient(clientId: string): Promise<(Appointment & { services: { name: string } | null })[]> {
+	const { data, error } = await supabase
+		.from('appointments')
+		.select('*, services(name)')
+		.eq('client_id', clientId)
+		.order('start_time', { ascending: false });
+	if (error) throw error;
+	return (data ?? []) as unknown as (Appointment & { services: { name: string } | null })[];
+}
+
+/** Détermine le type de compte d'un utilisateur authentifié (pour rediriger après connexion/inscription). */
+export async function getAccountType(userId: string): Promise<'professional' | 'client' | null> {
+	const professional = await getProfessionalByUserId(userId);
+	if (professional) return 'professional';
+	const client = await getClientById(userId);
+	if (client) return 'client';
+	return null;
 }

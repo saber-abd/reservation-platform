@@ -1,5 +1,6 @@
 ---
 import Layout from '@/layouts/Layout.astro';
+import Map from '@/components/Map.astro';
 import { siteConfig } from '@/config/site';
 ---
 
@@ -21,8 +22,8 @@ import { siteConfig } from '@/config/site';
 					</ul>
 				</div>
 
-				<div class="mt-6 flex aspect-video items-center justify-center rounded-xl bg-stone-100 text-stone-400">
-					Carte / plan d'accès
+				<div class="mt-6">
+					<Map lat={siteConfig.business.lat} lng={siteConfig.business.lng} label={siteConfig.business.name} />
 				</div>
 			</div>
 

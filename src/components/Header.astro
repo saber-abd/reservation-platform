@@ -1,4 +1,5 @@
 ---
+import { Scissors, LogIn } from 'lucide-react';
 import { siteConfig } from '@/config/site';
 
 const currentPath = Astro.url.pathname;
@@ -6,8 +7,11 @@ const currentPath = Astro.url.pathname;
 
 <header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
 	<div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-		<a href="/" class="text-lg font-bold tracking-tight text-stone-900">
-			{siteConfig.business.name}
+		<a href="/" aria-label={siteConfig.business.name} class="flex items-center gap-2">
+			<span class="flex h-9 w-9 items-center justify-center rounded-full bg-rose-600 text-white shadow-sm">
+				<Scissors size={18} />
+			</span>
+			<span class="sr-only">{siteConfig.business.name}</span>
 		</a>
 
 		<nav class="hidden items-center gap-8 md:flex">
@@ -27,16 +31,11 @@ const currentPath = Astro.url.pathname;
 		</nav>
 
 		<a
-			href="/reservation"
-			class="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-rose-700"
+			href="/connexion"
+			class="flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-2 text-sm font-semibold text-stone-700 shadow-sm transition-colors hover:border-rose-300 hover:text-rose-600"
 		>
-			Réserver
-		</a>
-	</div>
-
-	<div class="border-t border-border bg-stone-50 px-6 py-1.5 text-right">
-		<a href="/connexion" class="text-xs font-medium text-stone-500 hover:text-rose-600">
-			Espace professionnel
+			<LogIn size={16} />
+			Connexion / Inscription
 		</a>
 	</div>
 </header>

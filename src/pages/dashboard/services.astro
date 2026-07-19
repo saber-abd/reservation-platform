@@ -1,12 +1,10 @@
 ---
-import Layout from '@/layouts/Layout.astro';
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import DashboardNav from '@/components/dashboard/DashboardNav';
 import ServicesPanel from '@/components/dashboard/ServicesPanel';
 ---
 
-<Layout title="Mes prestations" description="Gestion des prestations." noindex>
-	<section class="mx-auto max-w-5xl px-6 py-12">
-		<DashboardNav client:load />
-		<ServicesPanel client:load />
-	</section>
-</Layout>
+<DashboardLayout title="Mes prestations">
+	<DashboardNav client:load />
+	<ServicesPanel client:load />
+</DashboardLayout>

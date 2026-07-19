@@ -1,12 +1,10 @@
 ---
-import Layout from '@/layouts/Layout.astro';
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import DashboardNav from '@/components/dashboard/DashboardNav';
 import AvailabilitiesPanel from '@/components/dashboard/AvailabilitiesPanel';
 ---
 
-<Layout title="Mes disponibilités" description="Gestion des disponibilités." noindex>
-	<section class="mx-auto max-w-5xl px-6 py-12">
-		<DashboardNav client:load />
-		<AvailabilitiesPanel client:load />
-	</section>
-</Layout>
+<DashboardLayout title="Mes disponibilités">
+	<DashboardNav client:load />
+	<AvailabilitiesPanel client:load />
+</DashboardLayout>

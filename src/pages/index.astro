@@ -1,5 +1,6 @@
 ---
 import Layout from '@/layouts/Layout.astro';
+import Map from '@/components/Map.astro';
 import { siteConfig } from '@/config/site';
 
 const previewServices = siteConfig.services.slice(0, 4);
@@ -90,6 +91,22 @@ const previewServices = siteConfig.services.slice(0, 4);
 						</div>
 					))
 				}
+			</div>
+		</div>
+	</section>
+
+	<!-- Où nous trouver -->
+	<section class="mx-auto max-w-6xl px-6 py-20">
+		<div class="grid items-center gap-10 md:grid-cols-2">
+			<div data-aos="fade-right">
+				<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">Où nous trouver</h2>
+				<p class="mt-4 text-stone-500">{siteConfig.business.address}</p>
+				<a href="/contact" class="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
+					Voir les coordonnées complètes
+				</a>
+			</div>
+			<div data-aos="fade-left">
+				<Map lat={siteConfig.business.lat} lng={siteConfig.business.lng} label={siteConfig.business.name} />
 			</div>
 		</div>
 	</section>

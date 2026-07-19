@@ -1,12 +1,10 @@
 ---
-import Layout from '@/layouts/Layout.astro';
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
 import DashboardNav from '@/components/dashboard/DashboardNav';
 import ProfilePanel from '@/components/dashboard/ProfilePanel';
 ---
 
-<Layout title="Mon profil" description="Profil professionnel." noindex>
-	<section class="mx-auto max-w-5xl px-6 py-12">
-		<DashboardNav client:load />
-		<ProfilePanel client:load />
-	</section>
-</Layout>
+<DashboardLayout title="Mon profil">
+	<DashboardNav client:load />
+	<ProfilePanel client:load />
+</DashboardLayout>

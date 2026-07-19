@@ -1,0 +1,10 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import ClientNav from '@/components/client/ClientNav';
+import AppointmentsClientPanel from '@/components/client/AppointmentsClientPanel';
+---
+
+<DashboardLayout title="Mes rendez-vous">
+	<ClientNav client:load />
+	<AppointmentsClientPanel client:load />
+</DashboardLayout>

@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { signIn } from '@/lib/auth';
+import { getAccountType } from '@/lib/queries';
 
 const schema = z.object({
 	email: z.string().email('Email invalide'),
@@ -24,8 +25,17 @@ export default function LoginForm() {
 		setSubmitting(true);
 		setError(null);
 		try {
-			await signIn(values.email, values.password);
-			window.location.href = '/dashboard';
+			const { user } = await signIn(values.email, values.password);
+			if (!user) throw new Error('Connexion impossible.');
+
+			const accountType = await getAccountType(user.id);
+			if (accountType === 'professional') {
+				window.location.href = '/dashboard';
+			} else if (accountType === 'client') {
+				window.location.href = '/espace-client';
+			} else {
+				window.location.href = '/inscription';
+			}
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Erreur de connexion.');
 		} finally {

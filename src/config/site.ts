@@ -19,14 +19,16 @@ export interface Testimonial {
 export const siteConfig = {
 	url: 'https://reservation-platform.demonstration-pro.workers.dev',
 	business: {
-		name: 'Salon Éclat',
+		name: 'Salon Coiffure',
 		activity: 'Coiffeur',
 		tagline: 'Révélez votre style, sans compromis.',
 		description:
 			"Salon de coiffure mixte au cœur de la ville, spécialisé dans les coupes tendances, les colorations sur-mesure et les soins capillaires haut de gamme. Une équipe passionnée à votre écoute pour un moment de détente et de transformation.",
 		address: '12 rue des Lilas, 75011 Paris',
+		lat: 48.8566,
+		lng: 2.3522,
 		phone: '01 23 45 67 89',
-		email: 'contact@salon-eclat.fr',
+		email: 'contact@salon-coiffure.fr',
 		openingHours: [
 			{ day: 'Mardi - Vendredi', hours: '9h30 - 19h00' },
 			{ day: 'Samedi', hours: '9h00 - 18h00' },
@@ -95,6 +97,7 @@ export const siteConfig = {
 	nav: [
 		{ label: 'Accueil', href: '/' },
 		{ label: 'Services', href: '/services' },
+		{ label: 'Réserver', href: '/reservation' },
 		{ label: 'À propos', href: '/a-propos' },
 		{ label: 'Contact', href: '/contact' },
 	],

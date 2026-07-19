@@ -1,0 +1,60 @@
+---
+// Carte de localisation basée sur Leaflet + OpenStreetMap (gratuit, sans clé API).
+interface Props {
+	lat: number;
+	lng: number;
+	label?: string;
+	zoom?: number;
+	class?: string;
+}
+
+const { lat, lng, label = '', zoom = 15, class: className = 'aspect-video' } = Astro.props;
+---
+
+<div
+	class:list={['leaflet-mount overflow-hidden rounded-xl border border-border', className]}
+	data-lat={lat}
+	data-lng={lng}
+	data-label={label}
+	data-zoom={zoom}
+>
+</div>
+
+<script>
+	import 'leaflet/dist/leaflet.css';
+	import L from 'leaflet';
+
+	function initMaps() {
+		document.querySelectorAll<HTMLElement>('.leaflet-mount').forEach((el) => {
+			if (el.dataset.leafletReady === 'true') return;
+			el.dataset.leafletReady = 'true';
+
+			const lat = parseFloat(el.dataset.lat ?? '0');
+			const lng = parseFloat(el.dataset.lng ?? '0');
+			const zoom = parseInt(el.dataset.zoom ?? '15', 10);
+
+			const map = L.map(el, { scrollWheelZoom: false }).setView([lat, lng], zoom);
+
+			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+				maxZoom: 19,
+			}).addTo(map);
+
+			const marker = L.circleMarker([lat, lng], {
+				radius: 10,
+				color: '#e11d48',
+				weight: 3,
+				fillColor: '#e11d48',
+				fillOpacity: 1,
+			}).addTo(map);
+
+			if (el.dataset.label) marker.bindPopup(el.dataset.label);
+		});
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initMaps);
+	} else {
+		initMaps();
+	}
+</script>
