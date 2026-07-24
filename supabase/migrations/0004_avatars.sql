@@ -40,6 +40,6 @@ create policy "Clients voient leurs messages"
   on public.messages for all
   using (
     client_id = (
-      select id from public.clients where user_id = auth.uid() limit 1
+      select id from public.clients where id = auth.uid() limit 1
     )
   );
