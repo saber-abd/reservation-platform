@@ -10,6 +10,7 @@ export interface Professional {
 	email: string | null;
 	address: string | null;
 	logo_url: string | null;
+	avatar_url: string | null;
 	opening_hours: unknown;
 }
 
@@ -33,8 +34,11 @@ export interface Availability {
 
 export interface Client {
 	id: string;
+	/** same as auth.users.id — used for client-side auth checks */
+	user_id?: string;
 	full_name: string | null;
 	phone: string | null;
+	avatar_url: string | null;
 	created_at: string;
 }
 

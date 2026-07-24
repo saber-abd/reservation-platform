@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useAuthedClient } from '@/lib/useAuthedClient';
 import { updateClient } from '@/lib/queries';
+import AvatarPicker, { type AvatarKey } from '@/components/shared/AvatarPicker';
 
 export default function ClientProfilePanel() {
 	const { loading, client, email, error } = useAuthedClient();
 	const [fullName, setFullName] = useState('');
 	const [phone, setPhone] = useState('');
+	const [avatarKey, setAvatarKey] = useState<string | null>(null);
 	const [saving, setSaving] = useState(false);
 	const [message, setMessage] = useState<string | null>(null);
 
@@ -13,6 +15,7 @@ export default function ClientProfilePanel() {
 		if (client) {
 			setFullName(client.full_name ?? '');
 			setPhone(client.phone ?? '');
+			setAvatarKey(client.avatar_url ?? null);
 		}
 	}, [client]);
 
@@ -22,7 +25,7 @@ export default function ClientProfilePanel() {
 		setSaving(true);
 		setMessage(null);
 		try {
-			await updateClient(client.id, { full_name: fullName, phone });
+			await updateClient(client.id, { full_name: fullName, phone, avatar_url: avatarKey });
 			setMessage('Profil mis à jour.');
 		} catch (err) {
 			setMessage(err instanceof Error ? err.message : 'Erreur lors de la mise à jour.');
@@ -65,6 +68,9 @@ export default function ClientProfilePanel() {
 						onChange={(e) => setPhone(e.target.value)}
 						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
 					/>
+				</div>
+				<div>
+					<AvatarPicker value={avatarKey} onChange={(k: AvatarKey) => setAvatarKey(k)} />
 				</div>
 				{message && <p className="text-sm text-stone-600">{message}</p>}
 				<button

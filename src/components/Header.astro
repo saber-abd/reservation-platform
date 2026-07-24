@@ -1,6 +1,7 @@
 ---
-import { Scissors, LogIn } from 'lucide-react';
+import { Scissors } from 'lucide-react';
 import { siteConfig } from '@/config/site';
+import HeaderAuthButton from '@/components/HeaderAuthButton';
 
 const currentPath = Astro.url.pathname;
 ---
@@ -30,12 +31,7 @@ const currentPath = Astro.url.pathname;
 			}
 		</nav>
 
-		<a
-			href="/connexion"
-			class="flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-2 text-sm font-semibold text-stone-700 shadow-sm transition-colors hover:border-rose-300 hover:text-rose-600"
-		>
-			<LogIn size={16} />
-			Connexion / Inscription
-		</a>
+		<!-- Bouton dynamique : avatar si connecté, connexion sinon -->
+		<HeaderAuthButton client:load />
 	</div>
 </header>

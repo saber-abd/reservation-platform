@@ -202,3 +202,30 @@ Changements :
 
 ⚠️ Prochaine étape technique : exécuter la migration `0003_rules_messages.sql`, puis dans `/dashboard/disponibilites`, définir au moins un horaire récurrent (ex. Lun-Ven 8h-16h, 30 min) pour que la réservation publique affiche des créneaux.
 
+## Lot de modifs — session du 2026-07-24 (matin)
+
+### ⚠️ Migrations SQL à exécuter dans Supabase (dans l'ordre)
+
+1. `supabase/migrations/0004_avatars.sql` — ajoute les colonnes `avatar_url` et `phone` sur `professionals` et `clients`, et crée la table `messages` (si pas déjà créée par 0003).
+2. `supabase/seed/demo_data.sql` — insère 10 prestations, 5 clients fictifs et 30 réservations passées pour alimenter les stats.
+
+### Changements apportés
+
+- **Avatars de profil prédéfinis** (`src/components/shared/AvatarPicker.tsx`) : 12 avatars SVG inline diversifiés (hommes/femmes), sélectionnables depuis un composant en grille. Intégré dans les panneaux Profil pro et Profil client.
+- **Header dynamique** (`HeaderAuthButton.tsx` + `Header.astro`) : le bouton "Connexion / Inscription" est remplacé par l'avatar + prénom de l'utilisateur connecté (avec menu déroulant "Mon espace" / "Se déconnecter"). Si non connecté, affiche le bouton classique. Écoute les changements de session Supabase en temps réel (persistance entre rechargements automatique via `localStorage`).
+- **Sélecteur d'heure en scroll** (`src/components/shared/TimePicker.tsx`) : deux colonnes scrollables (heures 0-23, minutes :00 et :30). Remplace tous les `input type="time"` natifs dans `AvailabilitiesPanel.tsx`. À déployer progressivement dans les autres formulaires si besoin.
+- **Messages d'erreur précis à la réservation** : si non connecté, la page `/reservation` affiche maintenant une bannière claire avec lien vers `/inscription` (au lieu d'un message générique). La réservation reste possible en "invité" (sans compte), mais si connecté le `client_id` est automatiquement attaché.
+- **Données de démo SQL** (`supabase/seed/demo_data.sql`) : 10 prestations coiffure avec durées et prix, 5 clients fictifs et 30 réservations passées sur 3 mois — à exécuter dans le SQL Editor Supabase pour avoir des stats significatives.
+
+### Comptes de test (inchangés)
+- **Pro** : `pro-test@example.com` / `Test-Password-123!`
+- **Clients** :
+  - `client.test1@example.com` / `TestClient123!`
+  - `client.test2@example.com` / `TestClient123!`
+
+### Prochaines étapes
+- Exécuter les 2 SQL ci-dessus
+- Vérifier le header dynamique (avatar après connexion)
+- Vérifier le TimePicker dans `/dashboard/disponibilites`
+- Phase 8 finitions (reste : optimisation images réelles si tu en as)
+- Phase 9 multi-tenant (quand tu veux)

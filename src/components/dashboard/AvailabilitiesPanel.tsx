@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
 import { createAvailabilityRule, deleteAvailabilityRule, getAvailabilityRules, type AvailabilityRule } from '@/lib/queries';
 import { formatDaysOfWeek, weekdayLabels } from '@/lib/slots';
+import TimePicker from '@/components/shared/TimePicker';
 
 const recurringSchema = z
 	.object({
@@ -179,22 +180,20 @@ export default function AvailabilitiesPanel() {
 						)}
 					</div>
 					<div>
-						<label className="text-sm text-stone-700">Heure de début</label>
-						<input
-							type="time"
-							className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
-							{...recurringForm.register('startTime')}
+						<TimePicker
+							label="Heure de début"
+							value={recurringForm.watch('startTime') || ''}
+							onChange={(v) => recurringForm.setValue('startTime', v)}
 						/>
 						{recurringForm.formState.errors.startTime && (
 							<p className="mt-1 text-xs text-red-600">{recurringForm.formState.errors.startTime.message}</p>
 						)}
 					</div>
 					<div>
-						<label className="text-sm text-stone-700">Heure de fin</label>
-						<input
-							type="time"
-							className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
-							{...recurringForm.register('endTime')}
+						<TimePicker
+							label="Heure de fin"
+							value={recurringForm.watch('endTime') || ''}
+							onChange={(v) => recurringForm.setValue('endTime', v)}
 						/>
 						{recurringForm.formState.errors.endTime && (
 							<p className="mt-1 text-xs text-red-600">{recurringForm.formState.errors.endTime.message}</p>
@@ -300,22 +299,20 @@ export default function AvailabilitiesPanel() {
 							)}
 						</div>
 						<div>
-							<label className="text-sm text-stone-700">Heure de début</label>
-							<input
-								type="time"
-								className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
-								{...exceptionForm.register('startTime')}
+							<TimePicker
+								label="Heure de début"
+								value={exceptionForm.watch('startTime') || ''}
+								onChange={(v) => exceptionForm.setValue('startTime', v)}
 							/>
 							{exceptionForm.formState.errors.startTime && (
 								<p className="mt-1 text-xs text-red-600">{exceptionForm.formState.errors.startTime.message}</p>
 							)}
 						</div>
 						<div>
-							<label className="text-sm text-stone-700">Heure de fin</label>
-							<input
-								type="time"
-								className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
-								{...exceptionForm.register('endTime')}
+							<TimePicker
+								label="Heure de fin"
+								value={exceptionForm.watch('endTime') || ''}
+								onChange={(v) => exceptionForm.setValue('endTime', v)}
 							/>
 							{exceptionForm.formState.errors.endTime && (
 								<p className="mt-1 text-xs text-red-600">{exceptionForm.formState.errors.endTime.message}</p>

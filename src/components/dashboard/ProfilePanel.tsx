@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useState } from 'react';
 import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
 import { updateProfessional } from '@/lib/queries';
+import AvatarPicker, { type AvatarKey } from '@/components/shared/AvatarPicker';
 
 const schema = z.object({
 	businessName: z.string().min(2, 'Nom trop court'),
@@ -21,6 +21,7 @@ export default function ProfilePanel() {
 	const { loading, professional, error } = useAuthedProfessional();
 	const [saved, setSaved] = useState(false);
 	const [formError, setFormError] = useState<string | null>(null);
+	const [avatarKey, setAvatarKey] = useState<string | null>(null);
 
 	const {
 		register,
@@ -39,6 +40,7 @@ export default function ProfilePanel() {
 			email: professional.email ?? '',
 			address: professional.address ?? '',
 		});
+		setAvatarKey(professional.avatar_url ?? null);
 	}, [professional, reset]);
 
 	async function onSubmit(values: FormValues) {
@@ -53,6 +55,7 @@ export default function ProfilePanel() {
 				phone: values.phone || null,
 				email: values.email || null,
 				address: values.address || null,
+				avatar_url: avatarKey,
 			});
 			setSaved(true);
 		} catch (err) {
@@ -132,6 +135,9 @@ export default function ProfilePanel() {
 						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('address')}
 					/>
+				</div>
+				<div>
+					<AvatarPicker value={avatarKey} onChange={(k: AvatarKey) => setAvatarKey(k)} />
 				</div>
 				{formError && <p className="text-sm text-red-600">{formError}</p>}
 				{saved && <p className="text-sm text-green-700">Profil mis à jour.</p>}
