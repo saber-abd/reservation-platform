@@ -3,6 +3,7 @@ import { signOut } from '@/lib/auth';
 
 const links = [
 	{ label: 'Mes rendez-vous', href: '/espace-client' },
+	{ label: 'Messages', href: '/espace-client/messages' },
 	{ label: 'Mon profil', href: '/espace-client/profil' },
 ];
 

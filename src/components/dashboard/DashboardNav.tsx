@@ -5,6 +5,8 @@ const links = [
 	{ label: "Vue d'ensemble", href: '/dashboard' },
 	{ label: 'Services', href: '/dashboard/services' },
 	{ label: 'Disponibilités', href: '/dashboard/disponibilites' },
+	{ label: 'Clients', href: '/dashboard/clients' },
+	{ label: 'Statistiques', href: '/dashboard/statistiques' },
 	{ label: 'Profil', href: '/dashboard/profil' },
 ];
 

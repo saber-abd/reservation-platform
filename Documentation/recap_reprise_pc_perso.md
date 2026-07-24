@@ -163,3 +163,42 @@ Si VS Code redirige automatiquement le port 4321 vers une URL type `https://xxxx
   2. Dans l'onglet **Ports** de VS Code (Terminal > onglet "Ports"), clic droit sur le port 4321 → **Port Visibility** → vérifier qu'il n'est pas mis en "Public" par erreur (le mode "Private" suffit en local).
   3. Si le port a été forwardé automatiquement, on peut le retirer de la liste (bouton "Forward a Port" / poubelle à côté de la ligne 4321) : VS Code arrêtera de proposer le lien devtunnel et le navigateur local pourra utiliser `http://localhost:4321` directement.
   4. Le lien devtunnel fonctionne aussi (il proxy vers le même serveur), mais il est plus lent et dépend d'une connexion internet — à réserver pour tester depuis un autre appareil (téléphone, etc.).
+
+## Phase 8 — Thème couleurs, header, carte, espace client, dashboard distinct (session du 2026-07-24)
+
+- **Thème couleurs** : remplacement du bleu/blanc par une palette rose/terracotta + stone (`--primary`/`--ring` en oklch, classes `rose-*`/`stone-*` dans tout le site).
+- **Header** : logo texte remplacé par une icône (ciseaux, `lucide-react`) + nom du business en `sr-only` ; bouton "Réserver" retiré du header (accessible via le menu classique) ; bandeau "Espace professionnel" supprimé, remplacé par un lien unique "Connexion / Inscription".
+- **Nom du site** : `Salon Éclat` → `Salon Coiffure` (dans `src/config/site.ts`).
+- **Arrière-plan** : `--background` passé d'un blanc pur à un ivoire pâle (oklch), les cartes restent blanches pour contraster.
+- **Carte de localisation** : `leaflet` + `@types/leaflet` installés (OpenStreetMap, gratuit, sans clé API) ; composant `src/components/Map.astro` (vanilla JS, `circleMarker` pour éviter les soucis d'icônes par défaut de Leaflet avec les bundlers) ; intégrée sur l'accueil (section "Où nous trouver") et sur `/contact`.
+- **Espace client complet** (table `clients` déjà prête dans `schema.sql` depuis la Phase 3, aucune migration nécessaire pour cette partie) :
+  - `src/lib/queries.ts` : `Client`, `getClientById`, `createClient`, `updateClient`, `getAppointmentsForClient`, `getAccountType`.
+  - `src/lib/useAuthedClient.ts` (hook miroir de `useAuthedProfessional`).
+  - Pages `/espace-client` (mes rendez-vous), `/espace-client/profil`, `/espace-client/messages`.
+  - `SignupForm.tsx` : toggle Client/Professionnel à l'inscription. `LoginForm.tsx` : redirige vers `/dashboard` ou `/espace-client` selon `getAccountType`.
+- **Dashboard distinct de la vitrine** : nouveau `src/layouts/DashboardLayout.astro` (chrome minimal, sans header/footer public) utilisé par toutes les pages `/dashboard/*` et `/espace-client/*` (elles utilisaient auparavant le `Layout.astro` public).
+- Build (`npm run build`) validé, commit `01c4c4b` poussé sur `main`.
+
+### Suite (même session) : réservation, disponibilités, stats, messagerie
+
+⚠️ **Migration SQL à exécuter dans Supabase avant que ces fonctionnalités marchent** : `supabase/migrations/0003_rules_messages.sql` (SQL Editor → New query → coller → Run, même procédure que les migrations précédentes). Elle crée :
+- la table `availability_rules` (règles de disponibilité récurrentes/exceptionnelles) + RLS,
+- un index unique partiel anti-double-booking sur `appointments (professional_id, start_time) where status = 'confirmed'` (remplace l'ancien trigger `is_booked` pour ce nouveau flux),
+- la policy permettant au professionnel de voir les clients ayant déjà réservé chez lui,
+- la table `messages` (messagerie pro ↔ client) + RLS.
+
+**Tant que cette migration n'est pas exécutée**, les pages `/reservation`, `/dashboard/disponibilites`, `/dashboard/clients`, `/dashboard/statistiques`, `/espace-client/messages` afficheront des erreurs Supabase (tables/policies inexistantes).
+
+Changements :
+- **Réservation publique repensée** (`ReservationForm.tsx`) : au lieu de charger tous les créneaux libres d'un coup, l'utilisateur choisit une date puis clique sur "Voir les disponibilités" (calcul à la volée via `src/lib/slots.ts`, en combinant les règles de dispo du jour + les rendez-vous déjà pris ce jour-là). Les créneaux pris sont grisés/barrés.
+- **Services synchronisés avec la base** : `services.astro` et l'aperçu de l'accueil utilisaient encore la liste statique `siteConfig.services` (désynchronisée de la table `services`). Remplacés par un composant `src/components/ServicesList.tsx` qui lit la table `services` en direct (les mêmes prestations que celles gérées dans `/dashboard/services` et proposées à la réservation).
+- **Disponibilités pro repensées** (`AvailabilitiesPanel.tsx`) : au lieu de créer un créneau à la fois, le pro définit des **horaires récurrents groupés** (ex. "Lun - Ven, 8h-16h, créneaux de 30 min") avec choix des jours et de la granularité (30 min ou 1h pour les prestations longues), plus une case à cocher "disponibilité exceptionnelle" qui affiche un formulaire libre pour une date précise (remplace l'horaire récurrent ce jour-là).
+- **Statistiques pro** : nouvelle page `/dashboard/statistiques` (`StatsPanel.tsx`) — rendez-vous cette semaine/à venir, CA estimé du mois, total, annulations, prestation la plus demandée (calculé côté client à partir des données déjà chargées, pas de nouvelle requête serveur).
+- **Messagerie pro ↔ client** : nouvelle table `messages`. Page pro `/dashboard/clients` (`ClientsPanel.tsx`) liste les clients inscrits ayant déjà réservé et permet d'ouvrir une conversation. Page client `/espace-client/messages` (`MessagesClientPanel.tsx`) permet d'écrire au salon. Composant partagé `src/components/shared/MessageThread.tsx`.
+- **Comptes clients de test créés** (session du 2026-07-24, via script Node temporaire utilisant uniquement la clé anon, supprimé après usage) pour tester `/espace-client` :
+  - `client.test1@example.com` / `TestClient123!`
+  - `client.test2@example.com` / `TestClient123!`
+- Build (`npm run build`) validé sans erreur.
+
+⚠️ Prochaine étape technique : exécuter la migration `0003_rules_messages.sql`, puis dans `/dashboard/disponibilites`, définir au moins un horaire récurrent (ex. Lun-Ven 8h-16h, 30 min) pour que la réservation publique affiche des créneaux.
+

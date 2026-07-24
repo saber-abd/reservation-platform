@@ -38,6 +38,28 @@ export interface Client {
 	created_at: string;
 }
 
+export interface AvailabilityRule {
+	id: string;
+	professional_id: string;
+	days_of_week: number[];
+	start_time: string;
+	end_time: string;
+	slot_duration_minutes: number;
+	is_exception: boolean;
+	exception_date: string | null;
+	created_at: string;
+}
+
+export interface Message {
+	id: string;
+	professional_id: string;
+	client_id: string;
+	sender: 'professional' | 'client';
+	body: string;
+	created_at: string;
+	read_at: string | null;
+}
+
 export interface Appointment {
 	id: string;
 	professional_id: string;
@@ -159,7 +181,7 @@ export async function deleteAvailability(id: string) {
 export async function createAppointment(appointment: {
 	professional_id: string;
 	service_id: string;
-	availability_id: string;
+	availability_id?: string;
 	client_id?: string;
 	client_name: string;
 	client_email: string;
@@ -180,6 +202,82 @@ export async function getAppointmentsForProfessional(professionalId: string): Pr
 		.order('start_time', { ascending: false });
 	if (error) throw error;
 	return data ?? [];
+}
+
+/** Rendez-vous non annulés d'un professionnel pour une date précise (YYYY-MM-DD), pour calculer les créneaux libres. */
+export async function getAppointmentsForDate(professionalId: string, date: string): Promise<Appointment[]> {
+	const { data, error } = await supabase
+		.from('appointments')
+		.select('*')
+		.eq('professional_id', professionalId)
+		.neq('status', 'cancelled')
+		.gte('start_time', `${date}T00:00:00`)
+		.lte('start_time', `${date}T23:59:59`);
+	if (error) throw error;
+	return data ?? [];
+}
+
+/** Règles de disponibilité (récurrentes ou exceptionnelles) d'un professionnel. */
+export async function getAvailabilityRules(professionalId: string): Promise<AvailabilityRule[]> {
+	const { data, error } = await supabase
+		.from('availability_rules')
+		.select('*')
+		.eq('professional_id', professionalId)
+		.order('created_at');
+	if (error) throw error;
+	return data ?? [];
+}
+
+export async function createAvailabilityRule(
+	rule: Omit<AvailabilityRule, 'id' | 'created_at'>,
+): Promise<AvailabilityRule> {
+	const { data, error } = await supabase.from('availability_rules').insert(rule).select().single();
+	if (error) throw error;
+	return data as AvailabilityRule;
+}
+
+export async function deleteAvailabilityRule(id: string) {
+	const { error } = await supabase.from('availability_rules').delete().eq('id', id);
+	if (error) throw error;
+}
+
+/** Clients ayant déjà réservé au moins un rendez-vous avec ce professionnel ("clients inscrits"). */
+export async function getRegisteredClients(professionalId: string): Promise<Client[]> {
+	const { data, error } = await supabase
+		.from('appointments')
+		.select('clients(id, full_name, phone, created_at)')
+		.eq('professional_id', professionalId)
+		.not('client_id', 'is', null);
+	if (error) throw error;
+	const rows = (data ?? []) as unknown as { clients: Client | null }[];
+	const byId = new Map<string, Client>();
+	for (const row of rows) {
+		if (row.clients) byId.set(row.clients.id, row.clients);
+	}
+	return Array.from(byId.values());
+}
+
+/** Messages échangés entre un professionnel et un client précis, dans l'ordre chronologique. */
+export async function getMessages(professionalId: string, clientId: string): Promise<Message[]> {
+	const { data, error } = await supabase
+		.from('messages')
+		.select('*')
+		.eq('professional_id', professionalId)
+		.eq('client_id', clientId)
+		.order('created_at');
+	if (error) throw error;
+	return data ?? [];
+}
+
+export async function sendMessage(message: {
+	professional_id: string;
+	client_id: string;
+	sender: 'professional' | 'client';
+	body: string;
+}): Promise<Message> {
+	const { data, error } = await supabase.from('messages').insert(message).select().single();
+	if (error) throw error;
+	return data as Message;
 }
 
 export async function updateAppointmentStatus(id: string, status: Appointment['status']) {

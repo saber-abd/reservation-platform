@@ -1,0 +1,10 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import ClientNav from '@/components/client/ClientNav';
+import MessagesClientPanel from '@/components/client/MessagesClientPanel';
+---
+
+<DashboardLayout title="Messagerie">
+	<ClientNav client:load />
+	<MessagesClientPanel client:load />
+</DashboardLayout>

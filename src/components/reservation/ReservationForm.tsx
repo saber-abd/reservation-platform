@@ -4,13 +4,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
 	createAppointment,
-	getAvailableSlots,
+	getAppointmentsForDate,
+	getAvailabilityRules,
 	getPrimaryProfessional,
 	getServices,
-	type Availability,
 	type Professional,
 	type Service,
 } from '@/lib/queries';
+import { generateSlotsForDate, type GeneratedSlot } from '@/lib/slots';
+import { getSession } from '@/lib/auth';
 
 const clientSchema = z.object({
 	clientName: z.string().min(2, 'Nom trop court'),
@@ -20,23 +22,26 @@ const clientSchema = z.object({
 
 type ClientFormValues = z.infer<typeof clientSchema>;
 
-function formatSlot(slot: Availability) {
-	const start = new Date(slot.start_time);
-	return start.toLocaleString('fr-FR', {
-		weekday: 'long',
-		day: 'numeric',
-		month: 'long',
+function formatSlot(slot: GeneratedSlot) {
+	return slot.start.toLocaleString('fr-FR', {
+		weekday: 'short',
 		hour: '2-digit',
 		minute: '2-digit',
 	});
 }
 
+function todayISO() {
+	return new Date().toISOString().slice(0, 10);
+}
+
 export default function ReservationForm() {
 	const [professional, setProfessional] = useState<Professional | null>(null);
 	const [services, setServices] = useState<Service[]>([]);
-	const [slots, setSlots] = useState<Availability[]>([]);
 	const [selectedServiceId, setSelectedServiceId] = useState<string>('');
-	const [selectedSlotId, setSelectedSlotId] = useState<string>('');
+	const [selectedDate, setSelectedDate] = useState<string>(todayISO());
+	const [slots, setSlots] = useState<GeneratedSlot[] | null>(null);
+	const [slotsLoading, setSlotsLoading] = useState(false);
+	const [selectedSlot, setSelectedSlot] = useState<GeneratedSlot | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -55,12 +60,8 @@ export default function ReservationForm() {
 				const pro = await getPrimaryProfessional();
 				setProfessional(pro);
 				if (pro) {
-					const [servicesData, slotsData] = await Promise.all([
-						getServices(pro.id),
-						getAvailableSlots(pro.id),
-					]);
+					const servicesData = await getServices(pro.id);
 					setServices(servicesData);
-					setSlots(slotsData);
 				}
 			} catch (err) {
 				setError(err instanceof Error ? err.message : 'Erreur de chargement.');
@@ -75,22 +76,40 @@ export default function ReservationForm() {
 		() => services.find((s) => s.id === selectedServiceId) ?? null,
 		[services, selectedServiceId],
 	);
-	const selectedSlot = useMemo(() => slots.find((s) => s.id === selectedSlotId) ?? null, [slots, selectedSlotId]);
+
+	async function handleShowAvailabilities() {
+		if (!professional) return;
+		setSlotsLoading(true);
+		setSlots(null);
+		setSelectedSlot(null);
+		try {
+			const [rules, appointments] = await Promise.all([
+				getAvailabilityRules(professional.id),
+				getAppointmentsForDate(professional.id, selectedDate),
+			]);
+			setSlots(generateSlotsForDate(rules, selectedDate, appointments));
+		} catch (err) {
+			setError(err instanceof Error ? err.message : 'Erreur lors du chargement des disponibilités.');
+		} finally {
+			setSlotsLoading(false);
+		}
+	}
 
 	async function onSubmit(values: ClientFormValues) {
 		if (!professional || !selectedService || !selectedSlot) return;
 		setSubmitting(true);
 		setError(null);
 		try {
+			const session = await getSession();
 			await createAppointment({
 				professional_id: professional.id,
 				service_id: selectedService.id,
-				availability_id: selectedSlot.id,
+				client_id: session?.user.id,
 				client_name: values.clientName,
 				client_email: values.clientEmail,
 				client_phone: values.clientPhone,
-				start_time: selectedSlot.start_time,
-				end_time: selectedSlot.end_time,
+				start_time: selectedSlot.start.toISOString(),
+				end_time: selectedSlot.end.toISOString(),
 			});
 			setSuccess(true);
 			reset();
@@ -100,10 +119,8 @@ export default function ReservationForm() {
 					? err.message
 					: "Une erreur est survenue, ce créneau n'est peut-être plus disponible.",
 			);
-			// Recharge les créneaux au cas où celui choisi vient d'être pris.
-			const freshSlots = await getAvailableSlots(professional.id);
-			setSlots(freshSlots);
-			setSelectedSlotId('');
+			// Recharge les créneaux au cas où celui choisi vient d'être pris entre-temps.
+			await handleShowAvailabilities();
 		} finally {
 			setSubmitting(false);
 		}
@@ -159,28 +176,63 @@ export default function ReservationForm() {
 				</div>
 			</div>
 
-			{/* Étape 2 : créneau */}
+			{/* Étape 2 : date + créneau */}
 			<div>
-				<p className="text-sm font-semibold text-stone-900">2. Choisissez un créneau</p>
-				<div className="mt-3 grid gap-2 sm:grid-cols-2">
-					{slots.map((slot) => (
-						<button
-							type="button"
-							key={slot.id}
-							onClick={() => setSelectedSlotId(slot.id)}
-							className={`rounded-xl border p-3 text-left text-sm capitalize transition-colors ${
-								selectedSlotId === slot.id
-									? 'border-rose-600 bg-rose-50'
-									: 'border-border bg-white hover:border-rose-300'
-							}`}
-						>
-							{formatSlot(slot)}
-						</button>
-					))}
-					{slots.length === 0 && (
-						<p className="text-sm text-stone-500">Aucun créneau disponible pour le moment.</p>
-					)}
+				<p className="text-sm font-semibold text-stone-900">2. Choisissez un jour puis un créneau</p>
+				<div className="mt-3 flex flex-wrap items-end gap-3">
+					<div>
+						<label className="text-sm text-stone-700" htmlFor="date">
+							Date
+						</label>
+						<input
+							id="date"
+							type="date"
+							min={todayISO()}
+							value={selectedDate}
+							onChange={(e) => {
+								setSelectedDate(e.target.value);
+								setSlots(null);
+								setSelectedSlot(null);
+							}}
+							className="mt-1 rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						/>
+					</div>
+					<button
+						type="button"
+						onClick={handleShowAvailabilities}
+						disabled={slotsLoading}
+						className="rounded-xl border border-rose-600 px-4 py-2 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-50 disabled:opacity-50"
+					>
+						{slotsLoading ? 'Chargement...' : 'Voir les disponibilités'}
+					</button>
 				</div>
+
+				{slots !== null && (
+					<div className="mt-4 grid gap-2 sm:grid-cols-3">
+						{slots.map((slot) => (
+							<button
+								type="button"
+								key={slot.start.toISOString()}
+								disabled={slot.isBooked}
+								onClick={() => setSelectedSlot(slot)}
+								className={`rounded-xl border p-3 text-center text-sm capitalize transition-colors ${
+									slot.isBooked
+										? 'cursor-not-allowed border-border bg-stone-100 text-stone-400 line-through'
+										: selectedSlot?.start.getTime() === slot.start.getTime()
+											? 'border-rose-600 bg-rose-50'
+											: 'border-border bg-white hover:border-rose-300'
+								}`}
+							>
+								{formatSlot(slot)}
+							</button>
+						))}
+						{slots.length === 0 && (
+							<p className="col-span-full text-sm text-stone-500">
+								Aucun créneau disponible ce jour-là. Essayez une autre date.
+							</p>
+						)}
+					</div>
+				)}
 			</div>
 
 			{/* Étape 3 : coordonnées */}
@@ -235,3 +287,4 @@ export default function ReservationForm() {
 		</form>
 	);
 }
+

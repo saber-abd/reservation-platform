@@ -1,9 +1,8 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import Map from '@/components/Map.astro';
+import ServicesList from '@/components/ServicesList';
 import { siteConfig } from '@/config/site';
-
-const previewServices = siteConfig.services.slice(0, 4);
 ---
 
 <Layout>
@@ -33,24 +32,7 @@ const previewServices = siteConfig.services.slice(0, 4);
 				<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">Nos prestations</h2>
 				<a href="/services" class="text-sm font-medium text-rose-600 hover:underline">Voir tout</a>
 			</div>
-			<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-				{
-					previewServices.map((service, index) => (
-						<div
-							class="rounded-xl border border-border bg-white p-6 shadow-sm"
-							data-aos="fade-up"
-							data-aos-delay={index * 75}
-						>
-							<p class="font-semibold text-stone-900">{service.name}</p>
-							<p class="mt-2 text-sm text-stone-500">{service.description}</p>
-							<div class="mt-4 flex items-center justify-between text-sm">
-								<span class="text-stone-400">{service.durationMinutes} min</span>
-								<span class="font-semibold text-stone-900">{service.price} €</span>
-							</div>
-						</div>
-					))
-				}
-			</div>
+			<ServicesList client:load limit={4} showCta={false} />
 		</div>
 	</section>
 
