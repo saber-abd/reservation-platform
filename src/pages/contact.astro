@@ -1,7 +1,8 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import Map from '@/components/Map.astro';
-import { siteConfig } from '@/config/site';
+import { getSiteConfig } from '@/config/site';
+const siteConfig = await getSiteConfig();
 ---
 
 <Layout title="Contact" description={`Contactez ${siteConfig.business.name}.`}>
@@ -27,8 +28,8 @@ import { siteConfig } from '@/config/site';
 				</div>
 			</div>
 
-			<!-- Formulaire visuel : la logique d'envoi sera branchée en Phase 5/6 (backend). -->
 			<form
+				id="contact-form"
 				class="flex flex-col gap-4 rounded-xl border border-border bg-white p-6 shadow-sm"
 				data-aos="fade-left"
 			>
@@ -62,7 +63,9 @@ import { siteConfig } from '@/config/site';
 						class="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 					></textarea>
 				</div>
+				<p id="form-status" class="text-sm hidden"></p>
 				<button
+					id="submit-btn"
 					type="submit"
 					class="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700"
 				>
@@ -72,3 +75,50 @@ import { siteConfig } from '@/config/site';
 		</div>
 	</section>
 </Layout>
+
+<script>
+	const form = document.getElementById('contact-form') as HTMLFormElement;
+	const status = document.getElementById('form-status');
+	const btn = document.getElementById('submit-btn') as HTMLButtonElement;
+
+	if (form && status && btn) {
+		form.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const formData = new FormData(form);
+			
+			btn.disabled = true;
+			btn.textContent = 'Envoi en cours...';
+			status.classList.add('hidden');
+			
+			try {
+				const response = await fetch('/api/send-email', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						to: formData.get('email'), // This should ideally be the business email, but for demo we send it to the user so they see it (or business, depending on Resend verification)
+						subject: `Nouveau message de ${formData.get('name')}`,
+						html: `<p><strong>Nom:</strong> ${formData.get('name')}</p>
+							   <p><strong>Email:</strong> ${formData.get('email')}</p>
+							   <p><strong>Message:</strong><br/>${formData.get('message')}</p>`
+					})
+				});
+
+				const result = await response.json();
+				if (response.ok) {
+					status.textContent = 'Message envoyé avec succès !';
+					status.className = 'text-sm text-green-600';
+					form.reset();
+				} else {
+					throw new Error(result.error?.message || 'Erreur inconnue');
+				}
+			} catch (err: any) {
+				status.textContent = `Erreur lors de l'envoi : ${err.message}`;
+				status.className = 'text-sm text-red-600';
+			} finally {
+				btn.disabled = false;
+				btn.textContent = 'Envoyer';
+				status.classList.remove('hidden');
+			}
+		});
+	}
+</script>

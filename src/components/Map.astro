@@ -33,11 +33,11 @@ const { lat, lng, label = '', zoom = 15, class: className = 'aspect-video' } = A
 			const lng = parseFloat(el.dataset.lng ?? '0');
 			const zoom = parseInt(el.dataset.zoom ?? '15', 10);
 
-			const map = L.map(el, { scrollWheelZoom: false }).setView([lat, lng], zoom);
+			const map = L.map(el).setView([lat, lng], zoom);
 
-			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-				maxZoom: 19,
+			L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+				maxZoom: 20,
 			}).addTo(map);
 
 			const marker = L.circleMarker([lat, lng], {

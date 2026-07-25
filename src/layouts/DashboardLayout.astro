@@ -4,7 +4,8 @@
 // juste une barre d'app minimale, pour bien différencier "site public" et "espace privé".
 import '../styles/global.css';
 import { Scissors, ArrowLeft } from 'lucide-react';
-import { siteConfig } from '@/config/site';
+import { getSiteConfig } from '@/config/site';
+const siteConfig = await getSiteConfig();
 
 interface Props {
 	title?: string;

@@ -10,6 +10,7 @@ import cloudflare from '@astrojs/cloudflare';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
+  output: 'server',
   site: 'https://reservation-platform.demonstration-pro.workers.dev',
   vite: {
     plugins: [tailwindcss()]

@@ -1,6 +1,7 @@
 ---
 import Layout from '@/layouts/Layout.astro';
-import { siteConfig } from '@/config/site';
+import { getSiteConfig } from '@/config/site';
+const siteConfig = await getSiteConfig();
 ---
 
 <Layout title="À propos" description={`En savoir plus sur ${siteConfig.business.name}.`}>
@@ -20,11 +21,8 @@ import { siteConfig } from '@/config/site';
 					Réserver maintenant
 				</a>
 			</div>
-			<div
-				class="flex aspect-square items-center justify-center rounded-xl bg-stone-100 text-stone-400"
-				data-aos="fade-left"
-			>
-				Photo de l'équipe
+			<div class="overflow-hidden rounded-2xl shadow-xl" data-aos="fade-left">
+				<img src="/images/about_salon.jpg" alt="Notre équipe" class="aspect-square w-full object-cover" />
 			</div>
 		</div>
 	</section>

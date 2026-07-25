@@ -1,6 +1,7 @@
 ---
-import { Scissors } from 'lucide-react';
-import { siteConfig } from '@/config/site';
+import { Scissors, Menu, X } from 'lucide-react';
+import { getSiteConfig } from '@/config/site';
+const siteConfig = await getSiteConfig();
 import HeaderAuthButton from '@/components/HeaderAuthButton';
 
 const currentPath = Astro.url.pathname;
@@ -15,6 +16,7 @@ const currentPath = Astro.url.pathname;
 			<span class="sr-only">{siteConfig.business.name}</span>
 		</a>
 
+		<!-- Desktop Nav -->
 		<nav class="hidden items-center gap-8 md:flex">
 			{
 				siteConfig.nav.map((item) => (
@@ -31,7 +33,54 @@ const currentPath = Astro.url.pathname;
 			}
 		</nav>
 
-		<!-- Bouton dynamique : avatar si connecté, connexion sinon -->
-		<HeaderAuthButton client:load />
+		<div class="flex items-center gap-4">
+			<!-- Bouton dynamique : avatar si connecté, connexion sinon -->
+			<div class="hidden md:block">
+				<HeaderAuthButton client:load />
+			</div>
+
+			<!-- Mobile Menu Toggle -->
+			<button id="mobile-menu-btn" class="md:hidden text-stone-600 hover:text-rose-600 focus:outline-none">
+				<Menu size={24} id="icon-menu" />
+				<X size={24} id="icon-close" class="hidden" />
+			</button>
+		</div>
+	</div>
+
+	<!-- Mobile Nav -->
+	<div id="mobile-nav" class="hidden border-t border-border bg-white md:hidden">
+		<nav class="flex flex-col px-6 py-4 gap-4">
+			{
+				siteConfig.nav.map((item) => (
+					<a
+						href={item.href}
+						class:list={[
+							'text-lg font-medium transition-colors hover:text-rose-600',
+							currentPath === item.href ? 'text-rose-600' : 'text-stone-600',
+						]}
+					>
+						{item.label}
+					</a>
+				))
+			}
+			<div class="mt-4 pt-4 border-t border-border">
+				<HeaderAuthButton client:load />
+			</div>
+		</nav>
 	</div>
 </header>
+
+<script>
+	const btn = document.getElementById('mobile-menu-btn');
+	const nav = document.getElementById('mobile-nav');
+	const iconMenu = document.getElementById('icon-menu');
+	const iconClose = document.getElementById('icon-close');
+
+	if (btn && nav && iconMenu && iconClose) {
+		btn.addEventListener('click', () => {
+			nav.classList.toggle('hidden');
+			iconMenu.classList.toggle('hidden');
+			iconClose.classList.toggle('hidden');
+		});
+	}
+</script>

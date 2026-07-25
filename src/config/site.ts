@@ -1,3 +1,5 @@
+import { getPrimaryProfessional } from '../lib/queries';
+
 // Configuration de contenu du site vitrine — démo "coiffeur".
 // Objectif : ne jamais coder les textes/services en dur dans les composants
 // (voir Documentation/phase1_cadrage.md). Ce fichier sera remplacé plus tard
@@ -102,3 +104,26 @@ export const siteConfig = {
 		{ label: 'Contact', href: '/contact' },
 	],
 };
+
+export async function getSiteConfig() {
+	try {
+		const pro = await getPrimaryProfessional();
+		if (pro) {
+			return {
+				...siteConfig,
+				business: {
+					...siteConfig.business,
+					name: pro.business_name || siteConfig.business.name,
+					activity: pro.activity || siteConfig.business.activity,
+					description: pro.description || siteConfig.business.description,
+					phone: pro.phone || siteConfig.business.phone,
+					email: pro.email || siteConfig.business.email,
+					address: pro.address || siteConfig.business.address,
+				}
+			};
+		}
+	} catch (e) {
+		console.error("Error fetching primary professional", e);
+	}
+	return siteConfig;
+}

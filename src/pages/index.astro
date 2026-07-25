@@ -2,24 +2,31 @@
 import Layout from '@/layouts/Layout.astro';
 import Map from '@/components/Map.astro';
 import ServicesList from '@/components/ServicesList';
-import { siteConfig } from '@/config/site';
+import { getSiteConfig } from '@/config/site';
+const siteConfig = await getSiteConfig();
 ---
 
 <Layout>
 	<!-- Hero -->
-	<section class="mx-auto flex max-w-6xl flex-col items-start gap-6 px-6 py-24 md:py-32">
+	<section class="relative mx-auto flex min-h-[70vh] flex-col items-center justify-center gap-6 px-6 py-24 text-center md:py-32">
+		<!-- Hero Background Image -->
+		<div class="absolute inset-0 z-[-1] overflow-hidden">
+			<img src="/images/hero_salon.jpg" alt="Salon de beauté intérieur" class="h-full w-full object-cover object-center" />
+			<div class="absolute inset-0 bg-white/70 backdrop-blur-[2px]"></div>
+		</div>
+
 		<p class="text-sm font-semibold uppercase tracking-widest text-rose-600">
 			{siteConfig.business.activity}
 		</p>
-		<h1 class="max-w-2xl text-4xl font-bold tracking-tight text-stone-900 md:text-6xl">
+		<h1 class="max-w-3xl text-4xl font-bold tracking-tight text-stone-900 md:text-6xl">
 			{siteConfig.business.tagline}
 		</h1>
-		<p class="max-w-xl text-lg text-stone-500">
+		<p class="max-w-xl text-lg text-stone-700">
 			{siteConfig.business.description}
 		</p>
 		<a
 			href="/reservation"
-			class="rounded-xl bg-rose-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-rose-700"
+			class="mt-4 rounded-xl bg-rose-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:-translate-y-1 hover:bg-rose-700 hover:shadow-xl"
 		>
 			Réserver maintenant
 		</a>
@@ -39,11 +46,8 @@ import { siteConfig } from '@/config/site';
 	<!-- À propos résumé -->
 	<section class="mx-auto max-w-6xl px-6 py-20">
 		<div class="grid items-center gap-10 md:grid-cols-2">
-			<div
-				class="flex aspect-video items-center justify-center rounded-xl bg-stone-100 text-stone-400"
-				data-aos="fade-right"
-			>
-				Photo du salon
+			<div class="overflow-hidden rounded-2xl shadow-xl" data-aos="fade-right">
+				<img src="/images/about_salon.jpg" alt="Matériel professionnel" class="aspect-[4/3] w-full object-cover" />
 			</div>
 			<div data-aos="fade-left">
 				<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">À propos</h2>

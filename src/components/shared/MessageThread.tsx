@@ -33,6 +33,18 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 			const created = await sendMessage({ professional_id: professionalId, client_id: clientId, sender: role, body });
 			setMessages((prev) => [...prev, created]);
 			setBody('');
+
+			// Notification Email (en asynchrone)
+			fetch('/api/send-email', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					to: role === 'client' ? 'pro-test@example.com' : 'client.test1@example.com', // En mode démo, on utilise des emails de test. En prod, il faudrait faire une requête pour récupérer l'email du destinataire (client.email ou professional.email).
+					subject: `Nouveau message reçu`,
+					html: `<p>Vous avez reçu un nouveau message :</p><p><em>"${body}"</em></p><p>Connectez-vous pour répondre.</p>`
+				})
+			}).catch(console.error);
+
 		} finally {
 			setSending(false);
 		}

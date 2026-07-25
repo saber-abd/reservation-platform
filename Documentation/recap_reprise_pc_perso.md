@@ -223,9 +223,23 @@ Changements :
   - `client.test1@example.com` / `TestClient123!`
   - `client.test2@example.com` / `TestClient123!`
 
+## Lot 2 — session du 2026-07-25 (matin)
+
+### ⚠️ Migration SQL à exécuter dans Supabase
+1. `supabase/migrations/0005_soft_delete_services.sql` — Ajoute la colonne `is_deleted` pour permettre la suppression de prestations sans casser l'historique.
+
+### Changements apportés
+- **Images générées par IA** : ajout d'une belle photo de fond pour le "Hero" (`/images/hero_salon.jpg`) et d'une photo d'illustration pour le "À propos" (`/images/about_salon.jpg`).
+- **Standardisation du profil Pro** : le formulaire de modification du profil professionnel (`ProfilePanel.tsx`) utilise maintenant le même design élégant sous forme de carte blanche que l'espace client.
+- **Suppression "douce" de prestation** : correction du bug de suppression qui échouait à cause de la clé étrangère des réservations. La suppression met désormais `is_deleted = true` et la prestation est masquée dans le dashboard pro (et sur la page publique) sans supprimer les réservations passées.
+- **Menu mobile (Hamburger)** : ajout du support de la navigation mobile sur téléphone dans `Header.astro`.
+- **Amélioration de la carte Interactive** : remplacement des tuiles OpenStreetMap brutes par le fond "CartoDB Positron" pour un look premium. Activation du zoom (scroll/clic).
+- **Intégration d'envoi d'e-mail (Resend)** : création de la route `/api/send-email.ts` et branchement de l'API Resend. Des e-mails sont désormais envoyés lors de :
+  1. L'envoi d'un message via le formulaire "Contact".
+  2. La confirmation d'une réservation avec succès.
+  3. L'envoi d'un message privé client-pro (Notification).
+- **Cohérence des informations (SSR)** : `astro.config.mjs` est passé en mode `output: 'server'`. Le site vitrine (`Layout.astro`, `index.astro`, etc.) va désormais piocher les informations nom/téléphone/adresse **directement dans la base de données** du professionnel au lieu de la configuration statique en dur (`siteConfig`).
+
 ### Prochaines étapes
-- Exécuter les 2 SQL ci-dessus
-- Vérifier le header dynamique (avatar après connexion)
-- Vérifier le TimePicker dans `/dashboard/disponibilites`
-- Phase 8 finitions (reste : optimisation images réelles si tu en as)
-- Phase 9 multi-tenant (quand tu veux)
+- Exécuter la requête `0005_soft_delete_services.sql`.
+- Préparer le déploiement.

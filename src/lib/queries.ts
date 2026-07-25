@@ -22,6 +22,8 @@ export interface Service {
 	duration_minutes: number;
 	price: number;
 	is_active: boolean;
+	is_deleted: boolean;
+	created_at: string;
 }
 
 export interface Availability {
@@ -114,7 +116,8 @@ export async function getServices(professionalId: string): Promise<Service[]> {
 		.select('*')
 		.eq('professional_id', professionalId)
 		.eq('is_active', true)
-		.order('name');
+		.eq('is_deleted', false)
+		.order('created_at', { ascending: true });
 	if (error) throw error;
 	return data ?? [];
 }
@@ -125,7 +128,8 @@ export async function getAllServices(professionalId: string): Promise<Service[]>
 		.from('services')
 		.select('*')
 		.eq('professional_id', professionalId)
-		.order('name');
+		.eq('is_deleted', false)
+		.order('created_at', { ascending: true });
 	if (error) throw error;
 	return data ?? [];
 }
@@ -145,7 +149,7 @@ export async function updateService(id: string, changes: Partial<Service>) {
 }
 
 export async function deleteService(id: string) {
-	const { error } = await supabase.from('services').delete().eq('id', id);
+	const { error } = await supabase.from('services').update({ is_deleted: true }).eq('id', id);
 	if (error) throw error;
 }
 
