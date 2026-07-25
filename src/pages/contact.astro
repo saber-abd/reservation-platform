@@ -30,6 +30,7 @@ const siteConfig = await getSiteConfig();
 
 			<form
 				id="contact-form"
+				data-business-email={siteConfig.business.email}
 				class="flex flex-col gap-4 rounded-xl border border-border bg-white p-6 shadow-sm"
 				data-aos="fade-left"
 			>
@@ -85,17 +86,24 @@ const siteConfig = await getSiteConfig();
 		form.addEventListener('submit', async (e) => {
 			e.preventDefault();
 			const formData = new FormData(form);
+			const businessEmail = form.dataset.businessEmail;
 			
 			btn.disabled = true;
 			btn.textContent = 'Envoi en cours...';
 			status.classList.add('hidden');
 			
 			try {
+				const userEmail = formData.get('email') as string;
+				const recipients = [userEmail];
+				if (businessEmail && businessEmail !== userEmail) {
+					recipients.push(businessEmail);
+				}
+
 				const response = await fetch('/api/send-email', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
-						to: formData.get('email'), // This should ideally be the business email, but for demo we send it to the user so they see it (or business, depending on Resend verification)
+						to: recipients,
 						subject: `Nouveau message de ${formData.get('name')}`,
 						html: `<p><strong>Nom:</strong> ${formData.get('name')}</p>
 							   <p><strong>Email:</strong> ${formData.get('email')}</p>
@@ -109,7 +117,7 @@ const siteConfig = await getSiteConfig();
 					status.className = 'text-sm text-green-600';
 					form.reset();
 				} else {
-					throw new Error(result.error?.message || 'Erreur inconnue');
+					throw new Error(result.error?.message || result.error?.name || 'Erreur inconnue');
 				}
 			} catch (err: any) {
 				status.textContent = `Erreur lors de l'envoi : ${err.message}`;

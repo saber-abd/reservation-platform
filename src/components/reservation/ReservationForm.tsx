@@ -113,14 +113,19 @@ export default function ReservationForm() {
 			});
 
 			// Envoi email de confirmation
+			const recipients = [values.clientEmail];
+			if (professional.email && professional.email !== values.clientEmail) {
+				recipients.push(professional.email);
+			}
+
 			fetch('/api/send-email', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					to: values.clientEmail,
+					to: recipients,
 					subject: `Confirmation de votre rendez-vous - ${selectedService.name}`,
 					html: `<p>Bonjour ${values.clientName},</p>
-						   <p>Votre réservation pour <strong>${selectedService.name}</strong> a bien été confirmée.</p>
+						   <p>La réservation pour <strong>${selectedService.name}</strong> a bien été confirmée.</p>
 						   <p><strong>Date :</strong> ${formatSlot(selectedSlot)}</p>
 						   <p>À très bientôt !</p>`
 				})

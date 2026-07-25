@@ -23,7 +23,7 @@ export const POST: APIRoute = async ({ request }) => {
 			},
 			body: JSON.stringify({
 				from: 'Plateforme <onboarding@resend.dev>', // Par défaut sur Resend gratuit
-				to: [to],
+				to: Array.isArray(to) ? to : [to],
 				subject: subject,
 				html: html,
 			}),
