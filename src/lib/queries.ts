@@ -98,6 +98,13 @@ export async function getProfessionalByUserId(userId: string): Promise<Professio
 	return data;
 }
 
+/** Récupère un professionnel par son id de ligne (professionals.id), utile pour les notifications email. */
+export async function getProfessionalById(id: string): Promise<Professional | null> {
+	const { data, error } = await supabase.from('professionals').select('*').eq('id', id).maybeSingle();
+	if (error) throw error;
+	return data;
+}
+
 export async function createProfessional(professional: Pick<Professional, 'user_id' | 'business_name'> & Partial<Professional>) {
 	const { data, error } = await supabase.from('professionals').insert(professional).select().single();
 	if (error) throw error;

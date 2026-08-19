@@ -41,7 +41,7 @@ export default function ClientProfilePanel() {
 		<div>
 			<h1 className="text-2xl font-bold text-stone-900">Mon profil</h1>
 
-			<form onSubmit={handleSubmit} className="mt-6 max-w-md space-y-4 rounded-xl border border-border bg-white p-6 shadow-sm">
+			<form onSubmit={handleSubmit} className="mt-6 mx-auto max-w-md space-y-4 rounded-xl border border-border bg-white p-6 shadow-sm">
 				<div>
 					<label className="block text-sm font-medium text-stone-700">Email</label>
 					<input
@@ -57,7 +57,7 @@ export default function ClientProfilePanel() {
 						type="text"
 						value={fullName}
 						onChange={(e) => setFullName(e.target.value)}
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
+						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
 					/>
 				</div>
 				<div>
@@ -66,7 +66,7 @@ export default function ClientProfilePanel() {
 						type="tel"
 						value={phone}
 						onChange={(e) => setPhone(e.target.value)}
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
+						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
 					/>
 				</div>
 				<div>

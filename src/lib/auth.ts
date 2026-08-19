@@ -24,6 +24,20 @@ export async function signOut() {
 	if (error) throw error;
 }
 
+/** Envoie un email contenant un lien de réinitialisation du mot de passe. */
+export async function resetPasswordForEmail(email: string) {
+	const { error } = await supabase.auth.resetPasswordForEmail(email, {
+		redirectTo: `${window.location.origin}/reinitialiser-mot-de-passe`,
+	});
+	if (error) throw error;
+}
+
+/** Définit un nouveau mot de passe (utilisateur déjà authentifié via le lien reçu par email). */
+export async function updatePassword(password: string) {
+	const { error } = await supabase.auth.updateUser({ password });
+	if (error) throw error;
+}
+
 /** Récupère la session courante (null si non connecté). */
 export async function getSession() {
 	const { data, error } = await supabase.auth.getSession();

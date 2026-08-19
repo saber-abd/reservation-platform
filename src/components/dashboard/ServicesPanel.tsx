@@ -122,7 +122,7 @@ export default function ServicesPanel() {
 					</label>
 					<input
 						id="name"
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('name')}
 					/>
 					{errors.name && <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
@@ -134,7 +134,7 @@ export default function ServicesPanel() {
 					<input
 						id="durationMinutes"
 						type="number"
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('durationMinutes')}
 					/>
 					{errors.durationMinutes && (
@@ -149,7 +149,7 @@ export default function ServicesPanel() {
 						id="price"
 						type="number"
 						step="0.01"
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('price')}
 					/>
 					{errors.price && <p className="mt-1 text-xs text-red-600">{errors.price.message}</p>}
@@ -161,7 +161,7 @@ export default function ServicesPanel() {
 					<textarea
 						id="description"
 						rows={2}
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('description')}
 					/>
 				</div>

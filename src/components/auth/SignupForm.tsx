@@ -15,6 +15,21 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+function sendWelcomeEmail(email: string, name: string) {
+	fetch('/api/send-email', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			to: [email],
+			subject: 'Bienvenue — votre compte a bien été créé',
+			html: `<p>Bonjour ${name},</p>
+				   <p>Votre compte vient d'être créé avec succès.</p>
+				   <p>Vous pouvez dès maintenant vous connecter et profiter de votre espace personnel.</p>
+				   <p>À très bientôt !</p>`,
+		}),
+	}).catch((err) => console.error("Erreur d'envoi d'email de bienvenue:", err));
+}
+
 export default function SignupForm() {
 	const [role, setRole] = useState<'professional' | 'client'>('client');
 	const [error, setError] = useState<string | null>(null);
@@ -51,9 +66,11 @@ export default function SignupForm() {
 					business_name: values.businessName || 'Mon activité',
 					email: values.email,
 				});
+				sendWelcomeEmail(values.email, values.businessName || values.email);
 				window.location.href = '/dashboard';
 			} else {
 				await createClient({ id: user.id, full_name: values.fullName || null });
+				sendWelcomeEmail(values.email, values.fullName || values.email);
 				window.location.href = '/espace-client';
 			}
 		} catch (err) {
@@ -100,7 +117,7 @@ export default function SignupForm() {
 					</label>
 					<input
 						id="businessName"
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('businessName')}
 					/>
 					{errors.businessName && <p className="mt-1 text-xs text-red-600">{errors.businessName.message}</p>}
@@ -112,7 +129,7 @@ export default function SignupForm() {
 					</label>
 					<input
 						id="fullName"
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('fullName')}
 					/>
 					{errors.fullName && <p className="mt-1 text-xs text-red-600">{errors.fullName.message}</p>}
@@ -120,24 +137,24 @@ export default function SignupForm() {
 			)}
 			<div>
 				<label className="text-sm text-stone-700" htmlFor="email">
-					Email
+					Email <span className="text-rose-600">*</span>
 				</label>
 				<input
 					id="email"
 					type="email"
-					className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+					className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 					{...register('email')}
 				/>
 				{errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
 			</div>
 			<div>
 				<label className="text-sm text-stone-700" htmlFor="password">
-					Mot de passe
+					Mot de passe <span className="text-rose-600">*</span>
 				</label>
 				<input
 					id="password"
 					type="password"
-					className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+					className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 					{...register('password')}
 				/>
 				{errors.password && <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>}

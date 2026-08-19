@@ -2,18 +2,17 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { signIn } from '@/lib/auth';
-import { getAccountType } from '@/lib/queries';
+import { resetPasswordForEmail } from '@/lib/auth';
 
 const schema = z.object({
 	email: z.string().email('Email invalide'),
-	password: z.string().min(6, '6 caractères minimum'),
 });
 
 type FormValues = z.infer<typeof schema>;
 
-export default function LoginForm() {
+export default function ForgotPasswordForm() {
 	const [error, setError] = useState<string | null>(null);
+	const [sent, setSent] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
 	const {
 		register,
@@ -25,22 +24,21 @@ export default function LoginForm() {
 		setSubmitting(true);
 		setError(null);
 		try {
-			const { user } = await signIn(values.email, values.password);
-			if (!user) throw new Error('Connexion impossible.');
-
-			const accountType = await getAccountType(user.id);
-			if (accountType === 'professional') {
-				window.location.href = '/dashboard';
-			} else if (accountType === 'client') {
-				window.location.href = '/espace-client';
-			} else {
-				window.location.href = '/inscription';
-			}
+			await resetPasswordForEmail(values.email);
+			setSent(true);
 		} catch (err) {
-			setError(err instanceof Error ? err.message : 'Erreur de connexion.');
+			setError(err instanceof Error ? err.message : "Erreur lors de l'envoi de l'email.");
 		} finally {
 			setSubmitting(false);
 		}
+	}
+
+	if (sent) {
+		return (
+			<p className="text-sm text-stone-600">
+				Si un compte existe avec cette adresse, un email contenant un lien de réinitialisation vient de vous être envoyé.
+			</p>
+		);
 	}
 
 	return (
@@ -57,28 +55,13 @@ export default function LoginForm() {
 				/>
 				{errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
 			</div>
-			<div>
-				<label className="text-sm text-stone-700" htmlFor="password">
-					Mot de passe <span className="text-rose-600">*</span>
-				</label>
-				<input
-					id="password"
-					type="password"
-					className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
-					{...register('password')}
-				/>
-				{errors.password && <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>}
-				<a href="/mot-de-passe-oublie" className="mt-1 inline-block text-xs font-medium text-rose-600 hover:underline">
-					Mot de passe oublié ?
-				</a>
-			</div>
 			{error && <p className="text-sm text-red-600">{error}</p>}
 			<button
 				type="submit"
 				disabled={submitting}
 				className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700 disabled:opacity-50"
 			>
-				{submitting ? 'Connexion...' : 'Se connecter'}
+				{submitting ? 'Envoi...' : 'Envoyer le lien de réinitialisation'}
 			</button>
 		</form>
 	);

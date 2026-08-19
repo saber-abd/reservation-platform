@@ -6,6 +6,7 @@ import {
 	createAppointment,
 	getAppointmentsForDate,
 	getAvailabilityRules,
+	getClientById,
 	getPrimaryProfessional,
 	getServices,
 	type Professional,
@@ -62,6 +63,10 @@ export default function ReservationForm() {
 				if (pro) {
 					const servicesData = await getServices(pro.id);
 					setServices(servicesData);
+					const preselectedId = new URLSearchParams(window.location.search).get('service');
+					if (preselectedId && servicesData.some((s) => s.id === preselectedId)) {
+						setSelectedServiceId(preselectedId);
+					}
 				}
 			} catch (err) {
 				setError(err instanceof Error ? err.message : 'Erreur de chargement.');
@@ -71,6 +76,21 @@ export default function ReservationForm() {
 		}
 		load();
 	}, []);
+
+	// Préremplit les coordonnées si le visiteur est déjà connecté en tant que client.
+	useEffect(() => {
+		async function prefillFromSession() {
+			const session = await getSession();
+			if (!session?.user) return;
+			const client = await getClientById(session.user.id);
+			reset({
+				clientName: client?.full_name ?? '',
+				clientEmail: session.user.email ?? '',
+				clientPhone: client?.phone ?? '',
+			});
+		}
+		prefillFromSession();
+	}, [reset]);
 
 	const selectedService = useMemo(
 		() => services.find((s) => s.id === selectedServiceId) ?? null,
@@ -180,12 +200,12 @@ export default function ReservationForm() {
 							onClick={() => setSelectedServiceId(service.id)}
 							className={`rounded-xl border p-4 text-left transition-colors ${
 								selectedServiceId === service.id
-									? 'border-rose-600 bg-rose-50'
+									? 'border-rose-600 bg-rose-600 text-white shadow-md'
 									: 'border-border bg-white hover:border-rose-300'
 							}`}
 						>
-							<p className="font-medium text-stone-900">{service.name}</p>
-							<p className="mt-1 text-xs text-stone-500">
+							<p className={`font-medium ${selectedServiceId === service.id ? 'text-white' : 'text-stone-900'}`}>{service.name}</p>
+							<p className={`mt-1 text-xs ${selectedServiceId === service.id ? 'text-rose-50' : 'text-stone-500'}`}>
 								{service.duration_minutes} min — {service.price} €
 							</p>
 						</button>
@@ -202,7 +222,7 @@ export default function ReservationForm() {
 				<div className="mt-3 flex flex-wrap items-end gap-3">
 					<div>
 						<label className="text-sm text-stone-700" htmlFor="date">
-							Date
+							Date <span className="text-rose-600">*</span>
 						</label>
 						<input
 							id="date"
@@ -214,7 +234,7 @@ export default function ReservationForm() {
 								setSlots(null);
 								setSelectedSlot(null);
 							}}
-							className="mt-1 rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+							className="mt-1 rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						/>
 					</div>
 					<button
@@ -239,7 +259,7 @@ export default function ReservationForm() {
 									slot.isBooked
 										? 'cursor-not-allowed border-border bg-stone-100 text-stone-400 line-through'
 										: selectedSlot?.start.getTime() === slot.start.getTime()
-											? 'border-rose-600 bg-rose-50'
+											? 'border-rose-600 bg-rose-600 text-white shadow-md'
 											: 'border-border bg-white hover:border-rose-300'
 								}`}
 							>
@@ -261,23 +281,23 @@ export default function ReservationForm() {
 				<div className="mt-3 flex flex-col gap-4">
 					<div>
 						<label className="text-sm text-stone-700" htmlFor="clientName">
-							Nom complet
+							Nom complet <span className="text-rose-600">*</span>
 						</label>
 						<input
 							id="clientName"
-							className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+							className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 							{...register('clientName')}
 						/>
 						{errors.clientName && <p className="mt-1 text-xs text-red-600">{errors.clientName.message}</p>}
 					</div>
 					<div>
 						<label className="text-sm text-stone-700" htmlFor="clientEmail">
-							Email
+							Email <span className="text-rose-600">*</span>
 						</label>
 						<input
 							id="clientEmail"
 							type="email"
-							className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+							className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 							{...register('clientEmail')}
 						/>
 						{errors.clientEmail && <p className="mt-1 text-xs text-red-600">{errors.clientEmail.message}</p>}
@@ -288,7 +308,7 @@ export default function ReservationForm() {
 						</label>
 						<input
 							id="clientPhone"
-							className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+							className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 							{...register('clientPhone')}
 						/>
 					</div>

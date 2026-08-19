@@ -41,7 +41,7 @@ export default function ServicesList({ limit, showCta = true }: Props) {
 						<span className="font-semibold text-stone-900">{service.price} €</span>
 					</div>
 					<a
-						href="/reservation"
+						href={`/reservation?service=${service.id}`}
 						hidden={!showCta}
 						className="mt-4 rounded-xl bg-rose-600 px-4 py-2 text-center text-sm font-semibold text-white transition-colors hover:bg-rose-700"
 					>

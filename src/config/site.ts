@@ -18,6 +18,12 @@ export interface Testimonial {
 	comment: string;
 }
 
+export interface Diploma {
+	title: string;
+	institution: string;
+	year: string;
+}
+
 export const siteConfig = {
 	url: 'https://reservation-platform.demonstration-pro.workers.dev',
 	business: {
@@ -36,6 +42,31 @@ export const siteConfig = {
 			{ day: 'Samedi', hours: '9h00 - 18h00' },
 			{ day: 'Dimanche - Lundi', hours: 'Fermé' },
 		],
+	},
+
+	about: {
+		story:
+			"Tout a commencé en 2014, quand notre fondatrice a ouvert un premier petit salon de deux fauteuils avec l'envie de proposer une coiffure sur-mesure, loin des enseignes standardisées. Au fil des années et grâce au bouche-à-oreille, l'équipe s'est agrandie et le salon a déménagé dans son écrin actuel au cœur de la ville. Aujourd'hui, ce sont plusieurs coiffeurs passionnés qui partagent le même goût du détail et la même envie de faire de chaque rendez-vous un moment de bien-être.",
+		objectives: [
+			{
+				title: 'Un service sur-mesure',
+				description: "Chaque prestation est adaptée à la nature de vos cheveux, votre morphologie et vos envies du moment.",
+			},
+			{
+				title: 'Une formation continue',
+				description: 'Notre équipe se forme chaque année aux dernières techniques de coupe et de coloration pour rester à la pointe.',
+			},
+			{
+				title: 'Des produits responsables',
+				description: 'Nous privilégions des marques engagées, respectueuses du cheveu et de l\'environnement.',
+			},
+		],
+		diplomas: [
+			{ title: 'CAP Coiffure', institution: 'CFA Coiffure Paris', year: '2011' },
+			{ title: 'Brevet Professionnel (BP) Coiffure', institution: 'Académie de Coiffure', year: '2013' },
+			{ title: 'Brevet de Maîtrise Coiffure', institution: 'Chambre des Métiers et de l\'Artisanat', year: '2017' },
+			{ title: 'Certification Coloriste Expert', institution: "L'Oréal Professionnel", year: '2020' },
+		] satisfies Diploma[],
 	},
 
 	services: [
@@ -93,6 +124,16 @@ export const siteConfig = {
 			name: 'Elodie M.',
 			rating: 4,
 			comment: "Très bonne expérience, coloration parfaite. J'ai adoré le moment de détente pendant le soin.",
+		},
+		{
+			name: 'Julien P.',
+			rating: 5,
+			comment: 'Réservation en ligne super simple et rappel par email très pratique. Résultat impeccable !',
+		},
+		{
+			name: 'Nadia R.',
+			rating: 5,
+			comment: "Le balayage est magnifique, exactement ce que je voulais. Un vrai coup de cœur pour ce salon.",
 		},
 	] satisfies Testimonial[],
 

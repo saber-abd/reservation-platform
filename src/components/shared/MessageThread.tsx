@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { getMessages, sendMessage, type Message } from '@/lib/queries';
+import { getAppointmentsForClient, getMessages, getProfessionalById, sendMessage, type Message } from '@/lib/queries';
 
 interface Props {
 	professionalId: string;
@@ -25,6 +25,16 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 		bottomRef.current?.scrollIntoView({ block: 'nearest' });
 	}, [messages]);
 
+	/** Retrouve l'email réel du destinataire (le client n'a pas d'email en base, on le déduit de ses réservations). */
+	async function resolveRecipientEmail(): Promise<string | null> {
+		if (role === 'client') {
+			const professional = await getProfessionalById(professionalId);
+			return professional?.email ?? null;
+		}
+		const appointments = await getAppointmentsForClient(clientId);
+		return appointments.find((a) => a.professional_id === professionalId)?.client_email ?? null;
+	}
+
 	async function handleSend(e: React.FormEvent) {
 		e.preventDefault();
 		if (!body.trim()) return;
@@ -35,15 +45,20 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 			setBody('');
 
 			// Notification Email (en asynchrone)
-			fetch('/api/send-email', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					to: role === 'client' ? 'pro-test@example.com' : 'client.test1@example.com', // En mode démo, on utilise des emails de test. En prod, il faudrait faire une requête pour récupérer l'email du destinataire (client.email ou professional.email).
-					subject: `Nouveau message reçu`,
-					html: `<p>Vous avez reçu un nouveau message :</p><p><em>"${body}"</em></p><p>Connectez-vous pour répondre.</p>`
+			resolveRecipientEmail()
+				.then((recipient) => {
+					if (!recipient) return;
+					return fetch('/api/send-email', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							to: recipient,
+							subject: `Nouveau message reçu`,
+							html: `<p>Vous avez reçu un nouveau message :</p><p><em>"${body}"</em></p><p>Connectez-vous pour répondre.</p>`,
+						}),
+					});
 				})
-			}).catch(console.error);
+				.catch(console.error);
 
 		} finally {
 			setSending(false);
@@ -84,7 +99,7 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 					value={body}
 					onChange={(e) => setBody(e.target.value)}
 					placeholder="Écrire un message..."
-					className="flex-1 rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+					className="flex-1 rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 				/>
 				<button
 					type="submit"

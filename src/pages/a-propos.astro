@@ -26,4 +26,55 @@ const siteConfig = await getSiteConfig();
 			</div>
 		</div>
 	</section>
+
+	<!-- Notre histoire -->
+	<section class="bg-stone-50 py-20">
+		<div class="mx-auto max-w-3xl px-6" data-aos="fade-up">
+			<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">Notre histoire</h2>
+			<p class="mt-4 text-stone-500">{siteConfig.about.story}</p>
+		</div>
+	</section>
+
+	<!-- Nos objectifs et motivations -->
+	<section class="mx-auto max-w-6xl px-6 py-20">
+		<h2 class="text-2xl font-bold text-stone-900 md:text-3xl" data-aos="fade-up">Nos objectifs et motivations</h2>
+		<div class="mt-10 grid gap-6 md:grid-cols-3">
+			{
+				siteConfig.about.objectives.map((objective, index) => (
+					<div
+						class="rounded-xl border border-border bg-white p-6 shadow-sm"
+						data-aos="fade-up"
+						data-aos-delay={index * 75}
+					>
+						<p class="font-semibold text-stone-900">{objective.title}</p>
+						<p class="mt-2 text-sm text-stone-500">{objective.description}</p>
+					</div>
+				))
+			}
+		</div>
+	</section>
+
+	<!-- Diplômes et certifications -->
+	<section class="bg-stone-50 py-20">
+		<div class="mx-auto max-w-3xl px-6">
+			<h2 class="text-2xl font-bold text-stone-900 md:text-3xl" data-aos="fade-up">Diplômes et certifications</h2>
+			<ul class="mt-8 space-y-4">
+				{
+					siteConfig.about.diplomas.map((diploma, index) => (
+						<li
+							class="flex items-center justify-between rounded-xl border border-border bg-white p-4 shadow-sm"
+							data-aos="fade-up"
+							data-aos-delay={index * 75}
+						>
+							<div>
+								<p class="font-medium text-stone-900">{diploma.title}</p>
+								<p class="text-sm text-stone-500">{diploma.institution}</p>
+							</div>
+							<span class="text-sm font-semibold text-rose-600">{diploma.year}</span>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+	</section>
 </Layout>

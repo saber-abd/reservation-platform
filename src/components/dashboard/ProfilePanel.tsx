@@ -70,14 +70,14 @@ export default function ProfilePanel() {
 		<div>
 			<h1 className="text-2xl font-bold text-stone-900">Mon profil</h1>
 
-			<form onSubmit={handleSubmit(onSubmit)} className="mt-6 max-w-md space-y-4 rounded-xl border border-border bg-white p-6 shadow-sm">
+			<form onSubmit={handleSubmit(onSubmit)} className="mt-6 mx-auto max-w-md space-y-4 rounded-xl border border-border bg-white p-6 shadow-sm">
 				<div>
 					<label className="block text-sm font-medium text-stone-700" htmlFor="businessName">
 						Nom de l'activité
 					</label>
 					<input
 						id="businessName"
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
+						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
 						{...register('businessName')}
 					/>
 					{errors.businessName && <p className="mt-1 text-xs text-red-600">{errors.businessName.message}</p>}
@@ -89,7 +89,7 @@ export default function ProfilePanel() {
 					<input
 						id="activity"
 						placeholder="Coiffeur, fleuriste, coach..."
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
+						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
 						{...register('activity')}
 					/>
 				</div>
@@ -100,7 +100,7 @@ export default function ProfilePanel() {
 					<textarea
 						id="description"
 						rows={4}
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
+						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
 						{...register('description')}
 					/>
 				</div>
@@ -110,7 +110,7 @@ export default function ProfilePanel() {
 					</label>
 					<input
 						id="phone"
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
+						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
 						{...register('phone')}
 					/>
 				</div>
@@ -121,7 +121,7 @@ export default function ProfilePanel() {
 					<input
 						id="email"
 						type="email"
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
+						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
 						{...register('email')}
 					/>
 					{errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
@@ -132,7 +132,7 @@ export default function ProfilePanel() {
 					</label>
 					<input
 						id="address"
-						className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
+						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
 						{...register('address')}
 					/>
 				</div>

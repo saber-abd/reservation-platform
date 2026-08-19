@@ -243,3 +243,25 @@ Changements :
 ### Prochaines étapes
 - Exécuter la requête `0005_soft_delete_services.sql`.
 - Préparer le déploiement.
+
+## Lot 3 — session du 2026-08-20 (liste de petites tâches UX/fonctionnelles)
+
+Traitées une par une, voir `/memories/session/todo.md` pour le suivi détaillé.
+
+- **Email de bienvenue à l'inscription** : `SignupForm.tsx` envoie désormais un email (via `/api/send-email`, Resend) au client/pro juste après la création réussie du compte (fonction `sendWelcomeEmail`, fire-and-forget, cohérent avec le pattern déjà utilisé pour contact/réservation/messagerie).
+- **Présélection de la prestation lors de la réservation** : le lien "Réserver" sur la page `/services` pointe vers `/reservation?service={id}` ; `ReservationForm.tsx` lit ce paramètre d'URL au chargement et présélectionne automatiquement la prestation correspondante.
+- **Champs obligatoires marqués d'un astérisque** : dans `ReservationForm.tsx` (Nom complet, Email, Date), `LoginForm.tsx` et `SignupForm.tsx` (Email, Mot de passe).
+- **Contraste de la sélection dans "reserver"** : la prestation et le créneau sélectionnés utilisent maintenant un fond rose plein (`bg-rose-600 text-white`) au lieu du rose pâle (`bg-rose-50`) peu visible.
+- **Carousel d'avis clients sur l'accueil** : nouveau composant `TestimonialsCarousel.tsx` (React) avec flèches précédent/suivant et points de pagination, remplace la grille statique des 3 avis. 2 avis de démo supplémentaires ajoutés dans `site.ts` (5 au total).
+- **Carousel de prestations sur l'accueil** : nouveau composant `ServicesCarousel.tsx` (scroll horizontal avec `scroll-snap` + flèches précédent/suivant), remplace `ServicesList` sur `index.astro` (celui-ci reste inchangé et utilisé sur `/services`).
+- **Finalisation du mailing (messagerie pro↔client)** : `MessageThread.tsx` envoyait ses notifications à des adresses de test codées en dur (laissé en TODO par l'autre IA). Corrigé : nouvelle fonction `getProfessionalById` dans `queries.ts` (email du pro), email du client déduit de ses réservations passées avec ce pro via `appointments.client_email` (la table `clients` n'a pas de colonne email). `RESEND_API_KEY` ajouté à `.env.example`.
+- **"Mot de passe oublié ?"** : lien ajouté dans `LoginForm.tsx` → nouvelle page `/mot-de-passe-oublie` (`ForgotPasswordForm.tsx`) → email Supabase avec lien vers `/reinitialiser-mot-de-passe` (`ResetPasswordForm.tsx`). Nouvelles fonctions `resetPasswordForEmail`/`updatePassword` dans `auth.ts`. ⚠️ Vérifier dans Supabase Auth (Site URL/Redirect URLs) que `/reinitialiser-mot-de-passe` est bien autorisé en redirection.
+- **Fenêtre profil centrée** : `mx-auto` ajouté au formulaire (max-w-md) dans `ClientProfilePanel.tsx` et `ProfilePanel.tsx`, qui étaient collés à gauche.
+- **Préremplissage du formulaire de réservation** : si le visiteur est connecté (client), `ReservationForm.tsx` récupère sa session + son profil (`getClientById`) et préremplit nom/email/téléphone automatiquement.
+- **Contenu enrichi de la page "À propos"** : nouvelle section `about` dans `site.ts` (histoire, objectifs/motivations, diplômes — contenu inventé pour la démo), 3 nouvelles sections dans `a-propos.astro`.
+- **Bandeau de navigation** : `Header.astro` passe d'un fond crème translucide + bordure nette à un fond blanc plein (`bg-white`) avec une ombre douce dégradée à la place de la bordure simple.
+- **Fond blanc sur tous les champs de formulaire** : `bg-white` ajouté systématiquement à tous les `<input>`/`<textarea>` du site (connexion, inscription, mot de passe oublié, profils client/pro, services, disponibilités, réservation, messagerie, contact) pour contraster avec les fonds de page (souvent crème/stone-50).
+
+### Prochaines étapes (Lot 3)
+- Toutes les tâches demandées (1 à 13, voir `/memories/session/todo.md`) sont faites et vérifiées par un build réussi à chaque étape.
+- À faire manuellement : vérifier que l'URL de redirection Supabase Auth autorise `/reinitialiser-mot-de-passe` (point 8), configurer `RESEND_API_KEY` en prod si pas déjà fait.
