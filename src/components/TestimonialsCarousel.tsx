@@ -30,7 +30,7 @@ export default function TestimonialsCarousel({ testimonials }: Props) {
 						type="button"
 						aria-label="Avis précédent"
 						onClick={() => goTo(index - 1)}
-						className="absolute top-1/2 left-0 -translate-x-4 -translate-y-1/2 rounded-full border border-border bg-white p-2 text-stone-600 shadow-sm transition-colors hover:border-rose-300 hover:text-rose-600"
+						className="absolute top-1/2 left-2 -translate-y-1/2 rounded-full border border-border bg-white p-2 text-stone-600 shadow-sm transition-colors hover:border-rose-300 hover:text-rose-600"
 					>
 						‹
 					</button>
@@ -38,7 +38,7 @@ export default function TestimonialsCarousel({ testimonials }: Props) {
 						type="button"
 						aria-label="Avis suivant"
 						onClick={() => goTo(index + 1)}
-						className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-4 rounded-full border border-border bg-white p-2 text-stone-600 shadow-sm transition-colors hover:border-rose-300 hover:text-rose-600"
+						className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full border border-border bg-white p-2 text-stone-600 shadow-sm transition-colors hover:border-rose-300 hover:text-rose-600"
 					>
 						›
 					</button>

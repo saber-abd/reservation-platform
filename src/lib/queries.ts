@@ -23,6 +23,7 @@ export interface Service {
 	price: number;
 	is_active: boolean;
 	is_deleted: boolean;
+	image_url: string | null;
 	created_at: string;
 }
 
@@ -77,7 +78,7 @@ export interface Appointment {
 	client_phone: string | null;
 	start_time: string;
 	end_time: string;
-	status: 'confirmed' | 'cancelled' | 'completed';
+	status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
 	created_at: string;
 }
 
@@ -142,11 +143,22 @@ export async function getAllServices(professionalId: string): Promise<Service[]>
 }
 
 export async function createService(
-	service: Pick<Service, 'professional_id' | 'name' | 'description' | 'duration_minutes' | 'price'>,
+	service: Pick<Service, 'professional_id' | 'name' | 'description' | 'duration_minutes' | 'price'> &
+		Partial<Pick<Service, 'image_url'>>,
 ) {
 	const { data, error } = await supabase.from('services').insert(service).select().single();
 	if (error) throw error;
 	return data as Service;
+}
+
+/** Téléverse une photo illustrant une prestation dans le bucket public `service-images` et retourne son URL publique. */
+export async function uploadServiceImage(professionalId: string, file: File): Promise<string> {
+	const extension = file.name.split('.').pop() || 'jpg';
+	const path = `${professionalId}/${crypto.randomUUID()}.${extension}`;
+	const { error } = await supabase.storage.from('service-images').upload(path, file, { upsert: true });
+	if (error) throw error;
+	const { data } = supabase.storage.from('service-images').getPublicUrl(path);
+	return data.publicUrl;
 }
 
 export async function updateService(id: string, changes: Partial<Service>) {
@@ -204,19 +216,26 @@ export async function createAppointment(appointment: {
 	start_time: string;
 	end_time: string;
 }) {
+	if (new Date(appointment.start_time) <= new Date()) {
+		throw new Error("Impossible de réserver un créneau déjà passé.");
+	}
 	const { data, error } = await supabase.from('appointments').insert(appointment).select().single();
 	if (error) throw error;
 	return data as Appointment;
 }
 
-export async function getAppointmentsForProfessional(professionalId: string): Promise<Appointment[]> {
+export async function getAppointmentsForProfessional(
+	professionalId: string,
+): Promise<(Appointment & { services: { name: string; duration_minutes: number; price: number } | null })[]> {
 	const { data, error } = await supabase
 		.from('appointments')
-		.select('*')
+		.select('*, services(name, duration_minutes, price)')
 		.eq('professional_id', professionalId)
 		.order('start_time', { ascending: false });
 	if (error) throw error;
-	return data ?? [];
+	return (data ?? []) as unknown as (Appointment & {
+		services: { name: string; duration_minutes: number; price: number } | null;
+	})[];
 }
 
 /** Rendez-vous non annulés d'un professionnel pour une date précise (YYYY-MM-DD), pour calculer les créneaux libres. */
@@ -272,6 +291,40 @@ export async function getRegisteredClients(professionalId: string): Promise<Clie
 	return Array.from(byId.values());
 }
 
+export interface ClientNote {
+	id: string;
+	professional_id: string;
+	client_id: string;
+	note: string;
+	updated_at: string;
+}
+
+/** Note privée du professionnel sur un client précis (fiche client), null si jamais renseignée. */
+export async function getClientNote(professionalId: string, clientId: string): Promise<ClientNote | null> {
+	const { data, error } = await supabase
+		.from('client_notes')
+		.select('*')
+		.eq('professional_id', professionalId)
+		.eq('client_id', clientId)
+		.maybeSingle();
+	if (error) throw error;
+	return data;
+}
+
+/** Crée ou met à jour la note privée du professionnel sur un client. */
+export async function upsertClientNote(professionalId: string, clientId: string, note: string): Promise<ClientNote> {
+	const { data, error } = await supabase
+		.from('client_notes')
+		.upsert(
+			{ professional_id: professionalId, client_id: clientId, note, updated_at: new Date().toISOString() },
+			{ onConflict: 'professional_id,client_id' },
+		)
+		.select()
+		.single();
+	if (error) throw error;
+	return data as ClientNote;
+}
+
 /** Messages échangés entre un professionnel et un client précis, dans l'ordre chronologique. */
 export async function getMessages(professionalId: string, clientId: string): Promise<Message[]> {
 	const { data, error } = await supabase
@@ -297,6 +350,21 @@ export async function sendMessage(message: {
 
 export async function updateAppointmentStatus(id: string, status: Appointment['status']) {
 	const { data, error } = await supabase.from('appointments').update({ status }).eq('id', id).select().single();
+	if (error) throw error;
+	return data as Appointment;
+}
+
+/** Déplace un rendez-vous existant vers un nouveau créneau (le client ne peut pas modifier au dernier moment, cf. UI). */
+export async function rescheduleAppointment(id: string, startTime: string, endTime: string) {
+	if (new Date(startTime) <= new Date()) {
+		throw new Error('Impossible de choisir un créneau déjà passé.');
+	}
+	const { data, error } = await supabase
+		.from('appointments')
+		.update({ start_time: startTime, end_time: endTime })
+		.eq('id', id)
+		.select()
+		.single();
 	if (error) throw error;
 	return data as Appointment;
 }

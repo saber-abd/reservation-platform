@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getSession } from '@/lib/auth';
-import { getProfessionalByUserId, type Professional } from '@/lib/queries';
+import { getClientById, getProfessionalByUserId, type Professional } from '@/lib/queries';
 
 interface AuthedProfessionalState {
 	loading: boolean;
@@ -31,7 +31,9 @@ export function useAuthedProfessional(): AuthedProfessionalState {
 				}
 				const professional = await getProfessionalByUserId(session.user.id);
 				if (!professional) {
-					window.location.href = '/inscription';
+					// Compte client connecté sur l'espace pro : renvoyer vers son propre espace, pas vers l'inscription.
+					const client = await getClientById(session.user.id);
+					window.location.href = client ? '/espace-client' : '/inscription';
 					return;
 				}
 				if (!cancelled) setState({ loading: false, professional, error: null });

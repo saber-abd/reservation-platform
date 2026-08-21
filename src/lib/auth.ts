@@ -32,6 +32,12 @@ export async function resetPasswordForEmail(email: string) {
 	if (error) throw error;
 }
 
+/** Renvoie l'email de confirmation d'inscription (si le compte n'est pas encore confirmé). */
+export async function resendConfirmationEmail(email: string) {
+	const { error } = await supabase.auth.resend({ type: 'signup', email });
+	if (error) throw error;
+}
+
 /** Définit un nouveau mot de passe (utilisateur déjà authentifié via le lien reçu par email). */
 export async function updatePassword(password: string) {
 	const { error } = await supabase.auth.updateUser({ password });

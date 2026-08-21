@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
-import { createService, deleteService, getAllServices, updateService, type Service } from '@/lib/queries';
+import { createService, deleteService, getAllServices, updateService, uploadServiceImage, type Service } from '@/lib/queries';
 
 const schema = z.object({
 	name: z.string().min(2, 'Nom trop court'),
@@ -18,6 +18,9 @@ export default function ServicesPanel() {
 	const { loading, professional, error } = useAuthedProfessional();
 	const [services, setServices] = useState<Service[]>([]);
 	const [formError, setFormError] = useState<string | null>(null);
+	const [imageFile, setImageFile] = useState<File | null>(null);
+	const [uploading, setUploading] = useState(false);
+	const [editingId, setEditingId] = useState<string | null>(null);
 
 	const {
 		register,
@@ -31,21 +34,62 @@ export default function ServicesPanel() {
 		getAllServices(professional.id).then(setServices);
 	}, [professional]);
 
+	function handleEdit(service: Service) {
+		setEditingId(service.id);
+		setImageFile(null);
+		setFormError(null);
+		reset({
+			name: service.name,
+			description: service.description ?? '',
+			durationMinutes: service.duration_minutes,
+			price: service.price,
+		});
+		window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+	}
+
+	function handleCancelEdit() {
+		setEditingId(null);
+		setImageFile(null);
+		reset({ name: '', description: '', durationMinutes: undefined, price: undefined });
+	}
+
 	async function onSubmit(values: FormValues) {
 		if (!professional) return;
 		setFormError(null);
 		try {
-			const created = await createService({
-				professional_id: professional.id,
-				name: values.name,
-				description: values.description ?? null,
-				duration_minutes: values.durationMinutes,
-				price: values.price,
-			});
-			setServices((prev) => [...prev, created]);
+			let imageUrl: string | null | undefined = undefined;
+			if (imageFile) {
+				setUploading(true);
+				imageUrl = await uploadServiceImage(professional.id, imageFile);
+			}
+
+			if (editingId) {
+				const updated = await updateService(editingId, {
+					name: values.name,
+					description: values.description ?? null,
+					duration_minutes: values.durationMinutes,
+					price: values.price,
+					...(imageUrl !== undefined ? { image_url: imageUrl } : {}),
+				});
+				setServices((prev) => prev.map((s) => (s.id === editingId ? updated : s)));
+				setEditingId(null);
+			} else {
+				const created = await createService({
+					professional_id: professional.id,
+					name: values.name,
+					description: values.description ?? null,
+					duration_minutes: values.durationMinutes,
+					price: values.price,
+					image_url: imageUrl ?? null,
+				});
+				setServices((prev) => [...prev, created]);
+			}
 			reset();
+			setImageFile(null);
 		} catch (err) {
-			setFormError(err instanceof Error ? err.message : 'Erreur lors de la création.');
+			setFormError(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+		} finally {
+			setUploading(false);
 		}
 	}
 
@@ -70,6 +114,7 @@ export default function ServicesPanel() {
 				<table className="w-full text-left text-sm">
 					<thead className="bg-stone-50 text-xs uppercase text-stone-500">
 						<tr>
+							<th className="px-4 py-3" />
 							<th className="px-4 py-3">Nom</th>
 							<th className="px-4 py-3">Durée</th>
 							<th className="px-4 py-3">Prix</th>
@@ -80,13 +125,20 @@ export default function ServicesPanel() {
 					<tbody>
 						{services.length === 0 && (
 							<tr>
-								<td className="px-4 py-4 text-stone-500" colSpan={5}>
+								<td className="px-4 py-4 text-stone-500" colSpan={6}>
 									Aucune prestation pour le moment.
 								</td>
 							</tr>
 						)}
 						{services.map((service) => (
 							<tr key={service.id} className="border-t border-border">
+								<td className="px-4 py-3">
+									{service.image_url ? (
+										<img src={service.image_url} alt={service.name} className="h-10 w-10 rounded-lg object-cover" />
+									) : (
+										<div className="h-10 w-10 rounded-lg bg-stone-100" />
+									)}
+								</td>
 								<td className="px-4 py-3 font-medium text-stone-900">{service.name}</td>
 								<td className="px-4 py-3 text-stone-600">{service.duration_minutes} min</td>
 								<td className="px-4 py-3 text-stone-600">{service.price} €</td>
@@ -102,6 +154,12 @@ export default function ServicesPanel() {
 								</td>
 								<td className="px-4 py-3 text-right">
 									<button
+										onClick={() => handleEdit(service)}
+										className="mr-3 text-xs font-medium text-rose-600 hover:underline"
+									>
+										Modifier
+									</button>
+									<button
 										onClick={() => handleDelete(service.id)}
 										className="text-xs font-medium text-red-600 hover:underline"
 									>
@@ -115,7 +173,9 @@ export default function ServicesPanel() {
 			</div>
 
 			<form onSubmit={handleSubmit(onSubmit)} className="mt-8 grid gap-4 rounded-xl border border-border p-6 sm:grid-cols-2">
-				<p className="col-span-full text-sm font-semibold text-stone-900">Ajouter une prestation</p>
+				<p className="col-span-full text-sm font-semibold text-stone-900">
+					{editingId ? 'Modifier la prestation' : 'Ajouter une prestation'}
+				</p>
 				<div>
 					<label className="text-sm text-stone-700" htmlFor="name">
 						Nom
@@ -165,13 +225,33 @@ export default function ServicesPanel() {
 						{...register('description')}
 					/>
 				</div>
+				<div className="sm:col-span-2">
+					<label className="text-sm text-stone-700" htmlFor="image">
+						Photo (optionnelle)
+					</label>
+					<input
+						id="image"
+						type="file"
+						accept="image/*"
+						onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+					/>
+				</div>
 				{formError && <p className="col-span-full text-sm text-red-600">{formError}</p>}
-				<button
-					type="submit"
-					className="col-span-full rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700"
-				>
-					Ajouter
-				</button>
+				<div className="col-span-full flex items-center gap-4">
+					<button
+						type="submit"
+						disabled={uploading}
+						className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700 disabled:opacity-50"
+					>
+						{uploading ? 'Envoi de la photo...' : editingId ? 'Enregistrer les modifications' : 'Ajouter'}
+					</button>
+					{editingId && (
+						<button type="button" onClick={handleCancelEdit} className="text-sm font-medium text-stone-500 hover:text-stone-700">
+							Annuler la modification
+						</button>
+					)}
+				</div>
 			</form>
 		</div>
 	);

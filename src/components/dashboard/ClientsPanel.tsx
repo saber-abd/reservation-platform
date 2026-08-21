@@ -1,7 +1,61 @@
 import { useEffect, useState } from 'react';
 import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
-import { getRegisteredClients, type Client } from '@/lib/queries';
+import { getClientNote, getRegisteredClients, upsertClientNote, type Client } from '@/lib/queries';
 import MessageThread from '@/components/shared/MessageThread';
+
+function ClientNoteCard({ professionalId, client }: { professionalId: string; client: Client }) {
+	const [note, setNote] = useState('');
+	const [loading, setLoading] = useState(true);
+	const [saving, setSaving] = useState(false);
+	const [status, setStatus] = useState<string | null>(null);
+
+	useEffect(() => {
+		setLoading(true);
+		setStatus(null);
+		getClientNote(professionalId, client.id)
+			.then((existing) => setNote(existing?.note ?? ''))
+			.finally(() => setLoading(false));
+	}, [professionalId, client.id]);
+
+	async function handleSave() {
+		setSaving(true);
+		setStatus(null);
+		try {
+			await upsertClientNote(professionalId, client.id, note);
+			setStatus('Note enregistrée.');
+		} catch (err) {
+			setStatus(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+		} finally {
+			setSaving(false);
+		}
+	}
+
+	return (
+		<div className="rounded-xl border border-border bg-white p-4">
+			<p className="text-sm font-semibold text-stone-900">Fiche client (note privée)</p>
+			<p className="mt-1 text-xs text-stone-500">Visible uniquement par vous — préférences, allergies, historique...</p>
+			<textarea
+				rows={3}
+				value={note}
+				disabled={loading}
+				onChange={(e) => setNote(e.target.value)}
+				placeholder="Ex : préfère les colorations sans ammoniaque, allergie au latex..."
+				className="mt-2 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+			/>
+			<div className="mt-2 flex items-center gap-3">
+				<button
+					type="button"
+					onClick={handleSave}
+					disabled={saving || loading}
+					className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-rose-700 disabled:opacity-50"
+				>
+					{saving ? 'Enregistrement...' : 'Enregistrer'}
+				</button>
+				{status && <p className="text-xs text-stone-500">{status}</p>}
+			</div>
+		</div>
+	);
+}
 
 export default function ClientsPanel() {
 	const { loading, professional, error } = useAuthedProfessional();
@@ -23,7 +77,7 @@ export default function ClientsPanel() {
 				Les clients inscrits ayant déjà réservé chez vous. Sélectionnez-en un pour lui écrire.
 			</p>
 
-			<div className="mt-6 grid gap-6 md:grid-cols-3">
+			<div className="mt-6 grid items-start gap-6 md:grid-cols-3">
 				<div className="grid gap-2 md:col-span-1">
 					{clients.length === 0 && <p className="text-sm text-stone-500">Aucun client inscrit pour le moment.</p>}
 					{clients.map((client) => (
@@ -42,9 +96,12 @@ export default function ClientsPanel() {
 					))}
 				</div>
 
-				<div className="md:col-span-2">
+				<div className="md:col-span-2 flex flex-col gap-4">
 					{selectedClient && professional ? (
-						<MessageThread professionalId={professional.id} clientId={selectedClient.id} role="professional" />
+						<>
+							<ClientNoteCard professionalId={professional.id} client={selectedClient} />
+							<MessageThread professionalId={professional.id} clientId={selectedClient.id} role="professional" />
+						</>
 					) : (
 						<p className="text-sm text-stone-500">Sélectionnez un client dans la liste pour ouvrir la conversation.</p>
 					)}

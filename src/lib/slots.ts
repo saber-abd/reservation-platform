@@ -52,7 +52,9 @@ export function generateSlotsForDate(
 		}
 	}
 
-	return slots.sort((a, b) => a.start.getTime() - b.start.getTime());
+	return slots
+		.filter((slot) => slot.start > new Date())
+		.sort((a, b) => a.start.getTime() - b.start.getTime());
 }
 
 export const weekdayLabels = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];

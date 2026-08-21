@@ -13,7 +13,7 @@ const currentPath = Astro.url.pathname;
 			<span class="flex h-9 w-9 items-center justify-center rounded-full bg-rose-600 text-white shadow-sm">
 				<Scissors size={18} />
 			</span>
-			<span class="sr-only">{siteConfig.business.name}</span>
+			<span class="text-base font-semibold text-stone-900">{siteConfig.business.name}</span>
 		</a>
 
 		<!-- Desktop Nav -->
@@ -41,8 +41,8 @@ const currentPath = Astro.url.pathname;
 
 			<!-- Mobile Menu Toggle -->
 			<button id="mobile-menu-btn" class="md:hidden text-stone-600 hover:text-rose-600 focus:outline-none">
-				<Menu size={24} id="icon-menu" />
-				<X size={24} id="icon-close" class="hidden" />
+				<span id="icon-menu"><Menu size={24} /></span>
+				<span id="icon-close" class="hidden"><X size={24} /></span>
 			</button>
 		</div>
 	</div>

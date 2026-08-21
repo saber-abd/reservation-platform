@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { signIn } from '@/lib/auth';
+import { resendConfirmationEmail, signIn } from '@/lib/auth';
 import { getAccountType } from '@/lib/queries';
 
 const schema = z.object({
@@ -14,6 +14,8 @@ type FormValues = z.infer<typeof schema>;
 
 export default function LoginForm() {
 	const [error, setError] = useState<string | null>(null);
+	const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
+	const [resendStatus, setResendStatus] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
 	const {
 		register,
@@ -24,6 +26,7 @@ export default function LoginForm() {
 	async function onSubmit(values: FormValues) {
 		setSubmitting(true);
 		setError(null);
+		setUnconfirmedEmail(null);
 		try {
 			const { user } = await signIn(values.email, values.password);
 			if (!user) throw new Error('Connexion impossible.');
@@ -37,9 +40,26 @@ export default function LoginForm() {
 				window.location.href = '/inscription';
 			}
 		} catch (err) {
-			setError(err instanceof Error ? err.message : 'Erreur de connexion.');
+			const message = err instanceof Error ? err.message : 'Erreur de connexion.';
+			if (message.toLowerCase().includes('confirm')) {
+				setError("Votre adresse email n'a pas encore été confirmée. Vérifiez votre boîte mail (et vos spams).");
+				setUnconfirmedEmail(values.email);
+			} else {
+				setError(message);
+			}
 		} finally {
 			setSubmitting(false);
+		}
+	}
+
+	async function handleResendConfirmation() {
+		if (!unconfirmedEmail) return;
+		setResendStatus(null);
+		try {
+			await resendConfirmationEmail(unconfirmedEmail);
+			setResendStatus("Email de confirmation renvoyé.");
+		} catch (err) {
+			setResendStatus(err instanceof Error ? err.message : "Erreur lors de l'envoi.");
 		}
 	}
 
@@ -73,6 +93,18 @@ export default function LoginForm() {
 				</a>
 			</div>
 			{error && <p className="text-sm text-red-600">{error}</p>}
+			{unconfirmedEmail && (
+				<div>
+					<button
+						type="button"
+						onClick={handleResendConfirmation}
+						className="text-xs font-medium text-rose-600 hover:underline"
+					>
+						Renvoyer l'email de confirmation
+					</button>
+					{resendStatus && <p className="mt-1 text-xs text-stone-500">{resendStatus}</p>}
+				</div>
+			)}
 			<button
 				type="submit"
 				disabled={submitting}

@@ -132,7 +132,7 @@ export default function ReservationForm() {
 				end_time: selectedSlot.end.toISOString(),
 			});
 
-			// Envoi email de confirmation
+			// Envoi email de demande de réservation (en attente de validation par le professionnel)
 			const recipients = [values.clientEmail];
 			if (professional.email && professional.email !== values.clientEmail) {
 				recipients.push(professional.email);
@@ -143,11 +143,11 @@ export default function ReservationForm() {
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					to: recipients,
-					subject: `Confirmation de votre rendez-vous - ${selectedService.name}`,
+					subject: `Demande de réservation reçue - ${selectedService.name}`,
 					html: `<p>Bonjour ${values.clientName},</p>
-						   <p>La réservation pour <strong>${selectedService.name}</strong> a bien été confirmée.</p>
+						   <p>Votre demande de réservation pour <strong>${selectedService.name}</strong> a bien été reçue.</p>
 						   <p><strong>Date :</strong> ${formatSlot(selectedSlot)}</p>
-						   <p>À très bientôt !</p>`
+						   <p>Elle sera confirmée prochainement par le professionnel.</p>`
 				})
 			}).catch(err => console.error("Erreur d'envoi d'email de confirmation:", err));
 
@@ -181,8 +181,8 @@ export default function ReservationForm() {
 	if (success) {
 		return (
 			<div className="rounded-xl border border-green-200 bg-green-50 p-6 text-green-800">
-				<p className="font-semibold">Réservation confirmée !</p>
-				<p className="mt-1 text-sm">Vous allez recevoir une confirmation par email.</p>
+				<p className="font-semibold">Demande de réservation envoyée !</p>
+				<p className="mt-1 text-sm">Elle est en attente de validation par le professionnel. Vous recevrez un email de confirmation.</p>
 			</div>
 		);
 	}
@@ -198,16 +198,21 @@ export default function ReservationForm() {
 							type="button"
 							key={service.id}
 							onClick={() => setSelectedServiceId(service.id)}
-							className={`rounded-xl border p-4 text-left transition-colors ${
+							className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-colors ${
 								selectedServiceId === service.id
 									? 'border-rose-600 bg-rose-600 text-white shadow-md'
 									: 'border-border bg-white hover:border-rose-300'
 							}`}
 						>
-							<p className={`font-medium ${selectedServiceId === service.id ? 'text-white' : 'text-stone-900'}`}>{service.name}</p>
-							<p className={`mt-1 text-xs ${selectedServiceId === service.id ? 'text-rose-50' : 'text-stone-500'}`}>
-								{service.duration_minutes} min — {service.price} €
-							</p>
+							{service.image_url && (
+								<img src={service.image_url} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+							)}
+							<div>
+								<p className={`font-medium ${selectedServiceId === service.id ? 'text-white' : 'text-stone-900'}`}>{service.name}</p>
+								<p className={`mt-1 text-xs ${selectedServiceId === service.id ? 'text-rose-50' : 'text-stone-500'}`}>
+									{service.duration_minutes} min — {service.price} €
+								</p>
+							</div>
 						</button>
 					))}
 					{services.length === 0 && (
