@@ -53,7 +53,11 @@ export default function ServicesCarousel({ limit }: Props) {
 						{service.image_url ? (
 							<img src={service.image_url} alt={service.name} className="h-36 w-full object-cover" />
 						) : (
-							<div className="h-36 w-full bg-stone-100" />
+							<img 
+								src={`https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=400&q=80&sig=${service.id}`} 
+								alt={service.name} 
+								className="h-36 w-full object-cover" 
+							/>
 						)}
 						<div className="flex flex-1 flex-col p-6">
 							<p className="text-lg font-semibold text-stone-900">{service.name}</p>

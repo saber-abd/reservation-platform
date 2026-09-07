@@ -2,11 +2,15 @@ import { supabase } from './supabase';
 
 /**
  * Inscription d'un professionnel (ou client) avec email + mot de passe.
- * Ne crée que le compte Auth ; la ligne dans `professionals`/`clients`
- * doit être créée séparément (voir Phase 5 - dashboard pro / espace client).
  */
-export async function signUp(email: string, password: string) {
-	const { data, error } = await supabase.auth.signUp({ email, password });
+export async function signUp(email: string, password: string, metadata?: Record<string, any>) {
+	const { data, error } = await supabase.auth.signUp({ 
+		email, 
+		password,
+		options: {
+			data: metadata
+		}
+	});
 	if (error) throw error;
 	return data;
 }
@@ -14,6 +18,18 @@ export async function signUp(email: string, password: string) {
 /** Connexion avec email + mot de passe. */
 export async function signIn(email: string, password: string) {
 	const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+	if (error) throw error;
+	return data;
+}
+
+/** Connexion avec Google. */
+export async function signInWithGoogle() {
+	const { data, error } = await supabase.auth.signInWithOAuth({
+		provider: 'google',
+		options: {
+			redirectTo: `${window.location.origin}/connexion`
+		}
+	});
 	if (error) throw error;
 	return data;
 }
