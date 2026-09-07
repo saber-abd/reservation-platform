@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
-import { getClientNote, getRegisteredClients, upsertClientNote, type Client } from '@/lib/queries';
+import { getClientNote, getRegisteredClients, upsertClientNote, getAppointmentsForClient, type Client, type Appointment } from '@/lib/queries';
 import MessageThread from '@/components/shared/MessageThread';
 
 function ClientNoteCard({ professionalId, client }: { professionalId: string; client: Client }) {
@@ -32,7 +32,7 @@ function ClientNoteCard({ professionalId, client }: { professionalId: string; cl
 
 	return (
 		<div className="rounded-xl border border-border bg-white p-4">
-			<p className="text-sm font-semibold text-stone-900">Fiche client (note privée)</p>
+			<p className="text-sm font-semibold text-stone-900">Note privée</p>
 			<p className="mt-1 text-xs text-stone-500">Visible uniquement par vous — préférences, allergies, historique...</p>
 			<textarea
 				rows={3}
@@ -57,6 +57,58 @@ function ClientNoteCard({ professionalId, client }: { professionalId: string; cl
 	);
 }
 
+function ClientAppointments({ clientId }: { clientId: string }) {
+	const [appointments, setAppointments] = useState<(Appointment & { services: { name: string } | null })[]>([]);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		getAppointmentsForClient(clientId)
+			.then(setAppointments)
+			.finally(() => setLoading(false));
+	}, [clientId]);
+
+	if (loading) return <p className="text-sm text-stone-500">Chargement des rendez-vous...</p>;
+	if (appointments.length === 0) return <p className="text-sm text-stone-500">Aucun rendez-vous pour ce client.</p>;
+
+	const statusLabels: Record<string, string> = {
+		pending: 'En attente',
+		confirmed: 'Confirmé',
+		cancelled: 'Annulé',
+		completed: 'Terminé',
+	};
+
+	return (
+		<div className="rounded-xl border border-border bg-white overflow-hidden">
+			<table className="w-full text-left text-sm">
+				<thead className="bg-stone-50 text-xs uppercase text-stone-500">
+					<tr>
+						<th className="px-4 py-3">Date</th>
+						<th className="px-4 py-3">Prestation</th>
+						<th className="px-4 py-3">Statut</th>
+					</tr>
+				</thead>
+				<tbody className="divide-y divide-border">
+					{appointments.map((apt) => (
+						<tr key={apt.id}>
+							<td className="px-4 py-3 text-stone-900">
+								{new Date(apt.start_time).toLocaleString('fr-FR', {
+									day: '2-digit',
+									month: 'short',
+									year: 'numeric',
+									hour: '2-digit',
+									minute: '2-digit'
+								})}
+							</td>
+							<td className="px-4 py-3 text-stone-600">{apt.services?.name ?? '—'}</td>
+							<td className="px-4 py-3 text-stone-500 capitalize">{statusLabels[apt.status] || apt.status}</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
+	);
+}
+
 export default function ClientsPanel() {
 	const { loading, professional, error } = useAuthedProfessional();
 	const [clients, setClients] = useState<Client[]>([]);
@@ -74,7 +126,7 @@ export default function ClientsPanel() {
 		<div>
 			<h1 className="text-2xl font-bold text-stone-900">Mes clients</h1>
 			<p className="mt-1 text-sm text-stone-500">
-				Les clients inscrits ayant déjà réservé chez vous. Sélectionnez-en un pour lui écrire.
+				Fiches infos clients : consultez leurs historiques, notez vos préférences, et échangez par message.
 			</p>
 
 			<div className="mt-6 grid items-start gap-6 md:grid-cols-3">
@@ -96,14 +148,32 @@ export default function ClientsPanel() {
 					))}
 				</div>
 
-				<div className="md:col-span-2 flex flex-col gap-4">
+				<div className="md:col-span-2 flex flex-col gap-6">
 					{selectedClient && professional ? (
 						<>
+							<div className="rounded-xl border border-border bg-white p-4">
+								<h2 className="text-lg font-bold text-stone-900">{selectedClient.full_name || 'Client inconnu'}</h2>
+								<p className="text-sm text-stone-600 mt-1">
+									Téléphone : {selectedClient.phone ? <a href={`tel:${selectedClient.phone}`} className="text-rose-600 hover:underline">{selectedClient.phone}</a> : 'Non renseigné'}
+								</p>
+							</div>
+							
 							<ClientNoteCard professionalId={professional.id} client={selectedClient} />
-							<MessageThread professionalId={professional.id} clientId={selectedClient.id} role="professional" />
+							
+							<div>
+								<h3 className="text-sm font-semibold text-stone-900 mb-3">Historique des rendez-vous</h3>
+								<ClientAppointments clientId={selectedClient.id} />
+							</div>
+
+							<div>
+								<h3 className="text-sm font-semibold text-stone-900 mb-3">Messages</h3>
+								<MessageThread professionalId={professional.id} clientId={selectedClient.id} role="professional" />
+							</div>
 						</>
 					) : (
-						<p className="text-sm text-stone-500">Sélectionnez un client dans la liste pour ouvrir la conversation.</p>
+						<div className="rounded-xl border border-dashed border-stone-300 p-8 text-center">
+							<p className="text-sm text-stone-500">Sélectionnez un client dans la liste pour afficher sa fiche.</p>
+						</div>
 					)}
 				</div>
 			</div>

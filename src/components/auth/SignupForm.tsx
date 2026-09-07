@@ -3,13 +3,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { signUp, getSession, getUser } from '@/lib/auth';
-import { createProfessional, createClient } from '@/lib/queries';
+import { createClient } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 
 const baseSchema = z.object({
-	role: z.enum(['professional', 'client']),
-	businessName: z.string().optional(),
-	fullName: z.string().optional(),
+	fullName: z.string().min(2, 'Nom obligatoire'),
 });
 
 const fullSchema = baseSchema.extend({
@@ -20,7 +18,6 @@ const fullSchema = baseSchema.extend({
 type FormValues = z.infer<typeof fullSchema>;
 
 export default function SignupForm() {
-	const [role, setRole] = useState<'professional' | 'client'>('client');
 	const [error, setError] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
 	const [existingUser, setExistingUser] = useState<any>(null);
@@ -30,7 +27,7 @@ export default function SignupForm() {
 		handleSubmit,
 		setValue,
 		formState: { errors },
-	} = useForm<FormValues>({ defaultValues: { role: 'client' } }); // Validation manuelle pour gérer les deux cas
+	} = useForm<FormValues>();
 
 	useEffect(() => {
 		async function checkExisting() {
@@ -39,6 +36,20 @@ export default function SignupForm() {
 				if (session) {
 					const user = await getUser();
 					if (user) {
+						const meta = user.user_metadata;
+						
+						// Si les métadonnées contiennent déjà qu'il est client, ou si on a son nom complet (ex: Google Auth)
+						if (meta?.account_role === 'client' || meta?.full_name || meta?.name) {
+							await createClient({ 
+								id: user.id, 
+								full_name: meta.full_name || meta.name || 'Client',
+								avatar_url: meta.avatar_url || null
+							});
+							window.location.href = '/espace-client';
+							return;
+						}
+						
+						// Sinon, on a besoin qu'il saisisse son nom complet manuellement
 						setExistingUser(user);
 					}
 				}
@@ -49,38 +60,21 @@ export default function SignupForm() {
 		checkExisting();
 	}, []);
 
-	function handleRoleChange(nextRole: 'professional' | 'client') {
-		setRole(nextRole);
-		setValue('role', nextRole);
-	}
-
 	async function onFinishProfile(values: any) {
 		if (!existingUser) return;
 		setSubmitting(true);
 		setError(null);
 		try {
 			const metadata = {
-				account_role: values.role,
-				business_name: values.businessName || null,
-				full_name: values.fullName || null
+				account_role: 'client',
+				full_name: values.fullName
 			};
 			
-			// Mettre à jour les métadonnées de l'utilisateur
 			const { error: updateError } = await supabase.auth.updateUser({ data: metadata });
 			if (updateError) throw updateError;
 
-			// Créer le profil correspondant
-			if (values.role === 'professional') {
-				await createProfessional({
-					user_id: existingUser.id,
-					business_name: values.businessName || 'Mon activité',
-					email: existingUser.email!,
-				});
-				window.location.href = '/dashboard';
-			} else {
-				await createClient({ id: existingUser.id, full_name: values.fullName || null });
-				window.location.href = '/espace-client';
-			}
+			await createClient({ id: existingUser.id, full_name: values.fullName });
+			window.location.href = '/espace-client';
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Erreur lors de la création du profil.");
 		} finally {
@@ -93,7 +87,6 @@ export default function SignupForm() {
 			return onFinishProfile(values);
 		}
 		
-		// Validation complète
 		const parsed = fullSchema.safeParse(values);
 		if (!parsed.success) {
 			setError("Veuillez remplir correctement tous les champs.");
@@ -104,9 +97,8 @@ export default function SignupForm() {
 		setError(null);
 		try {
 			const metadata = {
-				account_role: values.role,
-				business_name: values.businessName || null,
-				full_name: values.fullName || null
+				account_role: 'client',
+				full_name: values.fullName
 			};
 			const { user, session } = await signUp(values.email, values.password, metadata);
 			if (!user) throw new Error('Inscription impossible.');
@@ -130,61 +122,21 @@ export default function SignupForm() {
 		<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 			{existingUser && (
 				<div className="mb-2 rounded-xl bg-rose-50 p-4 text-sm text-rose-700">
-					Vous êtes connecté avec <b>{existingUser.email}</b>. Veuillez finaliser votre profil pour continuer.
+					Vous êtes connecté avec <b>{existingUser.email}</b>. Veuillez renseigner votre nom pour finaliser la création de votre espace client.
 				</div>
 			)}
 			
 			<div>
-				<span className="text-sm text-stone-700">Je suis...</span>
-				<div className="mt-1 grid grid-cols-2 gap-2">
-					<button
-						type="button"
-						onClick={() => handleRoleChange('client')}
-						className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
-							role === 'client'
-								? 'border-rose-600 bg-rose-50 text-rose-700'
-								: 'border-border text-stone-600 hover:bg-stone-50'
-						}`}
-					>
-						Client
-					</button>
-					<button
-						type="button"
-						onClick={() => handleRoleChange('professional')}
-						className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
-							role === 'professional'
-								? 'border-rose-600 bg-rose-50 text-rose-700'
-								: 'border-border text-stone-600 hover:bg-stone-50'
-						}`}
-					>
-						Professionnel
-					</button>
-				</div>
+				<label className="text-sm text-stone-700" htmlFor="fullName">
+					Nom complet <span className="text-rose-600">*</span>
+				</label>
+				<input
+					id="fullName"
+					className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+					{...register('fullName')}
+				/>
+				{errors.fullName && <p className="mt-1 text-xs text-red-600">{errors.fullName.message}</p>}
 			</div>
-
-			{role === 'professional' ? (
-				<div>
-					<label className="text-sm text-stone-700" htmlFor="businessName">
-						Nom de votre activité
-					</label>
-					<input
-						id="businessName"
-						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
-						{...register('businessName')}
-					/>
-				</div>
-			) : (
-				<div>
-					<label className="text-sm text-stone-700" htmlFor="fullName">
-						Nom complet
-					</label>
-					<input
-						id="fullName"
-						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
-						{...register('fullName')}
-					/>
-				</div>
-			)}
 			
 			{!existingUser && (
 				<>
