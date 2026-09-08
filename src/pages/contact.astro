@@ -94,31 +94,41 @@ const siteConfig = await getSiteConfig();
 			
 			try {
 				const userEmail = formData.get('email') as string;
-				
-				if (!businessEmail) {
-					throw new Error("L'email de contact du professionnel n'est pas configuré.");
-				}
+				const userName = formData.get('name') as string;
+				const userMessage = formData.get('message') as string;
 
-				const response = await fetch('/api/send-email', {
+				// EmailJS Configuration
+				const serviceID = 'service_7pvm3br';
+				const templateID = 'template_3j75n8o';
+				const publicKey = '5Jjd71i9EWOeYyzsG';
+
+				const templateParams = {
+					from_name: userName,
+					to_name: businessEmail || 'Professionnel',
+					name: userName,
+					email: userEmail,
+					reply_to: userEmail,
+					message: userMessage,
+				};
+
+				const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
-						to: businessEmail,
-						replyTo: userEmail,
-						subject: `Nouveau message de ${formData.get('name')} via le site`,
-						html: `<p><strong>Nom:</strong> ${formData.get('name')}</p>
-							   <p><strong>Email:</strong> ${userEmail}</p>
-							   <p><strong>Message:</strong><br/>${formData.get('message')}</p>`
+						service_id: serviceID,
+						template_id: templateID,
+						user_id: publicKey,
+						template_params: templateParams,
 					})
 				});
 
-				const result = await response.json();
 				if (response.ok) {
 					status.textContent = 'Message envoyé avec succès !';
 					status.className = 'text-sm text-green-600';
 					form.reset();
 				} else {
-					throw new Error(result.error?.message || result.error?.name || 'Erreur inconnue');
+					const errorText = await response.text();
+					throw new Error(errorText || 'Erreur lors de l\'envoi');
 				}
 			} catch (err: any) {
 				status.textContent = `Erreur lors de l'envoi : ${err.message}`;
