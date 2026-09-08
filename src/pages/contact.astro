@@ -94,19 +94,20 @@ const siteConfig = await getSiteConfig();
 			
 			try {
 				const userEmail = formData.get('email') as string;
-				const recipients = [userEmail];
-				if (businessEmail && businessEmail !== userEmail) {
-					recipients.push(businessEmail);
+				
+				if (!businessEmail) {
+					throw new Error("L'email de contact du professionnel n'est pas configuré.");
 				}
 
 				const response = await fetch('/api/send-email', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
-						to: recipients,
-						subject: `Nouveau message de ${formData.get('name')}`,
+						to: businessEmail,
+						replyTo: userEmail,
+						subject: `Nouveau message de ${formData.get('name')} via le site`,
 						html: `<p><strong>Nom:</strong> ${formData.get('name')}</p>
-							   <p><strong>Email:</strong> ${formData.get('email')}</p>
+							   <p><strong>Email:</strong> ${userEmail}</p>
 							   <p><strong>Message:</strong><br/>${formData.get('message')}</p>`
 					})
 				});
