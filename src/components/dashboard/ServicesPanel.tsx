@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
 import { createService, deleteService, getAllServices, updateService, uploadServiceImage, type Service } from '@/lib/queries';
 import { getServiceImageFallback } from '@/lib/serviceImages';
+import ImageCropper from '@/components/ui/ImageCropper';
 
 const schema = z.object({
 	name: z.string().min(2, 'Nom trop court'),
@@ -20,6 +21,7 @@ export default function ServicesPanel() {
 	const [services, setServices] = useState<Service[]>([]);
 	const [formError, setFormError] = useState<string | null>(null);
 	const [imageFile, setImageFile] = useState<File | null>(null);
+	const [croppingImageSrc, setCroppingImageSrc] = useState<string | null>(null);
 	const [uploading, setUploading] = useState(false);
 	const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -34,6 +36,17 @@ export default function ServicesPanel() {
 		if (!professional) return;
 		getAllServices(professional.id).then(setServices);
 	}, [professional]);
+
+	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0];
+		if (!file) return;
+		const reader = new FileReader();
+		reader.onload = () => {
+			setCroppingImageSrc(reader.result as string);
+		};
+		reader.readAsDataURL(file);
+		e.target.value = '';
+	}
 
 	function handleEdit(service: Service) {
 		setEditingId(service.id);
@@ -234,9 +247,17 @@ export default function ServicesPanel() {
 						id="image"
 						type="file"
 						accept="image/*"
-						onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+						onChange={handleFileChange}
 						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 					/>
+					{imageFile && (
+						<div className="mt-3 flex items-center gap-4">
+							<img src={URL.createObjectURL(imageFile)} alt="Preview" className="h-20 w-20 rounded-xl object-cover shadow-sm" />
+							<button type="button" onClick={() => setImageFile(null)} className="text-sm font-medium text-red-600 hover:underline">
+								Retirer la photo
+							</button>
+						</div>
+					)}
 				</div>
 				{formError && <p className="col-span-full text-sm text-red-600">{formError}</p>}
 				<div className="col-span-full flex items-center gap-4">
@@ -254,6 +275,18 @@ export default function ServicesPanel() {
 					)}
 				</div>
 			</form>
+
+			{croppingImageSrc && (
+				<ImageCropper
+					imageSrc={croppingImageSrc}
+					onCancel={() => setCroppingImageSrc(null)}
+					onCropComplete={(blob) => {
+						const croppedFile = new File([blob], 'cropped.jpg', { type: 'image/jpeg' });
+						setImageFile(croppedFile);
+						setCroppingImageSrc(null);
+					}}
+				/>
+			)}
 		</div>
 	);
 }

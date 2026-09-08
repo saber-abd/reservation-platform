@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { getPrimaryProfessional, getServices, type Service } from '@/lib/queries';
 import { getServiceImageFallback } from '@/lib/serviceImages';
+import ServiceModal from '@/components/ui/ServiceModal';
 
 interface Props {
 	limit?: number;
@@ -9,6 +10,7 @@ interface Props {
 export default function ServicesCarousel({ limit }: Props) {
 	const [services, setServices] = useState<Service[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [selectedService, setSelectedService] = useState<Service | null>(null);
 	const trackRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -49,13 +51,16 @@ export default function ServicesCarousel({ limit }: Props) {
 					<div
 						key={service.id}
 						data-card
-						className="flex w-72 shrink-0 snap-start flex-col overflow-hidden rounded-xl border border-border bg-white shadow-sm sm:w-80"
+						onClick={() => setSelectedService(service)}
+						className="group flex w-72 shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-all hover:border-rose-300 hover:shadow-md sm:w-80"
 					>
-						<img 
-							src={service.image_url || getServiceImageFallback(service.name)} 
-							alt={service.name} 
-							className="h-36 w-full object-cover" 
-						/>
+						<div className="aspect-square w-full overflow-hidden bg-stone-50">
+							<img 
+								src={service.image_url || getServiceImageFallback(service.name)} 
+								alt={service.name} 
+								className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" 
+							/>
+						</div>
 						<div className="flex flex-1 flex-col p-6">
 							<p className="text-lg font-semibold text-stone-900">{service.name}</p>
 							<p className="mt-2 flex-1 text-sm text-stone-500">{service.description}</p>
@@ -88,6 +93,11 @@ export default function ServicesCarousel({ limit }: Props) {
 					</button>
 				</>
 			)}
+
+			<ServiceModal 
+				service={selectedService} 
+				onClose={() => setSelectedService(null)} 
+			/>
 		</div>
 	);
 }

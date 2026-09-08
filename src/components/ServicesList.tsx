@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getPrimaryProfessional, getServices, type Service } from '@/lib/queries';
 import { getServiceImageFallback } from '@/lib/serviceImages';
+import ServiceModal from '@/components/ui/ServiceModal';
 
 interface Props {
 	limit?: number;
@@ -10,6 +11,7 @@ interface Props {
 export default function ServicesList({ limit, showCta = true }: Props) {
 	const [services, setServices] = useState<Service[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [selectedService, setSelectedService] = useState<Service | null>(null);
 
 	useEffect(() => {
 		async function load() {
@@ -32,15 +34,22 @@ export default function ServicesList({ limit, showCta = true }: Props) {
 	}
 
 	return (
-		<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-			{services.map((service) => (
-				<div key={service.id} className="flex flex-col overflow-hidden rounded-xl border border-border bg-white shadow-sm">
-					<img 
-						src={service.image_url || getServiceImageFallback(service.name)} 
-						alt={service.name} 
-						className="h-40 w-full object-cover" 
-					/>
-					<div className="flex flex-1 flex-col p-6">
+		<>
+			<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+				{services.map((service) => (
+					<div 
+						key={service.id} 
+						onClick={() => setSelectedService(service)}
+						className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-all hover:border-rose-300 hover:shadow-md"
+					>
+						<div className="aspect-square w-full overflow-hidden bg-stone-50">
+							<img 
+								src={service.image_url || getServiceImageFallback(service.name)} 
+								alt={service.name} 
+								className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" 
+							/>
+						</div>
+						<div className="flex flex-1 flex-col p-6">
 						<p className="text-lg font-semibold text-stone-900">{service.name}</p>
 						<p className="mt-2 flex-1 text-sm text-stone-500">{service.description}</p>
 						<div className="mt-4 flex items-center justify-between border-t border-border pt-4 text-sm">
@@ -55,8 +64,14 @@ export default function ServicesList({ limit, showCta = true }: Props) {
 							Réserver
 						</a>
 					</div>
-				</div>
-			))}
-		</div>
+					</div>
+				))}
+			</div>
+			
+			<ServiceModal 
+				service={selectedService} 
+				onClose={() => setSelectedService(null)} 
+			/>
+		</>
 	);
 }
