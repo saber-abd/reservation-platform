@@ -9,6 +9,7 @@ import ImageCropper from '@/components/ui/ImageCropper';
 
 const schema = z.object({
 	name: z.string().min(2, 'Nom trop court'),
+	category: z.enum(['Femmes', 'Hommes', 'Enfants']),
 	description: z.string().optional(),
 	durationMinutes: z.coerce.number().int().positive('Doit être positif'),
 	price: z.coerce.number().nonnegative('Doit être positif ou nul'),
@@ -54,6 +55,7 @@ export default function ServicesPanel() {
 		setFormError(null);
 		reset({
 			name: service.name,
+			category: (service.category as 'Femmes' | 'Hommes' | 'Enfants') || 'Femmes',
 			description: service.description ?? '',
 			durationMinutes: service.duration_minutes,
 			price: service.price,
@@ -64,7 +66,7 @@ export default function ServicesPanel() {
 	function handleCancelEdit() {
 		setEditingId(null);
 		setImageFile(null);
-		reset({ name: '', description: '', durationMinutes: undefined, price: undefined });
+		reset({ name: '', category: 'Femmes', description: '', durationMinutes: undefined, price: undefined });
 	}
 
 	async function onSubmit(values: FormValues) {
@@ -80,6 +82,7 @@ export default function ServicesPanel() {
 			if (editingId) {
 				const updated = await updateService(editingId, {
 					name: values.name,
+					category: values.category,
 					description: values.description ?? null,
 					duration_minutes: values.durationMinutes,
 					price: values.price,
@@ -91,6 +94,7 @@ export default function ServicesPanel() {
 				const created = await createService({
 					professional_id: professional.id,
 					name: values.name,
+					category: values.category,
 					description: values.description ?? null,
 					duration_minutes: values.durationMinutes,
 					price: values.price,
@@ -130,6 +134,7 @@ export default function ServicesPanel() {
 						<tr>
 							<th className="px-4 py-3" />
 							<th className="px-4 py-3">Nom</th>
+							<th className="px-4 py-3">Catégorie</th>
 							<th className="px-4 py-3">Durée</th>
 							<th className="px-4 py-3">Prix</th>
 							<th className="px-4 py-3">Statut</th>
@@ -154,6 +159,7 @@ export default function ServicesPanel() {
 									/>
 								</td>
 								<td className="px-4 py-3 font-medium text-stone-900">{service.name}</td>
+								<td className="px-4 py-3 text-stone-600">{service.category || 'Femmes'}</td>
 								<td className="px-4 py-3 text-stone-600">{service.duration_minutes} min</td>
 								<td className="px-4 py-3 text-stone-600">{service.price} €</td>
 								<td className="px-4 py-3">
@@ -200,6 +206,21 @@ export default function ServicesPanel() {
 						{...register('name')}
 					/>
 					{errors.name && <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
+				</div>
+				<div>
+					<label className="text-sm text-stone-700" htmlFor="category">
+						Catégorie
+					</label>
+					<select
+						id="category"
+						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						{...register('category')}
+					>
+						<option value="Femmes">Femmes</option>
+						<option value="Hommes">Hommes</option>
+						<option value="Enfants">Enfants</option>
+					</select>
+					{errors.category && <p className="mt-1 text-xs text-red-600">{errors.category.message}</p>}
 				</div>
 				<div>
 					<label className="text-sm text-stone-700" htmlFor="durationMinutes">

@@ -8,12 +8,6 @@ interface Props {
 	showCta?: boolean;
 }
 
-function getCategoryForService(name: string): string {
-	const lower = name.toLowerCase();
-	if (lower.includes('homme')) return 'Hommes';
-	if (lower.includes('enfant')) return 'Enfants';
-	return 'Femmes';
-}
 
 const CATEGORIES = ['Toutes', 'Femmes', 'Hommes', 'Enfants'];
 
@@ -45,7 +39,7 @@ export default function ServicesList({ limit, showCta = true }: Props) {
 
 	const filteredServices = services.filter((service) => {
 		if (activeCategory === 'Toutes') return true;
-		return getCategoryForService(service.name) === activeCategory;
+		return (service.category || 'Femmes') === activeCategory;
 	});
 
 	return (

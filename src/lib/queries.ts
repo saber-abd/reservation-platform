@@ -18,6 +18,7 @@ export interface Service {
 	id: string;
 	professional_id: string;
 	name: string;
+	category: string;
 	description: string | null;
 	duration_minutes: number;
 	price: number;
@@ -143,7 +144,7 @@ export async function getAllServices(professionalId: string): Promise<Service[]>
 }
 
 export async function createService(
-	service: Pick<Service, 'professional_id' | 'name' | 'description' | 'duration_minutes' | 'price'> &
+	service: Pick<Service, 'professional_id' | 'name' | 'category' | 'description' | 'duration_minutes' | 'price'> &
 		Partial<Pick<Service, 'image_url'>>,
 ) {
 	const { data, error } = await supabase.from('services').insert(service).select().single();
