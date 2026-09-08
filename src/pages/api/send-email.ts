@@ -10,11 +10,17 @@ export const POST: APIRoute = async ({ request }) => {
 		}
 
 		const RESEND_API_KEY = import.meta.env.RESEND_API_KEY;
+		const RESEND_VERIFIED_EMAIL = import.meta.env.RESEND_VERIFIED_EMAIL;
 
 		if (!RESEND_API_KEY) {
-			console.error("RESEND_API_KEY absente de l'environnement serveur (secret runtime Cloudflare non configuré ?)");
+			console.error("RESEND_API_KEY absente de l'environnement serveur");
 			return new Response(JSON.stringify({ error: 'Resend API key is not configured' }), { status: 500 });
 		}
+
+		// Pour contourner le blocage du mode gratuit de Resend, on force l'envoi
+		// vers l'adresse email vérifiée si elle est configurée en variable d'environnement,
+		// sinon on utilise l'adresse fournie par le formulaire (qui peut bloquer si non vérifiée).
+		const finalTo = RESEND_VERIFIED_EMAIL ? [RESEND_VERIFIED_EMAIL] : (Array.isArray(to) ? to : [to]);
 
 		const resendResponse = await fetch('https://api.resend.com/emails', {
 			method: 'POST',
@@ -24,7 +30,7 @@ export const POST: APIRoute = async ({ request }) => {
 			},
 			body: JSON.stringify({
 				from: import.meta.env.RESEND_FROM_EMAIL || 'Plateforme <onboarding@resend.dev>',
-				to: Array.isArray(to) ? to : [to],
+				to: finalTo,
 				...(replyTo ? { reply_to: replyTo } : {}),
 				subject: subject,
 				html: html,
