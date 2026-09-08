@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
 import { createService, deleteService, getAllServices, updateService, uploadServiceImage, type Service } from '@/lib/queries';
+import { getServiceImageFallback } from '@/lib/serviceImages';
 
 const schema = z.object({
 	name: z.string().min(2, 'Nom trop court'),
@@ -133,11 +134,11 @@ export default function ServicesPanel() {
 						{services.map((service) => (
 							<tr key={service.id} className="border-t border-border">
 								<td className="px-4 py-3">
-									{service.image_url ? (
-										<img src={service.image_url} alt={service.name} className="h-10 w-10 rounded-lg object-cover" />
-									) : (
-										<div className="h-10 w-10 rounded-lg bg-stone-100" />
-									)}
+									<img 
+										src={service.image_url || getServiceImageFallback(service.name)} 
+										alt={service.name} 
+										className="h-10 w-10 rounded-lg object-cover" 
+									/>
 								</td>
 								<td className="px-4 py-3 font-medium text-stone-900">{service.name}</td>
 								<td className="px-4 py-3 text-stone-600">{service.duration_minutes} min</td>

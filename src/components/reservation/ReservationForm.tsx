@@ -14,6 +14,7 @@ import {
 } from '@/lib/queries';
 import { generateSlotsForDate, type GeneratedSlot } from '@/lib/slots';
 import { getSession } from '@/lib/auth';
+import { getServiceImageFallback } from '@/lib/serviceImages';
 
 const clientSchema = z.object({
 	clientName: z.string().min(2, 'Nom trop court'),
@@ -204,9 +205,11 @@ export default function ReservationForm() {
 									: 'border-border bg-white hover:border-rose-300'
 							}`}
 						>
-							{service.image_url && (
-								<img src={service.image_url} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
-							)}
+							<img 
+								src={service.image_url || getServiceImageFallback(service.name)} 
+								alt="" 
+								className="h-12 w-12 shrink-0 rounded-lg object-cover" 
+							/>
 							<div>
 								<p className={`font-medium ${selectedServiceId === service.id ? 'text-white' : 'text-stone-900'}`}>{service.name}</p>
 								<p className={`mt-1 text-xs ${selectedServiceId === service.id ? 'text-rose-50' : 'text-stone-500'}`}>

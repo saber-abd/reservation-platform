@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getPrimaryProfessional, getServices, type Service } from '@/lib/queries';
+import { getServiceImageFallback } from '@/lib/serviceImages';
 
 interface Props {
 	limit?: number;
@@ -34,15 +35,11 @@ export default function ServicesList({ limit, showCta = true }: Props) {
 		<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 			{services.map((service) => (
 				<div key={service.id} className="flex flex-col overflow-hidden rounded-xl border border-border bg-white shadow-sm">
-					{service.image_url ? (
-						<img src={service.image_url} alt={service.name} className="h-40 w-full object-cover" />
-					) : (
-						<img 
-							src={`https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=400&q=80&sig=${service.id}`} 
-							alt={service.name} 
-							className="h-40 w-full object-cover" 
-						/>
-					)}
+					<img 
+						src={service.image_url || getServiceImageFallback(service.name)} 
+						alt={service.name} 
+						className="h-40 w-full object-cover" 
+					/>
 					<div className="flex flex-1 flex-col p-6">
 						<p className="text-lg font-semibold text-stone-900">{service.name}</p>
 						<p className="mt-2 flex-1 text-sm text-stone-500">{service.description}</p>
