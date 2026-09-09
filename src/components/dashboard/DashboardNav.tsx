@@ -10,9 +10,8 @@ const links = [
 	{ label: 'Profil', href: '/dashboard/profil' },
 ];
 
-export default function DashboardNav() {
+export default function DashboardNav({ basePath = '' }: { basePath?: string }) {
 	const [currentPath, setCurrentPath] = useState('');
-	const basePath = typeof window !== 'undefined' ? (window.location.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '') : '';
 
 	useEffect(() => {
 		setCurrentPath(window.location.pathname);

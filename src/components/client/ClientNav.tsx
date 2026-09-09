@@ -8,9 +8,8 @@ const links = [
 	{ label: 'Mon profil', href: '/espace-client/profil' },
 ];
 
-export default function ClientNav() {
+export default function ClientNav({ basePath = '' }: { basePath?: string }) {
 	const [currentPath, setCurrentPath] = useState('');
-	const basePath = typeof window !== 'undefined' ? (window.location.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '') : '';
 
 	useEffect(() => {
 		setCurrentPath(window.location.pathname);

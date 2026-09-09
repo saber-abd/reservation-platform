@@ -26,7 +26,7 @@ const siteConfig = await getSiteConfig();
 			{siteConfig.business.description}
 		</p>
 		<a
-			href="/reservation"
+			href="/demo-diamant/reservation"
 			class="mt-4 rounded-xl bg-rose-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:-translate-y-1 hover:bg-rose-700 hover:shadow-xl"
 		>
 			Réserver maintenant
@@ -38,7 +38,7 @@ const siteConfig = await getSiteConfig();
 		<div class="mx-auto max-w-6xl px-6">
 			<div class="mb-10 flex items-end justify-between" data-aos="fade-up">
 				<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">Nos prestations</h2>
-				<a href="/services" class="text-sm font-medium text-rose-600 hover:underline">Voir tout</a>
+				<a href="/demo-diamant/services" class="text-sm font-medium text-rose-600 hover:underline">Voir tout</a>
 			</div>
 			<ServicesCarousel client:load limit={6} />
 		</div>
@@ -53,7 +53,7 @@ const siteConfig = await getSiteConfig();
 			<div data-aos="fade-left">
 				<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">À propos</h2>
 				<p class="mt-4 text-stone-500">{siteConfig.business.description}</p>
-				<a href="/a-propos" class="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
+				<a href="/demo-diamant/a-propos" class="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
 					En savoir plus
 				</a>
 			</div>
@@ -76,7 +76,7 @@ const siteConfig = await getSiteConfig();
 			<div data-aos="fade-right">
 				<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">Où nous trouver</h2>
 				<p class="mt-4 text-stone-500">{siteConfig.business.address}</p>
-				<a href="/contact" class="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
+				<a href="/demo-diamant/contact" class="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
 					Voir les coordonnées complètes
 				</a>
 			</div>
@@ -91,7 +91,7 @@ const siteConfig = await getSiteConfig();
 		<h2 class="text-3xl font-bold text-stone-900 md:text-4xl">Prêt à prendre rendez-vous ?</h2>
 		<p class="mt-4 text-stone-500">Réservez votre créneau en quelques clics.</p>
 		<a
-			href="/reservation"
+			href="/demo-diamant/reservation"
 			class="mt-6 inline-block rounded-xl bg-rose-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-rose-700"
 		>
 			Réserver maintenant
