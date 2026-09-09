@@ -1,10 +1,10 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import CommercialLayout from '../layouts/CommercialLayout.astro';
 import { Mail, Phone, CalendarCheck, ShieldCheck, Gem } from 'lucide-react';
 ---
 
-<Layout title="Création de Sites Web & Plateformes sur mesure" description="Étudiant ingénieur freelance proposant des solutions web allant du site vitrine à la plateforme SaaS sur mesure.">
-	<div class="relative overflow-hidden bg-stone-50 py-20 lg:py-32">
+<CommercialLayout title="Création de Sites Web & Plateformes sur mesure" description="Étudiant ingénieur freelance proposant des solutions web allant du site vitrine à la plateforme SaaS sur mesure.">
+	<div id="presentation" class="relative overflow-hidden bg-stone-50 py-20 lg:py-32">
 		<div class="mx-auto max-w-6xl px-6">
 			<div class="mx-auto max-w-2xl text-center">
 				<h1 class="text-4xl font-extrabold tracking-tight text-stone-900 sm:text-6xl" data-aos="fade-up">
@@ -17,7 +17,18 @@ import { Mail, Phone, CalendarCheck, ShieldCheck, Gem } from 'lucide-react';
 		</div>
 	</div>
 
-	<div class="mx-auto max-w-6xl px-6 py-24">
+	<div id="histoire" class="mx-auto max-w-4xl px-6 py-24 text-center">
+		<h2 class="text-3xl font-bold text-stone-900" data-aos="fade-up">Notre Histoire</h2>
+		<p class="mt-6 text-lg text-stone-600" data-aos="fade-up" data-aos-delay="100">
+			Passionné par l'informatique depuis mon plus jeune âge et actuellement en école d'ingénieurs, j'ai décidé de mettre mes compétences au service des professionnels. Mon objectif est de démocratiser l'accès à des outils digitaux puissants et sur-mesure pour les petites et moyennes entreprises.
+		</p>
+	</div>
+
+	<div id="tarification" class="mx-auto max-w-6xl px-6 py-12">
+		<div class="text-center mb-16">
+			<h2 class="text-3xl font-bold text-stone-900" data-aos="fade-up">Tarification & Formules</h2>
+			<p class="mt-4 text-stone-600" data-aos="fade-up" data-aos-delay="100">Choisissez la solution qui s'adapte le mieux à l'évolution de votre activité.</p>
+		</div>
 		<div class="grid gap-8 lg:grid-cols-3">
 			
 			<!-- Standard -->
@@ -86,7 +97,7 @@ import { Mail, Phone, CalendarCheck, ShieldCheck, Gem } from 'lucide-react';
 		</div>
 	</div>
 
-	<div class="bg-stone-900 py-24 text-white">
+	<div id="contact" class="bg-stone-900 py-24 text-white">
 		<div class="mx-auto max-w-3xl text-center px-6">
 			<h2 class="text-3xl font-bold">Un projet en tête ? Discutons-en.</h2>
 			<p class="mt-4 text-stone-400">
@@ -104,4 +115,4 @@ import { Mail, Phone, CalendarCheck, ShieldCheck, Gem } from 'lucide-react';
 			</div>
 		</div>
 	</div>
-</Layout>
+</CommercialLayout>

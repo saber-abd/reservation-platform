@@ -1,0 +1,124 @@
+---
+import '../styles/global.css';
+import 'aos/dist/aos.css';
+import { Briefcase, Menu, X, Code2 } from 'lucide-react';
+
+interface Props {
+	title: string;
+	description: string;
+}
+
+const { title, description } = Astro.props;
+const currentYear = new Date().getFullYear();
+
+const navLinks = [
+	{ label: 'Présentation', href: '#presentation' },
+	{ label: 'Notre histoire', href: '#histoire' },
+	{ label: 'Tarification', href: '#tarification' },
+	{ label: 'Contact', href: '#contact' },
+];
+---
+
+<!doctype html>
+<html lang="fr" class="scroll-smooth">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="description" content={description} />
+		<title>{title}</title>
+		<meta name="theme-color" content="#1c1917" />
+	</head>
+	<body class="flex min-h-screen flex-col bg-stone-50 selection:bg-stone-900 selection:text-white">
+		
+		<!-- HEADER COMMERCIAL -->
+		<header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200">
+			<div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+				<a href="#" class="flex items-center gap-2 group">
+					<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-900 text-white transition-transform group-hover:scale-105">
+						<Code2 size={20} />
+					</div>
+					<span class="text-lg font-extrabold text-stone-900 tracking-tight">SaberWeb<span class="text-stone-400">.dev</span></span>
+				</a>
+
+				<!-- Desktop Nav -->
+				<nav class="hidden md:flex items-center gap-8">
+					{navLinks.map(link => (
+						<a href={link.href} class="text-sm font-semibold text-stone-600 hover:text-stone-900 transition-colors">
+							{link.label}
+						</a>
+					))}
+				</nav>
+
+				<div class="hidden md:block">
+					<a href="#contact" class="rounded-full bg-stone-900 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-stone-800">
+						Démarrer un projet
+					</a>
+				</div>
+
+				<!-- Mobile Menu Toggle -->
+				<button id="mobile-menu-btn" class="md:hidden text-stone-900 focus:outline-none">
+					<span id="icon-menu"><Menu size={24} /></span>
+					<span id="icon-close" class="hidden"><X size={24} /></span>
+				</button>
+			</div>
+
+			<!-- Mobile Nav -->
+			<div id="mobile-nav" class="hidden border-t border-stone-200 bg-white md:hidden">
+				<nav class="flex flex-col px-6 py-4 gap-4">
+					{navLinks.map(link => (
+						<a href={link.href} class="text-lg font-semibold text-stone-700 hover:text-stone-900">
+							{link.label}
+						</a>
+					))}
+					<div class="mt-4 pt-4 border-t border-stone-100">
+						<a href="#contact" class="block text-center rounded-xl bg-stone-900 px-5 py-3 text-sm font-bold text-white">
+							Démarrer un projet
+						</a>
+					</div>
+				</nav>
+			</div>
+		</header>
+
+		<main class="flex-1">
+			<slot />
+		</main>
+
+		<!-- FOOTER COMMERCIAL -->
+		<footer class="bg-stone-900 text-stone-400 py-12">
+			<div class="mx-auto max-w-6xl px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+				<div class="flex items-center gap-2">
+					<Code2 size={20} class="text-white" />
+					<span class="text-lg font-bold text-white">SaberWeb.dev</span>
+				</div>
+				<p class="text-sm">© {currentYear} Tous droits réservés.</p>
+				<div class="flex gap-4">
+					<a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">LinkedIn</a>
+					<a href="https://github.com" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">GitHub</a>
+				</div>
+			</div>
+		</footer>
+
+		<script>
+			import AOS from 'aos';
+			AOS.init({
+				duration: 800,
+				easing: 'ease-out-cubic',
+				once: true,
+				offset: 50,
+			});
+
+			const btn = document.getElementById('mobile-menu-btn');
+			const nav = document.getElementById('mobile-nav');
+			const iconMenu = document.getElementById('icon-menu');
+			const iconClose = document.getElementById('icon-close');
+
+			if (btn && nav && iconMenu && iconClose) {
+				btn.addEventListener('click', () => {
+					nav.classList.toggle('hidden');
+					iconMenu.classList.toggle('hidden');
+					iconClose.classList.toggle('hidden');
+				});
+			}
+		</script>
+	</body>
+</html>
