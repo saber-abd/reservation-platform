@@ -230,7 +230,14 @@ export default function AppointmentsClientPanel() {
 						{!loadingAppointments && appointments.length === 0 && (
 							<tr>
 								<td className="px-4 py-4 text-stone-500" colSpan={4}>
-									Vous n'avez pas encore de rendez-vous. <a href="/reservation" className="text-rose-600 hover:underline">Réserver un créneau</a>.
+								{(() => {
+									const basePath = typeof window !== 'undefined' ? (window.location.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '') : '';
+									return (
+										<>
+											Vous n'avez pas encore de rendez-vous. <a href={`${basePath}/reservation`} className="text-rose-600 hover:underline">Réserver un créneau</a>.
+										</>
+									);
+								})()}
 								</td>
 							</tr>
 						)}

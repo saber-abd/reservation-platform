@@ -1,0 +1,101 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Map from '@/components/Map.astro';
+import ServicesCarousel from '@/components/ServicesCarousel';
+import TestimonialsCarousel from '@/components/TestimonialsCarousel';
+import { getSiteConfig } from '@/config/site';
+const siteConfig = await getSiteConfig();
+---
+
+<Layout>
+	<!-- Hero -->
+	<section class="relative mx-auto flex min-h-[70vh] flex-col items-center justify-center gap-6 px-6 py-24 text-center md:py-32">
+		<!-- Hero Background Image -->
+		<div class="absolute inset-0 z-[-1] overflow-hidden">
+			<img src="/images/hero_salon.jpg" alt="Salon de beauté intérieur" class="h-full w-full object-cover object-center" />
+			<div class="absolute inset-0 bg-white/70 backdrop-blur-[2px]"></div>
+		</div>
+
+		<p class="text-sm font-semibold uppercase tracking-widest text-rose-600">
+			{siteConfig.business.activity}
+		</p>
+		<h1 class="max-w-3xl text-4xl font-bold tracking-tight text-stone-900 md:text-6xl">
+			{siteConfig.business.tagline}
+		</h1>
+		<p class="max-w-xl text-lg text-stone-700">
+			{siteConfig.business.description}
+		</p>
+		<a
+			href="/reservation"
+			class="mt-4 rounded-xl bg-rose-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:-translate-y-1 hover:bg-rose-700 hover:shadow-xl"
+		>
+			Réserver maintenant
+		</a>
+	</section>
+
+	<!-- Aperçu services -->
+	<section class="bg-stone-50 py-20">
+		<div class="mx-auto max-w-6xl px-6">
+			<div class="mb-10 flex items-end justify-between" data-aos="fade-up">
+				<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">Nos prestations</h2>
+				<a href="/services" class="text-sm font-medium text-rose-600 hover:underline">Voir tout</a>
+			</div>
+			<ServicesCarousel client:load limit={6} />
+		</div>
+	</section>
+
+	<!-- À propos résumé -->
+	<section class="mx-auto max-w-6xl px-6 py-20">
+		<div class="grid items-center gap-10 md:grid-cols-2">
+			<div class="overflow-hidden rounded-2xl shadow-xl" data-aos="fade-right">
+				<img src="/images/about_salon.jpg" alt="Matériel professionnel" class="aspect-[4/3] w-full object-cover" />
+			</div>
+			<div data-aos="fade-left">
+				<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">À propos</h2>
+				<p class="mt-4 text-stone-500">{siteConfig.business.description}</p>
+				<a href="/a-propos" class="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
+					En savoir plus
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<!-- Avis clients -->
+	<section class="bg-stone-50 py-20">
+		<div class="mx-auto max-w-6xl px-6">
+			<h2 class="mb-10 text-center text-2xl font-bold text-stone-900 md:text-3xl" data-aos="fade-up">Avis clients</h2>
+			<div data-aos="fade-up">
+				<TestimonialsCarousel client:load testimonials={siteConfig.testimonials} />
+			</div>
+		</div>
+	</section>
+
+	<!-- Où nous trouver -->
+	<section class="mx-auto max-w-6xl px-6 py-20">
+		<div class="grid items-center gap-10 md:grid-cols-2">
+			<div data-aos="fade-right">
+				<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">Où nous trouver</h2>
+				<p class="mt-4 text-stone-500">{siteConfig.business.address}</p>
+				<a href="/contact" class="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
+					Voir les coordonnées complètes
+				</a>
+			</div>
+			<div data-aos="fade-left">
+				<Map lat={siteConfig.business.lat} lng={siteConfig.business.lng} label={siteConfig.business.name} />
+			</div>
+		</div>
+	</section>
+
+	<!-- CTA final -->
+	<section class="mx-auto max-w-6xl px-6 py-20 text-center" data-aos="zoom-in">
+		<h2 class="text-3xl font-bold text-stone-900 md:text-4xl">Prêt à prendre rendez-vous ?</h2>
+		<p class="mt-4 text-stone-500">Réservez votre créneau en quelques clics.</p>
+		<a
+			href="/reservation"
+			class="mt-6 inline-block rounded-xl bg-rose-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-rose-700"
+		>
+			Réserver maintenant
+		</a>
+	</section>
+</Layout>
+

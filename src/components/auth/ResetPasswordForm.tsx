@@ -37,9 +37,14 @@ export default function ResetPasswordForm() {
 		return (
 			<div>
 				<p className="text-sm text-green-700">Votre mot de passe a bien été mis à jour.</p>
-				<a href="/connexion" className="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
-					Retour à la connexion
-				</a>
+			{(() => {
+				const basePath = typeof window !== 'undefined' ? (window.location.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '') : '';
+				return (
+					<a href={`${basePath}/connexion`} className="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
+						Retour à la connexion
+					</a>
+				);
+			})()}
 			</div>
 		);
 	}

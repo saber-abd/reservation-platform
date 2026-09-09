@@ -1,101 +1,107 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import Map from '@/components/Map.astro';
-import ServicesCarousel from '@/components/ServicesCarousel';
-import TestimonialsCarousel from '@/components/TestimonialsCarousel';
-import { getSiteConfig } from '@/config/site';
-const siteConfig = await getSiteConfig();
+import Layout from '../layouts/Layout.astro';
+import { Mail, Phone, CalendarCheck, ShieldCheck, Gem } from 'lucide-react';
 ---
 
-<Layout>
-	<!-- Hero -->
-	<section class="relative mx-auto flex min-h-[70vh] flex-col items-center justify-center gap-6 px-6 py-24 text-center md:py-32">
-		<!-- Hero Background Image -->
-		<div class="absolute inset-0 z-[-1] overflow-hidden">
-			<img src="/images/hero_salon.jpg" alt="Salon de beauté intérieur" class="h-full w-full object-cover object-center" />
-			<div class="absolute inset-0 bg-white/70 backdrop-blur-[2px]"></div>
-		</div>
-
-		<p class="text-sm font-semibold uppercase tracking-widest text-rose-600">
-			{siteConfig.business.activity}
-		</p>
-		<h1 class="max-w-3xl text-4xl font-bold tracking-tight text-stone-900 md:text-6xl">
-			{siteConfig.business.tagline}
-		</h1>
-		<p class="max-w-xl text-lg text-stone-700">
-			{siteConfig.business.description}
-		</p>
-		<a
-			href="/reservation"
-			class="mt-4 rounded-xl bg-rose-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:-translate-y-1 hover:bg-rose-700 hover:shadow-xl"
-		>
-			Réserver maintenant
-		</a>
-	</section>
-
-	<!-- Aperçu services -->
-	<section class="bg-stone-50 py-20">
+<Layout title="Création de Sites Web & Plateformes sur mesure" description="Étudiant ingénieur freelance proposant des solutions web allant du site vitrine à la plateforme SaaS sur mesure.">
+	<div class="relative overflow-hidden bg-stone-50 py-20 lg:py-32">
 		<div class="mx-auto max-w-6xl px-6">
-			<div class="mb-10 flex items-end justify-between" data-aos="fade-up">
-				<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">Nos prestations</h2>
-				<a href="/services" class="text-sm font-medium text-rose-600 hover:underline">Voir tout</a>
+			<div class="mx-auto max-w-2xl text-center">
+				<h1 class="text-4xl font-extrabold tracking-tight text-stone-900 sm:text-6xl" data-aos="fade-up">
+					Votre solution digitale, <span class="text-rose-600">sur mesure.</span>
+				</h1>
+				<p class="mt-6 text-lg leading-8 text-stone-600" data-aos="fade-up" data-aos-delay="100">
+					Je suis étudiant en dernière année d'école d'ingénieurs et je vous accompagne dans la digitalisation de votre activité. Du simple site vitrine à la plateforme de réservation complète, découvrez mes 3 formules.
+				</p>
 			</div>
-			<ServicesCarousel client:load limit={6} />
 		</div>
-	</section>
+	</div>
 
-	<!-- À propos résumé -->
-	<section class="mx-auto max-w-6xl px-6 py-20">
-		<div class="grid items-center gap-10 md:grid-cols-2">
-			<div class="overflow-hidden rounded-2xl shadow-xl" data-aos="fade-right">
-				<img src="/images/about_salon.jpg" alt="Matériel professionnel" class="aspect-[4/3] w-full object-cover" />
+	<div class="mx-auto max-w-6xl px-6 py-24">
+		<div class="grid gap-8 lg:grid-cols-3">
+			
+			<!-- Standard -->
+			<div class="flex flex-col rounded-3xl border border-stone-200 bg-white p-8 shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up">
+				<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-stone-100 text-stone-700">
+					<CalendarCheck size={24} />
+				</div>
+				<h3 class="text-2xl font-bold text-stone-900">Formule Standard</h3>
+				<p class="mt-4 flex-1 text-sm text-stone-600">
+					L'essentiel pour démarrer. Un site vitrine élégant couplé à une API (ex: Google Calendar) pour gérer vos réservations sans avoir besoin d'une base de données complexe.
+				</p>
+				<ul class="mt-8 space-y-3 text-sm text-stone-600">
+					<li class="flex items-center gap-3">✓ Site Vitrine moderne</li>
+					<li class="flex items-center gap-3">✓ Prise de rendez-vous</li>
+					<li class="flex items-center gap-3">✓ Hébergement léger</li>
+					<li class="flex items-center gap-3 text-stone-400">✗ Pas d'espace client</li>
+				</ul>
+				<a href="/demo-standard/" class="mt-8 block w-full rounded-xl bg-stone-900 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-stone-800 transition-colors">
+					Voir la Démo Standard
+				</a>
 			</div>
-			<div data-aos="fade-left">
-				<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">À propos</h2>
-				<p class="mt-4 text-stone-500">{siteConfig.business.description}</p>
-				<a href="/a-propos" class="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
-					En savoir plus
+
+			<!-- Premium -->
+			<div class="relative flex flex-col rounded-3xl border-2 border-rose-600 bg-white p-8 shadow-md hover:shadow-lg transition-shadow" data-aos="fade-up" data-aos-delay="100">
+				<div class="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-rose-600 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white">
+					Recommandé
+				</div>
+				<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
+					<ShieldCheck size={24} />
+				</div>
+				<h3 class="text-2xl font-bold text-stone-900">Formule Premium</h3>
+				<p class="mt-4 flex-1 text-sm text-stone-600">
+					Une plateforme complète avec Base de données. Espace client, tableau de bord professionnel, système de fidélité et de messagerie.
+				</p>
+				<ul class="mt-8 space-y-3 text-sm text-stone-600">
+					<li class="flex items-center gap-3 font-medium text-rose-700">Tout de Standard, plus :</li>
+					<li class="flex items-center gap-3">✓ Base de données</li>
+					<li class="flex items-center gap-3">✓ Tableau de bord Pro & Client</li>
+					<li class="flex items-center gap-3">✓ Système de Fidélité</li>
+				</ul>
+				<a href="/demo-premium/" class="mt-8 block w-full rounded-xl bg-rose-600 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-rose-700 transition-colors">
+					Voir la Démo Premium
+				</a>
+			</div>
+
+			<!-- Diamant -->
+			<div class="flex flex-col rounded-3xl border border-stone-200 bg-white p-8 shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="200">
+				<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+					<Gem size={24} />
+				</div>
+				<h3 class="text-2xl font-bold text-stone-900">Formule Diamant</h3>
+				<p class="mt-4 flex-1 text-sm text-stone-600">
+					Le sur-mesure absolu. Nous définissons ensemble chaque fonctionnalité pour créer une plateforme unique qui répond à 100% à vos besoins métiers.
+				</p>
+				<ul class="mt-8 space-y-3 text-sm text-stone-600">
+					<li class="flex items-center gap-3 font-medium text-violet-700">Tout de Premium, plus :</li>
+					<li class="flex items-center gap-3">✓ Design exclusif personnalisé</li>
+					<li class="flex items-center gap-3">✓ Fonctionnalités avancées métiers</li>
+					<li class="flex items-center gap-3">✓ Intégrations spécifiques</li>
+				</ul>
+				<a href="/demo-diamant/" class="mt-8 block w-full rounded-xl bg-violet-600 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-violet-700 transition-colors">
+					Voir la Démo Diamant
+				</a>
+			</div>
+
+		</div>
+	</div>
+
+	<div class="bg-stone-900 py-24 text-white">
+		<div class="mx-auto max-w-3xl text-center px-6">
+			<h2 class="text-3xl font-bold">Un projet en tête ? Discutons-en.</h2>
+			<p class="mt-4 text-stone-400">
+				Que vous ayez besoin d'un simple site vitrine ou d'une application complexe, je mets mes compétences d'ingénieur au service de votre réussite.
+			</p>
+			<div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-6">
+				<a href="mailto:contact@votre-email.com" class="flex items-center gap-3 rounded-full bg-white px-6 py-3 text-sm font-semibold text-stone-900 transition-colors hover:bg-stone-200">
+					<Mail size={18} />
+					Me contacter par mail
+				</a>
+				<a href="tel:+33600000000" class="flex items-center gap-3 rounded-full border border-stone-700 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-stone-800">
+					<Phone size={18} />
+					06 00 00 00 00
 				</a>
 			</div>
 		</div>
-	</section>
-
-	<!-- Avis clients -->
-	<section class="bg-stone-50 py-20">
-		<div class="mx-auto max-w-6xl px-6">
-			<h2 class="mb-10 text-center text-2xl font-bold text-stone-900 md:text-3xl" data-aos="fade-up">Avis clients</h2>
-			<div data-aos="fade-up">
-				<TestimonialsCarousel client:load testimonials={siteConfig.testimonials} />
-			</div>
-		</div>
-	</section>
-
-	<!-- Où nous trouver -->
-	<section class="mx-auto max-w-6xl px-6 py-20">
-		<div class="grid items-center gap-10 md:grid-cols-2">
-			<div data-aos="fade-right">
-				<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">Où nous trouver</h2>
-				<p class="mt-4 text-stone-500">{siteConfig.business.address}</p>
-				<a href="/contact" class="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
-					Voir les coordonnées complètes
-				</a>
-			</div>
-			<div data-aos="fade-left">
-				<Map lat={siteConfig.business.lat} lng={siteConfig.business.lng} label={siteConfig.business.name} />
-			</div>
-		</div>
-	</section>
-
-	<!-- CTA final -->
-	<section class="mx-auto max-w-6xl px-6 py-20 text-center" data-aos="zoom-in">
-		<h2 class="text-3xl font-bold text-stone-900 md:text-4xl">Prêt à prendre rendez-vous ?</h2>
-		<p class="mt-4 text-stone-500">Réservez votre créneau en quelques clics.</p>
-		<a
-			href="/reservation"
-			class="mt-6 inline-block rounded-xl bg-rose-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-rose-700"
-		>
-			Réserver maintenant
-		</a>
-	</section>
+	</div>
 </Layout>
-

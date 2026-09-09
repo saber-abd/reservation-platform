@@ -1,0 +1,10 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import DashboardNav from '@/components/dashboard/DashboardNav';
+import ProfilePanel from '@/components/dashboard/ProfilePanel';
+---
+
+<DashboardLayout title="Mon profil">
+	<DashboardNav client:load />
+	<ProfilePanel client:load />
+</DashboardLayout>

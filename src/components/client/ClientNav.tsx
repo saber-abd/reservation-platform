@@ -10,6 +10,7 @@ const links = [
 
 export default function ClientNav() {
 	const [currentPath, setCurrentPath] = useState('');
+	const basePath = typeof window !== 'undefined' ? (window.location.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '') : '';
 
 	useEffect(() => {
 		setCurrentPath(window.location.pathname);
@@ -17,7 +18,7 @@ export default function ClientNav() {
 
 	async function handleSignOut() {
 		await signOut();
-		window.location.href = '/connexion';
+		window.location.href = basePath ? `${basePath}/connexion` : '/connexion';
 	}
 
 	return (
@@ -26,9 +27,9 @@ export default function ClientNav() {
 				{links.map((link) => (
 					<a
 						key={link.href}
-						href={link.href}
+						href={`${basePath}${link.href}`}
 						className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-							currentPath === link.href
+							currentPath === `${basePath}${link.href}`
 								? 'bg-rose-50 text-rose-600'
 								: 'text-stone-600 hover:bg-stone-50'
 						}`}

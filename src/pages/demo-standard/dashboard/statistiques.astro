@@ -1,0 +1,10 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import DashboardNav from '@/components/dashboard/DashboardNav';
+import StatsPanel from '@/components/dashboard/StatsPanel';
+---
+
+<DashboardLayout title="Statistiques">
+	<DashboardNav client:load />
+	<StatsPanel client:load />
+</DashboardLayout>

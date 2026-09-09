@@ -1,0 +1,10 @@
+---
+import DashboardLayout from '@/layouts/DashboardLayout.astro';
+import ClientNav from '@/components/client/ClientNav';
+import LoyaltyClientPanel from '@/components/client/LoyaltyClientPanel';
+---
+
+<DashboardLayout title="Ma Fidélité">
+	<ClientNav client:load />
+	<LoyaltyClientPanel client:load />
+</DashboardLayout>

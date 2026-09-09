@@ -18,7 +18,7 @@ interface UserInfo {
 	accountType: 'professional' | 'client' | null;
 }
 
-export default function HeaderAuthButton() {
+export default function HeaderAuthButton({ basePath = '' }: { basePath?: string }) {
 	const [user, setUser] = useState<UserInfo | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -98,7 +98,7 @@ export default function HeaderAuthButton() {
 
 	async function handleSignOut() {
 		await signOut();
-		window.location.href = '/';
+		window.location.href = basePath ? `${basePath}/` : '/';
 	}
 
 	if (loading) {
@@ -109,7 +109,7 @@ export default function HeaderAuthButton() {
 	if (!user) {
 		return (
 			<a
-				href="/connexion"
+				href={`${basePath}/connexion`}
 				className="flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-2 text-sm font-semibold text-stone-700 shadow-sm transition-colors hover:border-rose-300 hover:text-rose-600"
 			>
 				{/* LogIn icon inline SVG */}
@@ -134,7 +134,7 @@ export default function HeaderAuthButton() {
 	}
 
 	// Logged in — show avatar + name + dropdown
-	const dashboardHref = user.accountType === 'professional' ? '/dashboard' : '/espace-client';
+	const dashboardHref = user.accountType === 'professional' ? `${basePath}/dashboard` : `${basePath}/espace-client`;
 	const firstWord = user.displayName.split(' ')[0] ?? user.displayName;
 
 	return (

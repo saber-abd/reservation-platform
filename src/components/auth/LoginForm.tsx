@@ -121,9 +121,14 @@ export default function LoginForm() {
 					{...register('password')}
 				/>
 				{errors.password && <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>}
-				<a href="/mot-de-passe-oublie" className="mt-1 inline-block text-xs font-medium text-rose-600 hover:underline">
-					Mot de passe oublié ?
-				</a>
+				{(() => {
+					const basePath = typeof window !== 'undefined' ? (window.location.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '') : '';
+					return (
+						<a href={`${basePath}/mot-de-passe-oublie`} className="mt-1 inline-block text-xs font-medium text-rose-600 hover:underline">
+							Mot de passe oublié ?
+						</a>
+					);
+				})()}
 			</div>
 			{error && <p className="text-sm text-red-600">{error}</p>}
 			{unconfirmedEmail && (

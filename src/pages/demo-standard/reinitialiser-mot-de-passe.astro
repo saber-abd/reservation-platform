@@ -1,0 +1,14 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import ResetPasswordForm from '@/components/auth/ResetPasswordForm';
+---
+
+<Layout title="Réinitialiser le mot de passe" description="Choisissez un nouveau mot de passe." noindex>
+	<section class="mx-auto max-w-md px-6 py-20">
+		<h1 class="text-2xl font-bold text-stone-900">Nouveau mot de passe</h1>
+		<p class="mt-2 text-sm text-stone-500">Choisissez un nouveau mot de passe pour votre compte.</p>
+		<div class="mt-8">
+			<ResetPasswordForm client:load />
+		</div>
+	</section>
+</Layout>
