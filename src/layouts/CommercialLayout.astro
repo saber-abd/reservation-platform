@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import 'aos/dist/aos.css';
 import { Briefcase, Menu, X, Code2 } from 'lucide-react';
+import SmoothScroll from '@/components/SmoothScroll.astro';
 
 interface Props {
 	title: string;
@@ -120,5 +121,6 @@ const navLinks = [
 				});
 			}
 		</script>
+		<SmoothScroll />
 	</body>
 </html>

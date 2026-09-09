@@ -3,7 +3,9 @@ import '../styles/global.css';
 import 'aos/dist/aos.css';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
+import SmoothScroll from '@/components/SmoothScroll.astro';
 import { getSiteConfig } from '@/config/site';
+
 const siteConfig = await getSiteConfig();
 
 interface Props {
@@ -64,5 +66,6 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 				offset: 80,
 			});
 		</script>
+		<SmoothScroll />
 	</body>
 </html>
