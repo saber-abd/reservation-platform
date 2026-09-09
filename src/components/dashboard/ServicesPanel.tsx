@@ -104,8 +104,9 @@ export default function ServicesPanel() {
 			}
 			reset();
 			setImageFile(null);
-		} catch (err) {
-			setFormError(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+		} catch (err: any) {
+			console.error(err);
+			setFormError(err?.message || "Erreur lors de l'enregistrement.");
 		} finally {
 			setUploading(false);
 		}

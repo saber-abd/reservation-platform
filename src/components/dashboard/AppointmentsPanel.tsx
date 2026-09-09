@@ -43,11 +43,13 @@ function AppointmentDetailModal({
 	onClose,
 	onCancel,
 	onConfirm,
+	onComplete,
 }: {
 	appointment: AppointmentWithService;
 	onClose: () => void;
 	onCancel: (id: string) => void;
 	onConfirm: (id: string) => void;
+	onComplete: (id: string) => void;
 }) {
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
@@ -89,15 +91,28 @@ function AppointmentDetailModal({
 					</div>
 				</dl>
 				{appointment.status === 'confirmed' && (
-					<button
-						onClick={() => {
-							onCancel(appointment.id);
-							onClose();
-						}}
-						className="mt-6 text-sm font-medium text-red-600 hover:underline"
-					>
-						Annuler ce rendez-vous
-					</button>
+					<div className="mt-6 flex flex-col gap-3">
+						{new Date(appointment.start_time) < new Date() && (
+							<button
+								onClick={() => {
+									onComplete(appointment.id);
+									onClose();
+								}}
+								className="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700"
+							>
+								Terminer la prestation (Ajoute les points)
+							</button>
+						)}
+						<button
+							onClick={() => {
+								onCancel(appointment.id);
+								onClose();
+							}}
+							className="text-sm font-medium text-red-600 hover:underline self-start"
+						>
+							Annuler ce rendez-vous
+						</button>
+					</div>
 				)}
 				{appointment.status === 'pending' && (
 					<div className="mt-6 flex gap-4">
@@ -147,6 +162,11 @@ export default function AppointmentsPanel() {
 
 	async function handleConfirm(id: string) {
 		const updated = await updateAppointmentStatus(id, 'confirmed');
+		setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, ...updated } : a)));
+	}
+
+	async function handleComplete(id: string) {
+		const updated = await updateAppointmentStatus(id, 'completed');
 		setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, ...updated } : a)));
 	}
 
@@ -234,6 +254,17 @@ export default function AppointmentsPanel() {
 									</span>
 								</td>
 								<td className="px-4 py-3 text-right">
+									{appointment.status === 'confirmed' && new Date(appointment.start_time) < now && (
+										<button
+											onClick={(e) => {
+												e.stopPropagation();
+												handleComplete(appointment.id);
+											}}
+											className="mr-3 text-xs font-bold text-green-600 hover:underline"
+										>
+											Terminer
+										</button>
+									)}
 									{appointment.status === 'pending' && (
 										<button
 											onClick={(e) => {
@@ -269,6 +300,7 @@ export default function AppointmentsPanel() {
 					onClose={() => setSelectedAppointment(null)}
 					onCancel={handleCancel}
 					onConfirm={handleConfirm}
+					onComplete={handleComplete}
 				/>
 			)}
 		</div>
