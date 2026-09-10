@@ -149,7 +149,7 @@
 }
 
 .theme-auto {
-    --background: oklch(0.95 0.01 240); /* Lighter grey/blue background */
+    --background: oklch(0.92 0 0); /* Light gray background to contrast with white cards */
     --foreground: oklch(0.15 0.02 240); /* Dark text for light background */
     --card: oklch(1 0 0); /* Pure white cards */
     --card-foreground: oklch(0.15 0.02 240);
