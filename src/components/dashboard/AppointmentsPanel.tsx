@@ -54,21 +54,21 @@ function AppointmentDetailModal({
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
 			<div
-				className="w-full max-w-md rounded-xl border border-border bg-white p-6 shadow-lg"
+				className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<div className="flex items-start justify-between">
-					<h2 className="text-lg font-semibold text-stone-900">Détail du rendez-vous</h2>
-					<button onClick={onClose} className="text-sm text-stone-400 hover:text-stone-600">
+					<h2 className="text-lg font-semibold text-foreground">Détail du rendez-vous</h2>
+					<button onClick={onClose} className="text-sm text-stone-400 hover:text-muted-foreground">
 						✕
 					</button>
 				</div>
 				<dl className="mt-4 space-y-3 text-sm">
 					<div>
 						<dt className="text-xs uppercase text-stone-400">Client</dt>
-						<dd className="font-medium text-stone-900">{appointment.client_name}</dd>
-						<dd className="text-stone-500">{appointment.client_email}</dd>
-						{appointment.client_phone && <dd className="text-stone-500">{appointment.client_phone}</dd>}
+						<dd className="font-medium text-foreground">{appointment.client_name}</dd>
+						<dd className="text-muted-foreground">{appointment.client_email}</dd>
+						{appointment.client_phone && <dd className="text-muted-foreground">{appointment.client_phone}</dd>}
 					</div>
 					<div>
 						<dt className="text-xs uppercase text-stone-400">Prestation</dt>
@@ -170,7 +170,7 @@ export default function AppointmentsPanel() {
 		setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, ...updated } : a)));
 	}
 
-	if (loading) return <p className="text-sm text-stone-500">Chargement...</p>;
+	if (loading) return <p className="text-sm text-muted-foreground">Chargement...</p>;
 	if (error) return <p className="text-sm text-red-600">{error}</p>;
 
 	const now = new Date();
@@ -183,8 +183,8 @@ export default function AppointmentsPanel() {
 
 	return (
 		<div>
-			<h1 className="text-2xl font-bold text-stone-900">Rendez-vous</h1>
-			<p className="mt-1 text-sm text-stone-500">Bienvenue, {professional?.business_name}.</p>
+			<h1 className="text-2xl font-bold text-foreground">Rendez-vous</h1>
+			<p className="mt-1 text-sm text-muted-foreground">Bienvenue, {professional?.business_name}.</p>
 
 			<div className="mt-6 flex flex-wrap gap-2">
 				{(Object.keys(tabLabels) as Tab[]).map((t) => (
@@ -195,7 +195,7 @@ export default function AppointmentsPanel() {
 						className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
 							tab === t
 								? 'border-rose-600 bg-rose-600 text-white'
-								: 'border-border bg-white text-stone-600 hover:border-rose-300'
+								: 'border-border bg-card text-muted-foreground hover:border-rose-300'
 						}`}
 					>
 						{tabLabels[t]}
@@ -205,7 +205,7 @@ export default function AppointmentsPanel() {
 
 			<div className="mt-6 overflow-x-auto rounded-xl border border-border">
 				<table className="w-full text-left text-sm">
-					<thead className="bg-stone-50 text-xs uppercase text-stone-500">
+					<thead className="bg-stone-50 text-xs uppercase text-muted-foreground">
 						<tr>
 							<th className="px-4 py-3">Client</th>
 							<th className="px-4 py-3">Créneau</th>
@@ -216,21 +216,21 @@ export default function AppointmentsPanel() {
 					<tbody>
 						{loadingAppointments && (
 							<tr>
-								<td className="px-4 py-4 text-stone-500" colSpan={4}>
+								<td className="px-4 py-4 text-muted-foreground" colSpan={4}>
 									Chargement des rendez-vous...
 								</td>
 							</tr>
 						)}
 						{!loadingAppointments && appointments.length === 0 && (
 							<tr>
-								<td className="px-4 py-4 text-stone-500" colSpan={4}>
+								<td className="px-4 py-4 text-muted-foreground" colSpan={4}>
 									Aucun rendez-vous pour le moment.
 								</td>
 							</tr>
 						)}
 						{!loadingAppointments && appointments.length > 0 && filteredAppointments.length === 0 && (
 							<tr>
-								<td className="px-4 py-4 text-stone-500" colSpan={4}>
+								<td className="px-4 py-4 text-muted-foreground" colSpan={4}>
 									Aucun rendez-vous dans cet onglet.
 								</td>
 							</tr>
@@ -242,10 +242,10 @@ export default function AppointmentsPanel() {
 								className="cursor-pointer border-t border-border hover:bg-stone-50"
 							>
 								<td className="px-4 py-3">
-									<p className="font-medium text-stone-900">{appointment.client_name}</p>
-									<p className="text-xs text-stone-500">{appointment.client_email}</p>
+									<p className="font-medium text-foreground">{appointment.client_name}</p>
+									<p className="text-xs text-muted-foreground">{appointment.client_email}</p>
 								</td>
-								<td className="px-4 py-3 text-stone-600">{formatDate(appointment.start_time)}</td>
+								<td className="px-4 py-3 text-muted-foreground">{formatDate(appointment.start_time)}</td>
 								<td className="px-4 py-3">
 									<span
 										className={`rounded-full px-2 py-1 text-xs font-medium ${statusStyles[appointment.status]}`}

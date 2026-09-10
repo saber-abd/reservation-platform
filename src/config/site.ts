@@ -146,9 +146,10 @@ export const siteConfig = {
 	],
 };
 
-export async function getSiteConfig() {
+export async function getSiteConfig(currentPath?: string) {
 	try {
-		const pro = await getPrimaryProfessional();
+		const tag = currentPath ? (currentPath.match(/^\/demo-([^/]+)/)?.[1] || 'diamant') : 'diamant';
+		const pro = await getPrimaryProfessional(tag);
 		if (pro) {
 			return {
 				...siteConfig,

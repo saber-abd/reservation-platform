@@ -1,5 +1,18 @@
 import { supabase } from './supabase';
 
+/** Helper pour extraire le tag de la démo depuis l'URL côté client ou via paramètre. */
+export function getDemoTag(path?: string): string {
+	if (path) {
+		const match = path.match(/^\/demo-([^/]+)/);
+		if (match) return match[1];
+	}
+	if (typeof window !== 'undefined') {
+		const match = window.location.pathname.match(/^\/demo-([^/]+)/);
+		if (match) return match[1];
+	}
+	return 'diamant'; // fallback default tag
+}
+
 export interface Professional {
 	id: string;
 	user_id: string;
@@ -12,6 +25,7 @@ export interface Professional {
 	logo_url: string | null;
 	avatar_url: string | null;
 	opening_hours: unknown;
+	tag_bd: string;
 }
 
 export interface Service {
@@ -26,6 +40,7 @@ export interface Service {
 	is_deleted: boolean;
 	image_url: string | null;
 	created_at: string;
+	tag_bd: string;
 }
 
 export interface Availability {
@@ -34,16 +49,17 @@ export interface Availability {
 	start_time: string;
 	end_time: string;
 	is_booked: boolean;
+	tag_bd: string;
 }
 
 export interface Client {
 	id: string;
-	/** same as auth.users.id — used for client-side auth checks */
 	user_id?: string;
 	full_name: string | null;
 	phone: string | null;
 	avatar_url: string | null;
 	created_at: string;
+	tag_bd: string;
 }
 
 export interface AvailabilityRule {
@@ -56,6 +72,7 @@ export interface AvailabilityRule {
 	is_exception: boolean;
 	exception_date: string | null;
 	created_at: string;
+	tag_bd: string;
 }
 
 export interface Message {
@@ -66,6 +83,7 @@ export interface Message {
 	body: string;
 	created_at: string;
 	read_at: string | null;
+	tag_bd: string;
 }
 
 export interface Appointment {
@@ -81,49 +99,45 @@ export interface Appointment {
 	end_time: string;
 	status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
 	created_at: string;
+	tag_bd: string;
 }
 
-/**
- * Le template est mono-professionnel pour l'instant : on récupère la première
- * ligne de la table `professionals`. En mode multi-tenant (Phase 9), on
- * filtrera plutôt par sous-domaine / slug.
- */
-export async function getPrimaryProfessional(): Promise<Professional | null> {
-	const { data, error } = await supabase.from('professionals').select('*').limit(1).maybeSingle();
+export async function getPrimaryProfessional(tag = getDemoTag()): Promise<Professional | null> {
+	const { data, error } = await supabase.from('professionals').select('*').eq('tag_bd', tag).limit(1).maybeSingle();
 	if (error) throw error;
 	return data;
 }
 
-export async function getProfessionalByUserId(userId: string): Promise<Professional | null> {
-	const { data, error } = await supabase.from('professionals').select('*').eq('user_id', userId).maybeSingle();
+export async function getProfessionalByUserId(userId: string, tag = getDemoTag()): Promise<Professional | null> {
+	const { data, error } = await supabase.from('professionals').select('*').eq('user_id', userId).eq('tag_bd', tag).maybeSingle();
 	if (error) throw error;
 	return data;
 }
 
-/** Récupère un professionnel par son id de ligne (professionals.id), utile pour les notifications email. */
-export async function getProfessionalById(id: string): Promise<Professional | null> {
-	const { data, error } = await supabase.from('professionals').select('*').eq('id', id).maybeSingle();
+export async function getProfessionalById(id: string, tag = getDemoTag()): Promise<Professional | null> {
+	const { data, error } = await supabase.from('professionals').select('*').eq('id', id).eq('tag_bd', tag).maybeSingle();
 	if (error) throw error;
 	return data;
 }
 
-export async function createProfessional(professional: Pick<Professional, 'user_id' | 'business_name'> & Partial<Professional>) {
-	const { data, error } = await supabase.from('professionals').insert(professional).select().single();
+export async function createProfessional(professional: Pick<Professional, 'user_id' | 'business_name'> & Partial<Professional>, tag = getDemoTag()) {
+	const { data, error } = await supabase.from('professionals').insert({ ...professional, tag_bd: tag }).select().single();
 	if (error) throw error;
 	return data as Professional;
 }
 
-export async function updateProfessional(id: string, changes: Partial<Professional>) {
-	const { data, error } = await supabase.from('professionals').update(changes).eq('id', id).select().single();
+export async function updateProfessional(id: string, changes: Partial<Professional>, tag = getDemoTag()) {
+	const { data, error } = await supabase.from('professionals').update(changes).eq('id', id).eq('tag_bd', tag).select().single();
 	if (error) throw error;
 	return data as Professional;
 }
 
-export async function getServices(professionalId: string): Promise<Service[]> {
+export async function getServices(professionalId: string, tag = getDemoTag()): Promise<Service[]> {
 	const { data, error } = await supabase
 		.from('services')
 		.select('*')
 		.eq('professional_id', professionalId)
+		.eq('tag_bd', tag)
 		.eq('is_active', true)
 		.eq('is_deleted', false)
 		.order('created_at', { ascending: true });
@@ -131,12 +145,12 @@ export async function getServices(professionalId: string): Promise<Service[]> {
 	return data ?? [];
 }
 
-/** Toutes les prestations (actives ou non), pour la gestion côté dashboard. */
-export async function getAllServices(professionalId: string): Promise<Service[]> {
+export async function getAllServices(professionalId: string, tag = getDemoTag()): Promise<Service[]> {
 	const { data, error } = await supabase
 		.from('services')
 		.select('*')
 		.eq('professional_id', professionalId)
+		.eq('tag_bd', tag)
 		.eq('is_deleted', false)
 		.order('created_at', { ascending: true });
 	if (error) throw error;
@@ -146,13 +160,13 @@ export async function getAllServices(professionalId: string): Promise<Service[]>
 export async function createService(
 	service: Pick<Service, 'professional_id' | 'name' | 'category' | 'description' | 'duration_minutes' | 'price'> &
 		Partial<Pick<Service, 'image_url'>>,
+	tag = getDemoTag()
 ) {
-	const { data, error } = await supabase.from('services').insert(service).select().single();
+	const { data, error } = await supabase.from('services').insert({ ...service, tag_bd: tag }).select().single();
 	if (error) throw error;
 	return data as Service;
 }
 
-/** Téléverse une photo illustrant une prestation dans le bucket public `service-images` et retourne son URL publique. */
 export async function uploadServiceImage(professionalId: string, file: File): Promise<string> {
 	const extension = file.name.split('.').pop() || 'jpg';
 	const path = `${professionalId}/${crypto.randomUUID()}.${extension}`;
@@ -162,22 +176,23 @@ export async function uploadServiceImage(professionalId: string, file: File): Pr
 	return data.publicUrl;
 }
 
-export async function updateService(id: string, changes: Partial<Service>) {
-	const { data, error } = await supabase.from('services').update(changes).eq('id', id).select().single();
+export async function updateService(id: string, changes: Partial<Service>, tag = getDemoTag()) {
+	const { data, error } = await supabase.from('services').update(changes).eq('id', id).eq('tag_bd', tag).select().single();
 	if (error) throw error;
 	return data as Service;
 }
 
-export async function deleteService(id: string) {
-	const { error } = await supabase.from('services').update({ is_deleted: true }).eq('id', id);
+export async function deleteService(id: string, tag = getDemoTag()) {
+	const { error } = await supabase.from('services').update({ is_deleted: true }).eq('id', id).eq('tag_bd', tag);
 	if (error) throw error;
 }
 
-export async function getAvailableSlots(professionalId: string): Promise<Availability[]> {
+export async function getAvailableSlots(professionalId: string, tag = getDemoTag()): Promise<Availability[]> {
 	const { data, error } = await supabase
 		.from('availabilities')
 		.select('*')
 		.eq('professional_id', professionalId)
+		.eq('tag_bd', tag)
 		.eq('is_booked', false)
 		.gte('start_time', new Date().toISOString())
 		.order('start_time');
@@ -185,24 +200,25 @@ export async function getAvailableSlots(professionalId: string): Promise<Availab
 	return data ?? [];
 }
 
-export async function getAllSlots(professionalId: string): Promise<Availability[]> {
+export async function getAllSlots(professionalId: string, tag = getDemoTag()): Promise<Availability[]> {
 	const { data, error } = await supabase
 		.from('availabilities')
 		.select('*')
 		.eq('professional_id', professionalId)
+		.eq('tag_bd', tag)
 		.order('start_time');
 	if (error) throw error;
 	return data ?? [];
 }
 
-export async function createAvailability(availability: Pick<Availability, 'professional_id' | 'start_time' | 'end_time'>) {
-	const { data, error } = await supabase.from('availabilities').insert(availability).select().single();
+export async function createAvailability(availability: Pick<Availability, 'professional_id' | 'start_time' | 'end_time'>, tag = getDemoTag()) {
+	const { data, error } = await supabase.from('availabilities').insert({ ...availability, tag_bd: tag }).select().single();
 	if (error) throw error;
 	return data as Availability;
 }
 
-export async function deleteAvailability(id: string) {
-	const { error } = await supabase.from('availabilities').delete().eq('id', id);
+export async function deleteAvailability(id: string, tag = getDemoTag()) {
+	const { error } = await supabase.from('availabilities').delete().eq('id', id).eq('tag_bd', tag);
 	if (error) throw error;
 }
 
@@ -216,22 +232,23 @@ export async function createAppointment(appointment: {
 	client_phone?: string;
 	start_time: string;
 	end_time: string;
-}) {
+}, tag = getDemoTag()) {
 	if (new Date(appointment.start_time) <= new Date()) {
 		throw new Error("Impossible de réserver un créneau déjà passé.");
 	}
-	const { data, error } = await supabase.from('appointments').insert(appointment).select().single();
+	const { data, error } = await supabase.from('appointments').insert({ ...appointment, tag_bd: tag }).select().single();
 	if (error) throw error;
 	return data as Appointment;
 }
 
 export async function getAppointmentsForProfessional(
-	professionalId: string,
+	professionalId: string, tag = getDemoTag()
 ): Promise<(Appointment & { services: { name: string; duration_minutes: number; price: number } | null })[]> {
 	const { data, error } = await supabase
 		.from('appointments')
 		.select('*, services(name, duration_minutes, price)')
 		.eq('professional_id', professionalId)
+		.eq('tag_bd', tag)
 		.order('start_time', { ascending: false });
 	if (error) throw error;
 	return (data ?? []) as unknown as (Appointment & {
@@ -239,12 +256,12 @@ export async function getAppointmentsForProfessional(
 	})[];
 }
 
-/** Rendez-vous non annulés d'un professionnel pour une date précise (YYYY-MM-DD), pour calculer les créneaux libres. */
-export async function getAppointmentsForDate(professionalId: string, date: string): Promise<Appointment[]> {
+export async function getAppointmentsForDate(professionalId: string, date: string, tag = getDemoTag()): Promise<Appointment[]> {
 	const { data, error } = await supabase
 		.from('appointments')
 		.select('*')
 		.eq('professional_id', professionalId)
+		.eq('tag_bd', tag)
 		.neq('status', 'cancelled')
 		.gte('start_time', `${date}T00:00:00`)
 		.lte('start_time', `${date}T23:59:59`);
@@ -252,42 +269,42 @@ export async function getAppointmentsForDate(professionalId: string, date: strin
 	return data ?? [];
 }
 
-/** Règles de disponibilité (récurrentes ou exceptionnelles) d'un professionnel. */
-export async function getAvailabilityRules(professionalId: string): Promise<AvailabilityRule[]> {
+export async function getAvailabilityRules(professionalId: string, tag = getDemoTag()): Promise<AvailabilityRule[]> {
 	const { data, error } = await supabase
 		.from('availability_rules')
 		.select('*')
 		.eq('professional_id', professionalId)
+		.eq('tag_bd', tag)
 		.order('created_at');
 	if (error) throw error;
 	return data ?? [];
 }
 
 export async function createAvailabilityRule(
-	rule: Omit<AvailabilityRule, 'id' | 'created_at'>,
+	rule: Omit<AvailabilityRule, 'id' | 'created_at' | 'tag_bd'>, tag = getDemoTag()
 ): Promise<AvailabilityRule> {
-	const { data, error } = await supabase.from('availability_rules').insert(rule).select().single();
+	const { data, error } = await supabase.from('availability_rules').insert({ ...rule, tag_bd: tag }).select().single();
 	if (error) throw error;
 	return data as AvailabilityRule;
 }
 
-export async function deleteAvailabilityRule(id: string) {
-	const { error } = await supabase.from('availability_rules').delete().eq('id', id);
+export async function deleteAvailabilityRule(id: string, tag = getDemoTag()) {
+	const { error } = await supabase.from('availability_rules').delete().eq('id', id).eq('tag_bd', tag);
 	if (error) throw error;
 }
 
-/** Clients ayant déjà réservé au moins un rendez-vous avec ce professionnel ("clients inscrits"). */
-export async function getRegisteredClients(professionalId: string): Promise<Client[]> {
+export async function getRegisteredClients(professionalId: string, tag = getDemoTag()): Promise<Client[]> {
 	const { data, error } = await supabase
 		.from('appointments')
-		.select('clients(id, full_name, phone, created_at)')
+		.select('clients(id, full_name, phone, created_at, tag_bd)')
 		.eq('professional_id', professionalId)
+		.eq('tag_bd', tag)
 		.not('client_id', 'is', null);
 	if (error) throw error;
 	const rows = (data ?? []) as unknown as { clients: Client | null }[];
 	const byId = new Map<string, Client>();
 	for (const row of rows) {
-		if (row.clients) byId.set(row.clients.id, row.clients);
+		if (row.clients && row.clients.tag_bd === tag) byId.set(row.clients.id, row.clients);
 	}
 	return Array.from(byId.values());
 }
@@ -298,26 +315,26 @@ export interface ClientNote {
 	client_id: string;
 	note: string;
 	updated_at: string;
+	tag_bd: string;
 }
 
-/** Note privée du professionnel sur un client précis (fiche client), null si jamais renseignée. */
-export async function getClientNote(professionalId: string, clientId: string): Promise<ClientNote | null> {
+export async function getClientNote(professionalId: string, clientId: string, tag = getDemoTag()): Promise<ClientNote | null> {
 	const { data, error } = await supabase
 		.from('client_notes')
 		.select('*')
 		.eq('professional_id', professionalId)
 		.eq('client_id', clientId)
+		.eq('tag_bd', tag)
 		.maybeSingle();
 	if (error) throw error;
 	return data;
 }
 
-/** Crée ou met à jour la note privée du professionnel sur un client. */
-export async function upsertClientNote(professionalId: string, clientId: string, note: string): Promise<ClientNote> {
+export async function upsertClientNote(professionalId: string, clientId: string, note: string, tag = getDemoTag()): Promise<ClientNote> {
 	const { data, error } = await supabase
 		.from('client_notes')
 		.upsert(
-			{ professional_id: professionalId, client_id: clientId, note, updated_at: new Date().toISOString() },
+			{ professional_id: professionalId, client_id: clientId, note, tag_bd: tag, updated_at: new Date().toISOString() },
 			{ onConflict: 'professional_id,client_id' },
 		)
 		.select()
@@ -326,13 +343,13 @@ export async function upsertClientNote(professionalId: string, clientId: string,
 	return data as ClientNote;
 }
 
-/** Messages échangés entre un professionnel et un client précis, dans l'ordre chronologique. */
-export async function getMessages(professionalId: string, clientId: string): Promise<Message[]> {
+export async function getMessages(professionalId: string, clientId: string, tag = getDemoTag()): Promise<Message[]> {
 	const { data, error } = await supabase
 		.from('messages')
 		.select('*')
 		.eq('professional_id', professionalId)
 		.eq('client_id', clientId)
+		.eq('tag_bd', tag)
 		.order('created_at');
 	if (error) throw error;
 	return data ?? [];
@@ -343,20 +360,19 @@ export async function sendMessage(message: {
 	client_id: string;
 	sender: 'professional' | 'client';
 	body: string;
-}): Promise<Message> {
-	const { data, error } = await supabase.from('messages').insert(message).select().single();
+}, tag = getDemoTag()): Promise<Message> {
+	const { data, error } = await supabase.from('messages').insert({ ...message, tag_bd: tag }).select().single();
 	if (error) throw error;
 	return data as Message;
 }
 
-export async function updateAppointmentStatus(id: string, status: Appointment['status']) {
-	const { data, error } = await supabase.from('appointments').update({ status }).eq('id', id).select().single();
+export async function updateAppointmentStatus(id: string, status: Appointment['status'], tag = getDemoTag()) {
+	const { data, error } = await supabase.from('appointments').update({ status }).eq('id', id).eq('tag_bd', tag).select().single();
 	if (error) throw error;
 	return data as Appointment;
 }
 
-/** Déplace un rendez-vous existant vers un nouveau créneau (le client ne peut pas modifier au dernier moment, cf. UI). */
-export async function rescheduleAppointment(id: string, startTime: string, endTime: string) {
+export async function rescheduleAppointment(id: string, startTime: string, endTime: string, tag = getDemoTag()) {
 	if (new Date(startTime) <= new Date()) {
 		throw new Error('Impossible de choisir un créneau déjà passé.');
 	}
@@ -364,46 +380,46 @@ export async function rescheduleAppointment(id: string, startTime: string, endTi
 		.from('appointments')
 		.update({ start_time: startTime, end_time: endTime })
 		.eq('id', id)
+		.eq('tag_bd', tag)
 		.select()
 		.single();
 	if (error) throw error;
 	return data as Appointment;
 }
 
-/** Profil client (espace "mes rendez-vous"), id = auth.users.id. */
-export async function getClientById(userId: string): Promise<Client | null> {
-	const { data, error } = await supabase.from('clients').select('*').eq('id', userId).maybeSingle();
+export async function getClientById(userId: string, tag = getDemoTag()): Promise<Client | null> {
+	const { data, error } = await supabase.from('clients').select('*').eq('id', userId).eq('tag_bd', tag).maybeSingle();
 	if (error) throw error;
 	return data;
 }
 
-export async function createClient(client: Pick<Client, 'id'> & Partial<Client>) {
-	const { data, error } = await supabase.from('clients').insert(client).select().single();
+export async function createClient(client: Pick<Client, 'id'> & Partial<Client>, tag = getDemoTag()) {
+	const { data, error } = await supabase.from('clients').insert({ ...client, tag_bd: tag }).select().single();
 	if (error) throw error;
 	return data as Client;
 }
 
-export async function updateClient(id: string, changes: Partial<Client>) {
-	const { data, error } = await supabase.from('clients').update(changes).eq('id', id).select().single();
+export async function updateClient(id: string, changes: Partial<Client>, tag = getDemoTag()) {
+	const { data, error } = await supabase.from('clients').update(changes).eq('id', id).eq('tag_bd', tag).select().single();
 	if (error) throw error;
 	return data as Client;
 }
 
-export async function getAppointmentsForClient(clientId: string): Promise<(Appointment & { services: { name: string } | null })[]> {
+export async function getAppointmentsForClient(clientId: string, tag = getDemoTag()): Promise<(Appointment & { services: { name: string } | null })[]> {
 	const { data, error } = await supabase
 		.from('appointments')
 		.select('*, services(name)')
 		.eq('client_id', clientId)
+		.eq('tag_bd', tag)
 		.order('start_time', { ascending: false });
 	if (error) throw error;
 	return (data ?? []) as unknown as (Appointment & { services: { name: string } | null })[];
 }
 
-/** Détermine le type de compte d'un utilisateur authentifié (pour rediriger après connexion/inscription). */
-export async function getAccountType(userId: string): Promise<'professional' | 'client' | null> {
-	const professional = await getProfessionalByUserId(userId);
+export async function getAccountType(userId: string, tag = getDemoTag()): Promise<'professional' | 'client' | null> {
+	const professional = await getProfessionalByUserId(userId, tag);
 	if (professional) return 'professional';
-	const client = await getClientById(userId);
+	const client = await getClientById(userId, tag);
 	if (client) return 'client';
 	return null;
 }

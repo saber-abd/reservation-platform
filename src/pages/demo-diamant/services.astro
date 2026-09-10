@@ -2,7 +2,7 @@
 import Layout from '@/layouts/Layout.astro';
 import ServicesList from '@/components/ServicesList';
 import { getSiteConfig } from '@/config/site';
-const siteConfig = await getSiteConfig();
+const siteConfig = await getSiteConfig(Astro.url.pathname);
 ---
 
 <Layout title="Services" description={`Découvrez les prestations proposées par ${siteConfig.business.name}.`}>

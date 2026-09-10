@@ -1,11 +1,11 @@
 ---
-import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import DashboardNav from '@/components/dashboard/DashboardNav';
-import StatsPanel from '@/components/dashboard/StatsPanel';
+import PremiumDashboardLayout from '@/layouts/PremiumDashboardLayout.astro';
+import PremiumDashboardNav from '@/components/premium/dashboard/PremiumDashboardNav';
+import PremiumStatsPanel from '@/components/premium/dashboard/PremiumStatsPanel';
 ---
 
-<DashboardLayout title="Statistiques">
-	<DashboardNav basePath="/demo-premium" client:load />
-	<StatsPanel client:load />
-</DashboardLayout>
+<PremiumDashboardLayout title="Statistiques">
+	<PremiumDashboardNav basePath="/demo-premium" client:load />
+	<PremiumStatsPanel client:load />
+</PremiumDashboardLayout>
 

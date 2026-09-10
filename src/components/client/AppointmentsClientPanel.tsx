@@ -91,16 +91,16 @@ function RescheduleModal({
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
 			<div
-				className="w-full max-w-lg rounded-xl border border-border bg-white p-6 shadow-lg"
+				className="w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-lg"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<div className="flex items-start justify-between">
-					<h2 className="text-lg font-semibold text-stone-900">Modifier le rendez-vous</h2>
-					<button onClick={onClose} className="text-sm text-stone-400 hover:text-stone-600">
+					<h2 className="text-lg font-semibold text-foreground">Modifier le rendez-vous</h2>
+					<button onClick={onClose} className="text-sm text-stone-400 hover:text-muted-foreground">
 						✕
 					</button>
 				</div>
-				<p className="mt-1 text-sm text-stone-500">
+				<p className="mt-1 text-sm text-muted-foreground">
 					Créneau actuel : {formatDate(appointment.start_time)}
 				</p>
 
@@ -116,7 +116,7 @@ function RescheduleModal({
 								setSlots(null);
 								setSelectedSlot(null);
 							}}
-							className="mt-1 rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+							className="mt-1 rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						/>
 					</div>
 					<button
@@ -142,14 +142,14 @@ function RescheduleModal({
 										? 'cursor-not-allowed border-border bg-stone-100 text-stone-400 line-through'
 										: selectedSlot?.start.getTime() === slot.start.getTime()
 											? 'border-rose-600 bg-rose-600 text-white'
-											: 'border-border bg-white hover:border-rose-300'
+											: 'border-border bg-card hover:border-rose-300'
 								}`}
 							>
 								{slot.start.toLocaleString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
 							</button>
 						))}
 						{slots.length === 0 && (
-							<p className="col-span-full text-sm text-stone-500">Aucun créneau disponible ce jour-là.</p>
+							<p className="col-span-full text-sm text-muted-foreground">Aucun créneau disponible ce jour-là.</p>
 						)}
 					</div>
 				)}
@@ -201,17 +201,17 @@ export default function AppointmentsClientPanel() {
 		setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, ...updated } : a)));
 	}
 
-	if (loading) return <p className="text-sm text-stone-500">Chargement...</p>;
+	if (loading) return <p className="text-sm text-muted-foreground">Chargement...</p>;
 	if (error) return <p className="text-sm text-red-600">{error}</p>;
 
 	return (
 		<div>
-			<h1 className="text-2xl font-bold text-stone-900">Mes rendez-vous</h1>
-			<p className="mt-1 text-sm text-stone-500">Bienvenue, {client?.full_name ?? 'vous'}.</p>
+			<h1 className="text-2xl font-bold text-foreground">Mes rendez-vous</h1>
+			<p className="mt-1 text-sm text-muted-foreground">Bienvenue, {client?.full_name ?? 'vous'}.</p>
 
-			<div className="mt-6 overflow-x-auto rounded-xl border border-border bg-white">
+			<div className="mt-6 overflow-x-auto rounded-xl border border-border bg-card">
 				<table className="w-full text-left text-sm">
-					<thead className="bg-stone-50 text-xs uppercase text-stone-500">
+					<thead className="bg-stone-50 text-xs uppercase text-muted-foreground">
 						<tr>
 							<th className="px-4 py-3">Prestation</th>
 							<th className="px-4 py-3">Créneau</th>
@@ -222,14 +222,14 @@ export default function AppointmentsClientPanel() {
 					<tbody>
 						{loadingAppointments && (
 							<tr>
-								<td className="px-4 py-4 text-stone-500" colSpan={4}>
+								<td className="px-4 py-4 text-muted-foreground" colSpan={4}>
 									Chargement des rendez-vous...
 								</td>
 							</tr>
 						)}
 						{!loadingAppointments && appointments.length === 0 && (
 							<tr>
-								<td className="px-4 py-4 text-stone-500" colSpan={4}>
+								<td className="px-4 py-4 text-muted-foreground" colSpan={4}>
 								{(() => {
 									const basePath = typeof window !== 'undefined' ? (window.location.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '') : '';
 									return (
@@ -243,8 +243,8 @@ export default function AppointmentsClientPanel() {
 						)}
 						{appointments.map((appointment) => (
 							<tr key={appointment.id} className="border-t border-border">
-								<td className="px-4 py-3 font-medium text-stone-900">{appointment.services?.name ?? '—'}</td>
-								<td className="px-4 py-3 text-stone-600">{formatDate(appointment.start_time)}</td>
+								<td className="px-4 py-3 font-medium text-foreground">{appointment.services?.name ?? '—'}</td>
+								<td className="px-4 py-3 text-muted-foreground">{formatDate(appointment.start_time)}</td>
 								<td className="px-4 py-3">
 									<span
 										className={`rounded-full px-2 py-1 text-xs font-medium ${statusStyles[appointment.status]}`}

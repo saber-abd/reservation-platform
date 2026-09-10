@@ -44,21 +44,21 @@ function DetailModal({
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
 			<div
-				className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-white p-6 shadow-lg"
+				className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-card p-6 shadow-lg"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<div className="flex items-start justify-between">
-					<h2 className="text-lg font-semibold text-stone-900">{title}</h2>
-					<button onClick={onClose} className="text-sm text-stone-400 hover:text-stone-600">
+					<h2 className="text-lg font-semibold text-foreground">{title}</h2>
+					<button onClick={onClose} className="text-sm text-stone-400 hover:text-muted-foreground">
 						✕
 					</button>
 				</div>
 				<div className="mt-4 space-y-2">
-					{appointments.length === 0 && <p className="text-sm text-stone-500">Aucun rendez-vous.</p>}
+					{appointments.length === 0 && <p className="text-sm text-muted-foreground">Aucun rendez-vous.</p>}
 					{appointments.map((a) => (
 						<div key={a.id} className="rounded-lg border border-border p-3 text-sm">
-							<p className="font-medium text-stone-900">{a.client_name}</p>
-							<p className="text-stone-500">{formatDate(a.start_time)}</p>
+							<p className="font-medium text-foreground">{a.client_name}</p>
+							<p className="text-muted-foreground">{formatDate(a.start_time)}</p>
 						</div>
 					))}
 				</div>
@@ -134,7 +134,7 @@ export default function StatsPanel() {
 		};
 	}, [appointments, services, rangeStart, rangeEnd]);
 
-	if (loading) return <p className="text-sm text-stone-500">Chargement...</p>;
+	if (loading) return <p className="text-sm text-muted-foreground">Chargement...</p>;
 	if (error) return <p className="text-sm text-red-600">{error}</p>;
 
 	const cards = [
@@ -165,8 +165,8 @@ export default function StatsPanel() {
 
 	return (
 		<div>
-			<h1 className="text-2xl font-bold text-stone-900">Statistiques</h1>
-			<p className="mt-1 text-sm text-stone-500">Un suivi rapide de votre activité. Cliquez sur une carte pour voir le détail.</p>
+			<h1 className="text-2xl font-bold text-foreground">Statistiques</h1>
+			<p className="mt-1 text-sm text-muted-foreground">Un suivi rapide de votre activité. Cliquez sur une carte pour voir le détail.</p>
 
 			<div className="mt-6 flex flex-wrap items-end gap-3">
 				<div className="flex flex-wrap gap-2">
@@ -180,7 +180,7 @@ export default function StatsPanel() {
 								className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
 									preset === p
 										? 'border-rose-600 bg-rose-600 text-white'
-										: 'border-border bg-white text-stone-600 hover:border-rose-300'
+										: 'border-border bg-card text-muted-foreground hover:border-rose-300'
 								}`}
 							>
 								{presetLabels[p]}
@@ -189,7 +189,7 @@ export default function StatsPanel() {
 				</div>
 				<div className="flex flex-wrap items-end gap-2">
 					<div>
-						<label className="text-xs text-stone-500">Du</label>
+						<label className="text-xs text-muted-foreground">Du</label>
 						<input
 							type="date"
 							value={customStart}
@@ -197,11 +197,11 @@ export default function StatsPanel() {
 								setCustomStart(e.target.value);
 								setPreset('custom');
 							}}
-							className="mt-1 block rounded-lg border border-border bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+							className="mt-1 block rounded-lg border border-border bg-card px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						/>
 					</div>
 					<div>
-						<label className="text-xs text-stone-500">Au</label>
+						<label className="text-xs text-muted-foreground">Au</label>
 						<input
 							type="date"
 							value={customEnd}
@@ -209,7 +209,7 @@ export default function StatsPanel() {
 								setCustomEnd(e.target.value);
 								setPreset('custom');
 							}}
-							className="mt-1 block rounded-lg border border-border bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+							className="mt-1 block rounded-lg border border-border bg-card px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						/>
 					</div>
 				</div>
@@ -222,12 +222,12 @@ export default function StatsPanel() {
 						type="button"
 						onClick={card.onClick}
 						disabled={!card.onClick}
-						className={`rounded-xl border border-border bg-white p-6 text-left shadow-sm ${
+						className={`rounded-xl border border-border bg-card p-6 text-left shadow-sm ${
 							card.onClick ? 'transition-colors hover:border-rose-300 cursor-pointer' : 'cursor-default'
 						}`}
 					>
-						<p className="text-xs font-medium uppercase tracking-wide text-stone-500">{card.label}</p>
-						<p className="mt-2 text-2xl font-bold text-stone-900">{card.value}</p>
+						<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{card.label}</p>
+						<p className="mt-2 text-2xl font-bold text-foreground">{card.value}</p>
 						{card.onClick && <p className="mt-1 text-xs text-rose-600">Voir le détail →</p>}
 					</button>
 				))}

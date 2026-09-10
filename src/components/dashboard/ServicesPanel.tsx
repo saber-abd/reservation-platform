@@ -122,16 +122,16 @@ export default function ServicesPanel() {
 		setServices((prev) => prev.filter((s) => s.id !== id));
 	}
 
-	if (loading) return <p className="text-sm text-stone-500">Chargement...</p>;
+	if (loading) return <p className="text-sm text-muted-foreground">Chargement...</p>;
 	if (error) return <p className="text-sm text-red-600">{error}</p>;
 
 	return (
 		<div>
-			<h1 className="text-2xl font-bold text-stone-900">Mes prestations</h1>
+			<h1 className="text-2xl font-bold text-foreground">Mes prestations</h1>
 
 			<div className="mt-6 overflow-hidden rounded-xl border border-border">
 				<table className="w-full text-left text-sm">
-					<thead className="bg-stone-50 text-xs uppercase text-stone-500">
+					<thead className="bg-stone-50 text-xs uppercase text-muted-foreground">
 						<tr>
 							<th className="px-4 py-3" />
 							<th className="px-4 py-3">Nom</th>
@@ -145,7 +145,7 @@ export default function ServicesPanel() {
 					<tbody>
 						{services.length === 0 && (
 							<tr>
-								<td className="px-4 py-4 text-stone-500" colSpan={6}>
+								<td className="px-4 py-4 text-muted-foreground" colSpan={6}>
 									Aucune prestation pour le moment.
 								</td>
 							</tr>
@@ -159,15 +159,15 @@ export default function ServicesPanel() {
 										className="h-10 w-10 rounded-lg object-cover" 
 									/>
 								</td>
-								<td className="px-4 py-3 font-medium text-stone-900">{service.name}</td>
-								<td className="px-4 py-3 text-stone-600">{service.category || 'Femmes'}</td>
-								<td className="px-4 py-3 text-stone-600">{service.duration_minutes} min</td>
-								<td className="px-4 py-3 text-stone-600">{service.price} €</td>
+								<td className="px-4 py-3 font-medium text-foreground">{service.name}</td>
+								<td className="px-4 py-3 text-muted-foreground">{service.category || 'Femmes'}</td>
+								<td className="px-4 py-3 text-muted-foreground">{service.duration_minutes} min</td>
+								<td className="px-4 py-3 text-muted-foreground">{service.price} €</td>
 								<td className="px-4 py-3">
 									<button
 										onClick={() => handleToggleActive(service)}
 										className={`rounded-full px-2 py-1 text-xs font-medium ${
-											service.is_active ? 'bg-green-50 text-green-700' : 'bg-stone-100 text-stone-500'
+											service.is_active ? 'bg-green-50 text-green-700' : 'bg-stone-100 text-muted-foreground'
 										}`}
 									>
 										{service.is_active ? 'Active' : 'Masquée'}
@@ -194,7 +194,7 @@ export default function ServicesPanel() {
 			</div>
 
 			<form onSubmit={handleSubmit(onSubmit)} className="mt-8 grid gap-4 rounded-xl border border-border p-6 sm:grid-cols-2">
-				<p className="col-span-full text-sm font-semibold text-stone-900">
+				<p className="col-span-full text-sm font-semibold text-foreground">
 					{editingId ? 'Modifier la prestation' : 'Ajouter une prestation'}
 				</p>
 				<div>
@@ -203,7 +203,7 @@ export default function ServicesPanel() {
 					</label>
 					<input
 						id="name"
-						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('name')}
 					/>
 					{errors.name && <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
@@ -214,7 +214,7 @@ export default function ServicesPanel() {
 					</label>
 					<select
 						id="category"
-						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('category')}
 					>
 						<option value="Femmes">Femmes</option>
@@ -230,7 +230,7 @@ export default function ServicesPanel() {
 					<input
 						id="durationMinutes"
 						type="number"
-						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('durationMinutes')}
 					/>
 					{errors.durationMinutes && (
@@ -245,7 +245,7 @@ export default function ServicesPanel() {
 						id="price"
 						type="number"
 						step="0.01"
-						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('price')}
 					/>
 					{errors.price && <p className="mt-1 text-xs text-red-600">{errors.price.message}</p>}
@@ -257,7 +257,7 @@ export default function ServicesPanel() {
 					<textarea
 						id="description"
 						rows={2}
-						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 						{...register('description')}
 					/>
 				</div>
@@ -270,7 +270,7 @@ export default function ServicesPanel() {
 						type="file"
 						accept="image/*"
 						onChange={handleFileChange}
-						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 					/>
 					{imageFile && (
 						<div className="mt-3 flex items-center gap-4">
@@ -291,7 +291,7 @@ export default function ServicesPanel() {
 						{uploading ? 'Envoi de la photo...' : editingId ? 'Enregistrer les modifications' : 'Ajouter'}
 					</button>
 					{editingId && (
-						<button type="button" onClick={handleCancelEdit} className="text-sm font-medium text-stone-500 hover:text-stone-700">
+						<button type="button" onClick={handleCancelEdit} className="text-sm font-medium text-muted-foreground hover:text-stone-700">
 							Annuler la modification
 						</button>
 					)}

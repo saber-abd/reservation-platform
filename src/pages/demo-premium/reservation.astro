@@ -3,7 +3,7 @@ import PremiumAutoLayout from '@/layouts/PremiumAutoLayout.astro';
 import ReservationForm from '@/components/reservation/ReservationForm';
 import { getSiteConfig } from '@/config/site';
 
-const siteConfig = await getSiteConfig();
+const siteConfig = await getSiteConfig(Astro.url.pathname);
 ---
 
 <PremiumAutoLayout title="Réserver" description={`Réservez votre prestation en ligne chez ${siteConfig.business.name}.`}>

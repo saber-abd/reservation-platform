@@ -31,16 +31,16 @@ function ClientNoteCard({ professionalId, client }: { professionalId: string; cl
 	}
 
 	return (
-		<div className="rounded-xl border border-border bg-white p-4">
-			<p className="text-sm font-semibold text-stone-900">Note privée</p>
-			<p className="mt-1 text-xs text-stone-500">Visible uniquement par vous — préférences, allergies, historique...</p>
+		<div className="rounded-xl border border-border bg-card p-4">
+			<p className="text-sm font-semibold text-foreground">Note privée</p>
+			<p className="mt-1 text-xs text-muted-foreground">Visible uniquement par vous — préférences, allergies, historique...</p>
 			<textarea
 				rows={3}
 				value={note}
 				disabled={loading}
 				onChange={(e) => setNote(e.target.value)}
 				placeholder="Ex : préfère les colorations sans ammoniaque, allergie au latex..."
-				className="mt-2 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+				className="mt-2 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 			/>
 			<div className="mt-2 flex items-center gap-3">
 				<button
@@ -51,7 +51,7 @@ function ClientNoteCard({ professionalId, client }: { professionalId: string; cl
 				>
 					{saving ? 'Enregistrement...' : 'Enregistrer'}
 				</button>
-				{status && <p className="text-xs text-stone-500">{status}</p>}
+				{status && <p className="text-xs text-muted-foreground">{status}</p>}
 			</div>
 		</div>
 	);
@@ -67,8 +67,8 @@ function ClientAppointments({ clientId }: { clientId: string }) {
 			.finally(() => setLoading(false));
 	}, [clientId]);
 
-	if (loading) return <p className="text-sm text-stone-500">Chargement des rendez-vous...</p>;
-	if (appointments.length === 0) return <p className="text-sm text-stone-500">Aucun rendez-vous pour ce client.</p>;
+	if (loading) return <p className="text-sm text-muted-foreground">Chargement des rendez-vous...</p>;
+	if (appointments.length === 0) return <p className="text-sm text-muted-foreground">Aucun rendez-vous pour ce client.</p>;
 
 	const statusLabels: Record<string, string> = {
 		pending: 'En attente',
@@ -78,9 +78,9 @@ function ClientAppointments({ clientId }: { clientId: string }) {
 	};
 
 	return (
-		<div className="rounded-xl border border-border bg-white overflow-hidden">
+		<div className="rounded-xl border border-border bg-card overflow-hidden">
 			<table className="w-full text-left text-sm">
-				<thead className="bg-stone-50 text-xs uppercase text-stone-500">
+				<thead className="bg-stone-50 text-xs uppercase text-muted-foreground">
 					<tr>
 						<th className="px-4 py-3">Date</th>
 						<th className="px-4 py-3">Prestation</th>
@@ -90,7 +90,7 @@ function ClientAppointments({ clientId }: { clientId: string }) {
 				<tbody className="divide-y divide-border">
 					{appointments.map((apt) => (
 						<tr key={apt.id}>
-							<td className="px-4 py-3 text-stone-900">
+							<td className="px-4 py-3 text-foreground">
 								{new Date(apt.start_time).toLocaleString('fr-FR', {
 									day: '2-digit',
 									month: 'short',
@@ -99,8 +99,8 @@ function ClientAppointments({ clientId }: { clientId: string }) {
 									minute: '2-digit'
 								})}
 							</td>
-							<td className="px-4 py-3 text-stone-600">{apt.services?.name ?? '—'}</td>
-							<td className="px-4 py-3 text-stone-500 capitalize">{statusLabels[apt.status] || apt.status}</td>
+							<td className="px-4 py-3 text-muted-foreground">{apt.services?.name ?? '—'}</td>
+							<td className="px-4 py-3 text-muted-foreground capitalize">{statusLabels[apt.status] || apt.status}</td>
 						</tr>
 					))}
 				</tbody>
@@ -119,19 +119,19 @@ export default function ClientsPanel() {
 		getRegisteredClients(professional.id).then(setClients);
 	}, [professional]);
 
-	if (loading) return <p className="text-sm text-stone-500">Chargement...</p>;
+	if (loading) return <p className="text-sm text-muted-foreground">Chargement...</p>;
 	if (error) return <p className="text-sm text-red-600">{error}</p>;
 
 	return (
 		<div>
-			<h1 className="text-2xl font-bold text-stone-900">Mes clients</h1>
-			<p className="mt-1 text-sm text-stone-500">
+			<h1 className="text-2xl font-bold text-foreground">Mes clients</h1>
+			<p className="mt-1 text-sm text-muted-foreground">
 				Fiches infos clients : consultez leurs historiques, notez vos préférences, et échangez par message.
 			</p>
 
 			<div className="mt-6 grid items-start gap-6 md:grid-cols-3">
 				<div className="grid gap-2 md:col-span-1">
-					{clients.length === 0 && <p className="text-sm text-stone-500">Aucun client inscrit pour le moment.</p>}
+					{clients.length === 0 && <p className="text-sm text-muted-foreground">Aucun client inscrit pour le moment.</p>}
 					{clients.map((client) => (
 						<button
 							key={client.id}
@@ -139,11 +139,11 @@ export default function ClientsPanel() {
 							className={`rounded-xl border p-3 text-left text-sm transition-colors ${
 								selectedClient?.id === client.id
 									? 'border-rose-600 bg-rose-50'
-									: 'border-border bg-white hover:border-rose-300'
+									: 'border-border bg-card hover:border-rose-300'
 							}`}
 						>
-							<p className="font-medium text-stone-900">{client.full_name || 'Client'}</p>
-							{client.phone && <p className="text-xs text-stone-500">{client.phone}</p>}
+							<p className="font-medium text-foreground">{client.full_name || 'Client'}</p>
+							{client.phone && <p className="text-xs text-muted-foreground">{client.phone}</p>}
 						</button>
 					))}
 				</div>
@@ -151,9 +151,9 @@ export default function ClientsPanel() {
 				<div className="md:col-span-2 flex flex-col gap-6">
 					{selectedClient && professional ? (
 						<>
-							<div className="rounded-xl border border-border bg-white p-4">
-								<h2 className="text-lg font-bold text-stone-900">{selectedClient.full_name || 'Client inconnu'}</h2>
-								<p className="text-sm text-stone-600 mt-1">
+							<div className="rounded-xl border border-border bg-card p-4">
+								<h2 className="text-lg font-bold text-foreground">{selectedClient.full_name || 'Client inconnu'}</h2>
+								<p className="text-sm text-muted-foreground mt-1">
 									Téléphone : {selectedClient.phone ? <a href={`tel:${selectedClient.phone}`} className="text-rose-600 hover:underline">{selectedClient.phone}</a> : 'Non renseigné'}
 								</p>
 							</div>
@@ -161,18 +161,18 @@ export default function ClientsPanel() {
 							<ClientNoteCard professionalId={professional.id} client={selectedClient} />
 							
 							<div>
-								<h3 className="text-sm font-semibold text-stone-900 mb-3">Historique des rendez-vous</h3>
+								<h3 className="text-sm font-semibold text-foreground mb-3">Historique des rendez-vous</h3>
 								<ClientAppointments clientId={selectedClient.id} />
 							</div>
 
 							<div>
-								<h3 className="text-sm font-semibold text-stone-900 mb-3">Messages</h3>
+								<h3 className="text-sm font-semibold text-foreground mb-3">Messages</h3>
 								<MessageThread professionalId={professional.id} clientId={selectedClient.id} role="professional" />
 							</div>
 						</>
 					) : (
 						<div className="rounded-xl border border-dashed border-stone-300 p-8 text-center">
-							<p className="text-sm text-stone-500">Sélectionnez un client dans la liste pour afficher sa fiche.</p>
+							<p className="text-sm text-muted-foreground">Sélectionnez un client dans la liste pour afficher sa fiche.</p>
 						</div>
 					)}
 				</div>

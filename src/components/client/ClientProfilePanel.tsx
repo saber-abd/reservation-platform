@@ -34,21 +34,21 @@ export default function ClientProfilePanel() {
 		}
 	}
 
-	if (loading) return <p className="text-sm text-stone-500">Chargement...</p>;
+	if (loading) return <p className="text-sm text-muted-foreground">Chargement...</p>;
 	if (error) return <p className="text-sm text-red-600">{error}</p>;
 
 	return (
 		<div>
-			<h1 className="text-2xl font-bold text-stone-900">Mon profil</h1>
+			<h1 className="text-2xl font-bold text-foreground">Mon profil</h1>
 
-			<form onSubmit={handleSubmit} className="mt-6 mx-auto max-w-md space-y-4 rounded-xl border border-border bg-white p-6 shadow-sm">
+			<form onSubmit={handleSubmit} className="mt-6 mx-auto max-w-md space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm">
 				<div>
 					<label className="block text-sm font-medium text-stone-700">Email</label>
 					<input
 						type="email"
 						value={email ?? ''}
 						disabled
-						className="mt-1 w-full rounded-lg border border-border bg-stone-50 px-3 py-2 text-sm text-stone-500"
+						className="mt-1 w-full rounded-lg border border-border bg-stone-50 px-3 py-2 text-sm text-muted-foreground"
 					/>
 				</div>
 				<div>
@@ -57,7 +57,7 @@ export default function ClientProfilePanel() {
 						type="text"
 						value={fullName}
 						onChange={(e) => setFullName(e.target.value)}
-						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
+						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
 					/>
 				</div>
 				<div>
@@ -66,13 +66,13 @@ export default function ClientProfilePanel() {
 						type="tel"
 						value={phone}
 						onChange={(e) => setPhone(e.target.value)}
-						className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
+						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
 					/>
 				</div>
 				<div>
 					<AvatarPicker value={avatarKey} onChange={(k: AvatarKey) => setAvatarKey(k)} />
 				</div>
-				{message && <p className="text-sm text-stone-600">{message}</p>}
+				{message && <p className="text-sm text-muted-foreground">{message}</p>}
 				<button
 					type="submit"
 					disabled={saving}

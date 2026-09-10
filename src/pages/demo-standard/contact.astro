@@ -2,7 +2,7 @@
 import Layout from '@/layouts/Layout.astro';
 import Map from '@/components/Map.astro';
 import { getSiteConfig } from '@/config/site';
-const siteConfig = await getSiteConfig();
+const siteConfig = await getSiteConfig(Astro.url.pathname);
 ---
 
 <Layout title="Contact" description={`Contactez ${siteConfig.business.name}.`}>

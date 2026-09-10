@@ -1,7 +1,7 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import { getSiteConfig } from '@/config/site';
-const siteConfig = await getSiteConfig();
+const siteConfig = await getSiteConfig(Astro.url.pathname);
 import ReservationForm from '@/components/reservation/ReservationForm';
 ---
 

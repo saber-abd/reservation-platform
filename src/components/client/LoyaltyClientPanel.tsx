@@ -26,7 +26,7 @@ export default function LoyaltyClientPanel() {
 		load();
 	}, []);
 
-	if (loading) return <p className="text-sm text-stone-500">Chargement de votre programme de fidélité...</p>;
+	if (loading) return <p className="text-sm text-muted-foreground">Chargement de votre programme de fidélité...</p>;
 	if (error || !data) return <p className="text-sm text-red-600">{error}</p>;
 
 	const radius = 60;
@@ -74,14 +74,14 @@ export default function LoyaltyClientPanel() {
 				</div>
 
 				<div className="flex-1 text-center sm:text-left">
-					<h2 className="text-2xl font-bold text-stone-900">
+					<h2 className="text-2xl font-bold text-foreground">
 						Grade actuel : <span className={`bg-gradient-to-r bg-clip-text text-transparent ${tierColors[data.tier].split(' ')[0]}`}>{data.tier}</span>
 					</h2>
-					<p className="mt-2 text-sm text-stone-600">
+					<p className="mt-2 text-sm text-muted-foreground">
 						Vous avez cumulé <strong className="text-emerald-700">{data.passages} passages</strong>.
 					</p>
 					{data.nextTierPoints && (
-						<p className="mt-1 text-sm text-stone-500">
+						<p className="mt-1 text-sm text-muted-foreground">
 							Encore {data.nextTierPoints - data.points} points pour atteindre le niveau supérieur !
 						</p>
 					)}
@@ -89,7 +89,7 @@ export default function LoyaltyClientPanel() {
 			</div>
 
 			{data.activeBonuses.length > 0 && (
-				<div className="rounded-xl border border-emerald-100 bg-white p-6 shadow-sm">
+				<div className="rounded-xl border border-emerald-100 bg-card p-6 shadow-sm">
 					<h3 className="text-lg font-bold text-emerald-800">Cadeaux & Avantages en cours</h3>
 					<ul className="mt-4 space-y-3">
 						{data.activeBonuses.map((bonus, i) => (
@@ -102,9 +102,9 @@ export default function LoyaltyClientPanel() {
 			)}
 
 			{data.perks.length > 0 && (
-				<div className="rounded-xl border border-border bg-white p-6 shadow-sm">
-					<h3 className="text-lg font-bold text-stone-900">Avantages permanents</h3>
-					<ul className="mt-4 space-y-2 text-sm text-stone-600">
+				<div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+					<h3 className="text-lg font-bold text-foreground">Avantages permanents</h3>
+					<ul className="mt-4 space-y-2 text-sm text-muted-foreground">
 						{data.perks.map((perk, i) => (
 							<li key={i} className="flex items-center gap-2">
 								<span className="text-emerald-500">✓</span> {perk}
@@ -115,8 +115,8 @@ export default function LoyaltyClientPanel() {
 			)}
 
 			<div>
-				<h3 className="text-xl font-bold text-stone-900">Vos Badges</h3>
-				<p className="mt-1 text-sm text-stone-500">Débloquez de nouveaux badges pour obtenir des réductions exclusives.</p>
+				<h3 className="text-xl font-bold text-foreground">Vos Badges</h3>
+				<p className="mt-1 text-sm text-muted-foreground">Débloquez de nouveaux badges pour obtenir des réductions exclusives.</p>
 				
 				<div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 					{data.badges.map((badge) => {
@@ -133,8 +133,8 @@ export default function LoyaltyClientPanel() {
 								<div className={`text-5xl ${isUnlocked ? 'animate-bounce' : ''}`} style={{ animationDuration: '2s' }}>
 									{badge.icon}
 								</div>
-								<h4 className={`mt-4 font-bold ${isUnlocked ? 'text-emerald-800' : 'text-stone-600'}`}>{badge.name}</h4>
-								<p className="mt-2 text-xs text-stone-500">{badge.description}</p>
+								<h4 className={`mt-4 font-bold ${isUnlocked ? 'text-emerald-800' : 'text-muted-foreground'}`}>{badge.name}</h4>
+								<p className="mt-2 text-xs text-muted-foreground">{badge.description}</p>
 								
 								{isUnlocked && (
 									<span className="mt-4 inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
@@ -142,7 +142,7 @@ export default function LoyaltyClientPanel() {
 									</span>
 								)}
 								{!isUnlocked && (
-									<span className="mt-4 inline-block rounded-full bg-stone-200 px-3 py-1 text-xs font-semibold text-stone-500">
+									<span className="mt-4 inline-block rounded-full bg-stone-200 px-3 py-1 text-xs font-semibold text-muted-foreground">
 										Verrouillé
 									</span>
 								)}

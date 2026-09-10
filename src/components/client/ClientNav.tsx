@@ -30,7 +30,7 @@ export default function ClientNav({ basePath = '' }: { basePath?: string }) {
 						className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
 							currentPath === `${basePath}${link.href}`
 								? 'bg-rose-50 text-rose-600'
-								: 'text-stone-600 hover:bg-stone-50'
+								: 'text-muted-foreground hover:bg-stone-50'
 						}`}
 					>
 						{link.label}
@@ -39,7 +39,7 @@ export default function ClientNav({ basePath = '' }: { basePath?: string }) {
 			</div>
 			<button
 				onClick={handleSignOut}
-				className="text-sm font-medium text-stone-500 hover:text-stone-900"
+				className="text-sm font-medium text-muted-foreground hover:text-foreground"
 			>
 				Se déconnecter
 			</button>

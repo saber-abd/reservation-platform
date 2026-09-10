@@ -6,7 +6,7 @@ import Footer from '@/components/Footer.astro';
 import SmoothScroll from '@/components/SmoothScroll.astro';
 import { getSiteConfig } from '@/config/site';
 
-const siteConfig = await getSiteConfig();
+const siteConfig = await getSiteConfig(Astro.url.pathname);
 
 interface Props {
 	title?: string;

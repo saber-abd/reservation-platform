@@ -1,7 +1,7 @@
 ---
 import { Scissors, Menu, X } from 'lucide-react';
 import { getSiteConfig } from '@/config/site';
-const siteConfig = await getSiteConfig();
+const siteConfig = await getSiteConfig(Astro.url.pathname);
 import HeaderAuthButton from '@/components/HeaderAuthButton';
 
 const currentPath = Astro.url.pathname;

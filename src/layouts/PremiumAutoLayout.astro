@@ -1,12 +1,12 @@
 ---
 import '../styles/global.css';
 import 'aos/dist/aos.css';
-import Header from '@/components/Header.astro';
-import Footer from '@/components/Footer.astro';
+import PremiumHeader from '@/components/premium/PremiumHeader.astro';
+import PremiumFooter from '@/components/premium/PremiumFooter.astro';
 import SmoothScroll from '@/components/SmoothScroll.astro';
 import { getSiteConfig } from '@/config/site';
 
-const siteConfig = await getSiteConfig();
+const siteConfig = await getSiteConfig(Astro.url.pathname);
 
 interface Props {
 	title?: string;
@@ -36,11 +36,11 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 		<meta name="theme-color" content="#1a1c29" />
 	</head>
 	<body class="flex min-h-screen flex-col bg-background text-foreground selection:bg-primary selection:text-white">
-		<Header />
+		<PremiumHeader />
 		<main class="flex-1 overflow-x-hidden">
 			<slot />
 		</main>
-		<Footer />
+		<PremiumFooter />
 		<SmoothScroll />
 	</body>
 </html>

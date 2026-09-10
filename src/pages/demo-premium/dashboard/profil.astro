@@ -1,11 +1,11 @@
 ---
-import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import DashboardNav from '@/components/dashboard/DashboardNav';
+import PremiumDashboardLayout from '@/layouts/PremiumDashboardLayout.astro';
+import PremiumDashboardNav from '@/components/premium/dashboard/PremiumDashboardNav';
 import ProfilePanel from '@/components/dashboard/ProfilePanel';
 ---
 
-<DashboardLayout title="Mon profil">
-	<DashboardNav basePath="/demo-premium" client:load />
+<PremiumDashboardLayout title="Mon profil">
+	<PremiumDashboardNav basePath="/demo-premium" client:load />
 	<ProfilePanel client:load />
-</DashboardLayout>
+</PremiumDashboardLayout>
 

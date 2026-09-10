@@ -6,7 +6,7 @@ import '../styles/global.css';
 import { Scissors, ArrowLeft } from 'lucide-react';
 import { getSiteConfig } from '@/config/site';
 import SmoothScroll from '@/components/SmoothScroll.astro';
-const siteConfig = await getSiteConfig();
+const siteConfig = await getSiteConfig(Astro.url.pathname);
 
 interface Props {
 	title?: string;

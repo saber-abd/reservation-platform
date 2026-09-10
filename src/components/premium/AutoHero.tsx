@@ -16,7 +16,7 @@ export default function AutoHero({ basePath }: { basePath: string }) {
 			{/* Background Parallax Image */}
 			<motion.div 
 				style={{ y, opacity }}
-				className="absolute inset-0 z-0"
+				className="absolute inset-0 z-0 will-change-transform"
 			>
 				{/* Dark gradient overlay */}
 				<div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent z-10" />
@@ -76,7 +76,7 @@ export default function AutoHero({ basePath }: { basePath: string }) {
 					</a>
 					<a 
 						href={`${basePath}/services`} 
-						className="rounded-xl border border-stone-600 bg-stone-900/50 backdrop-blur-sm px-8 py-4 text-sm font-bold text-white transition-colors hover:bg-stone-800 hover:border-stone-400"
+						className="rounded-xl border border-stone-600 bg-stone-900 px-8 py-4 text-sm font-bold text-white transition-colors hover:bg-stone-800 hover:border-stone-400"
 					>
 						Découvrir nos services
 					</a>

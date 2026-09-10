@@ -1,7 +1,7 @@
 ---
 import PremiumAutoLayout from '@/layouts/PremiumAutoLayout.astro';
 import { getSiteConfig } from '@/config/site';
-const siteConfig = await getSiteConfig();
+const siteConfig = await getSiteConfig(Astro.url.pathname);
 const basePath = Astro.url.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '';
 ---
 

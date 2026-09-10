@@ -1,11 +1,11 @@
 ---
-import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import ClientNav from '@/components/client/ClientNav';
+import PremiumDashboardLayout from '@/layouts/PremiumDashboardLayout.astro';
+import PremiumClientNav from '@/components/premium/client/PremiumClientNav';
 import AppointmentsClientPanel from '@/components/client/AppointmentsClientPanel';
 ---
 
-<DashboardLayout title="Mes rendez-vous">
-	<ClientNav basePath="/demo-premium" client:load />
+<PremiumDashboardLayout title="Mes rendez-vous">
+	<PremiumClientNav basePath="/demo-premium" client:load />
 	<AppointmentsClientPanel client:load />
-</DashboardLayout>
+</PremiumDashboardLayout>
 

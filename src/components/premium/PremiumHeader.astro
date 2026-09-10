@@ -1,0 +1,102 @@
+---
+import { Wrench, Menu, X } from 'lucide-react';
+import { getSiteConfig } from '@/config/site';
+const siteConfig = await getSiteConfig(Astro.url.pathname);
+import HeaderAuthButton from '@/components/HeaderAuthButton';
+
+const currentPath = Astro.url.pathname;
+const basePathMatch = currentPath.match(/^\/(demo-[^/]+)/);
+const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
+---
+
+<header class="sticky top-0 z-50 bg-stone-950/80 backdrop-blur-md border-b border-stone-800">
+	<div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+		<a href={`${basePath}/`} aria-label={siteConfig.business.name} class="flex items-center gap-3">
+			<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-[0_0_15px_rgba(255,50,50,0.3)]">
+				<Wrench size={20} />
+			</span>
+			<span class="text-xl font-black text-white tracking-widest uppercase font-[var(--font-heading)]">{siteConfig.business.name}</span>
+		</a>
+
+		<!-- Desktop Nav -->
+		<nav class="hidden items-center gap-8 md:flex">
+			{
+				siteConfig.nav.map((item) => (
+					<a
+						href={`${basePath}${item.href}`}
+						class:list={[
+							'text-sm font-bold uppercase tracking-wider transition-colors hover:text-primary',
+							currentPath === item.href ? 'text-primary' : 'text-stone-400',
+						]}
+					>
+						{item.label}
+					</a>
+				))
+			}
+		</nav>
+
+		<div class="flex items-center gap-4">
+			<div class="hidden md:flex items-center gap-4">
+				{basePath && (
+					<a href="/" class="rounded-xl border border-stone-700 px-4 py-2 text-sm font-bold text-stone-300 hover:bg-stone-800 transition-colors uppercase tracking-wider">
+						← Portfolio
+					</a>
+				)}
+				<div class="theme-auto">
+					<HeaderAuthButton client:load basePath={basePath} />
+				</div>
+			</div>
+
+			<!-- Mobile Menu Toggle -->
+			<button id="mobile-menu-btn" class="md:hidden text-stone-400 hover:text-primary focus:outline-none">
+				<span id="icon-menu"><Menu size={28} /></span>
+				<span id="icon-close" class="hidden"><X size={28} /></span>
+			</button>
+		</div>
+	</div>
+
+	<!-- Mobile Nav -->
+	<div id="mobile-nav" class="hidden border-t border-stone-800 bg-stone-950 md:hidden absolute w-full h-screen">
+		<nav class="flex flex-col px-6 py-8 gap-6">
+			{
+				siteConfig.nav.map((item) => (
+					<a
+						href={`${basePath}${item.href}`}
+						class:list={[
+							'text-xl font-black uppercase tracking-widest transition-colors hover:text-primary',
+							currentPath === item.href ? 'text-primary' : 'text-stone-400',
+						]}
+					>
+						{item.label}
+					</a>
+				))
+			}
+			<div class="mt-8 pt-8 border-t border-stone-800 flex flex-col gap-4">
+				{basePath && (
+					<a href="/" class="block rounded-xl border border-stone-700 px-4 py-4 text-center text-sm font-bold uppercase tracking-wider text-stone-300 hover:bg-stone-800">
+						← Retour au Portfolio
+					</a>
+				)}
+				<div class="theme-auto">
+					<HeaderAuthButton client:load basePath={basePath} />
+				</div>
+			</div>
+		</nav>
+	</div>
+</header>
+
+<script>
+	const btn = document.getElementById('mobile-menu-btn');
+	const nav = document.getElementById('mobile-nav');
+	const iconMenu = document.getElementById('icon-menu');
+	const iconClose = document.getElementById('icon-close');
+
+	if (btn && nav && iconMenu && iconClose) {
+		btn.addEventListener('click', () => {
+			nav.classList.toggle('hidden');
+			iconMenu.classList.toggle('hidden');
+			iconClose.classList.toggle('hidden');
+			document.body.classList.toggle('overflow-hidden');
+		});
+	}
+</script>

@@ -1,6 +1,6 @@
 ---
 import { getSiteConfig } from '@/config/site';
-const siteConfig = await getSiteConfig();
+const siteConfig = await getSiteConfig(Astro.url.pathname);
 
 const currentPath = Astro.url.pathname;
 const basePathMatch = currentPath.match(/^\/(demo-[^/]+)/);

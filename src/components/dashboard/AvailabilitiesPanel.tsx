@@ -99,7 +99,7 @@ export default function AvailabilitiesPanel() {
 		setRules((prev) => prev.filter((r) => r.id !== id));
 	}
 
-	if (loading) return <p className="text-sm text-stone-500">Chargement...</p>;
+	if (loading) return <p className="text-sm text-muted-foreground">Chargement...</p>;
 	if (error) return <p className="text-sm text-red-600">{error}</p>;
 
 	const recurringRules = rules.filter((r) => !r.is_exception);
@@ -109,30 +109,30 @@ export default function AvailabilitiesPanel() {
 
 	return (
 		<div>
-			<h1 className="text-2xl font-bold text-stone-900">Mes disponibilités</h1>
-			<p className="mt-1 text-sm text-stone-500">
+			<h1 className="text-2xl font-bold text-foreground">Mes disponibilités</h1>
+			<p className="mt-1 text-sm text-muted-foreground">
 				Définissez vos horaires récurrents (ex : Lun-Ven, 8h-16h, créneaux de 30 min) et, si besoin, des
 				disponibilités exceptionnelles pour une date précise.
 			</p>
 
 			{/* Règles récurrentes */}
 			<div className="mt-6">
-				<p className="text-sm font-semibold text-stone-900">Horaires récurrents</p>
+				<p className="text-sm font-semibold text-foreground">Horaires récurrents</p>
 				<div className="mt-3 grid gap-2">
 					{recurringRules.length === 0 && (
-						<p className="text-sm text-stone-500">Aucun horaire récurrent défini pour le moment.</p>
+						<p className="text-sm text-muted-foreground">Aucun horaire récurrent défini pour le moment.</p>
 					)}
 					{recurringRules.map((rule) => (
 						<div
 							key={rule.id}
-							className="flex items-center justify-between rounded-xl border border-border bg-white px-4 py-3 text-sm"
+							className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm"
 						>
 							<div>
-								<span className="font-medium text-stone-900">{formatDaysOfWeek(rule.days_of_week)}</span>
-								<span className="ml-2 text-stone-600">
+								<span className="font-medium text-foreground">{formatDaysOfWeek(rule.days_of_week)}</span>
+								<span className="ml-2 text-muted-foreground">
 									{rule.start_time.slice(0, 5)} - {rule.end_time.slice(0, 5)}
 								</span>
-								<span className="ml-2 rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-500">
+								<span className="ml-2 rounded-full bg-stone-100 px-2 py-0.5 text-xs text-muted-foreground">
 									créneaux de {rule.slot_duration_minutes} min
 								</span>
 							</div>
@@ -147,7 +147,7 @@ export default function AvailabilitiesPanel() {
 					onSubmit={recurringForm.handleSubmit(onSubmitRecurring)}
 					className="mt-4 grid gap-4 rounded-xl border border-border p-6 sm:grid-cols-2"
 				>
-					<p className="col-span-full text-sm font-semibold text-stone-900">Ajouter un horaire récurrent</p>
+					<p className="col-span-full text-sm font-semibold text-foreground">Ajouter un horaire récurrent</p>
 					<div className="col-span-full">
 						<span className="text-sm text-stone-700">Jours concernés</span>
 						<div className="mt-2 flex flex-wrap gap-2">
@@ -167,7 +167,7 @@ export default function AvailabilitiesPanel() {
 										className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
 											selected
 												? 'border-rose-600 bg-rose-50 text-rose-700'
-												: 'border-border text-stone-600 hover:bg-stone-50'
+												: 'border-border text-muted-foreground hover:bg-stone-50'
 										}`}
 									>
 										{label.slice(0, 3)}
@@ -208,7 +208,7 @@ export default function AvailabilitiesPanel() {
 								className={`rounded-lg border px-3 py-1.5 text-xs font-medium ${
 									recurringForm.watch('slotDuration') === '30'
 										? 'border-rose-600 bg-rose-50 text-rose-700'
-										: 'border-border text-stone-600 hover:bg-stone-50'
+										: 'border-border text-muted-foreground hover:bg-stone-50'
 								}`}
 							>
 								30 min (prestations courtes)
@@ -219,7 +219,7 @@ export default function AvailabilitiesPanel() {
 								className={`rounded-lg border px-3 py-1.5 text-xs font-medium ${
 									recurringForm.watch('slotDuration') === '60'
 										? 'border-rose-600 bg-rose-50 text-rose-700'
-										: 'border-border text-stone-600 hover:bg-stone-50'
+										: 'border-border text-muted-foreground hover:bg-stone-50'
 								}`}
 							>
 								1h (prestations longues)
@@ -237,7 +237,7 @@ export default function AvailabilitiesPanel() {
 
 			{/* Exceptions */}
 			<div className="mt-10">
-				<label className="flex items-center gap-2 text-sm font-semibold text-stone-900">
+				<label className="flex items-center gap-2 text-sm font-semibold text-foreground">
 					<input
 						type="checkbox"
 						checked={showExceptionForm}
@@ -246,7 +246,7 @@ export default function AvailabilitiesPanel() {
 					/>
 					Ajouter une disponibilité exceptionnelle
 				</label>
-				<p className="mt-1 text-sm text-stone-500">
+				<p className="mt-1 text-sm text-muted-foreground">
 					Pour une date précise (jour férié travaillé, horaires spéciaux...), en remplacement de l'horaire récurrent
 					habituel ce jour-là.
 				</p>
@@ -259,7 +259,7 @@ export default function AvailabilitiesPanel() {
 								className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm"
 							>
 								<div>
-									<span className="font-medium text-stone-900">
+									<span className="font-medium text-foreground">
 										{rule.exception_date &&
 											new Date(`${rule.exception_date}T00:00:00`).toLocaleDateString('fr-FR', {
 												weekday: 'long',
@@ -267,10 +267,10 @@ export default function AvailabilitiesPanel() {
 												month: 'long',
 											})}
 									</span>
-									<span className="ml-2 text-stone-600">
+									<span className="ml-2 text-muted-foreground">
 										{rule.start_time.slice(0, 5)} - {rule.end_time.slice(0, 5)}
 									</span>
-									<span className="ml-2 rounded-full bg-white px-2 py-0.5 text-xs text-stone-500">
+									<span className="ml-2 rounded-full bg-card px-2 py-0.5 text-xs text-muted-foreground">
 										créneaux de {rule.slot_duration_minutes} min
 									</span>
 								</div>
@@ -291,7 +291,7 @@ export default function AvailabilitiesPanel() {
 							<label className="text-sm text-stone-700">Date</label>
 							<input
 								type="date"
-								className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+								className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 								{...exceptionForm.register('date')}
 							/>
 							{exceptionForm.formState.errors.date && (
@@ -327,7 +327,7 @@ export default function AvailabilitiesPanel() {
 									className={`rounded-lg border px-3 py-1.5 text-xs font-medium ${
 										exceptionForm.watch('slotDuration') === '30'
 											? 'border-rose-600 bg-rose-50 text-rose-700'
-											: 'border-border text-stone-600 hover:bg-stone-50'
+											: 'border-border text-muted-foreground hover:bg-stone-50'
 									}`}
 								>
 									30 min
@@ -338,7 +338,7 @@ export default function AvailabilitiesPanel() {
 									className={`rounded-lg border px-3 py-1.5 text-xs font-medium ${
 										exceptionForm.watch('slotDuration') === '60'
 											? 'border-rose-600 bg-rose-50 text-rose-700'
-											: 'border-border text-stone-600 hover:bg-stone-50'
+											: 'border-border text-muted-foreground hover:bg-stone-50'
 									}`}
 								>
 									1h
