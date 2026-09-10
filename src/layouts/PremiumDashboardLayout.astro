@@ -1,8 +1,11 @@
 ---
 import '../styles/global.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/700.css';
+import '@fontsource/inter/900.css';
 import { Wrench, ArrowLeft, LogOut } from 'lucide-react';
 import { getSiteConfig } from '@/config/site';
-import SmoothScroll from '@/components/SmoothScroll.astro';
 const siteConfig = await getSiteConfig(Astro.url.pathname);
 
 interface Props {
@@ -67,6 +70,5 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 				</div>
 			</main>
 		</div>
-		<SmoothScroll />
 	</body>
 </html>
