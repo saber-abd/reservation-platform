@@ -1,27 +1,32 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import ServicesList from '@/components/ServicesList';
+import PremiumAutoLayout from '@/layouts/PremiumAutoLayout.astro';
+import AutoServicesGrid from '@/components/premium/AutoServicesGrid';
 import { getSiteConfig } from '@/config/site';
+
 const siteConfig = await getSiteConfig();
+const basePath = Astro.url.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '';
 ---
 
-<Layout title="Services" description={`Découvrez les prestations proposées par ${siteConfig.business.name}.`}>
-	<section class="mx-auto max-w-6xl px-6 py-20">
-		<h1 class="text-3xl font-bold text-stone-900 md:text-4xl">Nos prestations</h1>
-		<p class="mt-3 max-w-2xl text-stone-500">
-			Un aperçu de nos services. Contactez-nous pour toute demande sur-mesure.
+<PremiumAutoLayout 
+	title="Catalogue des Services" 
+	description="L'arsenal mécanique complet pour votre véhicule. Découvrez nos prestations de pointe."
+>
+	<section class="pt-32 pb-16 bg-stone-950 text-center">
+		<h1 class="text-4xl font-black text-white md:text-6xl uppercase tracking-tighter font-[var(--font-heading)]">
+			Catalogue des <span class="text-primary">Services</span>
+		</h1>
+		<p class="mt-6 max-w-2xl mx-auto text-stone-400 font-medium">
+			Du diagnostic électronique à la préparation esthétique complète. Choisissez l'excellence.
 		</p>
-
-		<div class="mt-10">
-			<ServicesList client:load />
-		</div>
-
-		<div class="mt-16 rounded-xl bg-stone-50 p-8 text-center" data-aos="fade-up">
-			<p class="text-lg font-semibold text-stone-900">Une demande sur-mesure ?</p>
-			<p class="mt-2 text-stone-500">Contactez-nous pour en discuter, nous nous adaptons à vos besoins.</p>
-			<a href="/demo-premium/contact" class="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
-				Nous contacter
-			</a>
-		</div>
 	</section>
-</Layout>
+
+	<AutoServicesGrid basePath={basePath} client:load />
+
+	<section class="py-20 bg-stone-900 border-t border-stone-800 text-center px-6">
+		<h2 class="text-2xl font-bold text-white mb-4">Une demande sur-mesure ?</h2>
+		<p class="text-stone-400 mb-8 max-w-xl mx-auto">Préparation moteur, covering complet, reprogrammation... Nos experts sont à votre disposition pour vos projets spéciaux.</p>
+		<a href={`${basePath}/contact`} class="inline-flex items-center justify-center rounded-xl border-2 border-primary bg-transparent px-8 py-3 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-white uppercase tracking-wider">
+			Nous contacter pour un devis
+		</a>
+	</section>
+</PremiumAutoLayout>

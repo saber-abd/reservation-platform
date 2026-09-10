@@ -148,6 +148,31 @@
     --sidebar-ring: oklch(0.556 0 0);
 }
 
+.theme-auto {
+    --background: oklch(0.12 0.01 240); /* Dark metallic blue/grey */
+    --foreground: oklch(0.98 0 0); /* Pure white text */
+    --card: oklch(0.16 0.01 240);
+    --card-foreground: oklch(0.98 0 0);
+    --popover: oklch(0.16 0.01 240);
+    --popover-foreground: oklch(0.98 0 0);
+    --primary: oklch(0.6 0.25 25); /* Racing Red */
+    --primary-foreground: oklch(0.98 0 0);
+    --secondary: oklch(0.2 0.01 240);
+    --secondary-foreground: oklch(0.98 0 0);
+    --muted: oklch(0.2 0.01 240);
+    --muted-foreground: oklch(0.7 0 0);
+    --accent: oklch(0.2 0.01 240);
+    --accent-foreground: oklch(0.98 0 0);
+    --destructive: oklch(0.5 0.2 25);
+    --border: oklch(0.25 0.01 240);
+    --input: oklch(0.25 0.01 240);
+    --ring: oklch(0.6 0.25 25);
+    
+    /* Override fonts for premium auto theme */
+    --font-heading: 'Cocogoose', sans-serif;
+    --font-sans: 'Geist', sans-serif;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -161,6 +186,22 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
   }
+}
+
+@keyframes shine {
+  100% {
+    transform: translateX(200%) skewX(-12deg);
+  }
+}
+@keyframes scroll {
+  0% { transform: translateY(-100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+@layer utilities {
+  .animate-shine { animation: shine 1s ease-out forwards; }
+  .animate-scroll { animation: scroll 2s ease-in-out infinite; }
 }
 
 .commercial-page {

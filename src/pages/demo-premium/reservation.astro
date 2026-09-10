@@ -1,17 +1,20 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import { getSiteConfig } from '@/config/site';
-const siteConfig = await getSiteConfig();
+import PremiumAutoLayout from '@/layouts/PremiumAutoLayout.astro';
 import ReservationForm from '@/components/reservation/ReservationForm';
+import { getSiteConfig } from '@/config/site';
+
+const siteConfig = await getSiteConfig();
 ---
 
-<Layout title="Réservation" description={`Réservez votre créneau chez ${siteConfig.business.name}.`}>
-	<section class="mx-auto max-w-3xl px-6 py-20">
-		<h1 class="text-3xl font-bold text-stone-900 md:text-4xl">Réserver un rendez-vous</h1>
-		<p class="mt-3 text-stone-500">Choisissez une prestation, un créneau, puis renseignez vos coordonnées.</p>
-
-		<div class="mt-10">
+<PremiumAutoLayout title="Réserver" description={`Réservez votre prestation en ligne chez ${siteConfig.business.name}.`}>
+	<section class="mx-auto max-w-4xl px-6 py-20">
+		<h1 class="text-3xl font-bold text-white md:text-4xl text-center font-[var(--font-heading)] uppercase">Prendre <span class="text-primary">Rendez-vous</span></h1>
+		<p class="mt-2 text-stone-400 text-center font-medium">
+			Choisissez votre prestation et votre créneau en quelques clics.
+		</p>
+		
+		<div class="mt-10 rounded-2xl bg-stone-900 p-6 md:p-10 shadow-2xl border border-stone-800">
 			<ReservationForm client:load />
 		</div>
 	</section>
-</Layout>
+</PremiumAutoLayout>
