@@ -45,7 +45,9 @@ export default function SignupForm() {
 								full_name: meta.full_name || meta.name || 'Client',
 								avatar_url: meta.avatar_url || null
 							});
-							window.location.href = '/espace-client';
+							const match = window.location.pathname.match(/^\/(demo-[^/]+)/);
+							const basePath = match ? `/${match[1]}` : '';
+							window.location.href = basePath ? `${basePath}/espace-client` : '/espace-client';
 							return;
 						}
 						
@@ -74,7 +76,9 @@ export default function SignupForm() {
 			if (updateError) throw updateError;
 
 			await createClient({ id: existingUser.id, full_name: values.fullName });
-			window.location.href = '/espace-client';
+			const match = window.location.pathname.match(/^\/(demo-[^/]+)/);
+			const basePath = match ? `/${match[1]}` : '';
+			window.location.href = basePath ? `${basePath}/espace-client` : '/espace-client';
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Erreur lors de la création du profil.");
 		} finally {
@@ -110,7 +114,9 @@ export default function SignupForm() {
 				return;
 			}
 
-			window.location.href = '/connexion';
+			const match = window.location.pathname.match(/^\/(demo-[^/]+)/);
+			const basePath = match ? `/${match[1]}` : '';
+			window.location.href = basePath ? `${basePath}/connexion` : '/connexion';
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Erreur lors de l'inscription.");
 		} finally {
