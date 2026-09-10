@@ -25,7 +25,7 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 					<a
 						href={`${basePath}${item.href}`}
 						class:list={[
-							'text-sm font-bold uppercase tracking-wider transition-colors hover:text-primary',
+							'text-sm font-bold uppercase tracking-wider transition-colors hover:text-primary font-[var(--font-heading)]',
 							currentPath === item.href ? 'text-primary' : 'text-muted-foreground',
 						]}
 					>

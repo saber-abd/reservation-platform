@@ -4,14 +4,18 @@ import LoginForm from '@/components/auth/LoginForm';
 ---
 
 <PremiumAutoLayout title="Connexion" description="Connexion à l'espace premium." noindex>
-	<section class="mx-auto max-w-md px-6 py-20">
-		<h1 class="text-2xl font-black text-white uppercase tracking-widest font-[var(--font-heading)]">Connexion pilote</h1>
-		<p class="mt-2 text-sm text-stone-400">Accédez à votre espace de gestion.</p>
-		<div class="mt-8">
-			<LoginForm client:load />
+	<section class="flex min-h-[80vh] items-center justify-center px-6 py-20 bg-background">
+		<div class="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-sm">
+			<div class="text-center">
+				<h1 class="text-3xl font-black text-foreground uppercase tracking-widest font-[var(--font-heading)]">Connexion</h1>
+				<p class="mt-2 text-sm text-muted-foreground">Accédez à votre espace de gestion.</p>
+			</div>
+			<div class="mt-8">
+				<LoginForm client:load />
+			</div>
+			<p class="mt-6 text-center text-sm text-muted-foreground">
+				Nouveau pilote ? <a href="/demo-premium/inscription" class="font-medium text-primary hover:underline uppercase tracking-widest">Créer un compte</a>
+			</p>
 		</div>
-		<p class="mt-6 text-sm text-stone-400">
-			Nouveau pilote ? <a href="/demo-premium/inscription" class="font-medium text-primary hover:underline">Créer un compte</a>
-		</p>
 	</section>
 </PremiumAutoLayout>

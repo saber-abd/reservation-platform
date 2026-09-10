@@ -30,17 +30,17 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 			<aside class="w-64 flex-shrink-0 border-r border-border bg-card flex flex-col hidden md:flex">
 				<div class="p-6 border-b border-border">
 					<a href={`${basePath}/`} aria-label={siteConfig.business.name} class="flex items-center gap-3">
-						<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-[0_0_15px_rgba(255,50,50,0.3)]">
+						<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,50,50,0.3)]">
 							<Wrench size={20} />
 						</span>
-						<span class="text-xl font-black text-white tracking-widest uppercase font-[var(--font-heading)] truncate">{siteConfig.business.name}</span>
+						<span class="text-xl font-black text-foreground tracking-widest uppercase font-[var(--font-heading)] truncate">{siteConfig.business.name}</span>
 					</a>
 				</div>
 				<div class="flex-1 overflow-y-auto p-4">
 					<slot name="sidebar" />
 				</div>
 				<div class="p-4 border-t border-border">
-					<a href={`${basePath}/`} class="flex items-center justify-center gap-2 rounded-xl border border-border bg-muted px-4 py-3 text-sm font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-primary hover:text-white">
+					<a href={`${basePath}/`} class="flex items-center justify-center gap-2 rounded-xl border border-border bg-muted px-4 py-3 text-sm font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:border-primary hover:text-foreground">
 						<ArrowLeft size={16} />
 						Retour au site
 					</a>

@@ -141,37 +141,37 @@ export default function SignupForm() {
 					className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 					{...register('fullName')}
 				/>
-				{errors.fullName && <p className="mt-1 text-xs text-red-600">{errors.fullName.message}</p>}
+				{errors.fullName && <p className="mt-1 text-xs text-destructive">{errors.fullName.message}</p>}
 			</div>
 			
 			{!existingUser && (
 				<>
 					<div>
 						<label className="text-sm text-muted-foreground" htmlFor="email">
-							Email <span className="text-rose-600">*</span>
+							Email <span className="text-primary">*</span>
 						</label>
 						<input
 							id="email"
 							type="email"
-							className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+							className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
 							{...register('email')}
 						/>
 					</div>
 					<div>
 						<label className="text-sm text-muted-foreground" htmlFor="password">
-							Mot de passe <span className="text-rose-600">*</span>
+							Mot de passe <span className="text-primary">*</span>
 						</label>
 						<input
 							id="password"
 							type="password"
-							className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+							className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
 							{...register('password')}
 						/>
 					</div>
 				</>
 			)}
 			
-			{error && <p className="text-sm text-amber-700">{error}</p>}
+			{error && <p className="text-sm text-destructive">{error}</p>}
 			
 			<button
 				type="submit"

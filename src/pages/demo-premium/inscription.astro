@@ -4,16 +4,20 @@ import SignupForm from '@/components/auth/SignupForm';
 ---
 
 <PremiumAutoLayout title="Inscription" description="Créer votre espace premium." noindex>
-	<section class="mx-auto max-w-md px-6 py-20">
-		<h1 class="text-2xl font-black text-white uppercase tracking-widest font-[var(--font-heading)]">Rejoindre l'écurie</h1>
-		<p class="mt-2 text-sm text-stone-400">
-			Créez votre compte pour réserver votre intervention.
-		</p>
-		<div class="mt-8">
-			<SignupForm client:load />
+	<section class="flex min-h-[80vh] items-center justify-center px-6 py-20 bg-background">
+		<div class="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-sm">
+			<div class="text-center">
+				<h1 class="text-3xl font-black text-foreground uppercase tracking-widest font-[var(--font-heading)]">Rejoindre l'écurie</h1>
+				<p class="mt-2 text-sm text-muted-foreground">
+					Créez votre compte pour réserver votre intervention.
+				</p>
+			</div>
+			<div class="mt-8">
+				<SignupForm client:load />
+			</div>
+			<p class="mt-6 text-center text-sm text-muted-foreground">
+				Déjà pilote ? <a href="/demo-premium/connexion" class="font-medium text-primary hover:underline uppercase tracking-widest">Se connecter</a>
+			</p>
 		</div>
-		<p class="mt-6 text-sm text-stone-400">
-			Déjà pilote ? <a href="/demo-premium/connexion" class="font-medium text-primary hover:underline">Se connecter</a>
-		</p>
 	</section>
 </PremiumAutoLayout>

@@ -348,13 +348,13 @@ export function AvatarDisplay({
 }) {
 	const avatar = AVATARS.find((a) => a.key === avatarKey);
 	if (!avatar) {
-		// Default placeholder: scissors icon in rose circle
+		// Default placeholder: user icon
 		return (
 			<span
-				className={`flex items-center justify-center rounded-full bg-rose-600 text-white ${className}`}
+				className={`flex items-center justify-center rounded-full bg-stone-200 text-stone-500 ${className}`}
 				style={{ width: size, height: size, fontSize: size * 0.45 }}
 			>
-				✂
+				👤
 			</span>
 		);
 	}

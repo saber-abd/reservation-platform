@@ -20,18 +20,18 @@ const basePath = Astro.url.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '';
 	<AutoServicesGrid basePath={basePath} client:load />
 
 	{/* Section d'Appel à l'Action finale */}
-	<section class="relative py-24 bg-stone-950 overflow-hidden">
-		<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-primary/20 via-background to-background"></div>
+	<section class="relative py-24 bg-card border-t border-border overflow-hidden">
+		<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-primary/10 via-card to-card"></div>
 		<div class="relative z-10 max-w-4xl mx-auto px-6 text-center">
-			<h2 class="text-3xl md:text-5xl font-black text-white uppercase font-[var(--font-heading)] mb-6">
+			<h2 class="text-3xl md:text-5xl font-black text-foreground uppercase font-[var(--font-heading)] mb-6">
 				Prêt à libérer le <span class="text-primary">Potentiel</span> de votre véhicule ?
 			</h2>
-			<p class="text-lg text-stone-400 mb-10 max-w-2xl mx-auto">
+			<p class="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
 				Rejoignez les clients exigeants qui nous font confiance. Réservez votre créneau en ligne en quelques secondes.
 			</p>
 			<a 
 				href={`${basePath}/reservation`} 
-				class="inline-flex items-center justify-center rounded-xl bg-primary px-10 py-5 text-sm font-bold text-white shadow-[0_0_30px_rgba(255,50,50,0.4)] transition-transform hover:scale-105 active:scale-95 uppercase tracking-wider"
+				class="inline-flex items-center justify-center rounded-xl bg-primary px-10 py-5 text-sm font-bold text-primary-foreground shadow-[0_0_30px_rgba(255,50,50,0.3)] transition-transform hover:scale-105 active:scale-95 uppercase tracking-wider"
 			>
 				Planifier une intervention
 			</a>

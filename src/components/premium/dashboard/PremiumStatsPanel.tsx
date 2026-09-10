@@ -90,14 +90,14 @@ export default function PremiumStatsPanel() {
 		};
 	}, [appointments, services, daysPreset]);
 
-	if (loading) return <div className="animate-pulse h-64 bg-stone-900 rounded-xl"></div>;
-	if (error) return <p className="text-sm text-red-500">{error}</p>;
+	if (loading) return <div className="animate-pulse h-64 bg-muted rounded-xl"></div>;
+	if (error) return <p className="text-sm text-destructive">{error}</p>;
 
 	return (
 		<div className="space-y-8 animate-[fade-in_0.5s_ease-out]">
 			<div>
-				<h1 className="text-3xl font-black text-white uppercase tracking-widest font-[var(--font-heading)]">Télémétrie</h1>
-				<p className="mt-2 text-stone-400 font-medium">Analyse des performances et statistiques d'activité.</p>
+				<h1 className="text-3xl font-black text-foreground uppercase tracking-widest font-[var(--font-heading)]">Télémétrie</h1>
+				<p className="mt-2 text-muted-foreground font-medium">Analyse des performances et statistiques d'activité.</p>
 			</div>
 
 			<div className="flex gap-2">
@@ -107,8 +107,8 @@ export default function PremiumStatsPanel() {
 						onClick={() => setDaysPreset(days)}
 						className={`px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wider transition-all ${
 							daysPreset === days 
-							? 'bg-primary text-white shadow-[0_0_15px_rgba(255,50,50,0.3)]' 
-							: 'bg-stone-900 text-stone-400 hover:text-white hover:bg-stone-800 border border-stone-800'
+							? 'bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,50,50,0.3)]' 
+							: 'bg-muted text-muted-foreground hover:text-foreground hover:bg-accent border border-border'
 						}`}
 					>
 						{days} Jours
@@ -118,27 +118,27 @@ export default function PremiumStatsPanel() {
 
 			{/* KPI Cards */}
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-				<div className="bg-stone-900/50 backdrop-blur-sm border border-stone-800 rounded-2xl p-6 relative overflow-hidden group">
+				<div className="bg-card backdrop-blur-sm border border-border rounded-2xl p-6 relative overflow-hidden group shadow-sm">
 					<div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-					<p className="text-stone-400 text-sm font-bold uppercase tracking-wider mb-2">Chiffre d'affaires</p>
-					<p className="text-4xl font-black text-white font-[var(--font-heading)]">{stats.revenue} €</p>
+					<p className="text-muted-foreground text-sm font-bold uppercase tracking-wider mb-2">Chiffre d'affaires</p>
+					<p className="text-4xl font-black text-foreground font-[var(--font-heading)]">{stats.revenue} €</p>
 				</div>
-				<div className="bg-stone-900/50 backdrop-blur-sm border border-stone-800 rounded-2xl p-6 relative overflow-hidden group">
+				<div className="bg-card backdrop-blur-sm border border-border rounded-2xl p-6 relative overflow-hidden group shadow-sm">
 					<div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-					<p className="text-stone-400 text-sm font-bold uppercase tracking-wider mb-2">Interventions</p>
-					<p className="text-4xl font-black text-white font-[var(--font-heading)]">{stats.appointmentsCount}</p>
+					<p className="text-muted-foreground text-sm font-bold uppercase tracking-wider mb-2">Interventions</p>
+					<p className="text-4xl font-black text-foreground font-[var(--font-heading)]">{stats.appointmentsCount}</p>
 				</div>
-				<div className="bg-stone-900/50 backdrop-blur-sm border border-stone-800 rounded-2xl p-6 relative overflow-hidden group">
+				<div className="bg-card backdrop-blur-sm border border-border rounded-2xl p-6 relative overflow-hidden group shadow-sm">
 					<div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-					<p className="text-stone-400 text-sm font-bold uppercase tracking-wider mb-2">Panier Moyen</p>
-					<p className="text-4xl font-black text-white font-[var(--font-heading)]">{stats.avgTicket} €</p>
+					<p className="text-muted-foreground text-sm font-bold uppercase tracking-wider mb-2">Panier Moyen</p>
+					<p className="text-4xl font-black text-foreground font-[var(--font-heading)]">{stats.avgTicket} €</p>
 				</div>
 			</div>
 
 			{/* Charts */}
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-				<div className="bg-stone-900/50 backdrop-blur-sm border border-stone-800 rounded-2xl p-6">
-					<h3 className="text-white font-bold uppercase tracking-wider mb-6">Évolution CA</h3>
+				<div className="bg-card backdrop-blur-sm border border-border rounded-2xl p-6 shadow-sm">
+					<h3 className="text-foreground font-bold uppercase tracking-wider mb-6">Évolution CA</h3>
 					<div className="h-[300px] w-full">
 						<ResponsiveContainer width="100%" height="100%">
 							<AreaChart data={revenueData}>
@@ -148,11 +148,11 @@ export default function PremiumStatsPanel() {
 										<stop offset="95%" stopColor="#e11d48" stopOpacity={0}/>
 									</linearGradient>
 								</defs>
-								<CartesianGrid strokeDasharray="3 3" stroke="#292524" vertical={false} />
-								<XAxis dataKey="date" stroke="#78716c" fontSize={12} tickLine={false} axisLine={false} />
-								<YAxis stroke="#78716c" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}€`} />
+								<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+								<XAxis dataKey="date" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+								<YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}€`} />
 								<Tooltip 
-									contentStyle={{ backgroundColor: '#1c1917', borderColor: '#292524', color: '#fff', borderRadius: '8px' }}
+									contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', color: '#0f172a', borderRadius: '8px' }}
 									itemStyle={{ color: '#e11d48' }}
 								/>
 								<Area type="monotone" dataKey="revenue" stroke="#e11d48" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
@@ -161,17 +161,17 @@ export default function PremiumStatsPanel() {
 					</div>
 				</div>
 
-				<div className="bg-stone-900/50 backdrop-blur-sm border border-stone-800 rounded-2xl p-6">
-					<h3 className="text-white font-bold uppercase tracking-wider mb-6">Top Prestations (CA)</h3>
+				<div className="bg-card backdrop-blur-sm border border-border rounded-2xl p-6 shadow-sm">
+					<h3 className="text-foreground font-bold uppercase tracking-wider mb-6">Top Prestations (CA)</h3>
 					<div className="h-[300px] w-full">
 						<ResponsiveContainer width="100%" height="100%">
 							<BarChart data={serviceData} layout="vertical" margin={{ top: 0, right: 0, left: 40, bottom: 0 }}>
-								<CartesianGrid strokeDasharray="3 3" stroke="#292524" horizontal={true} vertical={false} />
-								<XAxis type="number" stroke="#78716c" fontSize={12} tickLine={false} axisLine={false} />
-								<YAxis dataKey="name" type="category" stroke="#78716c" fontSize={12} tickLine={false} axisLine={false} width={100} />
+								<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={true} vertical={false} />
+								<XAxis type="number" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+								<YAxis dataKey="name" type="category" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} width={100} />
 								<Tooltip 
-									contentStyle={{ backgroundColor: '#1c1917', borderColor: '#292524', color: '#fff', borderRadius: '8px' }}
-									cursor={{ fill: '#292524' }}
+									contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', color: '#0f172a', borderRadius: '8px' }}
+									cursor={{ fill: '#f1f5f9' }}
 								/>
 								<Bar dataKey="revenue" fill="#e11d48" radius={[0, 4, 4, 0]} barSize={20} />
 							</BarChart>
