@@ -41,11 +41,14 @@ export default function LoginForm() {
 	}, []);
 
 	async function routeUser(user: any) {
+		const match = window.location.pathname.match(/^\/(demo-[^/]+)/);
+		const basePath = match ? `/${match[1]}` : '';
+
 		const accountType = await getAccountType(user.id);
 		if (accountType === 'professional') {
-			window.location.href = '/dashboard';
+			window.location.href = basePath ? `${basePath}/dashboard` : '/dashboard';
 		} else if (accountType === 'client') {
-			window.location.href = '/espace-client';
+			window.location.href = basePath ? `${basePath}/espace-client` : '/espace-client';
 		} else {
 			const meta = user.user_metadata;
 			if (meta?.account_role === 'professional') {
@@ -54,12 +57,12 @@ export default function LoginForm() {
 					business_name: meta.business_name || 'Mon activité',
 					email: user.email!,
 				});
-				window.location.href = '/dashboard';
+				window.location.href = basePath ? `${basePath}/dashboard` : '/dashboard';
 			} else if (meta?.account_role === 'client') {
 				await createClient({ id: user.id, full_name: meta.full_name || null });
-				window.location.href = '/espace-client';
+				window.location.href = basePath ? `${basePath}/espace-client` : '/espace-client';
 			} else {
-				window.location.href = '/inscription';
+				window.location.href = basePath ? `${basePath}/inscription` : '/inscription';
 			}
 		}
 	}
