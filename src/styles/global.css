@@ -149,33 +149,33 @@
 }
 
 .theme-auto {
-    --background: oklch(0.20 0.01 240); /* Un peu moins foncé */
-    --foreground: oklch(0.98 0 0); /* Pure white text */
-    --card: oklch(0.24 0.01 240);
-    --card-foreground: oklch(0.98 0 0);
-    --popover: oklch(0.24 0.01 240);
-    --popover-foreground: oklch(0.98 0 0);
+    --background: oklch(0.95 0.01 240); /* Lighter grey/blue background */
+    --foreground: oklch(0.15 0.02 240); /* Dark text for light background */
+    --card: oklch(1 0 0); /* Pure white cards */
+    --card-foreground: oklch(0.15 0.02 240);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.15 0.02 240);
     --primary: oklch(0.6 0.25 25); /* Racing Red */
     --primary-foreground: oklch(0.98 0 0);
-    --secondary: oklch(0.30 0.01 240);
-    --secondary-foreground: oklch(0.98 0 0);
-    --muted: oklch(0.30 0.01 240);
-    --muted-foreground: oklch(0.8 0 0);
-    --accent: oklch(0.30 0.01 240);
-    --accent-foreground: oklch(0.98 0 0);
+    --secondary: oklch(0.90 0.02 240);
+    --secondary-foreground: oklch(0.15 0.02 240);
+    --muted: oklch(0.90 0.02 240);
+    --muted-foreground: oklch(0.40 0.02 240);
+    --accent: oklch(0.90 0.02 240);
+    --accent-foreground: oklch(0.15 0.02 240);
     --destructive: oklch(0.5 0.2 25);
-    --border: oklch(0.35 0.01 240);
+    --border: oklch(0.85 0.02 240);
     --input: oklch(1 0 0); /* White for inputs */
     --ring: oklch(0.6 0.25 25);
     
     /* Override fonts for premium auto theme */
-    --font-heading: 'Cocogoose', sans-serif;
+    --font-heading: 'Coolvetica', sans-serif;
     --font-sans: 'Coolvetica', sans-serif;
     font-family: 'Coolvetica', sans-serif !important;
 }
 
 .theme-auto h1, .theme-auto h2, .theme-auto h3, .theme-auto h4, .theme-auto h5, .theme-auto h6, .theme-auto .font-black {
-    font-family: 'Cocogoose', sans-serif !important;
+    font-family: 'Coolvetica', sans-serif !important;
 }
 
 .theme-auto input:not([type="checkbox"]):not([type="radio"]), 
