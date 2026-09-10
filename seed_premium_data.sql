@@ -4,7 +4,7 @@
 DO $$
 DECLARE
     -- Mettez votre vrai UUID ici entre les guillemets !
-    my_user_id UUID := '4d655ed7-3c1d-4da2-afc5-6e22ea749651';
+    my_user_id UUID := '8335869b-2773-4d39-88e6-3bca5aab8e76';
     
     pro_id UUID;
     client1_id UUID := gen_random_uuid();
@@ -38,25 +38,34 @@ BEGIN
     (svc_pneus_id, pro_id, 'Montage & Équilibrage (x2)', 'Pneus', 'Démontage, valve, équilibrage pour 2 roues', 40, 35.00, 'premium');
 
     -- 4. Créer de Faux Clients (Pilotes)
+    -- Attention : la table clients reference auth.users.id, il faut donc insérer dans auth.users d'abord.
+    INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, recovery_sent_at, last_sign_in_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, email_change, email_change_token_new, recovery_token)
+    VALUES 
+    ('00000000-0000-0000-0000-000000000000', client1_id, 'authenticated', 'authenticated', 'lucas.dubois@demo.com', '', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"account_role":"client"}', now(), now(), '', '', '', ''),
+    ('00000000-0000-0000-0000-000000000000', client2_id, 'authenticated', 'authenticated', 'emma.laurent@demo.com', '', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"account_role":"client"}', now(), now(), '', '', '', ''),
+    ('00000000-0000-0000-0000-000000000000', client3_id, 'authenticated', 'authenticated', 'thomas.martin@demo.com', '', now(), now(), now(), '{"provider":"email","providers":["email"]}', '{"account_role":"client"}', now(), now(), '', '', '', '')
+    ON CONFLICT (id) DO NOTHING;
+
     INSERT INTO clients (id, full_name, phone, tag_bd) VALUES
     (client1_id, 'Lucas Dubois (Audi RS3)', '06 12 34 56 78', 'premium'),
     (client2_id, 'Emma Laurent (Golf 8 R)', '06 98 76 54 32', 'premium'),
-    (client3_id, 'Thomas Martin (Porsche 911)', '07 11 22 33 44', 'premium');
+    (client3_id, 'Thomas Martin (Porsche 911)', '07 11 22 33 44', 'premium')
+    ON CONFLICT (id) DO UPDATE SET full_name = EXCLUDED.full_name, tag_bd = EXCLUDED.tag_bd;
 
     -- 5. Créer des Rendez-vous (Appointments) pour remplir le dashboard Télémétrie
     
     -- Rendez-vous terminés (Mois Précédent)
-    INSERT INTO appointments (professional_id, client_id, service_id, appointment_date, start_time, end_time, status, tag_bd) VALUES
-    (pro_id, client1_id, svc_vidange_id, CURRENT_DATE - INTERVAL '20 days', '09:00:00', '10:00:00', 'completed', 'premium'),
-    (pro_id, client2_id, svc_freins_id, CURRENT_DATE - INTERVAL '15 days', '14:00:00', '14:45:00', 'completed', 'premium'),
-    (pro_id, client3_id, svc_ceramic_id, CURRENT_DATE - INTERVAL '10 days', '10:00:00', '13:00:00', 'completed', 'premium'),
-    (pro_id, client1_id, svc_diag_id, CURRENT_DATE - INTERVAL '5 days', '16:00:00', '16:30:00', 'completed', 'premium');
+    INSERT INTO appointments (professional_id, client_id, service_id, client_name, client_email, client_phone, start_time, end_time, status, tag_bd) VALUES
+    (pro_id, client1_id, svc_vidange_id, 'Lucas Dubois (Audi RS3)', 'lucas.dubois@demo.com', '06 12 34 56 78', (CURRENT_DATE - INTERVAL '20 days') + TIME '09:00:00', (CURRENT_DATE - INTERVAL '20 days') + TIME '10:00:00', 'completed', 'premium'),
+    (pro_id, client2_id, svc_freins_id, 'Emma Laurent (Golf 8 R)', 'emma.laurent@demo.com', '06 98 76 54 32', (CURRENT_DATE - INTERVAL '15 days') + TIME '14:00:00', (CURRENT_DATE - INTERVAL '15 days') + TIME '14:45:00', 'completed', 'premium'),
+    (pro_id, client3_id, svc_ceramic_id, 'Thomas Martin (Porsche 911)', 'thomas.martin@demo.com', '07 11 22 33 44', (CURRENT_DATE - INTERVAL '10 days') + TIME '10:00:00', (CURRENT_DATE - INTERVAL '10 days') + TIME '13:00:00', 'completed', 'premium'),
+    (pro_id, client1_id, svc_diag_id, 'Lucas Dubois (Audi RS3)', 'lucas.dubois@demo.com', '06 12 34 56 78', (CURRENT_DATE - INTERVAL '5 days') + TIME '16:00:00', (CURRENT_DATE - INTERVAL '5 days') + TIME '16:30:00', 'completed', 'premium');
 
     -- Rendez-vous confirmés (Aujourd'hui et Demain)
-    INSERT INTO appointments (professional_id, client_id, service_id, appointment_date, start_time, end_time, status, tag_bd) VALUES
-    (pro_id, client2_id, svc_vidange_id, CURRENT_DATE, '11:00:00', '12:00:00', 'confirmed', 'premium'),
-    (pro_id, client3_id, svc_pneus_id, CURRENT_DATE, '15:00:00', '15:40:00', 'confirmed', 'premium'),
-    (pro_id, client1_id, svc_freins_id, CURRENT_DATE + INTERVAL '1 day', '09:30:00', '10:15:00', 'confirmed', 'premium'),
-    (pro_id, client2_id, svc_diag_id, CURRENT_DATE + INTERVAL '2 days', '14:00:00', '14:30:00', 'pending', 'premium');
+    INSERT INTO appointments (professional_id, client_id, service_id, client_name, client_email, client_phone, start_time, end_time, status, tag_bd) VALUES
+    (pro_id, client2_id, svc_vidange_id, 'Emma Laurent (Golf 8 R)', 'emma.laurent@demo.com', '06 98 76 54 32', CURRENT_DATE + TIME '11:00:00', CURRENT_DATE + TIME '12:00:00', 'confirmed', 'premium'),
+    (pro_id, client3_id, svc_pneus_id, 'Thomas Martin (Porsche 911)', 'thomas.martin@demo.com', '07 11 22 33 44', CURRENT_DATE + TIME '15:00:00', CURRENT_DATE + TIME '15:40:00', 'confirmed', 'premium'),
+    (pro_id, client1_id, svc_freins_id, 'Lucas Dubois (Audi RS3)', 'lucas.dubois@demo.com', '06 12 34 56 78', (CURRENT_DATE + INTERVAL '1 day') + TIME '09:30:00', (CURRENT_DATE + INTERVAL '1 day') + TIME '10:15:00', 'confirmed', 'premium'),
+    (pro_id, client2_id, svc_diag_id, 'Emma Laurent (Golf 8 R)', 'emma.laurent@demo.com', '06 98 76 54 32', (CURRENT_DATE + INTERVAL '2 days') + TIME '14:00:00', (CURRENT_DATE + INTERVAL '2 days') + TIME '14:30:00', 'pending', 'premium');
 
 END $$;

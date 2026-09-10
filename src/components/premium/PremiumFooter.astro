@@ -9,16 +9,16 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 const year = new Date().getFullYear();
 ---
 
-<footer class="border-t border-stone-800 bg-stone-950">
+<footer class="border-t border-border bg-background">
 	<div class="mx-auto grid max-w-6xl gap-10 px-6 py-16 sm:grid-cols-2 md:grid-cols-4">
 		<div>
-			<p class="text-xl font-black text-white uppercase tracking-widest font-[var(--font-heading)]">{siteConfig.business.name}</p>
-			<p class="mt-4 text-sm text-stone-400 font-medium leading-relaxed">L'excellence mécanique à votre service. Diagnostic, réparation et préparation haute performance.</p>
+			<p class="text-xl font-black text-foreground uppercase tracking-widest font-[var(--font-heading)]">{siteConfig.business.name}</p>
+			<p class="mt-4 text-sm text-muted-foreground font-medium leading-relaxed">L'excellence mécanique à votre service. Diagnostic, réparation et préparation haute performance.</p>
 		</div>
 
 		<div>
-			<p class="text-sm font-bold text-white uppercase tracking-wider">Navigation</p>
-			<ul class="mt-6 space-y-3 text-sm text-stone-400 font-medium">
+			<p class="text-sm font-bold text-foreground uppercase tracking-wider">Navigation</p>
+			<ul class="mt-6 space-y-3 text-sm text-muted-foreground font-medium">
 				<li><a href={`${basePath}/`} class="hover:text-primary transition-colors flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary"></span>Accueil</a></li>
 				<li><a href={`${basePath}/services`} class="hover:text-primary transition-colors flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary"></span>Arsenal Mécanique</a></li>
 				<li><a href={`${basePath}/a-propos`} class="hover:text-primary transition-colors flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary"></span>Notre Histoire</a></li>
@@ -27,8 +27,8 @@ const year = new Date().getFullYear();
 		</div>
 
 		<div>
-			<p class="text-sm font-bold text-white uppercase tracking-wider">Contact & Horaires</p>
-			<ul class="mt-6 space-y-2 text-sm text-stone-400 font-medium">
+			<p class="text-sm font-bold text-foreground uppercase tracking-wider">Contact & Horaires</p>
+			<ul class="mt-6 space-y-2 text-sm text-muted-foreground font-medium">
 				<li class="flex items-start gap-2">
 					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-1 shrink-0 text-primary"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
 					{siteConfig.business.address}
@@ -45,8 +45,8 @@ const year = new Date().getFullYear();
 		</div>
 
 		<div>
-			<p class="text-sm font-bold text-white uppercase tracking-wider">Informations Légales</p>
-			<ul class="mt-6 space-y-3 text-sm text-stone-400 font-medium">
+			<p class="text-sm font-bold text-foreground uppercase tracking-wider">Informations Légales</p>
+			<ul class="mt-6 space-y-3 text-sm text-muted-foreground font-medium">
 				<li><a href={`${basePath}/mentions-legales`} class="hover:text-primary transition-colors flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary"></span>Mentions Légales</a></li>
 				<li><a href={`${basePath}/politique-de-confidentialite`} class="hover:text-primary transition-colors flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary"></span>Confidentialité</a></li>
 				<li><a href={`${basePath}/conditions-utilisation`} class="hover:text-primary transition-colors flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary"></span>Conditions d'Utilisation</a></li>
@@ -54,12 +54,12 @@ const year = new Date().getFullYear();
 		</div>
 	</div>
 
-	<div class="border-t border-stone-800 bg-stone-900/50">
+	<div class="border-t border-border bg-card/50">
 		<div class="mx-auto max-w-6xl px-6 py-6 flex flex-col sm:flex-row items-center justify-between">
-			<div class="text-xs font-bold text-stone-500 uppercase tracking-widest">
+			<div class="text-xs font-bold text-muted-foreground uppercase tracking-widest">
 				© {year} {siteConfig.business.name}. Tous droits réservés.
 			</div>
-			<div class="flex items-center gap-6 mt-4 sm:mt-0 text-stone-500">
+			<div class="flex items-center gap-6 mt-4 sm:mt-0 text-muted-foreground">
 				<a href="/" aria-label="Instagram" class="hover:text-primary transition-colors">
 					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>

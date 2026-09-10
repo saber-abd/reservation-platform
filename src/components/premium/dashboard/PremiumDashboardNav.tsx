@@ -34,8 +34,8 @@ export default function PremiumDashboardNav({ basePath = '' }: { basePath?: stri
 							href={`${basePath}${link.href}`}
 							className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider transition-all ${
 								isActive
-									? 'bg-stone-900 text-white border-l-4 border-primary'
-									: 'text-stone-400 hover:bg-stone-900 hover:text-white border-l-4 border-transparent'
+									? 'bg-muted text-foreground border-l-4 border-primary'
+									: 'text-muted-foreground hover:bg-muted hover:text-foreground border-l-4 border-transparent'
 							}`}
 						>
 							{link.icon}
@@ -44,10 +44,10 @@ export default function PremiumDashboardNav({ basePath = '' }: { basePath?: stri
 					);
 				})}
 			</div>
-			<div className="mt-auto pt-4 md:border-t md:border-stone-800 hidden md:block">
+			<div className="mt-auto pt-4 md:border-t md:border-border hidden md:block">
 				<button
 					onClick={handleSignOut}
-					className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-stone-500 hover:bg-stone-900 hover:text-primary transition-colors"
+					className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-muted-foreground hover:bg-muted hover:text-primary transition-colors"
 				>
 					<LogOut size={16} />
 					Se déconnecter
