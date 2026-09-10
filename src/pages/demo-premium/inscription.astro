@@ -1,19 +1,19 @@
 ---
-import Layout from '@/layouts/Layout.astro';
+import PremiumAutoLayout from '@/layouts/PremiumAutoLayout.astro';
 import SignupForm from '@/components/auth/SignupForm';
 ---
 
-<Layout title="Inscription" description="Créer votre espace professionnel." noindex>
+<PremiumAutoLayout title="Inscription" description="Créer votre espace premium." noindex>
 	<section class="mx-auto max-w-md px-6 py-20">
-		<h1 class="text-2xl font-bold text-stone-900">Créer votre espace professionnel</h1>
-		<p class="mt-2 text-sm text-stone-500">
-			Configurez votre profil, vos prestations et vos disponibilités.
+		<h1 class="text-2xl font-black text-white uppercase tracking-widest font-[var(--font-heading)]">Rejoindre l'écurie</h1>
+		<p class="mt-2 text-sm text-stone-400">
+			Créez votre compte pour réserver votre intervention.
 		</p>
 		<div class="mt-8">
 			<SignupForm client:load />
 		</div>
-		<p class="mt-6 text-sm text-stone-500">
-			Déjà un compte ? <a href="/demo-premium/connexion" class="font-medium text-rose-600 hover:underline">Se connecter</a>
+		<p class="mt-6 text-sm text-stone-400">
+			Déjà pilote ? <a href="/demo-premium/connexion" class="font-medium text-primary hover:underline">Se connecter</a>
 		</p>
 	</section>
-</Layout>
+</PremiumAutoLayout>

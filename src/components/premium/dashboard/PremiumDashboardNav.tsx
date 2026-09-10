@@ -24,18 +24,18 @@ export default function PremiumDashboardNav({ basePath = '' }: { basePath?: stri
 	}
 
 	return (
-		<nav className="mb-8 flex flex-col sm:flex-row flex-wrap items-center justify-between gap-4 border-b border-stone-800 pb-4">
-			<div className="flex flex-wrap gap-2 w-full sm:w-auto">
+		<nav className="flex flex-col gap-2 h-full">
+			<div className="flex flex-col gap-1 flex-1">
 				{links.map((link) => {
 					const isActive = currentPath === `${basePath}${link.href}`;
 					return (
 						<a
 							key={link.href}
 							href={`${basePath}${link.href}`}
-							className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold uppercase tracking-wider transition-all ${
+							className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider transition-all ${
 								isActive
-									? 'bg-primary text-white shadow-[0_0_15px_rgba(255,50,50,0.3)]'
-									: 'text-stone-400 hover:bg-stone-900 hover:text-white'
+									? 'bg-stone-900 text-white border-l-4 border-primary'
+									: 'text-stone-400 hover:bg-stone-900 hover:text-white border-l-4 border-transparent'
 							}`}
 						>
 							{link.icon}
@@ -44,13 +44,15 @@ export default function PremiumDashboardNav({ basePath = '' }: { basePath?: stri
 					);
 				})}
 			</div>
-			<button
-				onClick={handleSignOut}
-				className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-stone-500 hover:text-primary transition-colors"
-			>
-				<LogOut size={16} />
-				Se déconnecter
-			</button>
+			<div className="mt-auto pt-4 md:border-t md:border-stone-800 hidden md:block">
+				<button
+					onClick={handleSignOut}
+					className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-stone-500 hover:bg-stone-900 hover:text-primary transition-colors"
+				>
+					<LogOut size={16} />
+					Se déconnecter
+				</button>
+			</div>
 		</nav>
 	);
 }

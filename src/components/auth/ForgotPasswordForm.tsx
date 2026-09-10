@@ -44,13 +44,13 @@ export default function ForgotPasswordForm() {
 	return (
 		<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 			<div>
-				<label className="text-sm text-stone-700" htmlFor="email">
+				<label className="text-sm text-muted-foreground" htmlFor="email">
 					Email <span className="text-rose-600">*</span>
 				</label>
 				<input
 					id="email"
 					type="email"
-					className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+					className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
 					{...register('email')}
 				/>
 				{errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
