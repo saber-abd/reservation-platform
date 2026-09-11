@@ -7,14 +7,16 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 ---
 
 <PremiumAutoLayout title="Réserver" description={`Réservez votre prestation en ligne chez ${siteConfig.business.name}.`}>
-	<section class="mx-auto max-w-4xl px-6 py-20">
-		<h1 class="text-3xl font-bold text-white md:text-4xl text-center font-[var(--font-heading)] uppercase">Prendre <span class="text-primary">Rendez-vous</span></h1>
-		<p class="mt-2 text-stone-400 text-center font-medium">
-			Choisissez votre prestation et votre créneau en quelques clics.
-		</p>
-		
-		<div class="mt-10 rounded-2xl bg-stone-900 p-6 md:p-10 shadow-2xl border border-stone-800">
-			<ReservationForm client:load />
+	<section class="min-h-screen bg-stone-950 px-6 py-20">
+		<div class="mx-auto max-w-4xl">
+			<h1 class="text-3xl font-bold text-white md:text-4xl text-center font-[var(--font-heading)] uppercase">Prendre <span class="text-primary">Rendez-vous</span></h1>
+			<p class="mt-2 text-stone-400 text-center font-medium">
+				Choisissez votre prestation et votre créneau en quelques clics.
+			</p>
+			
+			<div class="mt-10 rounded-2xl bg-white p-6 md:p-10 shadow-2xl border border-stone-200">
+				<ReservationForm client:load />
+			</div>
 		</div>
 	</section>
 </PremiumAutoLayout>
