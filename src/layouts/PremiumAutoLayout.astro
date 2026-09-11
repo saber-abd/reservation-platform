@@ -41,6 +41,17 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 			<slot />
 		</main>
 		<PremiumFooter />
+		<script>
+			import AOS from 'aos';
+
+			AOS.init({
+				duration: 600,
+				easing: 'ease-out',
+				once: false,
+				mirror: true,
+				offset: 80,
+			});
+		</script>
 		<SmoothScroll />
 	</body>
 </html>

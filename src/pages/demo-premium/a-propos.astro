@@ -6,16 +6,16 @@ const basePath = Astro.url.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '';
 ---
 
 <PremiumAutoLayout title="À propos" description={`Découvrez l'histoire et l'expertise du garage ${siteConfig.business.name}.`}>
-	<section class="pt-32 pb-20 bg-background px-6">
+	<section class="pt-32 pb-20 bg-stone-950 px-6">
 		<div class="max-w-6xl mx-auto grid items-center gap-16 md:grid-cols-2">
 			<div data-aos="fade-right">
-				<h1 class="text-4xl font-black text-foreground md:text-5xl uppercase font-[var(--font-heading)]">
+				<h1 class="text-4xl font-black text-white md:text-5xl uppercase font-[var(--font-heading)]">
 					L'<span class="text-primary">Exigence</span> Mécanique
 				</h1>
-				<p class="mt-6 text-muted-foreground font-medium text-lg leading-relaxed">
+				<p class="mt-6 text-stone-400 font-medium text-lg leading-relaxed">
 					{siteConfig.business.description}
 				</p>
-				<p class="mt-4 text-muted-foreground font-medium">
+				<p class="mt-4 text-stone-400 font-medium">
 					Notre équipe de techniciens certifiés met un point d'honneur à vous offrir des prestations
 					de très haute qualité, avec un équipement à la pointe de la technologie.
 				</p>
@@ -34,10 +34,10 @@ const basePath = Astro.url.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '';
 	</section>
 
 	<!-- Notre histoire -->
-	<section class="bg-card border-y border-border py-24">
+	<section class="bg-stone-900 border-y border-stone-800 py-24">
 		<div class="mx-auto max-w-4xl px-6 text-center" data-aos="fade-up">
-			<h2 class="text-3xl font-black text-foreground md:text-4xl uppercase font-[var(--font-heading)]">Notre <span class="text-primary">Histoire</span></h2>
-			<div class="mt-8 text-muted-foreground text-lg leading-relaxed text-justify md:text-center space-y-4">
+			<h2 class="text-3xl font-black text-white md:text-4xl uppercase font-[var(--font-heading)]">Notre <span class="text-primary">Histoire</span></h2>
+			<div class="mt-8 text-stone-400 text-lg leading-relaxed text-justify md:text-center space-y-4">
 				<p>Fondé par des passionnés de sport automobile, notre garage a d'abord vu le jour comme un petit atelier de préparation moteur. La quête constante de la performance et de la fiabilité nous a rapidement poussés à nous développer.</p>
 				<p>Aujourd'hui, nous mettons notre savoir-faire acquis en compétition au service de votre véhicule de tous les jours, avec la même rigueur et la même passion pour la belle mécanique.</p>
 			</div>
@@ -45,50 +45,50 @@ const basePath = Astro.url.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '';
 	</section>
 
 	<!-- Nos engagements -->
-	<section class="mx-auto max-w-6xl px-6 py-24">
-		<h2 class="text-3xl font-black text-foreground md:text-4xl uppercase font-[var(--font-heading)] text-center mb-16" data-aos="fade-up">Nos <span class="text-primary">Engagements</span></h2>
+	<section class="mx-auto max-w-6xl px-6 py-24 bg-stone-950">
+		<h2 class="text-3xl font-black text-white md:text-4xl uppercase font-[var(--font-heading)] text-center mb-16" data-aos="fade-up">Nos <span class="text-primary">Engagements</span></h2>
 		<div class="grid gap-8 md:grid-cols-3">
-			<div class="rounded-2xl border border-border bg-card p-8 shadow-sm transition-colors hover:border-primary/50" data-aos="fade-up" data-aos-delay="0">
-				<div class="w-12 h-12 bg-muted rounded-xl flex items-center justify-center text-primary mb-6"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
-				<p class="font-bold text-foreground uppercase tracking-wider mb-2">Transparence Totale</p>
-				<p class="text-sm text-muted-foreground">Devis clair avant toute intervention. Aucune réparation n'est effectuée sans votre accord explicite.</p>
+			<div class="rounded-2xl border border-stone-800 bg-stone-900 p-8 shadow-sm transition-colors hover:border-primary/50" data-aos="fade-up" data-aos-delay="0">
+				<div class="w-12 h-12 bg-stone-800 rounded-xl flex items-center justify-center text-primary mb-6"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
+				<p class="font-bold text-white uppercase tracking-wider mb-2">Transparence Totale</p>
+				<p class="text-sm text-stone-400">Devis clair avant toute intervention. Aucune réparation n'est effectuée sans votre accord explicite.</p>
 			</div>
-			<div class="rounded-2xl border border-border bg-card p-8 shadow-sm transition-colors hover:border-primary/50" data-aos="fade-up" data-aos-delay="75">
-				<div class="w-12 h-12 bg-muted rounded-xl flex items-center justify-center text-primary mb-6"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 11-5.5 5.5a2.5 2.5 0 0 1-3.53 0l-1.96-1.96a2.5 2.5 0 0 0-3.54 0L1 17"/><path d="M22 6 12 16l-3.5-3.5"/></svg></div>
-				<p class="font-bold text-foreground uppercase tracking-wider mb-2">Pièces Premium</p>
-				<p class="text-sm text-muted-foreground">Nous utilisons exclusivement des pièces d'origine constructeur ou des pièces performances certifiées.</p>
+			<div class="rounded-2xl border border-stone-800 bg-stone-900 p-8 shadow-sm transition-colors hover:border-primary/50" data-aos="fade-up" data-aos-delay="75">
+				<div class="w-12 h-12 bg-stone-800 rounded-xl flex items-center justify-center text-primary mb-6"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 11-5.5 5.5a2.5 2.5 0 0 1-3.53 0l-1.96-1.96a2.5 2.5 0 0 0-3.54 0L1 17"/><path d="M22 6 12 16l-3.5-3.5"/></svg></div>
+				<p class="font-bold text-white uppercase tracking-wider mb-2">Pièces Premium</p>
+				<p class="text-sm text-stone-400">Nous utilisons exclusivement des pièces d'origine constructeur ou des pièces performances certifiées.</p>
 			</div>
-			<div class="rounded-2xl border border-border bg-card p-8 shadow-sm transition-colors hover:border-primary/50" data-aos="fade-up" data-aos-delay="150">
-				<div class="w-12 h-12 bg-muted rounded-xl flex items-center justify-center text-primary mb-6"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-				<p class="font-bold text-foreground uppercase tracking-wider mb-2">Garantie Atelier</p>
-				<p class="text-sm text-muted-foreground">Toutes nos interventions mécaniques sont garanties 1 an pièces et main d'œuvre.</p>
+			<div class="rounded-2xl border border-stone-800 bg-stone-900 p-8 shadow-sm transition-colors hover:border-primary/50" data-aos="fade-up" data-aos-delay="150">
+				<div class="w-12 h-12 bg-stone-800 rounded-xl flex items-center justify-center text-primary mb-6"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+				<p class="font-bold text-white uppercase tracking-wider mb-2">Garantie Atelier</p>
+				<p class="text-sm text-stone-400">Toutes nos interventions mécaniques sont garanties 1 an pièces et main d'œuvre.</p>
 			</div>
 		</div>
 	</section>
 
 	<!-- Diplômes et certifications -->
-	<section class="bg-card border-t border-border py-24">
+	<section class="bg-stone-900 border-t border-stone-800 py-24">
 		<div class="mx-auto max-w-4xl px-6">
-			<h2 class="text-3xl font-black text-foreground md:text-4xl uppercase font-[var(--font-heading)] text-center mb-16" data-aos="fade-up">Nos <span class="text-primary">Certifications</span></h2>
+			<h2 class="text-3xl font-black text-white md:text-4xl uppercase font-[var(--font-heading)] text-center mb-16" data-aos="fade-up">Nos <span class="text-primary">Certifications</span></h2>
 			<ul class="space-y-4">
-				<li class="flex items-center justify-between rounded-xl border border-border bg-background p-6 shadow-sm hover:border-primary/50 transition-colors" data-aos="fade-up" data-aos-delay="0">
+				<li class="flex items-center justify-between rounded-xl border border-stone-800 bg-stone-950 p-6 shadow-sm hover:border-primary/50 transition-colors" data-aos="fade-up" data-aos-delay="0">
 					<div>
-						<p class="font-bold text-foreground uppercase tracking-wider">Diagnostic Électronique Avancé</p>
-						<p class="text-sm text-muted-foreground mt-1">Bosch Car Service Training</p>
+						<p class="font-bold text-white uppercase tracking-wider">Diagnostic Électronique Avancé</p>
+						<p class="text-sm text-stone-400 mt-1">Bosch Car Service Training</p>
 					</div>
 					<span class="text-sm font-black text-primary">2023</span>
 				</li>
-				<li class="flex items-center justify-between rounded-xl border border-border bg-background p-6 shadow-sm hover:border-primary/50 transition-colors" data-aos="fade-up" data-aos-delay="75">
+				<li class="flex items-center justify-between rounded-xl border border-stone-800 bg-stone-950 p-6 shadow-sm hover:border-primary/50 transition-colors" data-aos="fade-up" data-aos-delay="75">
 					<div>
-						<p class="font-bold text-foreground uppercase tracking-wider">Expert Véhicules Hybrides & Électriques</p>
-						<p class="text-sm text-muted-foreground mt-1">Habilitation Électrique B2VL</p>
+						<p class="font-bold text-white uppercase tracking-wider">Expert Véhicules Hybrides & Électriques</p>
+						<p class="text-sm text-stone-400 mt-1">Habilitation Électrique B2VL</p>
 					</div>
 					<span class="text-sm font-black text-primary">2022</span>
 				</li>
-				<li class="flex items-center justify-between rounded-xl border border-border bg-background p-6 shadow-sm hover:border-primary/50 transition-colors" data-aos="fade-up" data-aos-delay="150">
+				<li class="flex items-center justify-between rounded-xl border border-stone-800 bg-stone-950 p-6 shadow-sm hover:border-primary/50 transition-colors" data-aos="fade-up" data-aos-delay="150">
 					<div>
-						<p class="font-bold text-foreground uppercase tracking-wider">Préparation Moteur & Reprogrammation</p>
-						<p class="text-sm text-muted-foreground mt-1">Masterclass Motorsport Engineering</p>
+						<p class="font-bold text-white uppercase tracking-wider">Préparation Moteur & Reprogrammation</p>
+						<p class="text-sm text-stone-400 mt-1">Masterclass Motorsport Engineering</p>
 					</div>
 					<span class="text-sm font-black text-primary">2020</span>
 				</li>
