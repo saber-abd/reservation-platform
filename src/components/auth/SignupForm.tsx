@@ -133,12 +133,12 @@ export default function SignupForm() {
 			)}
 			
 			<div>
-				<label className="text-sm text-muted-foreground" htmlFor="fullName">
+				<label className="text-sm text-stone-500" htmlFor="fullName">
 					Nom complet <span className="text-rose-600">*</span>
 				</label>
 				<input
 					id="fullName"
-					className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+					className="mt-1 w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-rose-600 transition-colors"
 					{...register('fullName')}
 				/>
 				{errors.fullName && <p className="mt-1 text-xs text-destructive">{errors.fullName.message}</p>}
@@ -147,24 +147,24 @@ export default function SignupForm() {
 			{!existingUser && (
 				<>
 					<div>
-						<label className="text-sm text-muted-foreground" htmlFor="email">
+						<label className="text-sm text-stone-500" htmlFor="email">
 							Email <span className="text-primary">*</span>
 						</label>
 						<input
 							id="email"
 							type="email"
-							className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+							className="mt-1 w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
 							{...register('email')}
 						/>
 					</div>
 					<div>
-						<label className="text-sm text-muted-foreground" htmlFor="password">
+						<label className="text-sm text-stone-500" htmlFor="password">
 							Mot de passe <span className="text-primary">*</span>
 						</label>
 						<input
 							id="password"
 							type="password"
-							className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+							className="mt-1 w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
 							{...register('password')}
 						/>
 					</div>
@@ -184,9 +184,9 @@ export default function SignupForm() {
 			{!existingUser && (
 				<>
 					<div className="relative my-4 flex items-center py-2">
-						<div className="flex-grow border-t border-border"></div>
+						<div className="flex-grow border-t border-stone-200"></div>
 						<span className="shrink-0 px-4 text-xs text-stone-400">Ou continuer avec</span>
-						<div className="flex-grow border-t border-border"></div>
+						<div className="flex-grow border-t border-stone-200"></div>
 					</div>
 
 					<button
@@ -195,7 +195,7 @@ export default function SignupForm() {
 							const { signInWithGoogle } = await import('@/lib/auth');
 							await signInWithGoogle();
 						}}
-						className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted"
+						className="flex w-full items-center justify-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-4 py-2 text-sm font-semibold text-stone-700 transition-colors hover:bg-stone-100"
 					>
 						<svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
 							<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
