@@ -96,8 +96,8 @@ export default function PremiumStatsPanel() {
 	return (
 		<div className="space-y-8 animate-[fade-in_0.5s_ease-out]">
 			<div>
-				<h1 className="text-3xl font-black text-foreground uppercase tracking-widest font-[var(--font-heading)]">Télémétrie</h1>
-				<p className="mt-2 text-muted-foreground font-medium">Analyse des performances et statistiques d'activité.</p>
+				<h1 className="text-3xl font-black text-stone-900 uppercase tracking-widest font-[var(--font-heading)]">Télémétrie</h1>
+				<p className="mt-2 text-stone-500 font-medium">Analyse des performances et statistiques d'activité.</p>
 			</div>
 
 			<div className="flex gap-2">
@@ -105,10 +105,10 @@ export default function PremiumStatsPanel() {
 					<button
 						key={days}
 						onClick={() => setDaysPreset(days)}
-						className={`px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wider transition-all ${
+						className={`px-5 py-2 rounded-xl text-sm font-bold uppercase tracking-wider transition-all ${
 							daysPreset === days 
-							? 'bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,50,50,0.3)]' 
-							: 'bg-muted text-muted-foreground hover:text-foreground hover:bg-accent border border-border'
+							? 'bg-primary text-white shadow-sm border border-primary shadow-primary/20' 
+							: 'bg-white text-stone-500 hover:text-primary hover:border-primary border border-stone-200'
 						}`}
 					>
 						{days} Jours
@@ -118,27 +118,27 @@ export default function PremiumStatsPanel() {
 
 			{/* KPI Cards */}
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-				<div className="bg-card backdrop-blur-sm border border-border rounded-2xl p-6 relative overflow-hidden group shadow-sm">
-					<div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-					<p className="text-muted-foreground text-sm font-bold uppercase tracking-wider mb-2">Chiffre d'affaires</p>
-					<p className="text-4xl font-black text-foreground font-[var(--font-heading)]">{stats.revenue} €</p>
+				<div className="bg-white border border-stone-200 rounded-3xl p-8 relative overflow-hidden group shadow-sm transition-all hover:shadow-md hover:border-primary/30">
+					<div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+					<p className="text-stone-500 text-sm font-bold uppercase tracking-wider mb-2">Chiffre d'affaires</p>
+					<p className="text-4xl font-black text-stone-900 font-[var(--font-heading)]">{stats.revenue} €</p>
 				</div>
-				<div className="bg-card backdrop-blur-sm border border-border rounded-2xl p-6 relative overflow-hidden group shadow-sm">
-					<div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-					<p className="text-muted-foreground text-sm font-bold uppercase tracking-wider mb-2">Interventions</p>
-					<p className="text-4xl font-black text-foreground font-[var(--font-heading)]">{stats.appointmentsCount}</p>
+				<div className="bg-white border border-stone-200 rounded-3xl p-8 relative overflow-hidden group shadow-sm transition-all hover:shadow-md hover:border-primary/30">
+					<div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+					<p className="text-stone-500 text-sm font-bold uppercase tracking-wider mb-2">Interventions</p>
+					<p className="text-4xl font-black text-stone-900 font-[var(--font-heading)]">{stats.appointmentsCount}</p>
 				</div>
-				<div className="bg-card backdrop-blur-sm border border-border rounded-2xl p-6 relative overflow-hidden group shadow-sm">
-					<div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-					<p className="text-muted-foreground text-sm font-bold uppercase tracking-wider mb-2">Panier Moyen</p>
-					<p className="text-4xl font-black text-foreground font-[var(--font-heading)]">{stats.avgTicket} €</p>
+				<div className="bg-white border border-stone-200 rounded-3xl p-8 relative overflow-hidden group shadow-sm transition-all hover:shadow-md hover:border-primary/30">
+					<div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+					<p className="text-stone-500 text-sm font-bold uppercase tracking-wider mb-2">Panier Moyen</p>
+					<p className="text-4xl font-black text-stone-900 font-[var(--font-heading)]">{stats.avgTicket} €</p>
 				</div>
 			</div>
 
 			{/* Charts */}
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-				<div className="bg-card backdrop-blur-sm border border-border rounded-2xl p-6 shadow-sm">
-					<h3 className="text-foreground font-bold uppercase tracking-wider mb-6">Évolution CA</h3>
+				<div className="bg-white border border-stone-200 rounded-3xl p-8 shadow-sm transition-all hover:shadow-md">
+					<h3 className="text-stone-900 font-bold uppercase tracking-wider mb-6">Évolution CA</h3>
 					<div className="h-[300px] w-full">
 						<ResponsiveContainer width="100%" height="100%">
 							<AreaChart data={revenueData}>
@@ -161,8 +161,8 @@ export default function PremiumStatsPanel() {
 					</div>
 				</div>
 
-				<div className="bg-card backdrop-blur-sm border border-border rounded-2xl p-6 shadow-sm">
-					<h3 className="text-foreground font-bold uppercase tracking-wider mb-6">Top Prestations (CA)</h3>
+				<div className="bg-white border border-stone-200 rounded-3xl p-8 shadow-sm transition-all hover:shadow-md">
+					<h3 className="text-stone-900 font-bold uppercase tracking-wider mb-6">Top Prestations (CA)</h3>
 					<div className="h-[300px] w-full">
 						<ResponsiveContainer width="100%" height="100%">
 							<BarChart data={serviceData} layout="vertical" margin={{ top: 0, right: 0, left: 40, bottom: 0 }}>

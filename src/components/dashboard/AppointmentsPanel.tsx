@@ -24,10 +24,10 @@ const statusLabels: Record<Appointment['status'], string> = {
 };
 
 const statusStyles: Record<Appointment['status'], string> = {
-	pending: 'bg-amber-50 text-amber-700',
-	confirmed: 'bg-rose-50 text-rose-700',
-	cancelled: 'bg-red-50 text-red-700',
-	completed: 'bg-green-50 text-green-700',
+	pending: 'bg-amber-50 text-amber-700 border border-amber-200',
+	confirmed: 'bg-rose-50 text-rose-700 border border-rose-200',
+	cancelled: 'bg-stone-50 text-stone-600 border border-stone-200',
+	completed: 'bg-green-50 text-green-700 border border-green-200',
 };
 
 type Tab = 'pending' | 'confirmed' | 'history';
@@ -54,21 +54,21 @@ function AppointmentDetailModal({
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
 			<div
-				className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg"
+				className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-2xl"
 				onClick={(e) => e.stopPropagation()}
 			>
 				<div className="flex items-start justify-between">
-					<h2 className="text-lg font-semibold text-foreground">Détail du rendez-vous</h2>
-					<button onClick={onClose} className="text-sm text-stone-400 hover:text-muted-foreground">
+					<h2 className="text-lg font-bold text-stone-900">Détail du rendez-vous</h2>
+					<button onClick={onClose} className="text-sm text-stone-400 hover:text-stone-600 transition-colors">
 						✕
 					</button>
 				</div>
 				<dl className="mt-4 space-y-3 text-sm">
 					<div>
-						<dt className="text-xs uppercase text-stone-400">Client</dt>
-						<dd className="font-medium text-foreground">{appointment.client_name}</dd>
-						<dd className="text-muted-foreground">{appointment.client_email}</dd>
-						{appointment.client_phone && <dd className="text-muted-foreground">{appointment.client_phone}</dd>}
+						<dt className="text-xs font-bold tracking-wider uppercase text-stone-400">Client</dt>
+						<dd className="font-medium text-stone-900">{appointment.client_name}</dd>
+						<dd className="text-stone-500">{appointment.client_email}</dd>
+						{appointment.client_phone && <dd className="text-stone-500">{appointment.client_phone}</dd>}
 					</div>
 					<div>
 						<dt className="text-xs uppercase text-stone-400">Prestation</dt>
@@ -82,7 +82,7 @@ function AppointmentDetailModal({
 						<dd className="text-stone-700">{formatDate(appointment.start_time)}</dd>
 					</div>
 					<div>
-						<dt className="text-xs uppercase text-stone-400">Statut</dt>
+						<dt className="text-xs font-bold tracking-wider uppercase text-stone-400">Statut</dt>
 						<dd>
 							<span className={`rounded-full px-2 py-1 text-xs font-medium ${statusStyles[appointment.status]}`}>
 								{statusLabels[appointment.status]}
@@ -183,8 +183,8 @@ export default function AppointmentsPanel() {
 
 	return (
 		<div>
-			<h1 className="text-2xl font-bold text-foreground">Rendez-vous</h1>
-			<p className="mt-1 text-sm text-muted-foreground">Bienvenue, {professional?.business_name}.</p>
+			<h1 className="text-2xl font-black text-stone-900 uppercase tracking-widest font-[var(--font-heading)]">Rendez-vous</h1>
+			<p className="mt-1 text-sm text-stone-500">Bienvenue, {professional?.business_name}.</p>
 
 			<div className="mt-6 flex flex-wrap gap-2">
 				{(Object.keys(tabLabels) as Tab[]).map((t) => (
@@ -192,10 +192,10 @@ export default function AppointmentsPanel() {
 						key={t}
 						type="button"
 						onClick={() => setTab(t)}
-						className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+						className={`rounded-lg border px-4 py-2 text-sm font-bold transition-colors shadow-sm ${
 							tab === t
-								? 'border-rose-600 bg-rose-600 text-white'
-								: 'border-border bg-card text-muted-foreground hover:border-rose-300'
+								? 'border-primary bg-primary text-white shadow-primary/20'
+								: 'border-stone-200 bg-white text-stone-500 hover:border-primary hover:text-primary'
 						}`}
 					>
 						{tabLabels[t]}
@@ -203,17 +203,17 @@ export default function AppointmentsPanel() {
 				))}
 			</div>
 
-			<div className="mt-6 overflow-x-auto rounded-xl border border-border">
+			<div className="mt-8 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
 				<table className="w-full text-left text-sm">
-					<thead className="bg-stone-50 text-xs uppercase text-muted-foreground">
+					<thead className="bg-stone-50 text-xs font-bold uppercase tracking-wider text-stone-500 border-b border-stone-200">
 						<tr>
-							<th className="px-4 py-3">Client</th>
-							<th className="px-4 py-3">Créneau</th>
-							<th className="px-4 py-3">Statut</th>
-							<th className="px-4 py-3" />
+							<th className="px-6 py-4">Client</th>
+							<th className="px-6 py-4">Créneau</th>
+							<th className="px-6 py-4">Statut</th>
+							<th className="px-6 py-4" />
 						</tr>
 					</thead>
-					<tbody>
+					<tbody className="divide-y divide-stone-100">
 						{loadingAppointments && (
 							<tr>
 								<td className="px-4 py-4 text-muted-foreground" colSpan={4}>
@@ -239,21 +239,21 @@ export default function AppointmentsPanel() {
 							<tr
 								key={appointment.id}
 								onClick={() => setSelectedAppointment(appointment)}
-								className="cursor-pointer border-t border-border hover:bg-stone-50"
+								className="cursor-pointer hover:bg-stone-50 transition-colors"
 							>
-								<td className="px-4 py-3">
-									<p className="font-medium text-foreground">{appointment.client_name}</p>
-									<p className="text-xs text-muted-foreground">{appointment.client_email}</p>
+								<td className="px-6 py-4">
+									<p className="font-bold text-stone-900">{appointment.client_name}</p>
+									<p className="text-xs text-stone-500 mt-1">{appointment.client_email}</p>
 								</td>
-								<td className="px-4 py-3 text-muted-foreground">{formatDate(appointment.start_time)}</td>
-								<td className="px-4 py-3">
+								<td className="px-6 py-4 text-stone-600 font-medium">{formatDate(appointment.start_time)}</td>
+								<td className="px-6 py-4">
 									<span
 										className={`rounded-full px-2 py-1 text-xs font-medium ${statusStyles[appointment.status]}`}
 									>
 										{statusLabels[appointment.status]}
 									</span>
 								</td>
-								<td className="px-4 py-3 text-right">
+								<td className="px-6 py-4 text-right">
 									{appointment.status === 'confirmed' && new Date(appointment.start_time) < now && (
 										<button
 											onClick={(e) => {
