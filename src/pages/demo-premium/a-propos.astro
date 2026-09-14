@@ -45,23 +45,25 @@ const basePath = Astro.url.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '';
 	</section>
 
 	<!-- Nos engagements -->
-	<section class="mx-auto max-w-6xl px-6 py-24 bg-stone-950">
-		<h2 class="text-3xl font-black text-white md:text-4xl uppercase font-[var(--font-heading)] text-center mb-16" data-aos="fade-up">Nos <span class="text-primary">Engagements</span></h2>
-		<div class="grid gap-8 md:grid-cols-3">
-			<div class="rounded-2xl border border-stone-800 bg-stone-900 p-8 shadow-sm transition-colors hover:border-primary/50" data-aos="fade-up" data-aos-delay="0">
-				<div class="w-12 h-12 bg-stone-800 rounded-xl flex items-center justify-center text-primary mb-6"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
-				<p class="font-bold text-white uppercase tracking-wider mb-2">Transparence Totale</p>
-				<p class="text-sm text-stone-400">Devis clair avant toute intervention. Aucune réparation n'est effectuée sans votre accord explicite.</p>
-			</div>
-			<div class="rounded-2xl border border-stone-800 bg-stone-900 p-8 shadow-sm transition-colors hover:border-primary/50" data-aos="fade-up" data-aos-delay="75">
-				<div class="w-12 h-12 bg-stone-800 rounded-xl flex items-center justify-center text-primary mb-6"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 11-5.5 5.5a2.5 2.5 0 0 1-3.53 0l-1.96-1.96a2.5 2.5 0 0 0-3.54 0L1 17"/><path d="M22 6 12 16l-3.5-3.5"/></svg></div>
-				<p class="font-bold text-white uppercase tracking-wider mb-2">Pièces Premium</p>
-				<p class="text-sm text-stone-400">Nous utilisons exclusivement des pièces d'origine constructeur ou des pièces performances certifiées.</p>
-			</div>
-			<div class="rounded-2xl border border-stone-800 bg-stone-900 p-8 shadow-sm transition-colors hover:border-primary/50" data-aos="fade-up" data-aos-delay="150">
-				<div class="w-12 h-12 bg-stone-800 rounded-xl flex items-center justify-center text-primary mb-6"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-				<p class="font-bold text-white uppercase tracking-wider mb-2">Garantie Atelier</p>
-				<p class="text-sm text-stone-400">Toutes nos interventions mécaniques sont garanties 1 an pièces et main d'œuvre.</p>
+	<section class="bg-stone-950 py-24">
+		<div class="mx-auto max-w-6xl px-6">
+			<h2 class="text-3xl font-black text-white md:text-4xl uppercase font-[var(--font-heading)] text-center mb-16" data-aos="fade-up">Nos <span class="text-primary">Engagements</span></h2>
+			<div class="grid gap-8 md:grid-cols-3">
+				<div class="rounded-2xl border border-stone-800 bg-stone-900 p-8 shadow-sm transition-colors hover:border-primary/50" data-aos="fade-up" data-aos-delay="0">
+					<div class="w-12 h-12 bg-stone-800 rounded-xl flex items-center justify-center text-primary mb-6"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
+					<p class="font-bold text-white uppercase tracking-wider mb-2">Transparence Totale</p>
+					<p class="text-sm text-stone-400">Devis clair avant toute intervention. Aucune réparation n'est effectuée sans votre accord explicite.</p>
+				</div>
+				<div class="rounded-2xl border border-stone-800 bg-stone-900 p-8 shadow-sm transition-colors hover:border-primary/50" data-aos="fade-up" data-aos-delay="75">
+					<div class="w-12 h-12 bg-stone-800 rounded-xl flex items-center justify-center text-primary mb-6"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 11-5.5 5.5a2.5 2.5 0 0 1-3.53 0l-1.96-1.96a2.5 2.5 0 0 0-3.54 0L1 17"/><path d="M22 6 12 16l-3.5-3.5"/></svg></div>
+					<p class="font-bold text-white uppercase tracking-wider mb-2">Pièces Premium</p>
+					<p class="text-sm text-stone-400">Nous utilisons exclusivement des pièces d'origine constructeur ou des pièces performances certifiées.</p>
+				</div>
+				<div class="rounded-2xl border border-stone-800 bg-stone-900 p-8 shadow-sm transition-colors hover:border-primary/50" data-aos="fade-up" data-aos-delay="150">
+					<div class="w-12 h-12 bg-stone-800 rounded-xl flex items-center justify-center text-primary mb-6"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+					<p class="font-bold text-white uppercase tracking-wider mb-2">Garantie Atelier</p>
+					<p class="text-sm text-stone-400">Toutes nos interventions mécaniques sont garanties 1 an pièces et main d'œuvre.</p>
+				</div>
 			</div>
 		</div>
 	</section>
