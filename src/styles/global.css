@@ -169,7 +169,7 @@
     /* Removed Coolvetica override from here to avoid applying it to public pages */
 }
 
-.dashboard-premium {
+.dashboard-premium, .dashboard-premium body {
     --font-heading: 'Coolvetica', sans-serif;
     --font-sans: 'Coolvetica', sans-serif;
     font-family: 'Coolvetica', sans-serif !important;
