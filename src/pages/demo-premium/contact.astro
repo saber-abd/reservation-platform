@@ -91,8 +91,7 @@ const basePath = Astro.url.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '';
 			<Map 
 				lat={siteConfig.business.lat} 
 				lng={siteConfig.business.lng} 
-				name={siteConfig.business.name}
-				address={siteConfig.business.address}
+				label={siteConfig.business.name}
 			/>
 		</div>
 	</section>
