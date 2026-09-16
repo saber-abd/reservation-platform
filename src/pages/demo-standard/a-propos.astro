@@ -1,15 +1,10 @@
 ---
-import Layout from '@/layouts/Layout.astro';
+import StandardLayout from '@/layouts/StandardLayout.astro';
 import { getSiteConfig } from '@/config/site';
+
 const siteConfig = await getSiteConfig(Astro.url.pathname);
 ---
 
-<Layout title="À propos" description={`En savoir plus sur ${siteConfig.business.name}.`}>
-	<section class="mx-auto max-w-6xl px-6 py-20">
-		<div class="grid items-center gap-10 md:grid-cols-2">
-			<div data-aos="fade-right">
-				<h1 class="text-3xl font-bold text-stone-900 md:text-4xl">À propos</h1>
-				<p class="mt-4 text-stone-500">{siteConfig.business.description}</p>
 <StandardLayout title="À Propos" description={`Découvrez l'histoire et les engagements de ${siteConfig.business.name}.`}>
 	<!-- Hero Section -->
 	<section class="bg-slate-900 py-20 md:py-28 text-center relative overflow-hidden">
