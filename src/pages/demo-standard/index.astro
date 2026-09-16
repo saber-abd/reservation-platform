@@ -1,101 +1,235 @@
 ---
-import Layout from '@/layouts/Layout.astro';
+import StandardLayout from '@/layouts/StandardLayout.astro';
 import Map from '@/components/Map.astro';
-import ServicesCarousel from '@/components/ServicesCarousel';
 import TestimonialsCarousel from '@/components/TestimonialsCarousel';
 import { getSiteConfig } from '@/config/site';
+
 const siteConfig = await getSiteConfig(Astro.url.pathname);
+
+const servicesPreview = [
+	{
+		title: 'Smartphones & Tablettes',
+		icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-smartphone"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>',
+		desc: 'Changement d\'écran, remplacement de batterie, réparation connecteur de charge.',
+	},
+	{
+		title: 'Ordinateurs (PC & Mac)',
+		icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-laptop"><path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/></svg>',
+		desc: 'Diagnostic, nettoyage virus, réinstallation système, augmentation RAM/SSD.',
+	},
+	{
+		title: 'Télévisions & Périphériques',
+		icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-monitor"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>',
+		desc: 'Remplacement de dalles TV, configuration d\'imprimantes et réseaux Wi-Fi.',
+	}
+];
 ---
 
-<Layout>
-	<!-- Hero -->
-	<section class="relative mx-auto flex min-h-[70vh] flex-col items-center justify-center gap-6 px-6 py-24 text-center md:py-32">
-		<!-- Hero Background Image -->
-		<div class="absolute inset-0 z-[-1] overflow-hidden">
-			<img src="/images/hero_salon.jpg" alt="Salon de beauté intérieur" class="h-full w-full object-cover object-center" />
-			<div class="absolute inset-0 bg-white/70 backdrop-blur-[2px]"></div>
+<StandardLayout>
+	<!-- Hero Section -->
+	<section class="relative mx-auto flex min-h-[85vh] flex-col justify-center px-6 py-24 md:py-32 overflow-hidden">
+		<!-- Tech Background Image -->
+		<div class="absolute inset-0 z-[-2]">
+			<img src="https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?q=80&w=2560&auto=format&fit=crop" alt="Composants électroniques" class="h-full w-full object-cover object-center grayscale-[0.3]" />
 		</div>
+		<!-- Overlay Gradient -->
+		<div class="absolute inset-0 z-[-1] bg-gradient-to-r from-slate-900/95 via-slate-900/80 to-transparent"></div>
 
-		<p class="text-sm font-semibold uppercase tracking-widest text-rose-600">
-			{siteConfig.business.activity}
-		</p>
-		<h1 class="max-w-3xl text-4xl font-bold tracking-tight text-stone-900 md:text-6xl">
-			{siteConfig.business.tagline}
-		</h1>
-		<p class="max-w-xl text-lg text-stone-700">
-			{siteConfig.business.description}
-		</p>
-		<a
-			href="/demo-standard/reservation"
-			class="mt-4 rounded-xl bg-rose-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:-translate-y-1 hover:bg-rose-700 hover:shadow-xl"
-		>
-			Réserver maintenant
-		</a>
+		<div class="max-w-7xl mx-auto w-full">
+			<div class="max-w-2xl" data-aos="fade-right">
+				<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 text-sm font-semibold uppercase tracking-wider mb-6">
+					<span class="relative flex h-2 w-2">
+					  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+					  <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+					</span>
+					{siteConfig.business.activity}
+				</div>
+				<h1 class="text-4xl font-black tracking-tight text-white md:text-6xl/tight mb-6">
+					Vos problèmes informatiques résolus, <span class="text-blue-500">directement chez vous.</span>
+				</h1>
+				<p class="text-lg text-slate-300 mb-8 leading-relaxed">
+					{siteConfig.business.description}
+				</p>
+				<div class="flex flex-col sm:flex-row gap-4">
+					<a
+						href="/demo-standard/reservation"
+						class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-blue-600/30 transition-all hover:bg-blue-500 hover:-translate-y-1"
+					>
+						Réserver une intervention
+					</a>
+					<a
+						href="/demo-standard/services"
+						class="inline-flex items-center justify-center rounded-xl bg-white/10 px-8 py-4 text-base font-bold text-white backdrop-blur-md border border-white/20 transition-all hover:bg-white/20"
+					>
+						Voir nos tarifs
+					</a>
+				</div>
+			</div>
+		</div>
 	</section>
 
-	<!-- Aperçu services -->
-	<section class="bg-stone-50 py-20">
-		<div class="mx-auto max-w-6xl px-6">
-			<div class="mb-10 flex items-end justify-between" data-aos="fade-up">
-				<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">Nos prestations</h2>
-				<a href="/demo-standard/services" class="text-sm font-medium text-rose-600 hover:underline">Voir tout</a>
+	<!-- Process / Comment ça marche -->
+	<section class="py-24 bg-white">
+		<div class="max-w-7xl mx-auto px-6">
+			<div class="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up">
+				<h2 class="text-3xl font-bold text-slate-900 md:text-4xl mb-4">Un dépannage simple et rapide</h2>
+				<p class="text-slate-500 text-lg">Ne vous déplacez plus, notre technicien s'occupe de tout.</p>
 			</div>
-			<ServicesCarousel client:load limit={6} />
+			
+			<div class="grid md:grid-cols-3 gap-8 relative">
+				<!-- Connecting line (desktop only) -->
+				<div class="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-slate-100 -z-10"></div>
+				
+				<div class="bg-slate-50 border border-slate-100 rounded-2xl p-8 text-center relative z-10 transition-transform hover:-translate-y-2 duration-300 shadow-sm hover:shadow-xl" data-aos="fade-up" data-aos-delay="0">
+					<div class="w-20 h-20 mx-auto bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+						<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-check-2"><path d="M8 2v4"/><path d="M16 2v4"/><path d="M21 14V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/><path d="M3 10h18"/><path d="m16 20 2 2 4-4"/></svg>
+					</div>
+					<h3 class="text-xl font-bold text-slate-900 mb-3">1. Prise de RDV en ligne</h3>
+					<p class="text-slate-600">Choisissez votre créneau horaire et décrivez votre problème en quelques clics via notre plateforme sécurisée.</p>
+				</div>
+				
+				<div class="bg-slate-50 border border-slate-100 rounded-2xl p-8 text-center relative z-10 transition-transform hover:-translate-y-2 duration-300 shadow-sm hover:shadow-xl" data-aos="fade-up" data-aos-delay="100">
+					<div class="w-20 h-20 mx-auto bg-blue-600 text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-600/30">
+						<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wrench"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+					</div>
+					<h3 class="text-xl font-bold text-slate-900 mb-3">2. Diagnostic et Devis</h3>
+					<p class="text-slate-600">Notre technicien évalue la panne sur place. Un devis transparent et gratuit vous est proposé avant toute intervention.</p>
+				</div>
+				
+				<div class="bg-slate-50 border border-slate-100 rounded-2xl p-8 text-center relative z-10 transition-transform hover:-translate-y-2 duration-300 shadow-sm hover:shadow-xl" data-aos="fade-up" data-aos-delay="200">
+					<div class="w-20 h-20 mx-auto bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+						<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+					</div>
+					<h3 class="text-xl font-bold text-slate-900 mb-3">3. Appareil Réparé</h3>
+					<p class="text-slate-600">L'intervention est réalisée rapidement avec des pièces certifiées. Le matériel réparé est garanti 1 an.</p>
+				</div>
+			</div>
 		</div>
 	</section>
 
-	<!-- À propos résumé -->
-	<section class="mx-auto max-w-6xl px-6 py-20">
-		<div class="grid items-center gap-10 md:grid-cols-2">
-			<div class="overflow-hidden rounded-2xl shadow-xl" data-aos="fade-right">
-				<img src="/images/about_salon.jpg" alt="Matériel professionnel" class="aspect-[4/3] w-full object-cover" />
-			</div>
-			<div data-aos="fade-left">
-				<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">À propos</h2>
-				<p class="mt-4 text-stone-500">{siteConfig.business.description}</p>
-				<a href="/demo-standard/a-propos" class="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
-					En savoir plus
+	<!-- Domaines d'intervention -->
+	<section class="bg-slate-50 py-24 border-y border-slate-200">
+		<div class="max-w-7xl mx-auto px-6">
+			<div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6" data-aos="fade-up">
+				<div class="max-w-2xl">
+					<h2 class="text-3xl font-bold text-slate-900 md:text-4xl mb-4">Nos domaines d'intervention</h2>
+					<p class="text-slate-500 text-lg">Des professionnels équipés pour résoudre les pannes de n'importe quel appareil high-tech.</p>
+				</div>
+				<a href="/demo-standard/services" class="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700">
+					Voir la grille tarifaire complète
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
 				</a>
+			</div>
+			
+			<div class="grid md:grid-cols-3 gap-6">
+				{servicesPreview.map((service, index) => (
+					<div class="group rounded-2xl bg-white border border-slate-200 p-8 shadow-sm transition-all hover:shadow-xl hover:border-blue-200 cursor-pointer" data-aos="fade-up" data-aos-delay={index * 100}>
+						<div class="w-14 h-14 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-600 group-hover:bg-blue-600 group-hover:text-white transition-colors mb-6" set:html={service.icon}></div>
+						<h3 class="text-xl font-bold text-slate-900 mb-3">{service.title}</h3>
+						<p class="text-slate-600 leading-relaxed">{service.desc}</p>
+					</div>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<!-- Grille de prix populaire (Highlight) -->
+	<section class="py-24 bg-white">
+		<div class="max-w-7xl mx-auto px-6">
+			<div class="grid lg:grid-cols-2 gap-16 items-center">
+				<div data-aos="fade-right">
+					<h2 class="text-3xl font-bold text-slate-900 md:text-4xl mb-6">Des tarifs clairs, <br/>sans surprise.</h2>
+					<p class="text-slate-600 text-lg mb-8 leading-relaxed">
+						La transparence est au cœur de notre service. Pour les pannes courantes, nos forfaits incluent le diagnostic, la main d'œuvre et la pièce. Pour les cas plus complexes, un devis vous est systématiquement proposé.
+					</p>
+					<ul class="space-y-4 mb-10">
+						<li class="flex items-center gap-3 text-slate-700 font-medium">
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+							Déplacement offert dans un rayon de 20km
+						</li>
+						<li class="flex items-center gap-3 text-slate-700 font-medium">
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+							Devis gratuit sur place
+						</li>
+						<li class="flex items-center gap-3 text-slate-700 font-medium">
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+							Garantie 1 an sur les réparations matérielles
+						</li>
+					</ul>
+				</div>
+				
+				<div class="bg-slate-900 rounded-3xl p-8 md:p-10 shadow-2xl relative overflow-hidden" data-aos="fade-left">
+					<div class="absolute top-0 right-0 p-32 bg-blue-500/20 blur-[100px] rounded-full pointer-events-none"></div>
+					<h3 class="text-xl font-bold text-white mb-8 relative z-10">Interventions Fréquentes</h3>
+					
+					<div class="space-y-6 relative z-10">
+						{siteConfig.services.slice(0, 4).map((service) => (
+							<div class="flex items-center justify-between border-b border-slate-800 pb-4 last:border-0 last:pb-0">
+								<div>
+									<p class="font-semibold text-white">{service.name}</p>
+									<p class="text-sm text-slate-400 mt-1">{service.description.substring(0, 50)}...</p>
+								</div>
+								<div class="text-right ml-4">
+									<p class="font-bold text-lg text-blue-400 whitespace-nowrap">
+										{service.price > 0 ? `${service.price} €` : 'Sur devis'}
+									</p>
+								</div>
+							</div>
+						))}
+					</div>
+					
+					<div class="mt-10 relative z-10">
+						<a href="/demo-standard/reservation" class="block w-full py-4 text-center rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-colors shadow-lg shadow-blue-600/20">
+							Réserver ce tarif
+						</a>
+					</div>
+				</div>
 			</div>
 		</div>
 	</section>
 
 	<!-- Avis clients -->
-	<section class="bg-stone-50 py-20">
-		<div class="mx-auto max-w-6xl px-6">
-			<h2 class="mb-10 text-center text-2xl font-bold text-stone-900 md:text-3xl" data-aos="fade-up">Avis clients</h2>
-			<div data-aos="fade-up">
+	<section class="bg-slate-50 py-24 border-y border-slate-200">
+		<div class="max-w-7xl mx-auto px-6">
+			<div class="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up">
+				<h2 class="text-3xl font-bold text-slate-900 md:text-4xl mb-4">Ils nous ont fait confiance</h2>
+				<p class="text-slate-500 text-lg">Retrouvez les avis de nos clients sur nos interventions.</p>
+			</div>
+			<div data-aos="fade-up" class="pb-10">
+				<!-- Using existing TestimonialsCarousel but wrapping to fit standard layout -->
 				<TestimonialsCarousel client:load testimonials={siteConfig.testimonials} />
 			</div>
 		</div>
 	</section>
 
-	<!-- Où nous trouver -->
-	<section class="mx-auto max-w-6xl px-6 py-20">
-		<div class="grid items-center gap-10 md:grid-cols-2">
-			<div data-aos="fade-right">
-				<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">Où nous trouver</h2>
-				<p class="mt-4 text-stone-500">{siteConfig.business.address}</p>
-				<a href="/demo-standard/contact" class="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
-					Voir les coordonnées complètes
-				</a>
-			</div>
-			<div data-aos="fade-left">
-				<Map lat={siteConfig.business.lat} lng={siteConfig.business.lng} label={siteConfig.business.name} />
+	<!-- CTA final -->
+	<section class="mx-auto max-w-5xl px-6 py-24">
+		<div class="rounded-3xl bg-blue-600 p-10 md:p-16 text-center shadow-2xl relative overflow-hidden" data-aos="zoom-in">
+			<!-- Abstract decorative shapes -->
+			<div class="absolute -top-24 -left-24 w-64 h-64 bg-blue-500 rounded-full mix-blend-screen opacity-50 blur-3xl"></div>
+			<div class="absolute -bottom-24 -right-24 w-80 h-80 bg-cyan-400 rounded-full mix-blend-screen opacity-30 blur-3xl"></div>
+			
+			<div class="relative z-10">
+				<h2 class="text-3xl font-black text-white md:text-5xl mb-6">Besoin d'un dépannage urgent ?</h2>
+				<p class="text-blue-100 text-lg md:text-xl max-w-2xl mx-auto mb-10">
+					Nos techniciens sont disponibles 6j/7. Planifiez votre intervention dès maintenant via notre calendrier en ligne.
+				</p>
+				<div class="flex flex-col sm:flex-row justify-center gap-4">
+					<a
+						href="/demo-standard/reservation"
+						class="inline-flex items-center justify-center rounded-xl bg-white px-8 py-4 text-lg font-bold text-blue-700 shadow-xl hover:bg-slate-50 hover:-translate-y-1 transition-all"
+					>
+						Voir les disponibilités
+					</a>
+					<a
+						href="/demo-standard/contact"
+						class="inline-flex items-center justify-center rounded-xl bg-blue-700/50 backdrop-blur border border-blue-500/50 px-8 py-4 text-lg font-bold text-white shadow-xl hover:bg-blue-700 hover:-translate-y-1 transition-all"
+					>
+						Nous contacter
+					</a>
+				</div>
 			</div>
 		</div>
 	</section>
-
-	<!-- CTA final -->
-	<section class="mx-auto max-w-6xl px-6 py-20 text-center" data-aos="zoom-in">
-		<h2 class="text-3xl font-bold text-stone-900 md:text-4xl">Prêt à prendre rendez-vous ?</h2>
-		<p class="mt-4 text-stone-500">Réservez votre créneau en quelques clics.</p>
-		<a
-			href="/demo-standard/reservation"
-			class="mt-6 inline-block rounded-xl bg-rose-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-rose-700"
-		>
-			Réserver maintenant
-		</a>
-	</section>
-</Layout>
+</StandardLayout>
 

@@ -146,26 +146,169 @@ export const siteConfig = {
 	],
 };
 
+export const itRepairConfig = {
+	url: 'https://reservation-platform.demonstration-pro.workers.dev',
+	business: {
+		name: 'TechDom',
+		activity: 'Dépannage Informatique',
+		tagline: 'Vos problèmes informatiques résolus, directement chez vous.',
+		description:
+			"Spécialiste du dépannage informatique à domicile et en atelier. Nous intervenons rapidement pour réparer tous types d'appareils : ordinateurs (PC/Mac), smartphones, tablettes, télévisions et imprimantes. Transparence, efficacité et professionnalisme.",
+		address: '45 Avenue de la République, 75011 Paris',
+		lat: 48.864716,
+		lng: 2.379014,
+		phone: '01 99 88 77 66',
+		email: 'contact@techdom-reparation.fr',
+		openingHours: [
+			{ day: 'Lundi - Vendredi', hours: '9h00 - 19h00' },
+			{ day: 'Samedi', hours: '10h00 - 18h00' },
+			{ day: 'Dimanche', hours: 'Fermé' },
+		],
+	},
+
+	about: {
+		story:
+			"Passionnés par l'informatique depuis toujours, nous avons constaté que la technologie, bien qu'essentielle, pouvait vite devenir un casse-tête au quotidien. TechDom est né de cette volonté de simplifier la vie de nos clients en apportant une assistance technique humaine, claire et efficace directement chez eux.",
+		objectives: [
+			{
+				title: 'Transparence des prix',
+				description: "Aucune mauvaise surprise : nos forfaits sont clairs, et un devis gratuit est toujours réalisé avant toute réparation complexe.",
+			},
+			{
+				title: 'Intervention Rapide',
+				description: 'Parce qu\'un appareil en panne ne peut pas attendre, nous garantissons une intervention sous 24h à 48h.',
+			},
+			{
+				title: 'Pièces de Qualité',
+				description: 'Nous utilisons exclusivement des pièces certifiées ou d\'origine constructeur pour garantir la pérennité de nos réparations.',
+			},
+		],
+		diplomas: [
+			{ title: 'BTS Services Informatiques aux Organisations', institution: 'Lycée Tech', year: '2016' },
+			{ title: 'Certification Apple (ACMT)', institution: 'Apple', year: '2018' },
+			{ title: 'Technicien Réseau & Télécom', institution: 'Institut Tech', year: '2019' },
+		] satisfies Diploma[],
+	},
+
+	services: [
+		{
+			name: 'Diagnostic Complet',
+			description: 'Recherche de panne sur ordinateur, tablette ou smartphone.',
+			durationMinutes: 30,
+			price: 39,
+		},
+		{
+			name: 'Changement Écran Smartphone/Tablette',
+			description: 'Remplacement de l\'écran par une pièce d\'origine ou compatible AAA. (Sur devis)',
+			durationMinutes: 60,
+			price: 0, // 0 can signify "Sur devis" in UI
+		},
+		{
+			name: 'Remplacement Batterie',
+			description: 'Changement de la batterie (Smartphone, Tablette, PC portable). À partir de 49€ selon modèle.',
+			durationMinutes: 30,
+			price: 49,
+		},
+		{
+			name: 'Connecteur de Charge',
+			description: 'Remplacement du port de charge défectueux (Micro-USB, USB-C, Lightning).',
+			durationMinutes: 60,
+			price: 59,
+		},
+		{
+			name: 'Mise à niveau Composants PC',
+			description: 'Ajout de mémoire RAM, passage au disque dur SSD pour accélérer votre ordinateur.',
+			durationMinutes: 60,
+			price: 79,
+		},
+		{
+			name: 'Réparation TV (Changement Dalle)',
+			description: 'Diagnostic et remplacement de la dalle de votre téléviseur. (Sur devis selon résolution)',
+			durationMinutes: 120,
+			price: 0,
+		},
+		{
+			name: 'Dépannage Imprimante',
+			description: 'Résolution des problèmes de connexion, bourrages papier ou configuration réseau.',
+			durationMinutes: 45,
+			price: 49,
+		},
+		{
+			name: 'Nettoyage Logiciel & Virus',
+			description: 'Éradication des malwares, optimisation du système et nettoyage du registre.',
+			durationMinutes: 60,
+			price: 59,
+		},
+		{
+			name: 'Installation Pack Office',
+			description: 'Installation et configuration de la suite bureautique (Word, Excel...) et autres logiciels.',
+			durationMinutes: 30,
+			price: 49,
+		},
+	] satisfies Service[],
+
+	testimonials: [
+		{
+			name: 'Laurent D.',
+			rating: 5,
+			comment: "Intervention très rapide ! Mon PC ne démarrait plus, le problème a été réglé en une heure à domicile. Très professionnel.",
+		},
+		{
+			name: 'Sophie M.',
+			rating: 5,
+			comment: "J'ai fait changer l'écran de mon iPhone 13. Service impeccable, tarif annoncé à l'avance et travail soigné.",
+		},
+		{
+			name: 'Bernard P.',
+			rating: 4,
+			comment: "Très bon technicien qui a su configurer mon imprimante récalcitrante et m'expliquer le fonctionnement.",
+		},
+		{
+			name: 'Amélie T.',
+			rating: 5,
+			comment: "Mon ordinateur ramait énormément. Le passage au SSD a tout changé, c'est comme s'il était neuf !",
+		},
+	] satisfies Testimonial[],
+
+	nav: [
+		{ label: 'Accueil', href: '/' },
+		{ label: 'Services', href: '/services' },
+		{ label: 'Réserver', href: '/reservation' },
+		{ label: 'À propos', href: '/a-propos' },
+		{ label: 'Contact', href: '/contact' },
+	],
+};
+
 export async function getSiteConfig(currentPath?: string) {
 	try {
 		const tag = currentPath ? (currentPath.match(/^\/demo-([^/]+)/)?.[1] || 'diamant') : 'diamant';
+		
+		let baseConfig = siteConfig;
+		if (tag === 'standard') {
+			baseConfig = itRepairConfig;
+		}
+
 		const pro = await getPrimaryProfessional(tag);
 		if (pro) {
 			return {
-				...siteConfig,
+				...baseConfig,
 				business: {
-					...siteConfig.business,
-					name: pro.business_name || siteConfig.business.name,
-					activity: pro.activity || siteConfig.business.activity,
-					description: pro.description || siteConfig.business.description,
-					phone: pro.phone || siteConfig.business.phone,
-					email: pro.email || siteConfig.business.email,
-					address: pro.address || siteConfig.business.address,
+					...baseConfig.business,
+					name: pro.business_name || baseConfig.business.name,
+					activity: pro.activity || baseConfig.business.activity,
+					description: pro.description || baseConfig.business.description,
+					phone: pro.phone || baseConfig.business.phone,
+					email: pro.email || baseConfig.business.email,
+					address: pro.address || baseConfig.business.address,
 				}
 			};
 		}
+		
+		return baseConfig;
 	} catch (e) {
 		console.error("Error fetching primary professional", e);
 	}
-	return siteConfig;
+	
+	const tag = currentPath ? (currentPath.match(/^\/demo-([^/]+)/)?.[1] || 'diamant') : 'diamant';
+	return tag === 'standard' ? itRepairConfig : siteConfig;
 }
