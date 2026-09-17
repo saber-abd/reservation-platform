@@ -1,0 +1,196 @@
+---
+import CommercialLayout from '@/layouts/CommercialLayout.astro';
+import { Sparkles, Code2, Paintbrush, Rocket, Blocks, KeySquare, MonitorSmartphone, Euro, HeartHandshake } from 'lucide-react';
+---
+
+<CommercialLayout title="Galerie - Démo Diamant" description="Découvrez la démo Diamant : Le sur-mesure absolu pour votre entreprise.">
+	
+	<!-- Hero Section with Advanced Parallax and Glassmorphism -->
+	<section class="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-stone-950">
+		<!-- Dynamic animated background -->
+		<div class="absolute inset-0 z-0">
+			<!-- Layer 1: Base dark gradient -->
+			<div class="absolute inset-0 bg-gradient-to-b from-deep-teal-950 to-stone-950"></div>
+			<!-- Layer 2: Animated blobs -->
+			<div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-deep-teal-600 rounded-full blur-[150px] opacity-30 animate-[spin_20s_linear_infinite]"></div>
+			<div class="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-jasmine-600 rounded-full blur-[150px] opacity-20 animate-[spin_25s_linear_infinite_reverse]"></div>
+			<!-- Layer 3: Glassmorphism grid -->
+			<div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgwem0yMCAyMGMwIDExLjA0Ni04Ljk1NCAyMC0yMCAyMFMtMjAgMzEuMDQ2LTIwIDIwIC0xMS4wNDYgMCAwIDBzMjAgOC45NTQgMjAgMjB6IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=')]"></div>
+		</div>
+		
+		<div class="relative z-10 mx-auto max-w-7xl px-6 flex flex-col items-center text-center pt-20">
+			<div class="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-deep-teal-900/50 backdrop-blur-md border border-deep-teal-500/30 text-deep-teal-300 font-bold mb-8" data-aos="fade-down">
+				<Sparkles size={18} class="text-jasmine-400" />
+				Le Sur-Mesure Absolu
+			</div>
+			
+			<h1 class="text-5xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-deep-teal-200 to-jasmine-200 tracking-tighter mb-8 leading-tight" data-aos="fade-up" data-aos-delay="100">
+				L'Excellence <br/> <span class="font-sans italic font-light text-white">sans compromis.</span>
+			</h1>
+			
+			<p class="text-xl md:text-2xl text-stone-300 max-w-3xl mx-auto leading-relaxed mb-12 font-light" data-aos="fade-up" data-aos-delay="200">
+				Une architecture pensée exclusivement pour <strong>votre</strong> métier. Design unique, fonctionnalités inédites, intégrations sur-mesure.
+			</p>
+			
+			<div class="flex flex-col sm:flex-row gap-6" data-aos="fade-up" data-aos-delay="300">
+				<a href="/demo-diamant/" target="_blank" class="group relative px-8 py-4 bg-deep-teal-600 text-white rounded-2xl font-bold text-lg transition-all hover:scale-105 hover:shadow-[0_0_40px_-10px_rgba(112,141,129,0.8)] overflow-hidden">
+					<div class="absolute inset-0 bg-gradient-to-r from-deep-teal-400 to-deep-teal-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+					<span class="relative flex items-center gap-2">Visiter la Démo <Rocket size={20} /></span>
+				</a>
+				<a href="#couts" class="px-8 py-4 bg-white/5 backdrop-blur-lg border border-white/10 text-white rounded-2xl font-bold text-lg hover:bg-white/10 transition-colors">
+					Comprendre l'offre
+				</a>
+			</div>
+		</div>
+
+		<!-- Scroll indicator -->
+		<div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50 animate-bounce">
+			<span class="text-xs text-white uppercase tracking-widest">Scroll</span>
+			<div class="w-[1px] h-12 bg-gradient-to-b from-white to-transparent"></div>
+		</div>
+	</section>
+
+	<!-- Section Philosophie (Glass Cards overlapping) -->
+	<section id="philosophie" class="py-32 bg-stone-950 relative overflow-hidden">
+		<!-- Parallax elements -->
+		<div class="absolute right-0 top-1/4 w-96 h-96 bg-jasmine-600/10 rounded-full blur-3xl transform translate-x-1/2"></div>
+		<div class="absolute left-0 bottom-1/4 w-96 h-96 bg-deep-teal-600/10 rounded-full blur-3xl transform -translate-x-1/2"></div>
+		
+		<div class="mx-auto max-w-6xl px-6 relative z-10">
+			<div class="text-center mb-24" data-aos="fade-up">
+				<h2 class="text-4xl md:text-5xl font-bold text-white mb-6">La Philosophie Diamant</h2>
+				<p class="text-xl text-stone-400 max-w-2xl mx-auto font-light">Nous ne construisons pas un site web. Nous développons le moteur numérique de votre entreprise.</p>
+			</div>
+
+			<div class="grid md:grid-cols-3 gap-8">
+				<!-- Card 1 -->
+				<div class="bg-white/5 backdrop-blur-xl border border-white/10 p-10 rounded-3xl transform md:translate-y-12 hover:-translate-y-2 transition-transform duration-500" data-aos="fade-up" data-aos-delay="0">
+					<Paintbrush class="w-12 h-12 text-jasmine-400 mb-6" />
+					<h3 class="text-2xl font-bold text-white mb-4">Design Exclusif</h3>
+					<p class="text-stone-400 leading-relaxed">
+						Chaque pixel est pensé pour votre image de marque. Aucune utilisation de template préconçu. Une identité visuelle forte et mémorable.
+					</p>
+				</div>
+				<!-- Card 2 -->
+				<div class="bg-gradient-to-b from-deep-teal-900/50 to-deep-teal-950/50 backdrop-blur-xl border border-deep-teal-500/20 p-10 rounded-3xl shadow-[0_0_50px_-12px_rgba(112,141,129,0.3)] z-10 hover:scale-105 transition-transform duration-500" data-aos="fade-up" data-aos-delay="100">
+					<Code2 class="w-12 h-12 text-deep-teal-400 mb-6" />
+					<h3 class="text-2xl font-bold text-white mb-4">Code Sur-Mesure</h3>
+					<p class="text-stone-300 leading-relaxed">
+						Des algorithmes spécifiques à votre métier. Que vous ayez besoin d'un système d'enchères, d'un matchmaking complexe ou d'un moteur de réservation unique.
+					</p>
+				</div>
+				<!-- Card 3 -->
+				<div class="bg-white/5 backdrop-blur-xl border border-white/10 p-10 rounded-3xl transform md:translate-y-12 hover:-translate-y-2 transition-transform duration-500" data-aos="fade-up" data-aos-delay="200">
+					<Blocks class="w-12 h-12 text-jasmine-400 mb-6" />
+					<h3 class="text-2xl font-bold text-white mb-4">Intégrations Inédites</h3>
+					<p class="text-stone-400 leading-relaxed">
+						Connexion à vos logiciels internes (ERP, CRM), paiements complexes (Stripe Connect), envois SMS, ou intelligence artificielle.
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Section Technologies -->
+	<section id="technologies" class="py-32 bg-stone-50">
+		<div class="mx-auto max-w-6xl px-6">
+			<div class="flex flex-col-reverse md:flex-row items-center gap-16">
+				<div class="flex-1 w-full" data-aos="fade-right">
+					<!-- Visual Tech Stack Representation -->
+					<div class="relative w-full aspect-square">
+						<div class="absolute inset-0 border-2 border-dashed border-stone-200 rounded-full animate-[spin_60s_linear_infinite]"></div>
+						<div class="absolute inset-4 border border-deep-teal-100 rounded-full animate-[spin_40s_linear_infinite_reverse]"></div>
+						
+						<!-- Center Core -->
+						<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-deep-teal-600 rounded-full shadow-2xl flex items-center justify-center text-white font-bold text-xl z-20">
+							Astro
+						</div>
+						
+						<!-- Satellites -->
+						<div class="absolute top-[10%] left-[50%] -translate-x-1/2 w-16 h-16 bg-white border border-stone-200 rounded-full shadow-lg flex items-center justify-center z-10 text-stone-900 font-bold text-xs">
+							React
+						</div>
+						<div class="absolute bottom-[20%] left-[15%] w-20 h-20 bg-stone-900 rounded-full shadow-lg flex items-center justify-center z-10 text-white font-bold text-sm">
+							Supabase
+						</div>
+						<div class="absolute top-[40%] right-[10%] w-24 h-24 bg-jasmine-500 rounded-full shadow-lg flex items-center justify-center z-10 text-stone-900 font-bold text-sm">
+							Tailwind
+						</div>
+						<div class="absolute bottom-[10%] right-[30%] w-16 h-16 bg-blue-500 rounded-full shadow-lg flex items-center justify-center z-10 text-white font-bold text-xs">
+							Stripe
+						</div>
+					</div>
+				</div>
+				
+				<div class="flex-1" data-aos="fade-left">
+					<h2 class="text-4xl font-bold text-stone-900 mb-6">Un arsenal technologique illimité</h2>
+					<p class="text-lg text-stone-600 mb-8 leading-relaxed">
+						Dans la formule Diamant, aucune contrainte technique ne bride votre vision. Nous sélectionnons les meilleurs outils pour chaque besoin spécifique.
+					</p>
+					
+					<div class="space-y-6">
+						<div class="flex gap-4 items-start">
+							<MonitorSmartphone class="w-8 h-8 text-deep-teal-600 shrink-0 mt-1" />
+							<div>
+								<h4 class="font-bold text-xl text-stone-900">Performance Extrême</h4>
+								<p class="text-stone-600 mt-2">Architecture Jamstack hybride. Les pages statiques sont servies instantanément depuis le Edge, tandis que l'application dynamique s'exécute côté client et serveur via React.</p>
+							</div>
+						</div>
+						<div class="flex gap-4 items-start">
+							<KeySquare class="w-8 h-8 text-deep-teal-600 shrink-0 mt-1" />
+							<div>
+								<h4 class="font-bold text-xl text-stone-900">Sécurité Bancaire</h4>
+								<p class="text-stone-600 mt-2">Authentification Multi-Facteurs (MFA), chiffrement des données sensibles, et conformité RGPD stricte. Idéal pour les données médicales ou financières.</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Section Coûts & Processus -->
+	<section id="couts" class="py-32 bg-deep-teal-950 text-white relative">
+		<!-- Background decorative -->
+		<div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-deep-teal-500 to-transparent"></div>
+		
+		<div class="mx-auto max-w-5xl px-6">
+			<div class="text-center mb-20" data-aos="fade-up">
+				<h2 class="text-4xl font-bold mb-4">Investissement & Accompagnement</h2>
+				<p class="text-lg text-deep-teal-200 font-light">Un partenariat technologique sur le long terme.</p>
+			</div>
+
+			<div class="grid md:grid-cols-2 gap-12">
+				<div class="bg-white/5 backdrop-blur border border-white/10 rounded-3xl p-10" data-aos="fade-up">
+					<Euro class="w-10 h-10 text-jasmine-400 mb-6" />
+					<h3 class="text-2xl font-bold mb-4">Développement Initial</h3>
+					<p class="text-stone-400 mb-8 leading-relaxed">
+						Chaque projet Diamant fait l'objet d'un cahier des charges rigoureux. Le coût dépend entièrement de la complexité des algorithmes et des intégrations requises.
+					</p>
+					<div class="text-3xl font-black text-white">À partir de 3000 €</div>
+					<p class="text-sm text-stone-500 mt-2">Devis détaillé après étude de faisabilité.</p>
+				</div>
+
+				<div class="bg-gradient-to-br from-deep-teal-900 to-stone-900 border border-deep-teal-700/50 rounded-3xl p-10" data-aos="fade-up" data-aos-delay="100">
+					<HeartHandshake class="w-10 h-10 text-deep-teal-400 mb-6" />
+					<h3 class="text-2xl font-bold mb-4">Maintenance Évolutive</h3>
+					<p class="text-stone-400 mb-8 leading-relaxed">
+						L'infrastructure (Cloudflare, Supabase) est facturée à l'usage réel. Nous proposons un contrat de maintenance pour garantir les mises à jour de sécurité et l'ajout de nouvelles fonctionnalités.
+					</p>
+					<ul class="space-y-3 text-sm text-stone-300">
+						<li class="flex items-center gap-2">✓ Monitoring 24/7</li>
+						<li class="flex items-center gap-2">✓ Support prioritaire</li>
+						<li class="flex items-center gap-2">✓ Sauvegardes automatisées</li>
+					</ul>
+				</div>
+			</div>
+			
+			<div class="mt-16 text-center" data-aos="fade-up">
+				<a href="/#contact" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-stone-900 rounded-full font-bold text-lg hover:bg-stone-200 transition-colors">
+					Discuter de votre projet
+				</a>
+			</div>
+		</div>
+	</section>
+
+</CommercialLayout>

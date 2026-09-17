@@ -1,0 +1,237 @@
+---
+import CommercialLayout from '@/layouts/CommercialLayout.astro';
+import { Database, ShieldCheck, Users, LineChart, Euro, Gift, LayoutTemplate, Settings } from 'lucide-react';
+---
+
+<CommercialLayout title="Galerie - Démo Premium" description="Découvrez la démo Premium : Plateforme complète avec espace client et base de données.">
+	
+	<!-- Hero Section -->
+	<section class="relative min-h-[75vh] flex items-center justify-center overflow-hidden bg-brick-ember-900">
+		<div class="absolute inset-0 z-0">
+			<!-- Animated grid and gradients -->
+			<div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+			<div class="absolute left-0 top-0 w-full h-full bg-gradient-to-br from-brick-ember-900 via-brick-ember-800/20 to-transparent"></div>
+			
+			<div class="absolute right-[10%] top-[20%] w-[400px] h-[400px] bg-brick-ember-600 rounded-full blur-[120px] opacity-40 animate-pulse"></div>
+		</div>
+		
+		<div class="relative z-10 mx-auto max-w-6xl px-6 grid md:grid-cols-2 gap-12 items-center pt-20">
+			<div class="text-left" data-aos="fade-right">
+				<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brick-ember-500/20 text-brick-ember-300 font-bold mb-6 border border-brick-ember-500/30">
+					<ShieldCheck size={18} />
+					Le choix des Pros
+				</div>
+				<h1 class="text-5xl md:text-6xl font-black text-white tracking-tight mb-6 leading-tight">
+					Prenez le contrôle total de vos <span class="text-brick-ember-400">données.</span>
+				</h1>
+				<p class="text-xl text-brick-ember-100/80 mb-8 leading-relaxed">
+					Une plateforme robuste propulsée par une base de données relationnelle. Espace client sécurisé, suivi des rendez-vous et tableau de bord complet.
+				</p>
+				
+				<div class="flex flex-col sm:flex-row gap-4">
+					<a href="/demo-premium/" target="_blank" class="px-8 py-4 bg-brick-ember-600 text-white text-center rounded-xl font-bold text-lg hover:bg-brick-ember-500 transition-colors shadow-[0_0_40px_-10px_rgba(251,10,6,0.5)]">
+						Tester l'Espace Client
+					</a>
+					<a href="#fonctionnalites" class="px-8 py-4 bg-transparent border-2 border-brick-ember-400/30 text-white text-center rounded-xl font-bold text-lg hover:bg-brick-ember-800/50 transition-colors">
+						Découvrir
+					</a>
+				</div>
+			</div>
+			
+			<!-- Interactive 3D-like Dashboard Preview -->
+			<div class="relative perspective-1000 hidden md:block" data-aos="fade-left" data-aos-delay="200">
+				<div class="w-full aspect-square bg-brick-ember-800/30 rounded-3xl border border-brick-ember-700/50 backdrop-blur-sm p-6 transform rotate-y-[-10deg] rotate-x-[10deg] shadow-2xl relative overflow-hidden group">
+					<div class="absolute inset-0 bg-gradient-to-tr from-brick-ember-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+					<!-- Mockup UI -->
+					<div class="w-full h-12 border-b border-brick-ember-700/50 flex items-center px-4 gap-4 mb-6">
+						<div class="w-3 h-3 rounded-full bg-brick-ember-500"></div>
+						<div class="w-24 h-4 rounded-full bg-brick-ember-700/50"></div>
+					</div>
+					<div class="grid grid-cols-2 gap-4 mb-4">
+						<div class="h-24 rounded-xl border border-brick-ember-700/50 bg-brick-ember-800/40 p-4">
+							<div class="w-8 h-8 rounded bg-brick-ember-600/50 mb-3"></div>
+							<div class="w-16 h-3 rounded-full bg-brick-ember-500/80"></div>
+						</div>
+						<div class="h-24 rounded-xl border border-brick-ember-700/50 bg-brick-ember-800/40 p-4">
+							<div class="w-8 h-8 rounded bg-brick-ember-600/50 mb-3"></div>
+							<div class="w-12 h-3 rounded-full bg-brick-ember-500/80"></div>
+						</div>
+					</div>
+					<div class="h-40 rounded-xl border border-brick-ember-700/50 bg-brick-ember-800/40 p-4">
+						<div class="w-full h-full border-b border-l border-brick-ember-600/30 relative">
+							<div class="absolute bottom-0 left-0 w-[20%] h-[40%] bg-brick-ember-500/50 rounded-t-sm"></div>
+							<div class="absolute bottom-0 left-[25%] w-[20%] h-[70%] bg-brick-ember-500/50 rounded-t-sm"></div>
+							<div class="absolute bottom-0 left-[50%] w-[20%] h-[50%] bg-brick-ember-500/50 rounded-t-sm"></div>
+							<div class="absolute bottom-0 left-[75%] w-[20%] h-[90%] bg-brick-ember-500/50 rounded-t-sm"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Section Fonctionnalités (Horizontal Scroll / Cards) -->
+	<section id="fonctionnalites" class="py-24 bg-stone-50 overflow-hidden">
+		<div class="mx-auto max-w-6xl px-6">
+			<div class="text-center mb-16" data-aos="fade-up">
+				<h2 class="text-4xl font-bold text-stone-900 mb-4">Fonctionnalités Avancées</h2>
+				<p class="text-lg text-stone-600 max-w-2xl mx-auto">Offrez une expérience utilisateur digne des plus grandes plateformes.</p>
+			</div>
+
+			<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+				<!-- Feature 1 -->
+				<div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm hover:border-brick-ember-300 hover:shadow-lg transition-all" data-aos="fade-up" data-aos-delay="0">
+					<Users class="w-10 h-10 text-brick-ember-600 mb-6" />
+					<h3 class="text-xl font-bold text-stone-900 mb-3">Comptes Clients</h3>
+					<p class="text-stone-600 text-sm leading-relaxed">
+						Vos clients peuvent s'inscrire, se connecter, et retrouver l'historique complet de leurs réservations passées et futures.
+					</p>
+				</div>
+				<!-- Feature 2 -->
+				<div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm hover:border-brick-ember-300 hover:shadow-lg transition-all" data-aos="fade-up" data-aos-delay="100">
+					<Database class="w-10 h-10 text-brick-ember-600 mb-6" />
+					<h3 class="text-xl font-bold text-stone-900 mb-3">Base de données SQL</h3>
+					<p class="text-stone-600 text-sm leading-relaxed">
+						Toutes les informations (utilisateurs, services, créneaux) sont stockées de manière sécurisée et structurée dans Supabase (PostgreSQL).
+					</p>
+				</div>
+				<!-- Feature 3 -->
+				<div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm hover:border-brick-ember-300 hover:shadow-lg transition-all" data-aos="fade-up" data-aos-delay="200">
+					<LineChart class="w-10 h-10 text-brick-ember-600 mb-6" />
+					<h3 class="text-xl font-bold text-stone-900 mb-3">Tableau de bord</h3>
+					<p class="text-stone-600 text-sm leading-relaxed">
+						Gérez votre activité depuis une interface d'administration claire. Visualisez votre chiffre d'affaires et vos prochains RDV.
+					</p>
+				</div>
+				<!-- Feature 4 -->
+				<div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm hover:border-brick-ember-300 hover:shadow-lg transition-all" data-aos="fade-up" data-aos-delay="300">
+					<Gift class="w-10 h-10 text-brick-ember-600 mb-6" />
+					<h3 class="text-xl font-bold text-stone-900 mb-3">Fidélité & Points</h3>
+					<p class="text-stone-600 text-sm leading-relaxed">
+						Un système de points de fidélité automatisé. Vos clients cumulent des points à chaque réservation pour les fidéliser.
+					</p>
+				</div>
+				<!-- Feature 5 -->
+				<div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm hover:border-brick-ember-300 hover:shadow-lg transition-all" data-aos="fade-up" data-aos-delay="400">
+					<ShieldCheck class="w-10 h-10 text-brick-ember-600 mb-6" />
+					<h3 class="text-xl font-bold text-stone-900 mb-3">Sécurité RLS</h3>
+					<p class="text-stone-600 text-sm leading-relaxed">
+						Les données sont protégées par les règles de sécurité Row Level Security (RLS). Un client ne voit que ses propres données.
+					</p>
+				</div>
+				<!-- Feature 6 -->
+				<div class="bg-brick-ember-600 p-8 rounded-3xl border border-brick-ember-500 shadow-lg text-white" data-aos="fade-up" data-aos-delay="500">
+					<LayoutTemplate class="w-10 h-10 text-brick-ember-200 mb-6" />
+					<h3 class="text-xl font-bold mb-3">Interface Premium</h3>
+					<p class="text-brick-ember-100 text-sm leading-relaxed">
+						Composants UI développés avec Radix et Tailwind pour une accessibilité parfaite et un design moderne.
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Section Technologies -->
+	<section id="technologies" class="py-24 bg-stone-900 text-white">
+		<div class="mx-auto max-w-6xl px-6">
+			<div class="flex flex-col md:flex-row items-center gap-16">
+				<div class="flex-1" data-aos="fade-right">
+					<h2 class="text-4xl font-bold mb-6">L'écosystème Tech</h2>
+					<p class="text-stone-400 text-lg mb-8 leading-relaxed">
+						La formule Premium s'appuie sur des technologies robustes utilisées par les startups les plus innovantes.
+					</p>
+					
+					<ul class="space-y-6">
+						<li class="flex gap-4">
+							<div class="w-12 h-12 rounded-xl bg-brick-ember-900/50 flex items-center justify-center border border-brick-ember-800 text-brick-ember-500 shrink-0">
+								<Database size={24} />
+							</div>
+							<div>
+								<h4 class="font-bold text-lg mb-1">Supabase (PostgreSQL)</h4>
+								<p class="text-stone-400 text-sm">L'alternative open-source à Firebase. Fournit la base de données, l'authentification et l'API en temps réel.</p>
+							</div>
+						</li>
+						<li class="flex gap-4">
+							<div class="w-12 h-12 rounded-xl bg-brick-ember-900/50 flex items-center justify-center border border-brick-ember-800 text-brick-ember-500 shrink-0">
+								<Settings size={24} />
+							</div>
+							<div>
+								<h4 class="font-bold text-lg mb-1">Astro SSR & React</h4>
+								<p class="text-stone-400 text-sm">Le site est rendu côté serveur (SSR) pour générer des pages dynamiques sécurisées (vérification des sessions utilisateurs).</p>
+							</div>
+						</li>
+					</ul>
+				</div>
+				<div class="flex-1 w-full" data-aos="fade-left">
+					<div class="bg-stone-950 rounded-2xl border border-stone-800 p-6 font-mono text-sm shadow-2xl">
+						<div class="flex gap-2 mb-4 border-b border-stone-800 pb-4">
+							<span class="text-brick-ember-500">Supabase</span>
+							<span class="text-stone-500">Schema</span>
+						</div>
+						<pre class="text-stone-400 overflow-x-auto"><code><span class="text-purple-400">create table</span> users (
+  id uuid <span class="text-blue-400">primary key</span>,
+  email text <span class="text-blue-400">unique</span>,
+  loyalty_points int <span class="text-blue-400">default</span> 0
+);
+
+<span class="text-purple-400">create table</span> reservations (
+  id uuid <span class="text-blue-400">primary key</span>,
+  user_id uuid <span class="text-blue-400">references</span> users,
+  service_id uuid,
+  start_time timestamptz,
+  status text
+);</code></pre>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Section Coûts -->
+	<section id="couts" class="py-24 bg-brick-ember-50/50">
+		<div class="mx-auto max-w-4xl px-6">
+			<div class="text-center mb-16" data-aos="fade-up">
+				<h2 class="text-4xl font-bold text-stone-900 mb-4">Coûts de fonctionnement</h2>
+				<p class="text-lg text-stone-600">Une infrastructure professionnelle, des coûts maîtrisés.</p>
+			</div>
+
+			<div class="bg-white rounded-3xl p-8 md:p-12 border border-stone-200 shadow-sm" data-aos="fade-up">
+				<div class="flex flex-col md:flex-row gap-12 items-center justify-between border-b border-stone-200 pb-8 mb-8">
+					<div>
+						<h3 class="text-2xl font-bold text-stone-900 mb-2">Création de la Plateforme</h3>
+						<p class="text-stone-500">Développement Full-Stack, modélisation de la base de données, design UI/UX.</p>
+					</div>
+					<div class="text-right">
+						<span class="text-4xl font-black text-brick-ember-600">Sur devis</span>
+					</div>
+				</div>
+
+				<div>
+					<h4 class="text-lg font-bold text-stone-900 mb-6 flex items-center gap-2">
+						<Euro size={20} class="text-stone-400" />
+						Frais fixes mensuels (Infrastructure)
+					</h4>
+					<div class="space-y-4">
+						<div class="flex justify-between items-center bg-stone-50 p-4 rounded-xl border border-stone-100">
+							<span class="font-medium text-stone-700">Hébergement Frontend (Cloudflare)</span>
+							<span class="text-green-600 font-bold">0 € / mois *</span>
+						</div>
+						<div class="flex justify-between items-center bg-stone-50 p-4 rounded-xl border border-stone-100">
+							<span class="font-medium text-stone-700">Base de données & Auth (Supabase)</span>
+							<span class="text-stone-900 font-bold">0 € à 25 € / mois **</span>
+						</div>
+						<div class="flex justify-between items-center bg-stone-50 p-4 rounded-xl border border-stone-100">
+							<span class="font-medium text-stone-700">Nom de domaine</span>
+							<span class="text-stone-900 font-bold">~15 € / an</span>
+						</div>
+					</div>
+					<p class="mt-6 text-xs text-stone-400 italic">
+						* Toujours gratuit pour un trafic standard.<br>
+						** Supabase propose un palier gratuit généreux (jusqu'à 50 000 utilisateurs actifs). Le passage au plan Pro (25€) est nécessaire uniquement pour les très gros volumes ou pour des sauvegardes automatiques avancées (Point-in-Time Recovery).
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+</CommercialLayout>
