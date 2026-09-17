@@ -1,8 +1,52 @@
 import type { APIRoute } from 'astro';
 import { SignJWT, importPKCS8 } from 'jose';
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
 	try {
+		// --- Rate Limiting Logic ---
+		const historyCookie = cookies.get('calendar_sync_history');
+		let history: number[] = [];
+		
+		if (historyCookie && historyCookie.value) {
+			try {
+				history = JSON.parse(historyCookie.value);
+			} catch (e) {
+				history = [];
+			}
+		}
+
+		const now = Date.now();
+		// Max 3 reservations
+		if (history.length >= 3) {
+			return new Response(JSON.stringify({ error: 'Vous avez atteint la limite de 3 réservations pour cette session.' }), {
+				status: 429,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+
+		// 5 minutes interval
+		if (history.length > 0) {
+			const lastBooking = history[history.length - 1];
+			const fiveMinutes = 5 * 60 * 1000;
+			if (now - lastBooking < fiveMinutes) {
+				const waitTime = Math.ceil((fiveMinutes - (now - lastBooking)) / 60000);
+				return new Response(JSON.stringify({ error: `Veuillez patienter encore ${waitTime} minute(s) avant votre prochaine réservation.` }), {
+					status: 429,
+					headers: { 'Content-Type': 'application/json' },
+				});
+			}
+		}
+
+		// Update history
+		history.push(now);
+		cookies.set('calendar_sync_history', JSON.stringify(history), {
+			path: '/',
+			httpOnly: true,
+			sameSite: 'lax',
+			maxAge: 60 * 60 * 24 // 24 hours
+		});
+		// ---------------------------
+
 		const body = await request.json();
 		const { title, description, start_time, end_time } = body;
 
