@@ -3,16 +3,16 @@ import CommercialLayout from '@/layouts/CommercialLayout.astro';
 import { Database, ShieldCheck, Users, LineChart, Euro, Gift, LayoutTemplate, Settings } from 'lucide-react';
 ---
 
-<CommercialLayout title="Galerie - Démo Premium" description="Découvrez la démo Premium : Plateforme complète avec espace client et base de données.">
+<CommercialLayout title="Formules - Démo Premium" description="Découvrez la démo Premium : Plateforme complète avec espace client et base de données.">
 	
 	<!-- Hero Section -->
 	<section class="relative min-h-[75vh] flex items-center justify-center overflow-hidden bg-brick-ember-900">
 		<div class="absolute inset-0 z-0">
-			<!-- Animated grid and gradients -->
+			<!-- Animated grid and gradients (optimized) -->
 			<div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px]"></div>
 			<div class="absolute left-0 top-0 w-full h-full bg-gradient-to-br from-brick-ember-900 via-brick-ember-800/20 to-transparent"></div>
 			
-			<div class="absolute right-[10%] top-[20%] w-[400px] h-[400px] bg-brick-ember-600 rounded-full blur-[120px] opacity-40 animate-pulse"></div>
+			<div class="absolute right-[10%] top-[20%] w-[300px] h-[300px] bg-brick-ember-600 rounded-full blur-[100px] opacity-30 will-change-transform mix-blend-screen"></div>
 		</div>
 		
 		<div class="relative z-10 mx-auto max-w-6xl px-6 grid md:grid-cols-2 gap-12 items-center pt-20">
@@ -80,7 +80,7 @@ import { Database, ShieldCheck, Users, LineChart, Euro, Gift, LayoutTemplate, Se
 
 			<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
 				<!-- Feature 1 -->
-				<div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm hover:border-brick-ember-300 hover:shadow-lg transition-all" data-aos="fade-up" data-aos-delay="0">
+				<div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm hover:border-brick-ember-300 transition-all duration-300 ease-out hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-1" data-aos="fade-up" data-aos-delay="0">
 					<Users class="w-10 h-10 text-brick-ember-600 mb-6" />
 					<h3 class="text-xl font-bold text-stone-900 mb-3">Comptes Clients</h3>
 					<p class="text-stone-600 text-sm leading-relaxed">
@@ -88,7 +88,7 @@ import { Database, ShieldCheck, Users, LineChart, Euro, Gift, LayoutTemplate, Se
 					</p>
 				</div>
 				<!-- Feature 2 -->
-				<div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm hover:border-brick-ember-300 hover:shadow-lg transition-all" data-aos="fade-up" data-aos-delay="100">
+				<div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm hover:border-brick-ember-300 transition-all duration-300 ease-out hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-1" data-aos="fade-up" data-aos-delay="100">
 					<Database class="w-10 h-10 text-brick-ember-600 mb-6" />
 					<h3 class="text-xl font-bold text-stone-900 mb-3">Base de données SQL</h3>
 					<p class="text-stone-600 text-sm leading-relaxed">
@@ -96,7 +96,7 @@ import { Database, ShieldCheck, Users, LineChart, Euro, Gift, LayoutTemplate, Se
 					</p>
 				</div>
 				<!-- Feature 3 -->
-				<div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm hover:border-brick-ember-300 hover:shadow-lg transition-all" data-aos="fade-up" data-aos-delay="200">
+				<div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm hover:border-brick-ember-300 transition-all duration-300 ease-out hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-1" data-aos="fade-up" data-aos-delay="200">
 					<LineChart class="w-10 h-10 text-brick-ember-600 mb-6" />
 					<h3 class="text-xl font-bold text-stone-900 mb-3">Tableau de bord</h3>
 					<p class="text-stone-600 text-sm leading-relaxed">
@@ -104,7 +104,7 @@ import { Database, ShieldCheck, Users, LineChart, Euro, Gift, LayoutTemplate, Se
 					</p>
 				</div>
 				<!-- Feature 4 -->
-				<div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm hover:border-brick-ember-300 hover:shadow-lg transition-all" data-aos="fade-up" data-aos-delay="300">
+				<div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm hover:border-brick-ember-300 transition-all duration-300 ease-out hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-1" data-aos="fade-up" data-aos-delay="300">
 					<Gift class="w-10 h-10 text-brick-ember-600 mb-6" />
 					<h3 class="text-xl font-bold text-stone-900 mb-3">Fidélité & Points</h3>
 					<p class="text-stone-600 text-sm leading-relaxed">
@@ -112,7 +112,7 @@ import { Database, ShieldCheck, Users, LineChart, Euro, Gift, LayoutTemplate, Se
 					</p>
 				</div>
 				<!-- Feature 5 -->
-				<div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm hover:border-brick-ember-300 hover:shadow-lg transition-all" data-aos="fade-up" data-aos-delay="400">
+				<div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm hover:border-brick-ember-300 transition-all duration-300 ease-out hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-1" data-aos="fade-up" data-aos-delay="400">
 					<ShieldCheck class="w-10 h-10 text-brick-ember-600 mb-6" />
 					<h3 class="text-xl font-bold text-stone-900 mb-3">Sécurité RLS</h3>
 					<p class="text-stone-600 text-sm leading-relaxed">
@@ -120,10 +120,10 @@ import { Database, ShieldCheck, Users, LineChart, Euro, Gift, LayoutTemplate, Se
 					</p>
 				</div>
 				<!-- Feature 6 -->
-				<div class="bg-brick-ember-600 p-8 rounded-3xl border border-brick-ember-500 shadow-lg text-white" data-aos="fade-up" data-aos-delay="500">
-					<LayoutTemplate class="w-10 h-10 text-brick-ember-200 mb-6" />
-					<h3 class="text-xl font-bold mb-3">Interface Premium</h3>
-					<p class="text-brick-ember-100 text-sm leading-relaxed">
+				<div class="bg-brick-ember-600 p-8 rounded-3xl border border-brick-ember-500 shadow-lg text-white transition-all duration-300 ease-out hover:shadow-[0_20px_40px_-15px_rgba(191,6,3,0.3)] hover:-translate-y-1" data-aos="fade-up" data-aos-delay="500">
+					<LayoutTemplate class="w-10 h-10 text-brick-ember-100 mb-6" />
+					<h3 class="text-xl font-bold mb-3 text-white">Interface Premium</h3>
+					<p class="text-brick-ember-50 text-sm leading-relaxed">
 						Composants UI développés avec Radix et Tailwind pour une accessibilité parfaite et un design moderne.
 					</p>
 				</div>

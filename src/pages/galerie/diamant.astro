@@ -3,7 +3,7 @@ import CommercialLayout from '@/layouts/CommercialLayout.astro';
 import { Sparkles, Code2, Paintbrush, Rocket, Blocks, KeySquare, MonitorSmartphone, Euro, HeartHandshake } from 'lucide-react';
 ---
 
-<CommercialLayout title="Galerie - Démo Diamant" description="Découvrez la démo Diamant : Le sur-mesure absolu pour votre entreprise.">
+<CommercialLayout title="Formules - Démo Diamant" description="Découvrez la démo Diamant : Le sur-mesure absolu pour votre entreprise.">
 	
 	<!-- Hero Section with Advanced Parallax and Glassmorphism -->
 	<section class="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-stone-950">
@@ -11,9 +11,9 @@ import { Sparkles, Code2, Paintbrush, Rocket, Blocks, KeySquare, MonitorSmartpho
 		<div class="absolute inset-0 z-0">
 			<!-- Layer 1: Base dark gradient -->
 			<div class="absolute inset-0 bg-gradient-to-b from-deep-teal-950 to-stone-950"></div>
-			<!-- Layer 2: Animated blobs -->
-			<div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-deep-teal-600 rounded-full blur-[150px] opacity-30 animate-[spin_20s_linear_infinite]"></div>
-			<div class="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-jasmine-600 rounded-full blur-[150px] opacity-20 animate-[spin_25s_linear_infinite_reverse]"></div>
+			<!-- Layer 2: Animated blobs (optimized) -->
+			<div class="absolute top-0 left-1/4 w-[400px] h-[400px] bg-deep-teal-600 rounded-full blur-[100px] opacity-20 animate-[spin_20s_linear_infinite] will-change-transform mix-blend-screen"></div>
+			<div class="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-jasmine-600 rounded-full blur-[100px] opacity-15 animate-[spin_25s_linear_infinite_reverse] will-change-transform mix-blend-screen"></div>
 			<!-- Layer 3: Glassmorphism grid -->
 			<div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgwem0yMCAyMGMwIDExLjA0Ni04Ljk1NCAyMC0yMCAyMFMtMjAgMzEuMDQ2LTIwIDIwIC0xMS4wNDYgMCAwIDBzMjAgOC45NTQgMjAgMjB6IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=')]"></div>
 		</div>
@@ -32,8 +32,8 @@ import { Sparkles, Code2, Paintbrush, Rocket, Blocks, KeySquare, MonitorSmartpho
 				Une architecture pensée exclusivement pour <strong>votre</strong> métier. Design unique, fonctionnalités inédites, intégrations sur-mesure.
 			</p>
 			
-			<div class="flex flex-col sm:flex-row gap-6" data-aos="fade-up" data-aos-delay="300">
-				<a href="/demo-diamant/" target="_blank" class="group relative px-8 py-4 bg-deep-teal-600 text-white rounded-2xl font-bold text-lg transition-all hover:scale-105 hover:shadow-[0_0_40px_-10px_rgba(112,141,129,0.8)] overflow-hidden">
+			<div class="flex flex-col sm:flex-row gap-6 mb-24" data-aos="fade-up" data-aos-delay="300">
+				<a href="/demo-diamant/" target="_blank" class="group relative px-8 py-4 bg-deep-teal-600 text-white rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-[0_20px_40px_-10px_rgba(112,141,129,0.4)] overflow-hidden">
 					<div class="absolute inset-0 bg-gradient-to-r from-deep-teal-400 to-deep-teal-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 					<span class="relative flex items-center gap-2">Visiter la Démo <Rocket size={20} /></span>
 				</a>
@@ -64,27 +64,27 @@ import { Sparkles, Code2, Paintbrush, Rocket, Blocks, KeySquare, MonitorSmartpho
 
 			<div class="grid md:grid-cols-3 gap-8">
 				<!-- Card 1 -->
-				<div class="bg-white/5 backdrop-blur-xl border border-white/10 p-10 rounded-3xl transform md:translate-y-12 hover:-translate-y-2 transition-transform duration-500" data-aos="fade-up" data-aos-delay="0">
+				<div class="bg-white/5 backdrop-blur-xl border border-white/10 p-10 rounded-3xl transform md:translate-y-12 hover:-translate-y-2 transition-transform duration-500 ease-out" data-aos="fade-up" data-aos-delay="0">
 					<Paintbrush class="w-12 h-12 text-jasmine-400 mb-6" />
 					<h3 class="text-2xl font-bold text-white mb-4">Design Exclusif</h3>
-					<p class="text-stone-400 leading-relaxed">
+					<p class="text-stone-300 leading-relaxed">
 						Chaque pixel est pensé pour votre image de marque. Aucune utilisation de template préconçu. Une identité visuelle forte et mémorable.
 					</p>
 				</div>
 				<!-- Card 2 -->
-				<div class="bg-gradient-to-b from-deep-teal-900/50 to-deep-teal-950/50 backdrop-blur-xl border border-deep-teal-500/20 p-10 rounded-3xl shadow-[0_0_50px_-12px_rgba(112,141,129,0.3)] z-10 hover:scale-105 transition-transform duration-500" data-aos="fade-up" data-aos-delay="100">
-					<Code2 class="w-12 h-12 text-deep-teal-400 mb-6" />
+				<div class="bg-gradient-to-b from-deep-teal-900/50 to-deep-teal-950/50 backdrop-blur-xl border border-deep-teal-500/20 p-10 rounded-3xl shadow-[0_20px_40px_-12px_rgba(112,141,129,0.15)] z-10 hover:-translate-y-2 transition-transform duration-500 ease-out" data-aos="fade-up" data-aos-delay="100">
+					<Code2 class="w-12 h-12 text-deep-teal-300 mb-6" />
 					<h3 class="text-2xl font-bold text-white mb-4">Code Sur-Mesure</h3>
-					<p class="text-stone-300 leading-relaxed">
-						Des algorithmes spécifiques à votre métier. Que vous ayez besoin d'un système d'enchères, d'un matchmaking complexe ou d'un moteur de réservation unique.
+					<p class="text-stone-200 leading-relaxed">
+						Des algorithmes spécifiques à votre métier. Que vous ayez besoin d'un matchmaking complexe ou d'un moteur de réservation unique.
 					</p>
 				</div>
 				<!-- Card 3 -->
-				<div class="bg-white/5 backdrop-blur-xl border border-white/10 p-10 rounded-3xl transform md:translate-y-12 hover:-translate-y-2 transition-transform duration-500" data-aos="fade-up" data-aos-delay="200">
+				<div class="bg-white/5 backdrop-blur-xl border border-white/10 p-10 rounded-3xl transform md:translate-y-12 hover:-translate-y-2 transition-transform duration-500 ease-out" data-aos="fade-up" data-aos-delay="200">
 					<Blocks class="w-12 h-12 text-jasmine-400 mb-6" />
 					<h3 class="text-2xl font-bold text-white mb-4">Intégrations Inédites</h3>
-					<p class="text-stone-400 leading-relaxed">
-						Connexion à vos logiciels internes (ERP, CRM), paiements complexes (Stripe Connect), envois SMS, ou intelligence artificielle.
+					<p class="text-stone-300 leading-relaxed">
+						Connexion à vos logiciels internes (ERP, CRM), envois SMS, ou intelligence artificielle.
 					</p>
 				</div>
 			</div>
@@ -116,9 +116,6 @@ import { Sparkles, Code2, Paintbrush, Rocket, Blocks, KeySquare, MonitorSmartpho
 						<div class="absolute top-[40%] right-[10%] w-24 h-24 bg-jasmine-500 rounded-full shadow-lg flex items-center justify-center z-10 text-stone-900 font-bold text-sm">
 							Tailwind
 						</div>
-						<div class="absolute bottom-[10%] right-[30%] w-16 h-16 bg-blue-500 rounded-full shadow-lg flex items-center justify-center z-10 text-white font-bold text-xs">
-							Stripe
-						</div>
 					</div>
 				</div>
 				
@@ -139,8 +136,8 @@ import { Sparkles, Code2, Paintbrush, Rocket, Blocks, KeySquare, MonitorSmartpho
 						<div class="flex gap-4 items-start">
 							<KeySquare class="w-8 h-8 text-deep-teal-600 shrink-0 mt-1" />
 							<div>
-								<h4 class="font-bold text-xl text-stone-900">Sécurité Bancaire</h4>
-								<p class="text-stone-600 mt-2">Authentification Multi-Facteurs (MFA), chiffrement des données sensibles, et conformité RGPD stricte. Idéal pour les données médicales ou financières.</p>
+								<h4 class="font-bold text-xl text-stone-900">Sécurité Maximale</h4>
+								<p class="text-stone-600 mt-2">Authentification Multi-Facteurs (MFA), chiffrement des données sensibles, et conformité RGPD stricte.</p>
 							</div>
 						</div>
 					</div>

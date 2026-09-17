@@ -3,15 +3,15 @@ import CommercialLayout from '@/layouts/CommercialLayout.astro';
 import { Calendar, Zap, LayoutDashboard, Database, Server, Smartphone, CheckCircle2, ChevronRight, Euro } from 'lucide-react';
 ---
 
-<CommercialLayout title="Galerie - Démo Standard" description="Découvrez en détail la démo Standard, idéale pour démarrer votre activité en ligne.">
+<CommercialLayout title="Formules - Démo Standard" description="Découvrez en détail la démo Standard, idéale pour démarrer votre activité en ligne.">
 	
 	<!-- Hero Section with Parallax Effect -->
 	<section class="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-prussian-blue-900">
 		<div class="absolute inset-0 z-0">
-			<!-- Abstract dynamic background (CSS driven) -->
-			<div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-prussian-blue-500 rounded-full blur-[120px] opacity-50 animate-pulse"></div>
-			<div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-prussian-blue-300 rounded-full blur-[100px] opacity-30"></div>
-			<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80')] mix-blend-overlay opacity-20 bg-cover bg-fixed bg-center"></div>
+			<!-- Abstract dynamic background (optimized) -->
+			<div class="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-prussian-blue-500 rounded-full blur-[100px] opacity-40 will-change-transform mix-blend-screen"></div>
+			<div class="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-prussian-blue-400 rounded-full blur-[80px] opacity-20 will-change-transform mix-blend-screen"></div>
+			<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1080&auto=format&fit=crop&q=60')] mix-blend-overlay opacity-10 bg-cover bg-fixed bg-center"></div>
 		</div>
 		
 		<div class="relative z-10 mx-auto max-w-5xl px-6 text-center">
@@ -47,7 +47,7 @@ import { Calendar, Zap, LayoutDashboard, Database, Server, Smartphone, CheckCirc
 
 			<div class="relative max-w-4xl mx-auto space-y-12">
 				<!-- Card 1 -->
-				<div class="group relative bg-white rounded-3xl p-8 md:p-12 shadow-lg border border-stone-200 overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2" data-aos="fade-up">
+				<div class="group relative bg-white rounded-3xl p-8 md:p-12 shadow-md border border-stone-200 overflow-hidden transition-all duration-300 ease-out hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-1" data-aos="fade-up">
 					<div class="absolute -right-20 -top-20 w-64 h-64 bg-prussian-blue-50 rounded-full blur-3xl group-hover:bg-prussian-blue-100 transition-colors"></div>
 					<div class="relative z-10 flex flex-col md:flex-row gap-8 items-center">
 						<div class="flex-1">
@@ -72,7 +72,7 @@ import { Calendar, Zap, LayoutDashboard, Database, Server, Smartphone, CheckCirc
 				</div>
 
 				<!-- Card 2 -->
-				<div class="group relative bg-white rounded-3xl p-8 md:p-12 shadow-lg border border-stone-200 overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2" data-aos="fade-up" data-aos-delay="100">
+				<div class="group relative bg-white rounded-3xl p-8 md:p-12 shadow-md border border-stone-200 overflow-hidden transition-all duration-300 ease-out hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-1" data-aos="fade-up" data-aos-delay="100">
 					<div class="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-50 rounded-full blur-3xl group-hover:bg-blue-100 transition-colors"></div>
 					<div class="relative z-10 flex flex-col md:flex-row-reverse gap-8 items-center">
 						<div class="flex-1">
@@ -122,24 +122,24 @@ import { Calendar, Zap, LayoutDashboard, Database, Server, Smartphone, CheckCirc
 			</div>
 
 			<div class="grid md:grid-cols-3 gap-8">
-				<div class="bg-prussian-blue-900/50 backdrop-blur-xl border border-prussian-blue-800 p-8 rounded-3xl" data-aos="fade-up" data-aos-delay="0">
-					<LayoutDashboard class="w-12 h-12 text-prussian-blue-400 mb-6" />
-					<h3 class="text-xl font-bold mb-3">Astro & React</h3>
-					<p class="text-prussian-blue-100/70 text-sm leading-relaxed">
+				<div class="bg-prussian-blue-900/40 backdrop-blur-md border border-prussian-blue-800 p-8 rounded-3xl hover:bg-prussian-blue-900/60 transition-colors" data-aos="fade-up" data-aos-delay="0">
+					<LayoutDashboard class="w-12 h-12 text-prussian-blue-300 mb-6" />
+					<h3 class="text-xl font-bold mb-3 text-white">Astro & React</h3>
+					<p class="text-prussian-blue-100/90 text-sm leading-relaxed">
 						L'interface est construite avec Astro pour des performances maximales et React pour les composants interactifs (comme le formulaire de réservation).
 					</p>
 				</div>
-				<div class="bg-prussian-blue-900/50 backdrop-blur-xl border border-prussian-blue-800 p-8 rounded-3xl" data-aos="fade-up" data-aos-delay="100">
-					<Database class="w-12 h-12 text-prussian-blue-400 mb-6" />
-					<h3 class="text-xl font-bold mb-3">Zéro Base de données</h3>
-					<p class="text-prussian-blue-100/70 text-sm leading-relaxed">
+				<div class="bg-prussian-blue-900/40 backdrop-blur-md border border-prussian-blue-800 p-8 rounded-3xl hover:bg-prussian-blue-900/60 transition-colors" data-aos="fade-up" data-aos-delay="100">
+					<Database class="w-12 h-12 text-prussian-blue-300 mb-6" />
+					<h3 class="text-xl font-bold mb-3 text-white">Zéro Base de données</h3>
+					<p class="text-prussian-blue-100/90 text-sm leading-relaxed">
 						Aucune base de données complexe à maintenir. Les informations sont stockées dans des fichiers de configuration sécurisés et directement dans votre agenda.
 					</p>
 				</div>
-				<div class="bg-prussian-blue-900/50 backdrop-blur-xl border border-prussian-blue-800 p-8 rounded-3xl" data-aos="fade-up" data-aos-delay="200">
-					<Server class="w-12 h-12 text-prussian-blue-400 mb-6" />
-					<h3 class="text-xl font-bold mb-3">Hébergement Edge</h3>
-					<p class="text-prussian-blue-100/70 text-sm leading-relaxed">
+				<div class="bg-prussian-blue-900/40 backdrop-blur-md border border-prussian-blue-800 p-8 rounded-3xl hover:bg-prussian-blue-900/60 transition-colors" data-aos="fade-up" data-aos-delay="200">
+					<Server class="w-12 h-12 text-prussian-blue-300 mb-6" />
+					<h3 class="text-xl font-bold mb-3 text-white">Hébergement Edge</h3>
+					<p class="text-prussian-blue-100/90 text-sm leading-relaxed">
 						Déployé sur Cloudflare Workers. Votre site est distribué sur des centaines de serveurs dans le monde entier pour un accès immédiat.
 					</p>
 				</div>
