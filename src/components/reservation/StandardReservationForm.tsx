@@ -139,26 +139,19 @@ export default function StandardReservationForm() {
 			{/* Étape 1 : service */}
 			<div>
 				<p className="text-sm font-semibold text-slate-900">1. Choisissez une prestation</p>
-				<div className="mt-3 grid gap-3 sm:grid-cols-2">
-					{services.map((service) => (
-						<button
-							type="button"
-							key={service.name}
-							onClick={() => setSelectedServiceId(service.name)}
-							className={`flex items-start gap-3 rounded-xl border p-4 text-left transition-colors ${
-								selectedServiceId === service.name
-									? 'border-blue-600 bg-blue-600 text-white shadow-md'
-									: 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-blue-300'
-							}`}
-						>
-							<div>
-								<p className={`font-bold ${selectedServiceId === service.name ? 'text-white' : 'text-slate-900'}`}>{service.name}</p>
-								<p className={`mt-1 text-xs ${selectedServiceId === service.name ? 'text-blue-100' : 'text-slate-500'}`}>
-									{service.durationMinutes} min — {service.price > 0 ? `${service.price} €` : 'Sur devis'}
-								</p>
-							</div>
-						</button>
-					))}
+				<div className="mt-3">
+					<select
+						value={selectedServiceId}
+						onChange={(e) => setSelectedServiceId(e.target.value)}
+						className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors text-slate-900"
+					>
+						<option value="" disabled>Sélectionnez une prestation...</option>
+						{services.map((service) => (
+							<option key={service.name} value={service.name}>
+								{service.name} ({service.durationMinutes} min — {service.price > 0 ? `${service.price} €` : 'Sur devis'})
+							</option>
+						))}
+					</select>
 				</div>
 			</div>
 
