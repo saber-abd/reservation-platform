@@ -47,60 +47,64 @@ import { Calendar, Zap, LayoutDashboard, Database, Server, Smartphone, CheckCirc
 
 			<div class="relative max-w-4xl mx-auto space-y-12">
 				<!-- Card 1 -->
-				<div class="group relative bg-white rounded-3xl p-8 md:p-12 shadow-md border border-stone-200 overflow-hidden transition-all duration-300 ease-out hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-1" data-aos="fade-up">
-					<div class="absolute -right-20 -top-20 w-64 h-64 bg-prussian-blue-50 rounded-full blur-3xl group-hover:bg-prussian-blue-100 transition-colors"></div>
-					<div class="relative z-10 flex flex-col md:flex-row gap-8 items-center">
-						<div class="flex-1">
-							<div class="w-14 h-14 bg-prussian-blue-100 text-prussian-blue-600 rounded-2xl flex items-center justify-center mb-6">
-								<Calendar size={28} />
+				<div data-aos="fade-up">
+					<div class="group relative bg-white rounded-3xl p-8 md:p-12 shadow-md border border-stone-200 overflow-hidden transition-all duration-300 ease-out hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] transform hover:-translate-y-2">
+						<div class="absolute -right-20 -top-20 w-64 h-64 bg-prussian-blue-50 rounded-full blur-3xl group-hover:bg-prussian-blue-100 transition-colors pointer-events-none"></div>
+						<div class="relative z-10 flex flex-col md:flex-row gap-8 items-center">
+							<div class="flex-1">
+								<div class="w-14 h-14 bg-prussian-blue-100 text-prussian-blue-600 rounded-2xl flex items-center justify-center mb-6">
+									<Calendar size={28} />
+								</div>
+								<h3 class="text-2xl font-bold text-stone-900 mb-4">Prise de RDV Intégrée</h3>
+								<p class="text-stone-600 leading-relaxed mb-6">
+									Fini les appels pendant vos prestations. Vos clients réservent en ligne et le rendez-vous s'ajoute automatiquement sur votre <strong>Google Calendar</strong> ou Outlook.
+								</p>
+								<ul class="space-y-3">
+									<li class="flex items-center gap-3 text-sm font-medium text-stone-700"><CheckCircle2 size={18} class="text-prussian-blue-500" /> Synchronisation temps réel</li>
+									<li class="flex items-center gap-3 text-sm font-medium text-stone-700"><CheckCircle2 size={18} class="text-prussian-blue-500" /> Pas de double réservation</li>
+								</ul>
 							</div>
-							<h3 class="text-2xl font-bold text-stone-900 mb-4">Prise de RDV Intégrée</h3>
-							<p class="text-stone-600 leading-relaxed mb-6">
-								Fini les appels pendant vos prestations. Vos clients réservent en ligne et le rendez-vous s'ajoute automatiquement sur votre <strong>Google Calendar</strong> ou Outlook.
-							</p>
-							<ul class="space-y-3">
-								<li class="flex items-center gap-3 text-sm font-medium text-stone-700"><CheckCircle2 size={18} class="text-prussian-blue-500" /> Synchronisation temps réel</li>
-								<li class="flex items-center gap-3 text-sm font-medium text-stone-700"><CheckCircle2 size={18} class="text-prussian-blue-500" /> Pas de double réservation</li>
-							</ul>
-						</div>
-						<div class="flex-1 w-full relative">
-							<div class="aspect-video bg-stone-100 rounded-xl overflow-hidden border border-stone-200 shadow-inner">
-								<img src="/images/technicien_pc.jpg" alt="Illustration RDV" class="w-full h-full object-cover" />
+							<div class="flex-1 w-full relative">
+								<div class="aspect-video bg-stone-100 rounded-xl overflow-hidden border border-stone-200 shadow-inner">
+									<img src="/images/technicien_pc.jpg" alt="Illustration RDV" class="w-full h-full object-cover" />
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 
 				<!-- Card 2 -->
-				<div class="group relative bg-white rounded-3xl p-8 md:p-12 shadow-md border border-stone-200 overflow-hidden transition-all duration-300 ease-out hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-1" data-aos="fade-up" data-aos-delay="100">
-					<div class="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-50 rounded-full blur-3xl group-hover:bg-blue-100 transition-colors"></div>
-					<div class="relative z-10 flex flex-col md:flex-row-reverse gap-8 items-center">
-						<div class="flex-1">
-							<div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
-								<Zap size={28} />
-							</div>
-							<h3 class="text-2xl font-bold text-stone-900 mb-4">Vitesse & Référencement (SEO)</h3>
-							<p class="text-stone-600 leading-relaxed mb-6">
-								Contrairement aux sites WordPress classiques, ce site est généré statiquement. Résultat : un chargement instantané qui ravit vos visiteurs et Google.
-							</p>
-							<ul class="space-y-3">
-								<li class="flex items-center gap-3 text-sm font-medium text-stone-700"><CheckCircle2 size={18} class="text-blue-500" /> Score Google PageSpeed > 95%</li>
-								<li class="flex items-center gap-3 text-sm font-medium text-stone-700"><CheckCircle2 size={18} class="text-blue-500" /> Navigation fluide sans rechargement</li>
-							</ul>
-						</div>
-						<div class="flex-1 w-full relative">
-							<div class="aspect-video bg-stone-900 rounded-xl overflow-hidden shadow-2xl p-4 border border-stone-800">
-								<!-- Pseudo code block for visual -->
-								<div class="flex gap-2 mb-4">
-									<div class="w-3 h-3 rounded-full bg-red-500"></div>
-									<div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-									<div class="w-3 h-3 rounded-full bg-green-500"></div>
+				<div data-aos="fade-up" data-aos-delay="100">
+					<div class="group relative bg-white rounded-3xl p-8 md:p-12 shadow-md border border-stone-200 overflow-hidden transition-all duration-300 ease-out hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] transform hover:-translate-y-2">
+						<div class="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-50 rounded-full blur-3xl group-hover:bg-blue-100 transition-colors pointer-events-none"></div>
+						<div class="relative z-10 flex flex-col md:flex-row-reverse gap-8 items-center">
+							<div class="flex-1">
+								<div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
+									<Zap size={28} />
 								</div>
-								<div class="font-mono text-sm text-green-400">
-									<p>> astro build</p>
-									<p class="text-stone-400">✓ Completed in 120ms.</p>
-									<p class="text-blue-400 mt-2">Deploying to Global Edge Network...</p>
-									<p class="text-green-400">Success! Site is live.</p>
+								<h3 class="text-2xl font-bold text-stone-900 mb-4">Vitesse & Référencement (SEO)</h3>
+								<p class="text-stone-600 leading-relaxed mb-6">
+									Contrairement aux sites WordPress classiques, ce site est généré statiquement. Résultat : un chargement instantané qui ravit vos visiteurs et Google.
+								</p>
+								<ul class="space-y-3">
+									<li class="flex items-center gap-3 text-sm font-medium text-stone-700"><CheckCircle2 size={18} class="text-blue-500" /> Score Google PageSpeed > 95%</li>
+									<li class="flex items-center gap-3 text-sm font-medium text-stone-700"><CheckCircle2 size={18} class="text-blue-500" /> Navigation fluide sans rechargement</li>
+								</ul>
+							</div>
+							<div class="flex-1 w-full relative">
+								<div class="aspect-video bg-stone-900 rounded-xl overflow-hidden shadow-2xl p-4 border border-stone-800">
+									<!-- Pseudo code block for visual -->
+									<div class="flex gap-2 mb-4">
+										<div class="w-3 h-3 rounded-full bg-red-500"></div>
+										<div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+										<div class="w-3 h-3 rounded-full bg-green-500"></div>
+									</div>
+									<div class="font-mono text-sm text-green-400">
+										<p>> astro build</p>
+										<p class="text-stone-400">✓ Completed in 120ms.</p>
+										<p class="text-blue-400 mt-2">Deploying to Global Edge Network...</p>
+										<p class="text-green-400">Success! Site is live.</p>
+									</div>
 								</div>
 							</div>
 						</div>
