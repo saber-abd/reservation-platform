@@ -152,29 +152,6 @@ export default function ReservationForm() {
 				})
 			}).catch(err => console.error("Erreur d'envoi d'email de confirmation:", err));
 
-			// Intégration Google Calendar spécifique à la démo standard
-			if (window.location.pathname.startsWith('/demo-standard')) {
-				fetch('/api/calendar', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						title: `Intervention: ${selectedService.name} - ${values.clientName}`,
-						description: `Client: ${values.clientName}\nEmail: ${values.clientEmail}\nTéléphone: ${values.clientPhone || 'N/A'}\nService: ${selectedService.name}`,
-						start_time: selectedSlot.start.toISOString(),
-						end_time: selectedSlot.end.toISOString(),
-					})
-				})
-				.then(async (res) => {
-					if (!res.ok) {
-						const errData = await res.json();
-						console.error("Erreur synchronisation calendrier:", errData);
-					} else {
-						console.log("Synchronisation Google Calendar réussie.");
-					}
-				})
-				.catch(err => console.error("Erreur réseau vers calendrier:", err));
-			}
-
 			setSuccess(true);
 			reset();
 		} catch (err) {

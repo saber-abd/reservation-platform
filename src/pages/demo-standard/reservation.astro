@@ -2,7 +2,7 @@
 import StandardLayout from '@/layouts/StandardLayout.astro';
 import { getSiteConfig } from '@/config/site';
 const siteConfig = await getSiteConfig(Astro.url.pathname);
-import ReservationForm from '@/components/reservation/ReservationForm';
+import StandardReservationForm from '@/components/reservation/StandardReservationForm';
 ---
 
 <StandardLayout title="Réservation" description={`Réservez votre intervention avec ${siteConfig.business.name}.`}>
@@ -12,7 +12,7 @@ import ReservationForm from '@/components/reservation/ReservationForm';
 
 		<div class="mt-12 text-left">
 			<div class="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 md:p-10">
-				<ReservationForm client:load />
+				<StandardReservationForm client:load />
 			</div>
 		</div>
 	</section>
