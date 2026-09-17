@@ -220,7 +220,7 @@
     font-family: 'Coolvetica', sans-serif !important;
 }
 
-.theme-standard {
+.theme-standard, .theme-standard * {
     --background: oklch(0.98 0 0); /* Slate 50 equivalent */
     --foreground: oklch(0.13 0.03 260); /* Slate 900 */
     --card: oklch(1 0 0); /* White */
@@ -241,10 +241,6 @@
 
     --font-heading: 'CreatoDisplay-Regular', sans-serif;
     --font-sans: 'CreatoDisplay-Regular', sans-serif;
-    font-family: 'CreatoDisplay-Regular', sans-serif !important;
-}
-
-.theme-standard h1, .theme-standard h2, .theme-standard h3, .theme-standard h4, .theme-standard h5, .theme-standard h6, .theme-standard .font-black {
     font-family: 'CreatoDisplay-Regular', sans-serif !important;
 }
 
