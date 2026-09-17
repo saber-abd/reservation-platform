@@ -193,33 +193,21 @@ export default function ReservationForm() {
 			{/* Étape 1 : service */}
 			<div>
 				<p className="text-sm font-semibold text-stone-900">1. Choisissez une prestation</p>
-				<div className="mt-3 grid gap-3 sm:grid-cols-2">
-					{services.map((service) => (
-						<button
-							type="button"
-							key={service.id}
-							onClick={() => setSelectedServiceId(service.id)}
-							className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-colors ${
-								selectedServiceId === service.id
-									? 'border-rose-600 bg-rose-600 text-white shadow-md'
-									: 'border-border bg-stone-50 hover:bg-stone-100 hover:border-rose-300'
-							}`}
-						>
-							<img 
-								src={service.image_url || getServiceImageFallback(service.name)} 
-								alt="" 
-								className="h-12 w-12 shrink-0 rounded-lg object-cover" 
-							/>
-							<div>
-								<p className={`font-medium ${selectedServiceId === service.id ? 'text-white' : 'text-stone-900'}`}>{service.name}</p>
-								<p className={`mt-1 text-xs ${selectedServiceId === service.id ? 'text-rose-50' : 'text-stone-500'}`}>
-									{service.duration_minutes} min — {service.price} €
-								</p>
-							</div>
-						</button>
-					))}
+				<div className="mt-3">
+					<select
+						value={selectedServiceId}
+						onChange={(e) => setSelectedServiceId(e.target.value)}
+						className="w-full rounded-xl border border-border bg-stone-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600 transition-colors text-stone-900"
+					>
+						<option value="" disabled>Sélectionnez une prestation...</option>
+						{services.map((service) => (
+							<option key={service.id} value={service.id}>
+								{service.name} ({service.duration_minutes} min — {service.price} €)
+							</option>
+						))}
+					</select>
 					{services.length === 0 && (
-						<p className="text-sm text-stone-500">Aucune prestation disponible pour le moment.</p>
+						<p className="mt-2 text-sm text-stone-500">Aucune prestation disponible pour le moment.</p>
 					)}
 				</div>
 			</div>
