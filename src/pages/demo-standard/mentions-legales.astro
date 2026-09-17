@@ -1,26 +1,42 @@
 ---
-import Layout from '@/layouts/Layout.astro';
+import StandardLayout from '@/layouts/StandardLayout.astro';
 ---
 
-<Layout title="Mentions Légales" description="Mentions légales de la plateforme.">
-	<section class="mx-auto max-w-4xl px-6 py-20">
-		<h1 class="text-3xl font-bold text-stone-900 md:text-4xl">Mentions Légales</h1>
-		<div class="mt-8 space-y-6 text-stone-700">
-			<p>
-				Conformément aux dispositions des articles 6-III et 19 de la Loi n° 2004-575 du 21 juin 2004 pour la Confiance dans l'économie numérique, dite L.C.E.N., nous portons à la connaissance des utilisateurs et visiteurs du site les informations suivantes :
-			</p>
-			<h2 class="text-xl font-semibold text-stone-900">1. Éditeur du site</h2>
-			<p>
-				Le site est édité par la plateforme de réservation. Pour toute question ou demande d'information, veuillez nous contacter via la page de contact.
-			</p>
-			<h2 class="text-xl font-semibold text-stone-900">2. Hébergement</h2>
-			<p>
-				Ce site est hébergé par Cloudflare.
-			</p>
-			<h2 class="text-xl font-semibold text-stone-900">3. Propriété intellectuelle</h2>
-			<p>
-				La structure générale du site, ainsi que les textes, graphiques, images, sons et vidéos la composant, sont la propriété de l'éditeur ou de ses partenaires. Toute représentation et/ou reproduction et/ou exploitation partielle ou totale de ce site, par quelque procédé que ce soit, sans l'autorisation préalable et par écrit de l'éditeur est strictement interdite.
-			</p>
+<StandardLayout title="Mentions Légales" description="Mentions légales de Tech Express - Dépannage Informatique.">
+	<section class="mx-auto max-w-4xl px-6 py-24">
+		<h1 class="text-3xl font-black text-oxford-navy md:text-5xl uppercase tracking-tight mb-4">Mentions Légales</h1>
+		<p class="text-xl text-cerulean font-bold mb-12">Dernière mise à jour : 17 Septembre 2026</p>
+		
+		<div class="mt-8 space-y-10 text-oxford-navy-800 text-lg leading-relaxed">
+			<div>
+				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">1. Éditeur du site</h2>
+				<p>
+					Le site <span class="font-bold text-cerulean">Tech Express</span> est édité par la société Tech Express, SASU au capital de 10 000 €, dont le siège social est situé 123 Rue de la Réparation, 75000 Paris, immatriculée au Registre du Commerce et des Sociétés de Paris sous le numéro 123 456 789.
+				</p>
+				<p class="mt-2">Numéro de TVA intracommunautaire : FR 12 345678901</p>
+				<p class="mt-2">Directeur de la publication : Jean Dupont</p>
+			</div>
+			
+			<div>
+				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">2. Hébergement</h2>
+				<p>
+					Ce site est hébergé par la société Cloudflare, Inc., 101 Townsend St., San Francisco, CA 94107, États-Unis.
+				</p>
+			</div>
+			
+			<div>
+				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">3. Propriété intellectuelle</h2>
+				<p>
+					La structure générale du site, ainsi que les textes, graphiques, images, sons et vidéos la composant, sont la propriété de Tech Express. Toute représentation et/ou reproduction et/ou exploitation partielle ou totale de ce site, par quelque procédé que ce soit, sans l'autorisation préalable et par écrit de Tech Express est strictement interdite et serait susceptible de constituer une contrefaçon au sens des articles L 335-2 et suivants du Code de la propriété intellectuelle.
+				</p>
+			</div>
+			
+			<div>
+				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">4. Protection des données</h2>
+				<p>
+					Pour plus d'informations sur la manière dont nous traitons vos données personnelles, veuillez consulter notre <a href="/demo-standard/politique-de-confidentialite" class="text-punch-red hover:text-punch-red-700 underline font-bold">Politique de Confidentialité</a>.
+				</p>
+			</div>
 		</div>
 	</section>
-</Layout>
+</StandardLayout>

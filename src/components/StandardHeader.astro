@@ -8,13 +8,13 @@ const basePathMatch = currentPath.match(/^\/(demo-[^/]+)/);
 const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 ---
 
-<header class="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+<header class="sticky top-0 z-50 bg-white border-b border-frosted-blue-200 shadow-sm">
 	<div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
 		<a href={`${basePath}/`} aria-label={siteConfig.business.name} class="flex items-center gap-3">
-			<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-french-blue text-white shadow-sm">
+			<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-cerulean text-white shadow-sm">
 				<Wrench size={20} />
 			</span>
-			<span class="text-xl font-black text-deep-twilight tracking-tight">{siteConfig.business.name}</span>
+			<span class="text-xl font-black text-oxford-navy tracking-tight">{siteConfig.business.name}</span>
 		</a>
 
 		<!-- Desktop Nav -->
@@ -24,8 +24,8 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 					<a
 						href={`${basePath}${item.href}`}
 						class:list={[
-							'text-sm font-bold uppercase tracking-wider transition-colors hover:text-bright-teal-blue-600',
-							currentPath === item.href ? 'text-french-blue' : 'text-deep-twilight-800',
+							'text-sm font-bold uppercase tracking-wider transition-colors hover:text-punch-red',
+							currentPath === item.href ? 'text-cerulean' : 'text-oxford-navy',
 						]}
 					>
 						{item.label}
@@ -37,14 +37,14 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 		<div class="flex items-center gap-4">
 			<div class="hidden md:flex items-center gap-4">
 				{basePath && (
-					<a href="/" class="rounded-xl border-2 border-french-blue/10 px-4 py-2 text-sm font-bold text-french-blue hover:bg-french-blue/5 transition-colors">
+					<a href="/" class="rounded-xl border-2 border-cerulean/20 px-4 py-2 text-sm font-bold text-cerulean hover:bg-cerulean/10 transition-colors">
 						← Retour
 					</a>
 				)}
 			</div>
 
 			<!-- Mobile Menu Toggle -->
-			<button id="mobile-menu-btn" class="md:hidden text-deep-twilight hover:text-french-blue focus:outline-none">
+			<button id="mobile-menu-btn" class="md:hidden text-oxford-navy hover:text-cerulean focus:outline-none">
 				<span id="icon-menu"><Menu size={24} /></span>
 				<span id="icon-close" class="hidden"><X size={24} /></span>
 			</button>
@@ -52,24 +52,24 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 	</div>
 
 	<!-- Mobile Nav -->
-	<div id="mobile-nav" class="hidden border-t border-slate-200 bg-white md:hidden">
+	<div id="mobile-nav" class="hidden border-t border-frosted-blue-200 bg-white md:hidden">
 		<nav class="flex flex-col px-6 py-4 gap-4">
 			{
 				siteConfig.nav.map((item) => (
 					<a
 						href={`${basePath}${item.href}`}
 						class:list={[
-							'text-lg font-bold uppercase transition-colors hover:text-bright-teal-blue-600',
-							currentPath === item.href ? 'text-french-blue' : 'text-deep-twilight-800',
+							'text-lg font-bold uppercase transition-colors hover:text-punch-red',
+							currentPath === item.href ? 'text-cerulean' : 'text-oxford-navy',
 						]}
 					>
 						{item.label}
 					</a>
 				))
 			}
-			<div class="mt-4 pt-4 border-t border-slate-200">
+			<div class="mt-4 pt-4 border-t border-frosted-blue-200">
 				{basePath && (
-					<a href="/" class="mb-2 block rounded-xl border-2 border-french-blue/10 px-4 py-3 text-center text-sm font-bold text-french-blue hover:bg-french-blue/5">
+					<a href="/" class="mb-2 block rounded-xl border-2 border-cerulean/20 px-4 py-3 text-center text-sm font-bold text-cerulean hover:bg-cerulean/10">
 						← Retour au Portfolio
 					</a>
 				)}

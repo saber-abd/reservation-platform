@@ -1,27 +1,55 @@
 ---
-import Layout from '@/layouts/Layout.astro';
+import StandardLayout from '@/layouts/StandardLayout.astro';
 ---
 
-<Layout title="Conditions d'Utilisation" description="Conditions générales d'utilisation de la plateforme.">
-	<section class="mx-auto max-w-4xl px-6 py-20">
-		<h1 class="text-3xl font-bold text-stone-900 md:text-4xl">Conditions Générales d'Utilisation</h1>
-		<div class="mt-8 space-y-6 text-stone-700">
-			<h2 class="text-xl font-semibold text-stone-900">1. Objet</h2>
-			<p>
-				Les présentes conditions générales ont pour objet de définir les modalités de mise à disposition des services du site et les conditions d'utilisation du service par l'utilisateur.
-			</p>
-			<h2 class="text-xl font-semibold text-stone-900">2. Accès au site</h2>
-			<p>
-				Le site est accessible gratuitement à tout utilisateur disposant d'un accès à internet. L'éditeur met en œuvre tous les moyens raisonnables à sa disposition pour assurer un accès de qualité au service.
-			</p>
-			<h2 class="text-xl font-semibold text-stone-900">3. Réservations et Annulations</h2>
-			<p>
-				Toute réservation effectuée sur la plateforme engage l'utilisateur. En cas d'imprévu, nous vous prions d'annuler votre rendez-vous dans les délais indiqués par le professionnel afin de libérer le créneau.
-			</p>
-			<h2 class="text-xl font-semibold text-stone-900">4. Responsabilité</h2>
-			<p>
-				L'éditeur ne peut être tenu responsable de tout dysfonctionnement du réseau ou des serveurs ou de tout autre événement échappant au contrôle raisonnable, qui empêcherait ou dégraderait l'accès au service.
-			</p>
+<StandardLayout title="Conditions Générales d'Utilisation" description="CGU de Tech Express - Dépannage Informatique.">
+	<section class="mx-auto max-w-4xl px-6 py-24">
+		<h1 class="text-3xl font-black text-oxford-navy md:text-5xl uppercase tracking-tight mb-4">Conditions Générales d'Utilisation</h1>
+		<p class="text-xl text-cerulean font-bold mb-12">Dernière mise à jour : 17 Septembre 2026</p>
+		
+		<div class="mt-8 space-y-10 text-oxford-navy-800 text-lg leading-relaxed">
+			<div>
+				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">1. Objet</h2>
+				<p>
+					Les présentes Conditions Générales d'Utilisation (CGU) encadrent l'accès et l'utilisation du site internet de Tech Express, ainsi que les services de réservation de dépannage informatique en ligne qui y sont proposés.
+				</p>
+			</div>
+			
+			<div>
+				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">2. Description des services</h2>
+				<p>
+					Le site permet aux utilisateurs de :
+				</p>
+				<ul class="list-disc pl-6 mt-4 space-y-2 font-medium">
+					<li>Consulter nos offres de dépannage (ordinateur, téléphone, imprimante, etc.)</li>
+					<li>Réserver une intervention à domicile ou en atelier.</li>
+					<li>Nous contacter pour obtenir un devis personnalisé.</li>
+				</ul>
+				<p class="mt-4">
+					Toutes les interventions sont soumises à la disponibilité de nos techniciens.
+				</p>
+			</div>
+			
+			<div>
+				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">3. Obligations de l'utilisateur</h2>
+				<p>
+					L'utilisateur s'engage à fournir des informations exactes lors de la réservation (adresse, type d'appareil, description de la panne) pour permettre à nos techniciens d'intervenir dans les meilleures conditions. En cas d'informations erronées entraînant un déplacement inutile, des frais de déplacement pourront être facturés.
+				</p>
+			</div>
+			
+			<div>
+				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">4. Tarifs et Paiement</h2>
+				<p>
+					Les tarifs indiqués sur le site sont à titre indicatif pour les pannes classiques. Un devis final sera validé par le technicien avant toute intervention majeure. Le paiement s'effectue à l'issue de l'intervention, par carte bancaire ou espèces.
+				</p>
+			</div>
+			
+			<div>
+				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">5. Responsabilité</h2>
+				<p>
+					Tech Express s'engage à mettre en œuvre tous les moyens nécessaires pour réparer votre matériel. Toutefois, notre responsabilité ne saurait être engagée en cas de perte de données. Il incombe à l'utilisateur de sauvegarder ses données avant toute intervention.
+				</p>
+			</div>
 		</div>
 	</section>
-</Layout>
+</StandardLayout>

@@ -1,27 +1,52 @@
 ---
-import Layout from '@/layouts/Layout.astro';
+import StandardLayout from '@/layouts/StandardLayout.astro';
 ---
 
-<Layout title="Politique de Confidentialité" description="Notre politique de confidentialité et de gestion des données.">
-	<section class="mx-auto max-w-4xl px-6 py-20">
-		<h1 class="text-3xl font-bold text-stone-900 md:text-4xl">Politique de Confidentialité</h1>
-		<div class="mt-8 space-y-6 text-stone-700">
-			<h2 class="text-xl font-semibold text-stone-900">1. Collecte des données</h2>
-			<p>
-				Nous collectons les données nécessaires au bon fonctionnement de la plateforme : nom, adresse e-mail, informations de contact et données relatives aux réservations.
-			</p>
-			<h2 class="text-xl font-semibold text-stone-900">2. Utilisation des données</h2>
-			<p>
-				Les informations que nous recueillons sont utilisées pour gérer vos réservations, personnaliser votre expérience et vous contacter si nécessaire dans le cadre de nos services.
-			</p>
-			<h2 class="text-xl font-semibold text-stone-900">3. Protection des informations</h2>
-			<p>
-				Nous mettons en œuvre diverses mesures de sécurité pour préserver la sécurité de vos informations personnelles. Vos données sont stockées de manière sécurisée et ne sont pas revendues à des tiers.
-			</p>
-			<h2 class="text-xl font-semibold text-stone-900">4. Vos droits</h2>
-			<p>
-				Conformément à la réglementation en vigueur, vous disposez d'un droit d'accès, de rectification, de modification et de suppression des données qui vous concernent. Vous pouvez exercer ce droit en nous contactant directement.
-			</p>
+<StandardLayout title="Politique de Confidentialité" description="Politique de confidentialité de Tech Express - Dépannage Informatique.">
+	<section class="mx-auto max-w-4xl px-6 py-24">
+		<h1 class="text-3xl font-black text-oxford-navy md:text-5xl uppercase tracking-tight mb-4">Politique de Confidentialité</h1>
+		<p class="text-xl text-cerulean font-bold mb-12">Dernière mise à jour : 17 Septembre 2026</p>
+		
+		<div class="mt-8 space-y-10 text-oxford-navy-800 text-lg leading-relaxed">
+			<div>
+				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">1. Collecte des données personnelles</h2>
+				<p>
+					Dans le cadre de l'utilisation de nos services (réservation d'un dépannage, formulaire de contact), nous sommes amenés à collecter les informations suivantes :
+				</p>
+				<ul class="list-disc pl-6 mt-4 space-y-2 font-medium">
+					<li>Nom et prénom</li>
+					<li>Adresse e-mail</li>
+					<li>Numéro de téléphone</li>
+					<li>Adresse postale (pour le dépannage à domicile)</li>
+					<li>Détails sur le problème matériel ou logiciel</li>
+				</ul>
+			</div>
+			
+			<div>
+				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">2. Finalité du traitement</h2>
+				<p>
+					Ces données sont utilisées exclusivement pour le bon déroulement de nos services, à savoir :
+					<ul class="list-disc pl-6 mt-2 space-y-1">
+						<li>Gérer vos demandes de dépannage et la planification des interventions.</li>
+						<li>Vous contacter en cas de besoin concernant votre réservation.</li>
+						<li>Améliorer la qualité de notre service client.</li>
+					</ul>
+				</p>
+			</div>
+			
+			<div>
+				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">3. Durée de conservation</h2>
+				<p>
+					Vos données personnelles sont conservées pendant une durée de 3 ans à compter du dernier contact ou de la fin de notre relation commerciale. Les factures sont conservées 10 ans pour des raisons légales.
+				</p>
+			</div>
+			
+			<div>
+				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">4. Vos droits</h2>
+				<p>
+					Conformément à la réglementation RGPD, vous disposez d'un droit d'accès, de rectification, de suppression et de portabilité de vos données. Pour exercer ce droit, vous pouvez nous contacter via notre page de <a href="/demo-standard/contact" class="text-punch-red hover:text-punch-red-700 underline font-bold">Contact</a>.
+				</p>
+			</div>
 		</div>
 	</section>
-</Layout>
+</StandardLayout>
