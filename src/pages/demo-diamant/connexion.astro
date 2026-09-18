@@ -3,7 +3,7 @@ import DiamantLayout from '@/layouts/DiamantLayout.astro';
 import LoginForm from '@/components/auth/LoginForm';
 ---
 
-<DiamantLayout title="Connexion" description="Connectez-vous à votre espace VIP.">
+<DiamantLayout title="Connexion" description="Connectez-vous à votre espace personnel.">
 	<section class="relative min-h-[80vh] flex items-center justify-center py-20 px-6 bg-stone-950">
 		<div class="absolute inset-0 z-0 opacity-30">
 			<div class="absolute right-1/4 top-10 w-[500px] h-[500px] bg-jasmine-900/20 rounded-full blur-[100px] pointer-events-none"></div>
@@ -18,7 +18,7 @@ import LoginForm from '@/components/auth/LoginForm';
 				<LoginForm basePath="/demo-diamant" client:load />
 				
 				<div class="mt-6 text-center text-sm text-stone-400 border-t border-white/5 pt-6">
-					Pas encore de compte VIP ?{' '}
+					Pas encore de compte ?{' '}
 					<a href="/demo-diamant/inscription" class="font-bold text-jasmine-400 hover:text-jasmine-300 transition-colors">
 						S'inscrire
 					</a>

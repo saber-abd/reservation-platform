@@ -5,9 +5,10 @@ import ServiceModal from '@/components/ui/ServiceModal';
 
 interface Props {
 	limit?: number;
+	basePath?: string;
 }
 
-export default function ServicesCarousel({ limit }: Props) {
+export default function ServicesCarousel({ limit, basePath = '' }: Props) {
 	const [services, setServices] = useState<Service[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [selectedService, setSelectedService] = useState<Service | null>(null);

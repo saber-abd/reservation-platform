@@ -13,7 +13,7 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 			<div class="absolute left-1/4 top-10 w-96 h-96 bg-deep-teal-900/40 rounded-full blur-[100px] pointer-events-none"></div>
 		</div>
 		<div class="relative z-10 mx-auto max-w-4xl px-6 text-center">
-			<h1 class="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">Nos Prestations</h1>
+			<h1 class="text-3xl md:text-4xl font-black text-white mb-6 tracking-tight">Nos Prestations</h1>
 			<p class="text-xl text-stone-400">
 				Un aperçu de nos services d'exception. Contactez-nous pour toute demande sur-mesure.
 			</p>
@@ -22,7 +22,7 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 
 	<section class="mx-auto max-w-6xl px-6 py-20 relative z-10">
 		<div class="[&>div>div]:!bg-stone-900 [&>div>div]:!border-white/10 [&>div>div>div>h3]:!text-white [&>div>div>div>p]:!text-stone-400 [&>div>div>div>div>span]:!text-jasmine-400 [&>div>div>div>div>button]:!bg-jasmine-500 [&>div>div>div>div>button]:!text-stone-950 [&>div>div>div>div>a]:!bg-jasmine-500 [&>div>div>div>div>a]:!text-stone-950">
-			<ServicesList client:load />
+			<ServicesList basePath="/demo-diamant" client:load />
 		</div>
 
 		<div class="mt-24 rounded-2xl bg-gradient-to-br from-stone-900 to-stone-950 border border-white/10 p-12 text-center shadow-2xl relative overflow-hidden" data-aos="fade-up">

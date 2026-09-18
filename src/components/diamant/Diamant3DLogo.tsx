@@ -53,7 +53,7 @@ function StylizedScissors() {
 
 				{/* Pivot central */}
 				<mesh material={goldMaterial} position={[0, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
-					<cylinderGeometry args={[0.15, 0.15, 0.2, 32]} />
+					<cylinderGeometry args={[0.15, 0.15, 0.2, 16]} />
 				</mesh>
 			</Float>
 		</group>
@@ -63,23 +63,22 @@ function StylizedScissors() {
 export default function Diamant3DLogo() {
 	return (
 		<div className="w-full h-full min-h-[400px] relative pointer-events-auto">
-			<Canvas camera={{ position: [0, 0, 6], fov: 45 }}>
+			<Canvas camera={{ position: [0, 0, 6], fov: 45 }} dpr={[1, 1.5]}>
 				<ambientLight intensity={0.5} />
-				<spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
+				<spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
 				
 				<PresentationControls
-					global
+					global={false}
 					rotation={[0, 0.3, 0]}
-					polar={[-0.4, 0.2]}
-					azimuth={[-1, 0.75]}
-					config={{ mass: 2, tension: 400 }}
-					snap={{ mass: 4, tension: 400 }}
+					polar={[-0.4, 0.4]}
+					azimuth={[-1, 1]}
+					config={{ mass: 1, tension: 170, friction: 26 }}
+					snap={{ mass: 2, tension: 150 }}
 				>
 					<StylizedScissors />
 				</PresentationControls>
 
 				<Environment preset="city" />
-				<ContactShadows position={[0, -2.5, 0]} opacity={0.4} scale={10} blur={2} far={4} />
 			</Canvas>
 		</div>
 	);

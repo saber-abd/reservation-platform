@@ -6,12 +6,12 @@ import ServiceModal from '@/components/ui/ServiceModal';
 interface Props {
 	limit?: number;
 	showCta?: boolean;
+	basePath?: string;
 }
-
 
 const CATEGORIES = ['Toutes', 'Femmes', 'Hommes', 'Enfants'];
 
-export default function ServicesList({ limit, showCta = true }: Props) {
+export default function ServicesList({ limit, showCta = true, basePath = '' }: Props) {
 	const [services, setServices] = useState<Service[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -85,7 +85,7 @@ export default function ServicesList({ limit, showCta = true }: Props) {
 									<span className="font-semibold text-stone-900">{service.price} €</span>
 								</div>
 								<a
-									href={`/reservation?service=${service.id}`}
+									href={`${basePath}/reservation?service=${service.id}`}
 									hidden={!showCta}
 									className="mt-4 rounded-xl bg-rose-600 px-4 py-2 text-center text-sm font-semibold text-white transition-colors hover:bg-rose-700"
 									onClick={(e) => e.stopPropagation()}

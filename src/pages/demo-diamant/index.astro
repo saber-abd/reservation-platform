@@ -16,8 +16,8 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 		<div class="absolute inset-0 z-0">
 			<div class="absolute inset-0 bg-[url('/images/hero_salon.jpg')] bg-cover bg-center opacity-20 mix-blend-luminosity"></div>
 			<div class="absolute inset-0 bg-gradient-to-b from-stone-950 via-stone-950/80 to-stone-950"></div>
-			<div class="absolute right-0 top-1/4 w-1/2 h-1/2 bg-deep-teal-900/30 rounded-full blur-[150px] pointer-events-none transform-gpu"></div>
-			<div class="absolute left-0 bottom-1/4 w-1/3 h-1/3 bg-jasmine-900/20 rounded-full blur-[120px] pointer-events-none transform-gpu"></div>
+			<div class="absolute right-0 top-1/4 w-1/2 h-1/2 bg-deep-teal-900/30 rounded-full blur-[100px] pointer-events-none transform-gpu will-change-transform"></div>
+			<div class="absolute left-0 bottom-1/4 w-1/3 h-1/3 bg-jasmine-900/20 rounded-full blur-[80px] pointer-events-none transform-gpu will-change-transform"></div>
 		</div>
 
 		<div class="relative z-10 mx-auto max-w-7xl px-6 w-full grid md:grid-cols-2 gap-12 items-center">
@@ -27,7 +27,7 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 					<span class="w-1.5 h-1.5 rounded-full bg-jasmine-400 animate-pulse"></span>
 					{siteConfig.business.activity}
 				</div>
-				<h1 class="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight leading-tight">
+				<h1 class="text-4xl md:text-4xl font-black text-white mb-6 tracking-tight leading-tight">
 					L'Art de la <br />
 					<span class="text-transparent bg-clip-text bg-gradient-to-r from-jasmine-300 via-jasmine-500 to-jasmine-600">
 						Coiffure
@@ -84,7 +84,7 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 				</div>
 				<div data-aos="fade-left">
 					<h2 class="text-sm font-bold text-jasmine-400 uppercase tracking-widest mb-4">L'Expérience</h2>
-					<h3 class="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">L'Excellence <br/>à chaque détail</h3>
+					<h3 class="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">L'Excellence <br/>à chaque détail</h3>
 					<p class="text-stone-400 text-lg leading-relaxed mb-8">
 						{siteConfig.business.description} Plongez dans un univers de raffinement où nos artisans coiffeurs dédient leur savoir-faire à révéler votre beauté unique. 
 					</p>
@@ -104,7 +104,7 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 								<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
 							</div>
 							<div>
-								<h4 class="text-white font-bold text-lg mb-1">Service VIP</h4>
+								<h4 class="text-white font-bold text-lg mb-1">Service Prestige</h4>
 								<p class="text-stone-500">Salon privé, boisson offerte et consultation sur-mesure avant chaque prestation.</p>
 							</div>
 						</div>
@@ -132,7 +132,7 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 				</a>
 			</div>
 			
-			<div class="[&>div>div]:!bg-stone-950 [&>div>div]:!border-white/10 [&>div>div>div>h3]:!text-white [&>div>div>div>p]:!text-stone-400 [&>div>div>div>div>span]:!text-jasmine-400 [&>div>div>div>div>a]:!bg-jasmine-500 [&>div>div>div>div>a]:!text-stone-950">
+			<div class="[&>div>div]:!bg-stone-950 [&>div>div]:!border-white/10 [&>div>div>div>h3]:!text-white [&>div>div>div>p]:!text-stone-400 [&>div>div>div>div>span]:!text-jasmine-400 [&>div>div>div>div>a]:!bg-jasmine-500 [&>div>div>div>div>a]:!text-stone-950 [&_img]:!grayscale-0 [&_img]:hover:!grayscale-0">
 				<!-- Nous utilisons le même composant mais injectons des classes CSS globales pour le forcer dans le thème sombre -->
 				<ServicesCarousel client:load limit={6} />
 			</div>
@@ -182,7 +182,7 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 						Voir tous les détails
 					</a>
 				</div>
-				<div data-aos="fade-left" class="rounded-2xl overflow-hidden border border-white/10 shadow-2xl h-[400px] grayscale hover:grayscale-0 transition-all duration-700">
+				<div data-aos="fade-left" class="rounded-2xl overflow-hidden border border-white/10 shadow-2xl h-[400px] transition-all duration-700">
 					<Map lat={siteConfig.business.lat} lng={siteConfig.business.lng} label={siteConfig.business.name} />
 				</div>
 			</div>

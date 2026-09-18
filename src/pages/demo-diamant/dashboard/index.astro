@@ -5,7 +5,7 @@ import DiamantRevenueChart from '@/components/diamant/dashboard/DiamantRevenueCh
 import { ArrowUpRight, Users, Calendar, TrendingUp } from 'lucide-react';
 ---
 
-<DiamantDashboardLayout title="Tableau de Bord VIP">
+<DiamantDashboardLayout title="Tableau de Bord">
 	<DiamantDashboardNav slot="sidebar" basePath="/demo-diamant" client:load />
 	
 	<div class="mb-8">
@@ -53,7 +53,7 @@ import { ArrowUpRight, Users, Calendar, TrendingUp } from 'lucide-react';
 					<ArrowUpRight size={12} /> +18
 				</span>
 			</div>
-			<p class="text-stone-400 text-sm font-bold uppercase tracking-widest mb-1">Nouveaux VIP</p>
+			<p class="text-stone-400 text-sm font-bold uppercase tracking-widest mb-1">Nouveaux Clients</p>
 			<p class="text-3xl font-black text-white">45</p>
 		</div>
 
@@ -79,9 +79,9 @@ import { ArrowUpRight, Users, Calendar, TrendingUp } from 'lucide-react';
 			<DiamantRevenueChart client:load />
 		</div>
 
-		<!-- Prochains RDV VIP -->
+		<!-- Prochains RDV -->
 		<div class="rounded-2xl border border-white/10 bg-stone-900/50 p-6 shadow-xl">
-			<h2 class="text-lg font-bold text-white mb-6">Prochains RDV VIP</h2>
+			<h2 class="text-lg font-bold text-white mb-6">Prochains RDV</h2>
 			
 			<div class="space-y-4">
 				<div class="flex items-center gap-4 p-4 rounded-xl border border-white/5 bg-white/5 hover:border-jasmine-400/30 transition-colors">

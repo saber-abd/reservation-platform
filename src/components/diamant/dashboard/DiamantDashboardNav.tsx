@@ -11,8 +11,8 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 	const links = [
 		{ href: `${basePath}/dashboard`, label: 'Tableau de bord', icon: Home },
 		{ href: `${basePath}/dashboard/disponibilites`, label: 'Planning & RDV', icon: Calendar },
-		{ href: `${basePath}/dashboard/clients`, label: 'Clientèle VIP', icon: Users },
-		{ href: `${basePath}/dashboard/services`, label: 'Carte des Soins', icon: Star },
+		{ href: `${basePath}/dashboard/clients`, label: 'Clientèle', icon: Users },
+		{ href: `${basePath}/dashboard/services`, label: 'Gestion des prestations', icon: Star },
 		{ href: `${basePath}/dashboard/statistiques`, label: 'Performances', icon: BarChart3 },
 		{ href: `${basePath}/dashboard/profil`, label: 'Profil Maison', icon: Settings },
 	];
