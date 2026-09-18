@@ -3,7 +3,7 @@
 @import "shadcn/tailwind.css";
 
 @font-face {
-    font-family: 'Type Machine';
+    font-family: 'TypeMachine';
     src: url('/fonts/TypeMachine.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
@@ -36,9 +36,7 @@
 
 @font-face {
     font-family: 'Monimer Serif';
-    src: url('/fonts/monimer-serif.woff2') format('woff2'),
-         url('/fonts/monimer-serif.woff') format('woff'),
-         url('/fonts/monimer-serif.ttf') format('truetype');
+    src: url('/fonts/MonimerSerif_PERSONAL_USE_ONLY.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;

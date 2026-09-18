@@ -46,27 +46,13 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 		<meta name="twitter:description" content={description} />
 
 		<meta name="theme-color" content="#fff7f1" />
-
-		<!-- Google Fonts -->
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
-
 		<style>
-			/* Override fonts for diamant theme */
-			.theme-diamant {
-				--font-heading-display: 'Playfair Display', serif;
-				--font-body-display: 'Lato', sans-serif;
-			}
-			.theme-diamant body {
-				font-family: 'Lato', sans-serif;
-			}
+			.theme-diamant body { font-family: 'Lato', sans-serif; }
 			.theme-diamant h1, .theme-diamant h2, .theme-diamant h3,
 			.theme-diamant h4, .theme-diamant h5, .theme-diamant h6,
 			.theme-diamant .font-black, .theme-diamant .font-bold {
-				font-family: 'Playfair Display', serif;
+				font-family: 'Monimer Serif', serif;
 			}
-
 			/* Fade-in animation pour les sections */
 			.section-fade {
 				opacity: 0;
@@ -98,19 +84,22 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 		<DiamantFooter />
 		
 		<script>
-			// Intersection Observer léger pour les animations
-			const observer = new IntersectionObserver(
-				(entries) => {
-					entries.forEach((e) => {
-						if (e.isIntersecting) {
-							e.target.classList.add('visible');
-							observer.unobserve(e.target);
+			// Animation observer for section-fade elements
+			document.addEventListener('DOMContentLoaded', () => {
+				const observer = new IntersectionObserver((entries) => {
+					entries.forEach(entry => {
+						if (entry.isIntersecting) {
+							entry.target.classList.add('visible');
+							observer.unobserve(entry.target);
 						}
 					});
-				},
-				{ threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
-			);
-			document.querySelectorAll('.section-fade').forEach((el) => observer.observe(el));
+				}, {
+					threshold: 0.1,
+					rootMargin: "0px 0px -50px 0px"
+				});
+
+				document.querySelectorAll('.section-fade').forEach(el => observer.observe(el));
+			});
 		</script>
 	</body>
 </html>

@@ -1,6 +1,7 @@
 ---
 import DiamantDashboardLayout from '@/layouts/DiamantDashboardLayout.astro';
 import DiamantDashboardNav from '@/components/diamant/dashboard/DiamantDashboardNav';
+import DiamantProProfile from '@/components/diamant/dashboard/DiamantProProfile';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname);
@@ -14,70 +15,6 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 		<p class="text-stone-500 mt-1">Paramètres et informations de votre établissement.</p>
 	</div>
 
-	<!-- Carte identité -->
-	<div class="rounded-2xl border border-stone-200 bg-white p-7 shadow-sm mb-6">
-		<div class="flex items-center gap-6 mb-8 border-b border-stone-100 pb-7">
-			<div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-deep-teal-400 to-deep-teal-600 flex items-center justify-center shrink-0">
-				<span class="text-3xl font-black text-white uppercase">{siteConfig.business.name.charAt(0)}</span>
-			</div>
-			<div>
-				<h2 class="text-2xl font-bold text-stone-900 mb-1">{siteConfig.business.name}</h2>
-				<p class="text-deep-teal-600 text-sm font-bold uppercase tracking-widest">{siteConfig.business.activity}</p>
-			</div>
-		</div>
+	<DiamantProProfile client:load />
 
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-7">
-			<div>
-				<h3 class="text-base font-bold text-stone-800 mb-5">Informations Publiques</h3>
-				<div class="space-y-4">
-					<div>
-						<label class="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2">Adresse</label>
-						<div class="px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-700 text-sm">
-							{siteConfig.business.address}
-						</div>
-					</div>
-					<div>
-						<label class="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2">Téléphone</label>
-						<div class="px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-700 text-sm">
-							{siteConfig.business.phone}
-						</div>
-					</div>
-					<div>
-						<label class="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2">Email de contact</label>
-						<div class="px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-700 text-sm">
-							{siteConfig.business.email}
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div>
-				<h3 class="text-base font-bold text-stone-800 mb-5">Abonnement</h3>
-				<div class="rounded-2xl border border-deep-teal-200 bg-deep-teal-50 p-6">
-					<div class="flex items-center justify-between mb-3">
-						<span class="text-deep-teal-700 font-bold uppercase tracking-widest text-sm">Plan Prestige</span>
-						<span class="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full border border-green-200">Actif</span>
-					</div>
-					<p class="text-stone-500 text-sm mb-5">Toutes les fonctionnalités premium sont activées.</p>
-					<button class="w-full rounded-xl border border-deep-teal-300 bg-white px-4 py-3 text-sm font-bold text-deep-teal-700 hover:bg-deep-teal-50 transition-colors">
-						Gérer la facturation
-					</button>
-				</div>
-
-				<div class="mt-5 rounded-2xl border border-stone-200 bg-white p-5">
-					<h4 class="text-stone-700 font-bold text-sm mb-3">Accès rapide</h4>
-					<div class="space-y-2">
-						<a href="/demo-diamant/dashboard" class="flex items-center gap-3 p-2 rounded-lg hover:bg-stone-50 text-stone-600 text-sm transition-colors">
-							<span class="w-6 h-6 rounded-md bg-stone-100 flex items-center justify-center text-stone-500 text-xs">→</span>
-							Tableau de bord
-						</a>
-						<a href="/demo-diamant/dashboard/services" class="flex items-center gap-3 p-2 rounded-lg hover:bg-stone-50 text-stone-600 text-sm transition-colors">
-							<span class="w-6 h-6 rounded-md bg-stone-100 flex items-center justify-center text-stone-500 text-xs">✂</span>
-							Gérer les prestations
-						</a>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
 </DiamantDashboardLayout>
