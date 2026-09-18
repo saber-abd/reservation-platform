@@ -8,55 +8,91 @@ import DiamantRevenueChart from '@/components/diamant/dashboard/DiamantRevenueCh
 	<DiamantDashboardNav slot="sidebar" basePath="/demo-diamant" client:load />
 	
 	<div class="mb-8">
-		<h1 class="text-3xl font-black text-white tracking-tight">Performances & Statistiques</h1>
-		<p class="text-stone-400 mt-2">Analysez les résultats de votre salon Prestige.</p>
+		<h1 class="text-3xl font-black text-stone-800 tracking-tight">Performances & Statistiques</h1>
+		<p class="text-stone-500 mt-1">Analysez les résultats de votre salon Prestige.</p>
 	</div>
 
-	<div class="grid grid-cols-1 gap-8">
-		<div class="rounded-2xl border border-white/10 bg-stone-900/50 p-6 shadow-xl">
-			<h2 class="text-lg font-bold text-white mb-6">Évolution du Chiffre d'Affaires</h2>
+	<div class="grid grid-cols-1 gap-6">
+		<!-- Graphique CA -->
+		<div class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+			<h2 class="text-base font-bold text-stone-800 mb-6">Évolution du Chiffre d'Affaires</h2>
 			<DiamantRevenueChart client:load />
 		</div>
 		
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-			<div class="rounded-2xl border border-white/10 bg-stone-900/50 p-6 shadow-xl">
-				<h2 class="text-lg font-bold text-white mb-6">Top Prestations</h2>
-				<div class="space-y-4">
-					<div class="flex items-center justify-between">
-						<span class="text-stone-300">Balayage Signature</span>
-						<span class="text-jasmine-400 font-bold">45%</span>
-					</div>
-					<div class="w-full bg-stone-800 rounded-full h-2">
-						<div class="bg-jasmine-500 h-2 rounded-full" style="width: 45%"></div>
-					</div>
-					
-					<div class="flex items-center justify-between pt-2">
-						<span class="text-stone-300">Coupe & Barbe Soin</span>
-						<span class="text-jasmine-400 font-bold">30%</span>
-					</div>
-					<div class="w-full bg-stone-800 rounded-full h-2">
-						<div class="bg-jasmine-500 h-2 rounded-full" style="width: 30%"></div>
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<!-- Top prestations -->
+			<div class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+				<h2 class="text-base font-bold text-stone-800 mb-6">Top Prestations</h2>
+				<div class="space-y-5">
+					<div>
+						<div class="flex items-center justify-between mb-2">
+							<span class="text-stone-700 text-sm font-medium">Balayage Signature</span>
+							<span class="text-deep-teal-600 font-bold text-sm">45%</span>
+						</div>
+						<div class="w-full bg-stone-100 rounded-full h-2">
+							<div class="bg-deep-teal-400 h-2 rounded-full" style="width: 45%"></div>
+						</div>
 					</div>
 					
-					<div class="flex items-center justify-between pt-2">
-						<span class="text-stone-300">Coloration Végétale</span>
-						<span class="text-jasmine-400 font-bold">15%</span>
+					<div>
+						<div class="flex items-center justify-between mb-2">
+							<span class="text-stone-700 text-sm font-medium">Coupe & Barbe Soin</span>
+							<span class="text-deep-teal-600 font-bold text-sm">30%</span>
+						</div>
+						<div class="w-full bg-stone-100 rounded-full h-2">
+							<div class="bg-deep-teal-400 h-2 rounded-full" style="width: 30%"></div>
+						</div>
 					</div>
-					<div class="w-full bg-stone-800 rounded-full h-2">
-						<div class="bg-jasmine-500 h-2 rounded-full" style="width: 15%"></div>
+					
+					<div>
+						<div class="flex items-center justify-between mb-2">
+							<span class="text-stone-700 text-sm font-medium">Coloration Végétale</span>
+							<span class="text-deep-teal-600 font-bold text-sm">15%</span>
+						</div>
+						<div class="w-full bg-stone-100 rounded-full h-2">
+							<div class="bg-deep-teal-300 h-2 rounded-full" style="width: 15%"></div>
+						</div>
+					</div>
+
+					<div>
+						<div class="flex items-center justify-between mb-2">
+							<span class="text-stone-700 text-sm font-medium">Soin Profond Kératine</span>
+							<span class="text-stone-400 font-bold text-sm">10%</span>
+						</div>
+						<div class="w-full bg-stone-100 rounded-full h-2">
+							<div class="bg-stone-300 h-2 rounded-full" style="width: 10%"></div>
+						</div>
 					</div>
 				</div>
 			</div>
 			
-			<div class="rounded-2xl border border-white/10 bg-stone-900/50 p-6 shadow-xl">
-				<h2 class="text-lg font-bold text-white mb-6">Fidélité Clientèle</h2>
+			<!-- Fidélité -->
+			<div class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+				<h2 class="text-base font-bold text-stone-800 mb-6">Fidélité Clientèle</h2>
 				<div class="flex items-center justify-center h-48">
-					<div class="relative w-48 h-48 rounded-full border-[16px] border-stone-800 flex items-center justify-center">
-						<div class="absolute inset-0 rounded-full border-[16px] border-jasmine-500 border-l-transparent border-b-transparent transform rotate-45"></div>
-						<div class="text-center">
-							<span class="block text-3xl font-black text-white">78%</span>
+					<div class="relative w-48 h-48 flex items-center justify-center">
+						<!-- Donut SVG -->
+						<svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
+							<!-- Fond -->
+							<circle cx="50" cy="50" r="38" fill="none" stroke="#f3f4f6" stroke-width="14" />
+							<!-- Rétention 78% -->
+							<circle cx="50" cy="50" r="38" fill="none" stroke="#f08080" stroke-width="14"
+								stroke-dasharray="188 241" stroke-linecap="round" />
+						</svg>
+						<div class="text-center z-10">
+							<span class="block text-3xl font-black text-stone-900">78%</span>
 							<span class="text-xs text-stone-400 uppercase tracking-widest">Rétention</span>
 						</div>
+					</div>
+				</div>
+				<div class="mt-4 grid grid-cols-2 gap-3">
+					<div class="rounded-xl bg-stone-50 border border-stone-100 p-3 text-center">
+						<p class="text-xl font-black text-stone-900">142</p>
+						<p class="text-xs text-stone-400 uppercase tracking-widest mt-0.5">Clients fidèles</p>
+					</div>
+					<div class="rounded-xl bg-deep-teal-50 border border-deep-teal-100 p-3 text-center">
+						<p class="text-xl font-black text-deep-teal-700">+18</p>
+						<p class="text-xs text-deep-teal-400 uppercase tracking-widest mt-0.5">Ce mois-ci</p>
 					</div>
 				</div>
 			</div>

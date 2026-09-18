@@ -68,7 +68,7 @@ export default function ServicesList({ limit, showCta = true, basePath = '' }: P
 						<div 
 							key={service.id} 
 							onClick={() => setSelectedService(service)}
-							className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-all hover:border-rose-300 hover:shadow-md"
+							className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-stone-100 bg-white shadow-sm transition-all hover:border-deep-teal-200 hover:shadow-md card-hover"
 						>
 							<div className="aspect-square w-full overflow-hidden bg-stone-50">
 								<img 
@@ -87,7 +87,7 @@ export default function ServicesList({ limit, showCta = true, basePath = '' }: P
 								<a
 									href={`${basePath}/reservation?service=${service.id}`}
 									hidden={!showCta}
-									className="mt-4 rounded-xl bg-rose-600 px-4 py-2 text-center text-sm font-semibold text-white transition-colors hover:bg-rose-700"
+									className="mt-4 rounded-xl bg-deep-teal-500 px-4 py-2 text-center text-sm font-semibold text-white transition-colors hover:bg-deep-teal-400"
 									onClick={(e) => e.stopPropagation()}
 								>
 									Réserver

@@ -1,0 +1,16 @@
+---
+import DiamantDashboardLayout from '@/layouts/DiamantDashboardLayout.astro';
+import DiamantDashboardNav from '@/components/diamant/dashboard/DiamantDashboardNav';
+import DiamantSearchPanel from '@/components/diamant/dashboard/DiamantSearchPanel';
+---
+
+<DiamantDashboardLayout title="Recherche">
+	<DiamantDashboardNav slot="sidebar" basePath="/demo-diamant" client:load />
+	
+	<div class="mb-8">
+		<h1 class="text-3xl font-black text-stone-800 tracking-tight">Recherche</h1>
+		<p class="text-stone-500 mt-1">Trouvez un rendez-vous par nom de client, email, téléphone ou prestation.</p>
+	</div>
+
+	<DiamantSearchPanel client:load />
+</DiamantDashboardLayout>

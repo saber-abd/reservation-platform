@@ -47,16 +47,44 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 
 		<meta name="theme-color" content="#fff7f1" />
 
+		<!-- Google Fonts -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+
 		<style>
-			/* Fade-in animation légère pour les sections */
+			/* Override fonts for diamant theme */
+			.theme-diamant {
+				--font-heading-display: 'Playfair Display', serif;
+				--font-body-display: 'Lato', sans-serif;
+			}
+			.theme-diamant body {
+				font-family: 'Lato', sans-serif;
+			}
+			.theme-diamant h1, .theme-diamant h2, .theme-diamant h3,
+			.theme-diamant h4, .theme-diamant h5, .theme-diamant h6,
+			.theme-diamant .font-black, .theme-diamant .font-bold {
+				font-family: 'Playfair Display', serif;
+			}
+
+			/* Fade-in animation pour les sections */
 			.section-fade {
 				opacity: 0;
 				transform: translateY(24px);
-				transition: opacity 0.6s ease, transform 0.6s ease;
+				transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
 			}
 			.section-fade.visible {
 				opacity: 1;
 				transform: translateY(0);
+			}
+
+			/* Hover sur les cards */
+			.card-hover {
+				transition: transform 0.25s ease, box-shadow 0.25s ease;
+			}
+			.card-hover:hover {
+				transform: translateY(-4px);
+				box-shadow: 0 12px 32px rgba(0,0,0,0.1);
 			}
 		</style>
 	</head>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Calendar, Users, Settings, LogOut, BarChart3, Scissors } from 'lucide-react';
+import { Home, Calendar, Users, Settings, LogOut, BarChart3, Scissors, Search } from 'lucide-react';
 
 interface DiamantDashboardNavProps {
 	basePath: string;
@@ -14,6 +14,7 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 		{ href: `${basePath}/dashboard/clients`, label: 'Clientèle', icon: Users },
 		{ href: `${basePath}/dashboard/services`, label: 'Gestion des prestations', icon: Scissors },
 		{ href: `${basePath}/dashboard/statistiques`, label: 'Performances', icon: BarChart3 },
+		{ href: `${basePath}/dashboard/recherche`, label: 'Recherche', icon: Search },
 		{ href: `${basePath}/dashboard/profil`, label: 'Profil Maison', icon: Settings },
 	];
 
@@ -30,7 +31,6 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 					<a
 						key={link.href}
 						href={link.href}
-						data-searchable={link.label}
 						className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
 							isActive
 								? 'bg-deep-teal-50 text-deep-teal-700 border border-deep-teal-200'
@@ -49,7 +49,7 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 					className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-500 hover:bg-rose-50 transition-colors border border-transparent"
 				>
 					<LogOut size={17} />
-					Déconnexion
+					Retour au site
 				</a>
 			</div>
 		</nav>

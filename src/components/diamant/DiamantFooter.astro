@@ -5,24 +5,24 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 const currentYear = new Date().getFullYear();
 ---
 
-<footer class="bg-stone-900 border-t border-stone-800 pt-20 pb-10 overflow-hidden">
+<footer class="bg-[#fff0e8] border-t border-stone-200 pt-20 pb-10">
 	<div class="mx-auto max-w-7xl px-6">
 		<div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
 			<!-- Marque -->
 			<div class="md:col-span-1">
 				<a href="/demo-diamant/" class="inline-block mb-5">
-					<span class="text-xl font-bold tracking-widest text-white uppercase">
+					<span class="text-xl font-bold tracking-widest text-stone-800 uppercase">
 						Prestige
 					</span>
 				</a>
-				<p class="text-stone-400 text-sm leading-relaxed mb-7">
+				<p class="text-stone-500 text-sm leading-relaxed mb-7">
 					L'excellence de la coiffure haut de gamme. Un service sur-mesure conçu pour sublimer votre allure.
 				</p>
 				<div class="flex items-center gap-3">
-					<a href="#" class="w-9 h-9 rounded-full bg-stone-800 border border-stone-700 flex items-center justify-center text-stone-400 hover:text-white hover:border-stone-500 transition-all">
+					<a href="#" class="w-9 h-9 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-400 hover:text-deep-teal-500 hover:border-deep-teal-200 transition-all">
 						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
 					</a>
-					<a href="#" class="w-9 h-9 rounded-full bg-stone-800 border border-stone-700 flex items-center justify-center text-stone-400 hover:text-white hover:border-stone-500 transition-all">
+					<a href="#" class="w-9 h-9 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-400 hover:text-deep-teal-500 hover:border-deep-teal-200 transition-all">
 						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
 					</a>
 				</div>
@@ -30,42 +30,42 @@ const currentYear = new Date().getFullYear();
 
 			<!-- Navigation -->
 			<div>
-				<h4 class="text-white font-bold tracking-widest uppercase text-xs mb-5">Navigation</h4>
+				<h4 class="text-stone-800 font-bold tracking-widest uppercase text-xs mb-5">Navigation</h4>
 				<ul class="space-y-3">
-					<li><a href="/demo-diamant/services" class="text-stone-400 hover:text-white transition-colors text-sm">Prestations</a></li>
-					<li><a href="/demo-diamant/a-propos" class="text-stone-400 hover:text-white transition-colors text-sm">La Maison Prestige</a></li>
-					<li><a href="/demo-diamant/contact" class="text-stone-400 hover:text-white transition-colors text-sm">Contact & Accès</a></li>
-					<li><a href="/demo-diamant/reservation" class="text-deep-teal-400 font-medium hover:text-deep-teal-300 transition-colors text-sm">Réserver en ligne</a></li>
+					<li><a href="/demo-diamant/services" class="text-stone-500 hover:text-deep-teal-600 transition-colors text-sm">Prestations</a></li>
+					<li><a href="/demo-diamant/a-propos" class="text-stone-500 hover:text-deep-teal-600 transition-colors text-sm">La Maison Prestige</a></li>
+					<li><a href="/demo-diamant/contact" class="text-stone-500 hover:text-deep-teal-600 transition-colors text-sm">Contact & Accès</a></li>
+					<li><a href="/demo-diamant/reservation" class="text-deep-teal-600 font-medium hover:text-deep-teal-500 transition-colors text-sm">Réserver en ligne</a></li>
 				</ul>
 			</div>
 
 			<!-- Espace Membre -->
 			<div>
-				<h4 class="text-white font-bold tracking-widest uppercase text-xs mb-5">Espace Membre</h4>
+				<h4 class="text-stone-800 font-bold tracking-widest uppercase text-xs mb-5">Espace Membre</h4>
 				<ul class="space-y-3">
-					<li><a href="/demo-diamant/connexion" class="text-stone-400 hover:text-white transition-colors text-sm">Se connecter</a></li>
-					<li><a href="/demo-diamant/inscription" class="text-stone-400 hover:text-white transition-colors text-sm">Créer un compte</a></li>
-					<li><a href="/demo-diamant/espace-client" class="text-stone-400 hover:text-white transition-colors text-sm">Mon Profil</a></li>
-					<li><a href="/demo-diamant/dashboard" class="text-stone-500 hover:text-white transition-colors text-sm">Accès Pro</a></li>
+					<li><a href="/demo-diamant/connexion" class="text-stone-500 hover:text-deep-teal-600 transition-colors text-sm">Se connecter</a></li>
+					<li><a href="/demo-diamant/inscription" class="text-stone-500 hover:text-deep-teal-600 transition-colors text-sm">Créer un compte</a></li>
+					<li><a href="/demo-diamant/espace-client" class="text-stone-500 hover:text-deep-teal-600 transition-colors text-sm">Mon Profil</a></li>
+					<li><a href="/demo-diamant/dashboard" class="text-stone-400 hover:text-stone-700 transition-colors text-sm">Accès Pro</a></li>
 				</ul>
 			</div>
 
 			<!-- Informations légales -->
 			<div>
-				<h4 class="text-white font-bold tracking-widest uppercase text-xs mb-5">Mentions Légales</h4>
+				<h4 class="text-stone-800 font-bold tracking-widest uppercase text-xs mb-5">Mentions Légales</h4>
 				<ul class="space-y-3">
-					<li><a href="/demo-diamant/mentions-legales" class="text-stone-400 hover:text-white transition-colors text-sm">Mentions légales</a></li>
-					<li><a href="/demo-diamant/politique-de-confidentialite" class="text-stone-400 hover:text-white transition-colors text-sm">Politique de confidentialité</a></li>
-					<li><a href="/demo-diamant/conditions-utilisation" class="text-stone-400 hover:text-white transition-colors text-sm">Conditions d'utilisation</a></li>
+					<li><a href="/demo-diamant/mentions-legales" class="text-stone-500 hover:text-stone-700 transition-colors text-sm">Mentions légales</a></li>
+					<li><a href="/demo-diamant/politique-de-confidentialite" class="text-stone-500 hover:text-stone-700 transition-colors text-sm">Politique de confidentialité</a></li>
+					<li><a href="/demo-diamant/conditions-utilisation" class="text-stone-500 hover:text-stone-700 transition-colors text-sm">Conditions d'utilisation</a></li>
 				</ul>
 			</div>
 		</div>
 
-		<div class="pt-8 border-t border-stone-800 flex flex-col md:flex-row items-center justify-between gap-4">
-			<p class="text-stone-500 text-sm">
+		<div class="pt-8 border-t border-stone-200 flex flex-col md:flex-row items-center justify-between gap-4">
+			<p class="text-stone-400 text-sm">
 				&copy; {currentYear} Prestige by {siteConfig.business.name}. Tous droits réservés.
 			</p>
-			<p class="text-stone-600 text-sm">
+			<p class="text-stone-300 text-sm">
 				Demo Diamant — Plateforme de Réservation
 			</p>
 		</div>
