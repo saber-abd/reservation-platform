@@ -1,6 +1,6 @@
 ---
 import DiamantLayout from '@/layouts/DiamantLayout.astro';
-import ReservationSteps from '@/components/reservation/ReservationSteps';
+import ReservationForm from '@/components/reservation/ReservationForm';
 ---
 
 <DiamantLayout title="Réservation" description="Prenez rendez-vous en ligne.">
@@ -18,7 +18,7 @@ import ReservationSteps from '@/components/reservation/ReservationSteps';
 
 	<section class="mx-auto max-w-5xl px-6 py-20 relative z-10">
 		<div class="rounded-2xl border border-white/10 bg-stone-900/50 p-6 md:p-10 shadow-2xl [&>div]:!bg-transparent [&>div]:!shadow-none [&>div]:!border-none [&_h2]:!text-white [&_p]:!text-stone-400 [&_div.bg-white]:!bg-stone-800/50 [&_div.border-border]:!border-white/5 [&_.text-stone-900]:!text-white [&_.text-stone-500]:!text-stone-400 [&_button.bg-rose-600]:!bg-jasmine-500 [&_button.bg-rose-600]:!text-stone-950 [&_button.border-border]:!border-white/10 [&_button.border-border]:!text-white [&_button.border-border:hover]:!bg-white/5 [&_input]:!bg-stone-950/50 [&_input]:!border-white/10 [&_input]:!text-stone-200">
-			<ReservationSteps client:load />
+			<ReservationForm client:load />
 		</div>
 	</section>
 </DiamantLayout>
