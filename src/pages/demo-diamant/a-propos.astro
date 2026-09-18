@@ -1,53 +1,82 @@
 ---
-import Layout from '@/layouts/Layout.astro';
+import DiamantLayout from '@/layouts/DiamantLayout.astro';
 import { getSiteConfig } from '@/config/site';
 const siteConfig = await getSiteConfig(Astro.url.pathname);
 ---
 
-<Layout title="À propos" description={`En savoir plus sur ${siteConfig.business.name}.`}>
-	<section class="mx-auto max-w-6xl px-6 py-20">
-		<div class="grid items-center gap-10 md:grid-cols-2">
+<DiamantLayout title="La Maison Prestige" description={`En savoir plus sur ${siteConfig.business.name}.`}>
+	<!-- Header de la page -->
+	<section class="relative pt-40 pb-20 overflow-hidden border-b border-white/5 bg-stone-950">
+		<div class="absolute inset-0 z-0 opacity-30">
+			<div class="absolute left-1/4 top-10 w-96 h-96 bg-deep-teal-900/40 rounded-full blur-[100px] pointer-events-none"></div>
+		</div>
+		<div class="relative z-10 mx-auto max-w-4xl px-6 text-center">
+			<h1 class="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">La Maison Prestige</h1>
+			<p class="text-xl text-stone-400">
+				L'art de la coiffure élevé au rang de l'excellence. Découvrez notre histoire et nos valeurs.
+			</p>
+		</div>
+	</section>
+
+	<section class="mx-auto max-w-6xl px-6 py-24 relative z-10">
+		<div class="grid items-center gap-16 md:grid-cols-2">
 			<div data-aos="fade-right">
-				<h1 class="text-3xl font-bold text-stone-900 md:text-4xl">À propos</h1>
-				<p class="mt-4 text-stone-500">{siteConfig.business.description}</p>
-				<p class="mt-4 text-stone-500">
-					Notre équipe met un point d'honneur à vous offrir un accueil chaleureux et des prestations
-					de qualité, dans un cadre pensé pour votre confort.
+				<h2 class="text-sm font-bold text-jasmine-400 uppercase tracking-widest mb-4">Notre Vision</h2>
+				<h3 class="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">Une approche sur-mesure de la beauté</h3>
+				<p class="text-stone-400 text-lg leading-relaxed mb-6">
+					{siteConfig.business.description}
+				</p>
+				<p class="text-stone-400 text-lg leading-relaxed mb-10">
+					Notre équipe d'experts met un point d'honneur à vous offrir un accueil privilégié et des prestations d'exception, dans un cadre confidentiel pensé exclusivement pour votre confort.
 				</p>
 				<a
 					href="/demo-diamant/reservation"
-					class="mt-6 inline-block rounded-xl bg-rose-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-rose-700"
+					class="inline-block rounded-xl bg-gradient-to-r from-jasmine-500 to-jasmine-600 px-8 py-4 text-sm font-bold uppercase tracking-widest text-stone-950 shadow-[0_0_20px_rgba(235,188,102,0.2)] transition-all hover:from-jasmine-400 hover:to-jasmine-500 hover:shadow-[0_0_30px_rgba(235,188,102,0.4)]"
 				>
-					Réserver maintenant
+					Prendre Rendez-vous
 				</a>
 			</div>
-			<div class="overflow-hidden rounded-2xl shadow-xl" data-aos="fade-left">
-				<img src="/images/about_salon.jpg" alt="Notre équipe" class="aspect-square w-full object-cover" />
+			<div class="relative group" data-aos="fade-left">
+				<div class="absolute -inset-4 bg-gradient-to-r from-deep-teal-600 to-jasmine-600 rounded-2xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
+				<div class="relative overflow-hidden rounded-2xl border border-white/10 bg-stone-900 aspect-square shadow-2xl">
+					<img src="/images/about_salon.jpg" alt="Notre équipe" class="h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
+				</div>
 			</div>
 		</div>
 	</section>
 
 	<!-- Notre histoire -->
-	<section class="bg-stone-50 py-20">
-		<div class="mx-auto max-w-3xl px-6" data-aos="fade-up">
-			<h2 class="text-2xl font-bold text-stone-900 md:text-3xl">Notre histoire</h2>
-			<p class="mt-4 text-stone-500">{siteConfig.about.story}</p>
+	<section class="relative py-24 bg-stone-900 border-y border-white/5">
+		<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1600948836101-f9ffda59d250?w=1200&auto=format&fit=crop&q=60')] bg-cover bg-center opacity-5 mix-blend-luminosity"></div>
+		<div class="mx-auto max-w-3xl px-6 relative z-10 text-center" data-aos="fade-up">
+			<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-jasmine-400 mb-6"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+			<h2 class="text-3xl font-bold text-white mb-8">Notre héritage</h2>
+			<p class="text-stone-400 text-lg leading-relaxed italic">
+				"{siteConfig.about.story}"
+			</p>
 		</div>
 	</section>
 
 	<!-- Nos objectifs et motivations -->
-	<section class="mx-auto max-w-6xl px-6 py-20">
-		<h2 class="text-2xl font-bold text-stone-900 md:text-3xl" data-aos="fade-up">Nos objectifs et motivations</h2>
-		<div class="mt-10 grid gap-6 md:grid-cols-3">
+	<section class="mx-auto max-w-6xl px-6 py-24 relative z-10">
+		<div class="text-center mb-16" data-aos="fade-up">
+			<h2 class="text-sm font-bold text-jasmine-400 uppercase tracking-widest mb-2">Exigences</h2>
+			<h3 class="text-3xl md:text-4xl font-bold text-white">Nos engagements</h3>
+		</div>
+		<div class="grid gap-8 md:grid-cols-3">
 			{
 				siteConfig.about.objectives.map((objective, index) => (
 					<div
-						class="rounded-xl border border-border bg-white p-6 shadow-sm"
+						class="group rounded-2xl border border-white/10 bg-stone-900/50 backdrop-blur-sm p-8 shadow-xl hover:bg-stone-900 transition-all hover:-translate-y-1 relative overflow-hidden"
 						data-aos="fade-up"
-						data-aos-delay={index * 75}
+						data-aos-delay={index * 100}
 					>
-						<p class="font-semibold text-stone-900">{objective.title}</p>
-						<p class="mt-2 text-sm text-stone-500">{objective.description}</p>
+						<div class="absolute top-0 right-0 w-24 h-24 bg-deep-teal-900/10 rounded-full blur-[30px] group-hover:bg-deep-teal-900/30 transition-colors"></div>
+						<div class="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-jasmine-400 mb-6">
+							<span class="font-black text-lg">{index + 1}</span>
+						</div>
+						<p class="font-bold text-white text-lg mb-3">{objective.title}</p>
+						<p class="text-stone-400 leading-relaxed">{objective.description}</p>
 					</div>
 				))
 			}
@@ -55,26 +84,32 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 	</section>
 
 	<!-- Diplômes et certifications -->
-	<section class="bg-stone-50 py-20">
+	<section class="py-24 bg-stone-900 border-t border-white/5 relative">
 		<div class="mx-auto max-w-3xl px-6">
-			<h2 class="text-2xl font-bold text-stone-900 md:text-3xl" data-aos="fade-up">Diplômes et certifications</h2>
-			<ul class="mt-8 space-y-4">
+			<div class="text-center mb-16" data-aos="fade-up">
+				<h2 class="text-sm font-bold text-jasmine-400 uppercase tracking-widest mb-2">Expertise</h2>
+				<h3 class="text-3xl md:text-4xl font-bold text-white">Diplômes & Certifications</h3>
+			</div>
+			<ul class="space-y-6">
 				{
 					siteConfig.about.diplomas.map((diploma, index) => (
 						<li
-							class="flex items-center justify-between rounded-xl border border-border bg-white p-4 shadow-sm"
+							class="group flex flex-col md:flex-row md:items-center justify-between rounded-2xl border border-white/10 bg-stone-950 p-6 shadow-xl hover:border-jasmine-400/30 transition-all"
 							data-aos="fade-up"
-							data-aos-delay={index * 75}
+							data-aos-delay={index * 100}
 						>
-							<div>
-								<p class="font-medium text-stone-900">{diploma.title}</p>
-								<p class="text-sm text-stone-500">{diploma.institution}</p>
+							<div class="mb-4 md:mb-0">
+								<p class="font-bold text-white text-lg">{diploma.title}</p>
+								<p class="text-stone-500 mt-1">{diploma.institution}</p>
 							</div>
-							<span class="text-sm font-semibold text-rose-600">{diploma.year}</span>
+							<div class="flex items-center gap-3">
+								<div class="h-[1px] w-12 bg-white/10 hidden md:block"></div>
+								<span class="text-sm font-black text-jasmine-400 bg-jasmine-400/10 px-4 py-2 rounded-full border border-jasmine-400/20">{diploma.year}</span>
+							</div>
 						</li>
 					))
 				}
 			</ul>
 		</div>
 	</section>
-</Layout>
+</DiamantLayout>

@@ -1,0 +1,74 @@
+---
+import '../styles/global.css';
+import 'aos/dist/aos.css';
+import DiamantHeader from '@/components/diamant/DiamantHeader.astro';
+import DiamantFooter from '@/components/diamant/DiamantFooter.astro';
+import SmoothScroll from '@/components/SmoothScroll.astro';
+import { getSiteConfig } from '@/config/site';
+
+const siteConfig = await getSiteConfig(Astro.url.pathname);
+
+interface Props {
+	title?: string;
+	description?: string;
+	noindex?: boolean;
+}
+
+const {
+	title = "Prestige",
+	description = "L'excellence de la coiffure haut de gamme. Un service sur-mesure dans un cadre luxueux et raffiné, conçu pour sublimer votre allure.",
+	noindex = false,
+} = Astro.props;
+
+const pageTitle = `${title} — ${siteConfig.business.name} Diamant`;
+const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
+---
+
+<!doctype html>
+<html lang="fr" class="theme-diamant bg-stone-950 text-stone-300">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonicalURL} />
+		{noindex && <meta name="robots" content="noindex, nofollow" />}
+		<title>{pageTitle}</title>
+		
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:title" content={pageTitle} />
+		<meta property="og:description" content={description} />
+		<meta property="og:locale" content="fr_FR" />
+		<meta property="og:site_name" content="Prestige Diamant" />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={pageTitle} />
+		<meta name="twitter:description" content={description} />
+
+		<meta name="theme-color" content="#0c0a09" />
+	</head>
+	<body class="flex min-h-screen flex-col bg-stone-950 text-stone-300 selection:bg-jasmine-500/30 selection:text-jasmine-200 antialiased font-sans">
+		<DiamantHeader />
+		
+		<main class="flex-1 overflow-x-hidden relative">
+			<slot />
+		</main>
+		
+		<DiamantFooter />
+		
+		<script>
+			import AOS from 'aos';
+
+			AOS.init({
+				duration: 800,
+				easing: 'ease-out-cubic',
+				once: true,
+				mirror: false,
+				offset: 50,
+			});
+		</script>
+		<SmoothScroll />
+	</body>
+</html>

@@ -1,11 +1,18 @@
 ---
-import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import DashboardNav from '@/components/dashboard/DashboardNav';
+import DiamantDashboardLayout from '@/layouts/DiamantDashboardLayout.astro';
+import DiamantDashboardNav from '@/components/diamant/dashboard/DiamantDashboardNav';
 import ClientsPanel from '@/components/dashboard/ClientsPanel';
 ---
 
-<DashboardLayout title="Mes clients">
-	<DashboardNav basePath="/demo-diamant" client:load />
-	<ClientsPanel client:load />
-</DashboardLayout>
+<DiamantDashboardLayout title="Clientèle VIP">
+	<DiamantDashboardNav slot="sidebar" basePath="/demo-diamant" client:load />
+	
+	<div class="mb-8">
+		<h1 class="text-3xl font-black text-white tracking-tight">Clientèle VIP</h1>
+		<p class="text-stone-400 mt-2">Gérez les fiches de vos clients privilégiés.</p>
+	</div>
 
+	<div class="rounded-2xl border border-white/10 bg-stone-900/50 p-6 shadow-xl [&>div]:!bg-transparent [&>div]:!shadow-none [&>div]:!border-none [&_table]:!text-stone-300 [&_thead]:!bg-stone-800/50 [&_th]:!text-stone-400 [&_td]:!border-white/5 [&_tr:hover]:!bg-white/5 [&_input]:!bg-stone-950/50 [&_input]:!border-white/10 [&_input]:!text-stone-200 [&_button]:!bg-stone-800 [&_button]:!text-white [&_button:hover]:!bg-stone-700">
+		<ClientsPanel client:load />
+	</div>
+</DiamantDashboardLayout>

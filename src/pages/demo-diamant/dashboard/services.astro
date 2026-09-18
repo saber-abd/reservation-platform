@@ -1,11 +1,26 @@
 ---
-import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import DashboardNav from '@/components/dashboard/DashboardNav';
-import ServicesPanel from '@/components/dashboard/ServicesPanel';
+import DiamantDashboardLayout from '@/layouts/DiamantDashboardLayout.astro';
+import DiamantDashboardNav from '@/components/diamant/dashboard/DiamantDashboardNav';
+import ServicesList from '@/components/ServicesList';
 ---
 
-<DashboardLayout title="Mes prestations">
-	<DashboardNav basePath="/demo-diamant" client:load />
-	<ServicesPanel client:load />
-</DashboardLayout>
+<DiamantDashboardLayout title="Carte des Soins">
+	<DiamantDashboardNav slot="sidebar" basePath="/demo-diamant" client:load />
+	
+	<div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+		<div>
+			<h1 class="text-3xl font-black text-white tracking-tight">Carte des Soins</h1>
+			<p class="text-stone-400 mt-2">Gérez vos prestations et forfaits d'exception.</p>
+		</div>
+		<button class="px-4 py-2 rounded-xl bg-gradient-to-r from-jasmine-500 to-jasmine-600 text-stone-950 font-bold text-sm hover:from-jasmine-400 hover:to-jasmine-500 transition-colors shadow-[0_0_15px_rgba(235,188,102,0.3)]">
+			+ Nouvelle prestation
+		</button>
+	</div>
 
+	<div class="rounded-2xl border border-white/10 bg-stone-900/50 p-6 shadow-xl [&>div]:!bg-transparent [&>div]:!border-none [&>div>div>h3]:!text-white [&>div>div>p]:!text-stone-400 [&>div>div>div>span]:!text-jasmine-400 [&>div>div>div>button]:!bg-stone-800 [&>div>div>div>button]:!text-white [&>div>div>div>button:hover]:!bg-stone-700">
+		<!-- This component renders the services list for the admin with a different style approach if needed -->
+		<div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+			<ServicesList client:load />
+		</div>
+	</div>
+</DiamantDashboardLayout>

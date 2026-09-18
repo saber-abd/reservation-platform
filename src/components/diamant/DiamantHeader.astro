@@ -1,0 +1,68 @@
+---
+import HeaderAuthButton from '@/components/HeaderAuthButton';
+---
+
+<header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-stone-950/60 backdrop-blur-xl border-b border-white/10" id="diamant-header">
+	<div class="mx-auto max-w-7xl px-6">
+		<div class="flex h-20 items-center justify-between">
+			<!-- Logo -->
+			<a href="/demo-diamant/" class="flex items-center gap-3 group">
+				<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-deep-teal-500 to-deep-teal-800 flex items-center justify-center border border-deep-teal-400/30 shadow-[0_0_20px_rgba(20,52,56,0.5)] group-hover:shadow-[0_0_30px_rgba(20,52,56,0.8)] transition-all">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-jasmine-400"><path d="M6 3v2"/><path d="M18 3v2"/><path d="M12 3v2"/><path d="M6 21v-2"/><path d="M18 21v-2"/><path d="M12 21v-2"/><path d="M3 6h18"/><path d="M3 18h18"/><path d="M8 12h8"/></svg>
+				</div>
+				<span class="text-xl font-bold tracking-widest text-white uppercase bg-clip-text text-transparent bg-gradient-to-r from-white to-stone-400">
+					Prestige
+				</span>
+			</a>
+
+			<!-- Navigation Desktop -->
+			<nav class="hidden md:flex items-center gap-8">
+				<a href="/demo-diamant/services" class="text-sm font-medium text-stone-300 hover:text-jasmine-400 transition-colors tracking-wide uppercase">Services</a>
+				<a href="/demo-diamant/a-propos" class="text-sm font-medium text-stone-300 hover:text-jasmine-400 transition-colors tracking-wide uppercase">La Maison</a>
+				<a href="/demo-diamant/contact" class="text-sm font-medium text-stone-300 hover:text-jasmine-400 transition-colors tracking-wide uppercase">Contact</a>
+			</nav>
+
+			<!-- CTA & Auth -->
+			<div class="flex items-center gap-4">
+				<HeaderAuthButton 
+					client:load 
+					loginUrl="/demo-diamant/connexion" 
+					dashboardUrl="/demo-diamant/dashboard" 
+					clientAreaUrl="/demo-diamant/espace-client"
+					variant="diamant"
+				/>
+				<a
+					href="/demo-diamant/reservation"
+					class="hidden md:inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-gradient-to-r from-jasmine-500 to-jasmine-600 text-stone-900 font-bold text-sm tracking-wide hover:from-jasmine-400 hover:to-jasmine-500 transition-all shadow-[0_0_20px_rgba(235,188,102,0.3)] hover:shadow-[0_0_30px_rgba(235,188,102,0.5)] transform hover:-translate-y-0.5"
+				>
+					Réserver
+				</a>
+				
+				<!-- Mobile Menu Button -->
+				<button class="md:hidden p-2 text-stone-300 hover:text-white transition-colors">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+				</button>
+			</div>
+		</div>
+	</div>
+</header>
+
+<script>
+	// Effet au scroll pour le header
+	const header = document.getElementById('diamant-header');
+	
+	if (header) {
+		const updateHeader = () => {
+			if (window.scrollY > 20) {
+				header.classList.add('shadow-lg', 'bg-stone-950/80');
+				header.classList.remove('bg-stone-950/60');
+			} else {
+				header.classList.remove('shadow-lg', 'bg-stone-950/80');
+				header.classList.add('bg-stone-950/60');
+			}
+		};
+		
+		window.addEventListener('scroll', updateHeader);
+		updateHeader();
+	}
+</script>

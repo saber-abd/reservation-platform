@@ -1,11 +1,65 @@
 ---
-import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import DashboardNav from '@/components/dashboard/DashboardNav';
-import StatsPanel from '@/components/dashboard/StatsPanel';
+import DiamantDashboardLayout from '@/layouts/DiamantDashboardLayout.astro';
+import DiamantDashboardNav from '@/components/diamant/dashboard/DiamantDashboardNav';
+import DiamantRevenueChart from '@/components/diamant/dashboard/DiamantRevenueChart';
 ---
 
-<DashboardLayout title="Statistiques">
-	<DashboardNav basePath="/demo-diamant" client:load />
-	<StatsPanel client:load />
-</DashboardLayout>
+<DiamantDashboardLayout title="Performances">
+	<DiamantDashboardNav slot="sidebar" basePath="/demo-diamant" client:load />
+	
+	<div class="mb-8">
+		<h1 class="text-3xl font-black text-white tracking-tight">Performances & Statistiques</h1>
+		<p class="text-stone-400 mt-2">Analysez les résultats de votre salon Prestige.</p>
+	</div>
 
+	<div class="grid grid-cols-1 gap-8">
+		<div class="rounded-2xl border border-white/10 bg-stone-900/50 p-6 shadow-xl">
+			<h2 class="text-lg font-bold text-white mb-6">Évolution du Chiffre d'Affaires</h2>
+			<DiamantRevenueChart client:load />
+		</div>
+		
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+			<div class="rounded-2xl border border-white/10 bg-stone-900/50 p-6 shadow-xl">
+				<h2 class="text-lg font-bold text-white mb-6">Top Prestations</h2>
+				<div class="space-y-4">
+					<div class="flex items-center justify-between">
+						<span class="text-stone-300">Balayage Signature</span>
+						<span class="text-jasmine-400 font-bold">45%</span>
+					</div>
+					<div class="w-full bg-stone-800 rounded-full h-2">
+						<div class="bg-jasmine-500 h-2 rounded-full" style="width: 45%"></div>
+					</div>
+					
+					<div class="flex items-center justify-between pt-2">
+						<span class="text-stone-300">Coupe & Barbe Soin</span>
+						<span class="text-jasmine-400 font-bold">30%</span>
+					</div>
+					<div class="w-full bg-stone-800 rounded-full h-2">
+						<div class="bg-jasmine-500 h-2 rounded-full" style="width: 30%"></div>
+					</div>
+					
+					<div class="flex items-center justify-between pt-2">
+						<span class="text-stone-300">Coloration Végétale</span>
+						<span class="text-jasmine-400 font-bold">15%</span>
+					</div>
+					<div class="w-full bg-stone-800 rounded-full h-2">
+						<div class="bg-jasmine-500 h-2 rounded-full" style="width: 15%"></div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="rounded-2xl border border-white/10 bg-stone-900/50 p-6 shadow-xl">
+				<h2 class="text-lg font-bold text-white mb-6">Fidélité Clientèle</h2>
+				<div class="flex items-center justify-center h-48">
+					<div class="relative w-48 h-48 rounded-full border-[16px] border-stone-800 flex items-center justify-center">
+						<div class="absolute inset-0 rounded-full border-[16px] border-jasmine-500 border-l-transparent border-b-transparent transform rotate-45"></div>
+						<div class="text-center">
+							<span class="block text-3xl font-black text-white">78%</span>
+							<span class="text-xs text-stone-400 uppercase tracking-widest">Rétention</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</DiamantDashboardLayout>

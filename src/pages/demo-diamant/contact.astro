@@ -1,29 +1,54 @@
 ---
-import Layout from '@/layouts/Layout.astro';
+import DiamantLayout from '@/layouts/DiamantLayout.astro';
 import Map from '@/components/Map.astro';
 import { getSiteConfig } from '@/config/site';
+
 const siteConfig = await getSiteConfig(Astro.url.pathname);
 ---
 
-<Layout title="Contact" description={`Contactez ${siteConfig.business.name}.`}>
-	<section class="mx-auto max-w-6xl px-6 py-20">
-		<h1 class="text-3xl font-bold text-stone-900 md:text-4xl">Contact</h1>
-		<p class="mt-3 max-w-2xl text-stone-500">
-			Une question ? Contactez-nous, nous vous répondrons dans les meilleurs délais.
-		</p>
+<DiamantLayout title="Contact" description={`Contactez ${siteConfig.business.name}.`}>
+	<!-- Header de la page -->
+	<section class="relative pt-40 pb-20 overflow-hidden border-b border-white/5 bg-stone-950">
+		<div class="absolute inset-0 z-0 opacity-30">
+			<div class="absolute right-1/4 top-10 w-96 h-96 bg-jasmine-900/30 rounded-full blur-[100px] pointer-events-none"></div>
+		</div>
+		<div class="relative z-10 mx-auto max-w-4xl px-6 text-center">
+			<h1 class="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">Prendre Contact</h1>
+			<p class="text-xl text-stone-400">
+				Une question, une demande particulière ? Notre équipe est à votre entière disposition.
+			</p>
+		</div>
+	</section>
 
-		<div class="mt-10 grid gap-10 md:grid-cols-2">
+	<section class="mx-auto max-w-6xl px-6 py-20 relative z-10">
+		<div class="grid gap-16 md:grid-cols-2">
 			<div data-aos="fade-right">
-				<div class="rounded-xl border border-border bg-white p-6 shadow-sm">
-					<p class="font-semibold text-stone-900">Coordonnées</p>
-					<ul class="mt-4 space-y-2 text-sm text-stone-500">
-						<li>{siteConfig.business.address}</li>
-						<li>{siteConfig.business.phone}</li>
-						<li>{siteConfig.business.email}</li>
+				<div class="rounded-2xl border border-white/10 bg-stone-900/50 backdrop-blur-md p-8 shadow-2xl mb-8 relative overflow-hidden">
+					<div class="absolute top-0 right-0 w-32 h-32 bg-deep-teal-900/20 blur-[50px]"></div>
+					<p class="font-bold text-jasmine-400 uppercase tracking-widest text-sm mb-6">Coordonnées Prestige</p>
+					<ul class="space-y-6 text-stone-300">
+						<li class="flex items-start gap-4">
+							<div class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-jasmine-400">
+								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+							</div>
+							<span class="mt-2">{siteConfig.business.address}</span>
+						</li>
+						<li class="flex items-center gap-4">
+							<div class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-jasmine-400">
+								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+							</div>
+							<span>{siteConfig.business.phone}</span>
+						</li>
+						<li class="flex items-center gap-4">
+							<div class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-jasmine-400">
+								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+							</div>
+							<span>{siteConfig.business.email}</span>
+						</li>
 					</ul>
 				</div>
 
-				<div class="mt-6">
+				<div class="rounded-2xl overflow-hidden border border-white/10 shadow-2xl h-[300px] grayscale hover:grayscale-0 transition-all duration-700">
 					<Map lat={siteConfig.business.lat} lng={siteConfig.business.lng} label={siteConfig.business.name} />
 				</div>
 			</div>
@@ -31,51 +56,53 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 			<form
 				id="contact-form"
 				data-business-email={siteConfig.business.email}
-				class="flex flex-col gap-4 rounded-xl border border-border bg-white p-6 shadow-sm"
+				class="flex flex-col gap-6 rounded-2xl border border-white/10 bg-stone-900 p-8 shadow-2xl relative overflow-hidden"
 				data-aos="fade-left"
 			>
+				<div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-deep-teal-600 to-jasmine-500 opacity-50"></div>
+				
 				<div>
-					<label for="name" class="text-sm font-medium text-stone-900">Nom</label>
+					<label for="name" class="text-xs font-bold text-stone-400 uppercase tracking-widest">Nom complet</label>
 					<input
 						id="name"
 						name="name"
 						type="text"
 						required
-						class="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						class="mt-2 w-full rounded-xl border border-white/10 bg-stone-950/50 px-4 py-3 text-stone-200 focus:outline-none focus:ring-1 focus:ring-jasmine-500 focus:border-jasmine-500 transition-colors"
 					/>
 				</div>
 				<div>
-					<label for="email" class="text-sm font-medium text-stone-900">Email</label>
+					<label for="email" class="text-xs font-bold text-stone-400 uppercase tracking-widest">Email</label>
 					<input
 						id="email"
 						name="email"
 						type="email"
 						required
-						class="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						class="mt-2 w-full rounded-xl border border-white/10 bg-stone-950/50 px-4 py-3 text-stone-200 focus:outline-none focus:ring-1 focus:ring-jasmine-500 focus:border-jasmine-500 transition-colors"
 					/>
 				</div>
 				<div>
-					<label for="message" class="text-sm font-medium text-stone-900">Message</label>
+					<label for="message" class="text-xs font-bold text-stone-400 uppercase tracking-widest">Message</label>
 					<textarea
 						id="message"
 						name="message"
-						rows="4"
+						rows="5"
 						required
-						class="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						class="mt-2 w-full rounded-xl border border-white/10 bg-stone-950/50 px-4 py-3 text-stone-200 focus:outline-none focus:ring-1 focus:ring-jasmine-500 focus:border-jasmine-500 transition-colors resize-none"
 					></textarea>
 				</div>
 				<p id="form-status" class="text-sm hidden"></p>
 				<button
 					id="submit-btn"
 					type="submit"
-					class="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700"
+					class="mt-4 rounded-xl bg-gradient-to-r from-jasmine-500 to-jasmine-600 px-6 py-4 text-sm font-bold text-stone-950 transition-all hover:from-jasmine-400 hover:to-jasmine-500 shadow-[0_0_20px_rgba(235,188,102,0.2)] hover:shadow-[0_0_30px_rgba(235,188,102,0.4)] uppercase tracking-widest"
 				>
-					Envoyer
+					Envoyer la demande
 				</button>
 			</form>
 		</div>
 	</section>
-</Layout>
+</DiamantLayout>
 
 <script>
 	const form = document.getElementById('contact-form') as HTMLFormElement;
@@ -124,7 +151,7 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 
 				if (response.ok) {
 					status.textContent = 'Message envoyé avec succès !';
-					status.className = 'text-sm text-green-600';
+					status.className = 'text-sm text-green-400';
 					form.reset();
 				} else {
 					const errorText = await response.text();
@@ -132,10 +159,10 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 				}
 			} catch (err: any) {
 				status.textContent = `Erreur lors de l'envoi : ${err.message}`;
-				status.className = 'text-sm text-red-600';
+				status.className = 'text-sm text-red-400';
 			} finally {
 				btn.disabled = false;
-				btn.textContent = 'Envoyer';
+				btn.textContent = 'Envoyer la demande';
 				status.classList.remove('hidden');
 			}
 		});

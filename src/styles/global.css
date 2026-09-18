@@ -34,6 +34,26 @@
     font-display: swap;
 }
 
+@font-face {
+    font-family: 'Monimer Serif';
+    src: url('/fonts/monimer-serif.woff2') format('woff2'),
+         url('/fonts/monimer-serif.woff') format('woff'),
+         url('/fonts/monimer-serif.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Recoleta';
+    src: url('/fonts/recoleta.woff2') format('woff2'),
+         url('/fonts/recoleta.woff') format('woff'),
+         url('/fonts/recoleta.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -319,6 +339,16 @@
 
 .dashboard-premium h1, .dashboard-premium h2, .dashboard-premium h3, .dashboard-premium h4, .dashboard-premium h5, .dashboard-premium h6, .dashboard-premium .font-black {
     font-family: 'Coolvetica', sans-serif !important;
+}
+
+.theme-diamant, .theme-diamant * {
+    --font-heading: 'Monimer Serif', serif;
+    --font-sans: 'Recoleta', serif;
+    font-family: 'Recoleta', serif !important;
+}
+
+.theme-diamant h1, .theme-diamant h2, .theme-diamant h3, .theme-diamant h4, .theme-diamant h5, .theme-diamant h6, .theme-diamant .font-black {
+    font-family: 'Monimer Serif', serif !important;
 }
 
 .theme-auto input:not([type="checkbox"]):not([type="radio"]), 

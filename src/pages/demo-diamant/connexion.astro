@@ -1,17 +1,29 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import LoginForm from '@/components/auth/LoginForm';
+import DiamantLayout from '@/layouts/DiamantLayout.astro';
+import AuthForm from '@/components/auth/AuthForm';
 ---
 
-<Layout title="Connexion" description="Connexion à l'espace professionnel." noindex>
-	<section class="mx-auto max-w-md px-6 py-20">
-		<h1 class="text-2xl font-bold text-stone-900">Connexion professionnel</h1>
-		<p class="mt-2 text-sm text-stone-500">Accédez à votre espace de gestion.</p>
-		<div class="mt-8">
-			<LoginForm client:load />
+<DiamantLayout title="Connexion" description="Connectez-vous à votre espace VIP.">
+	<section class="relative min-h-[80vh] flex items-center justify-center py-20 px-6 bg-stone-950">
+		<div class="absolute inset-0 z-0 opacity-30">
+			<div class="absolute right-1/4 top-10 w-[500px] h-[500px] bg-jasmine-900/20 rounded-full blur-[100px] pointer-events-none"></div>
 		</div>
-		<p class="mt-6 text-sm text-stone-500">
-			Pas encore de compte ? <a href="/demo-diamant/inscription" class="font-medium text-rose-600 hover:underline">Créer un compte</a>
-		</p>
+		<div class="w-full max-w-md relative z-10">
+			<div class="text-center mb-10">
+				<h1 class="text-3xl font-black text-white mb-2 tracking-tight">Espace Privilège</h1>
+				<p class="text-stone-400">Accédez à votre compte personnel</p>
+			</div>
+			
+			<div class="rounded-2xl border border-white/10 bg-stone-900/80 backdrop-blur-md p-8 shadow-2xl [&_h2]:!hidden [&_form]:!mt-0 [&_input]:!bg-stone-950/50 [&_input]:!border-white/10 [&_input]:!text-stone-200 [&_input:focus]:!ring-jasmine-500 [&_input:focus]:!border-jasmine-500 [&_label]:!text-stone-400 [&_button[type=submit]]:!bg-gradient-to-r [&_button[type=submit]]:!from-jasmine-500 [&_button[type=submit]]:!to-jasmine-600 [&_button[type=submit]]:!text-stone-950 [&_button[type=submit]]:!font-bold [&_button[type=submit]]:!uppercase [&_button[type=submit]]:!tracking-widest [&_a]:!text-jasmine-400 [&_a:hover]:!text-jasmine-300">
+				<AuthForm type="login" basePath="/demo-diamant" client:load />
+				
+				<div class="mt-6 text-center text-sm text-stone-400 border-t border-white/5 pt-6">
+					Pas encore de compte VIP ?{' '}
+					<a href="/demo-diamant/inscription" class="font-bold text-jasmine-400 hover:text-jasmine-300 transition-colors">
+						S'inscrire
+					</a>
+				</div>
+			</div>
+		</div>
 	</section>
-</Layout>
+</DiamantLayout>

@@ -1,11 +1,111 @@
 ---
-import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import ClientNav from '@/components/client/ClientNav';
-import AppointmentsClientPanel from '@/components/client/AppointmentsClientPanel';
+import DiamantDashboardLayout from '@/layouts/DiamantDashboardLayout.astro';
+import DiamantClientNav from '@/components/diamant/dashboard/DiamantClientNav';
+import { Calendar as CalendarIcon, MapPin, Clock } from 'lucide-react';
 ---
 
-<DashboardLayout title="Mes rendez-vous">
-	<ClientNav basePath="/demo-diamant" client:load />
-	<AppointmentsClientPanel client:load />
-</DashboardLayout>
+<DiamantDashboardLayout title="Mes Rendez-vous">
+	<DiamantClientNav slot="sidebar" basePath="/demo-diamant" client:load />
+	
+	<div class="mb-8">
+		<h1 class="text-3xl font-black text-white tracking-tight">Mes Rendez-vous</h1>
+		<p class="text-stone-400 mt-2">Gérez vos moments d'exception au salon Prestige.</p>
+	</div>
 
+	<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+		<div class="lg:col-span-2 space-y-6">
+			<!-- Prochain RDV -->
+			<div class="rounded-2xl border border-jasmine-400/30 bg-gradient-to-br from-stone-900 to-stone-900/50 p-6 md:p-8 shadow-xl relative overflow-hidden group">
+				<div class="absolute top-0 right-0 w-32 h-32 bg-jasmine-900/20 blur-[30px] group-hover:bg-jasmine-900/40 transition-colors"></div>
+				
+				<div class="flex items-center gap-3 mb-6">
+					<div class="w-10 h-10 rounded-full bg-jasmine-500/20 text-jasmine-400 flex items-center justify-center border border-jasmine-400/30">
+						<Star size={18} className="fill-current" />
+					</div>
+					<h2 class="text-xl font-bold text-white tracking-tight">Prochain rendez-vous</h2>
+				</div>
+				
+				<div class="bg-stone-950/50 rounded-xl border border-white/5 p-6 mb-6">
+					<div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+						<div>
+							<h3 class="text-2xl font-bold text-white mb-2">Balayage Signature & Soin</h3>
+							<p class="text-jasmine-400 font-medium">Avec Clara, Maître Coloriste</p>
+						</div>
+						<div class="text-left md:text-right">
+							<p class="text-3xl font-black text-white">14h00</p>
+							<p class="text-stone-400 uppercase tracking-widest text-sm font-bold">Jeudi 24 Octobre</p>
+						</div>
+					</div>
+					
+					<div class="mt-6 pt-6 border-t border-white/5 flex flex-col sm:flex-row gap-4">
+						<div class="flex items-center gap-2 text-stone-400 text-sm">
+							<Clock size={16} className="text-jasmine-400" />
+							Durée estimée : 2h30
+						</div>
+						<div class="flex items-center gap-2 text-stone-400 text-sm">
+							<MapPin size={16} className="text-jasmine-400" />
+							Salon Prestige, Paris 8ème
+						</div>
+					</div>
+				</div>
+
+				<div class="flex gap-4">
+					<button class="px-6 py-3 rounded-xl bg-white/10 text-white font-bold text-sm hover:bg-white/20 transition-colors border border-white/10">
+						Modifier
+					</button>
+					<button class="px-6 py-3 rounded-xl text-stone-400 font-bold text-sm hover:text-white transition-colors">
+						Annuler
+					</button>
+				</div>
+			</div>
+
+			<!-- Historique -->
+			<div class="rounded-2xl border border-white/10 bg-stone-900/50 p-6 shadow-xl">
+				<h2 class="text-xl font-bold text-white mb-6 tracking-tight">Historique</h2>
+				
+				<div class="space-y-4">
+					<div class="flex items-center justify-between p-4 rounded-xl border border-white/5 bg-white/5 hover:border-white/10 transition-colors">
+						<div class="flex items-center gap-4">
+							<div class="w-12 h-12 rounded-full bg-stone-800 flex items-center justify-center text-stone-400">
+								<CalendarIcon size={20} />
+							</div>
+							<div>
+								<p class="text-white font-bold">Coupe & Brushing VIP</p>
+								<p class="text-stone-400 text-sm">Il y a 2 mois</p>
+							</div>
+						</div>
+						<button class="text-jasmine-400 text-sm font-bold uppercase tracking-widest hover:text-jasmine-300">
+							Reprendre
+						</button>
+					</div>
+
+					<div class="flex items-center justify-between p-4 rounded-xl border border-white/5 bg-white/5 hover:border-white/10 transition-colors">
+						<div class="flex items-center gap-4">
+							<div class="w-12 h-12 rounded-full bg-stone-800 flex items-center justify-center text-stone-400">
+								<CalendarIcon size={20} />
+							</div>
+							<div>
+								<p class="text-white font-bold">Soin Profond Kératine</p>
+								<p class="text-stone-400 text-sm">Il y a 5 mois</p>
+							</div>
+						</div>
+						<button class="text-jasmine-400 text-sm font-bold uppercase tracking-widest hover:text-jasmine-300">
+							Reprendre
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Action Rapide -->
+		<div class="space-y-6">
+			<a href="/demo-diamant/reservation" class="flex flex-col items-center justify-center p-8 rounded-2xl border border-jasmine-400/50 bg-gradient-to-b from-jasmine-500/10 to-transparent hover:bg-jasmine-500/20 transition-all text-center group">
+				<div class="w-16 h-16 rounded-full bg-jasmine-500/20 flex items-center justify-center text-jasmine-400 mb-4 group-hover:scale-110 transition-transform">
+					<CalendarIcon size={24} />
+				</div>
+				<h3 class="text-lg font-bold text-white mb-2">Nouveau Rendez-vous</h3>
+				<p class="text-stone-400 text-sm">Réservez votre prochaine prestation</p>
+			</a>
+		</div>
+	</div>
+</DiamantDashboardLayout>

@@ -1,11 +1,18 @@
 ---
-import DashboardLayout from '@/layouts/DashboardLayout.astro';
-import DashboardNav from '@/components/dashboard/DashboardNav';
-import AvailabilitiesPanel from '@/components/dashboard/AvailabilitiesPanel';
+import DiamantDashboardLayout from '@/layouts/DiamantDashboardLayout.astro';
+import DiamantDashboardNav from '@/components/diamant/dashboard/DiamantDashboardNav';
+import AppointmentsPanel from '@/components/dashboard/AppointmentsPanel';
 ---
 
-<DashboardLayout title="Mes disponibilités">
-	<DashboardNav basePath="/demo-diamant" client:load />
-	<AvailabilitiesPanel client:load />
-</DashboardLayout>
+<DiamantDashboardLayout title="Planning & RDV">
+	<DiamantDashboardNav slot="sidebar" basePath="/demo-diamant" client:load />
+	
+	<div class="mb-8">
+		<h1 class="text-3xl font-black text-white tracking-tight">Planning & RDV</h1>
+		<p class="text-stone-400 mt-2">Gérez les réservations de votre clientèle VIP.</p>
+	</div>
 
+	<div class="rounded-2xl border border-white/10 bg-stone-900/50 p-6 shadow-xl [&>div]:!bg-transparent [&>div]:!shadow-none [&>div]:!border-none [&_h2]:!text-white [&_p]:!text-stone-400 [&_div.bg-white]:!bg-stone-800/50 [&_div.border-border]:!border-white/5 [&_.text-stone-900]:!text-white [&_.text-stone-500]:!text-stone-400 [&_button.bg-rose-600]:!bg-jasmine-500 [&_button.bg-rose-600]:!text-stone-950 [&_button.border-border]:!border-white/10 [&_button.border-border]:!text-white [&_button.border-border:hover]:!bg-white/5">
+		<AppointmentsPanel client:load />
+	</div>
+</DiamantDashboardLayout>
