@@ -1,6 +1,6 @@
 ---
 import DiamantLayout from '@/layouts/DiamantLayout.astro';
-import AuthForm from '@/components/auth/AuthForm';
+import ResetPasswordForm from '@/components/auth/ResetPasswordForm';
 ---
 
 <DiamantLayout title="Réinitialiser le mot de passe" description="Choisissez un nouveau mot de passe.">
@@ -15,7 +15,7 @@ import AuthForm from '@/components/auth/AuthForm';
 			</div>
 			
 			<div class="rounded-2xl border border-white/10 bg-stone-900/80 backdrop-blur-md p-8 shadow-2xl [&_h2]:!hidden [&_form]:!mt-0 [&_input]:!bg-stone-950/50 [&_input]:!border-white/10 [&_input]:!text-stone-200 [&_input:focus]:!ring-jasmine-500 [&_input:focus]:!border-jasmine-500 [&_label]:!text-stone-400 [&_button[type=submit]]:!bg-gradient-to-r [&_button[type=submit]]:!from-jasmine-500 [&_button[type=submit]]:!to-jasmine-600 [&_button[type=submit]]:!text-stone-950 [&_button[type=submit]]:!font-bold [&_button[type=submit]]:!uppercase [&_button[type=submit]]:!tracking-widest [&_a]:!text-jasmine-400 [&_a:hover]:!text-jasmine-300">
-				<AuthForm type="reset-password" basePath="/demo-diamant" client:load />
+				<ResetPasswordForm basePath="/demo-diamant" client:load />
 				
 				<div class="mt-6 text-center text-sm text-stone-400 border-t border-white/5 pt-6">
 					<a href="/demo-diamant/connexion" class="font-bold text-jasmine-400 hover:text-jasmine-300 transition-colors">
