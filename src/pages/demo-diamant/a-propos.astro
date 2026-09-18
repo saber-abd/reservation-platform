@@ -5,107 +5,92 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 ---
 
 <DiamantLayout title="La Maison Prestige" description={`En savoir plus sur ${siteConfig.business.name}.`}>
-	<!-- Header de la page -->
-	<section class="relative pt-40 pb-20 overflow-hidden border-b border-white/5 bg-stone-950">
-		<div class="absolute inset-0 z-0 opacity-30">
-			<div class="absolute left-1/4 top-10 w-96 h-96 bg-deep-teal-900/40 rounded-full blur-[100px] pointer-events-none"></div>
-		</div>
-		<div class="relative z-10 mx-auto max-w-4xl px-6 text-center">
-			<h1 class="text-3xl md:text-4xl font-black text-white mb-6 tracking-tight">La Maison Prestige</h1>
-			<p class="text-xl text-stone-400">
+	<!-- Hero -->
+	<section class="pt-28 pb-12 bg-[#fff7f1] border-b border-stone-100">
+		<div class="mx-auto max-w-4xl px-6 text-center">
+			<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-3">Notre Histoire</p>
+			<h1 class="text-3xl md:text-4xl font-black text-stone-900 mb-4 tracking-tight">La Maison Prestige</h1>
+			<p class="text-lg text-stone-500">
 				L'art de la coiffure élevé au rang de l'excellence. Découvrez notre histoire et nos valeurs.
 			</p>
 		</div>
 	</section>
 
-	<section class="mx-auto max-w-6xl px-6 py-24 relative z-10">
+	<!-- Vision -->
+	<section class="mx-auto max-w-6xl px-6 py-20">
 		<div class="grid items-center gap-16 md:grid-cols-2">
-			<div data-aos="fade-right">
-				<h2 class="text-sm font-bold text-jasmine-400 uppercase tracking-widest mb-4">Notre Vision</h2>
-				<h3 class="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">Une approche sur-mesure de la beauté</h3>
-				<p class="text-stone-400 text-lg leading-relaxed mb-6">
+			<div class="section-fade">
+				<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-4">Notre Vision</p>
+				<h2 class="text-3xl md:text-4xl font-bold text-stone-900 mb-6 leading-tight">Une approche sur-mesure de la beauté</h2>
+				<p class="text-stone-600 text-lg leading-relaxed mb-6">
 					{siteConfig.business.description}
 				</p>
-				<p class="text-stone-400 text-lg leading-relaxed mb-10">
+				<p class="text-stone-600 text-lg leading-relaxed mb-10">
 					Notre équipe d'experts met un point d'honneur à vous offrir un accueil privilégié et des prestations d'exception, dans un cadre confidentiel pensé exclusivement pour votre confort.
 				</p>
 				<a
 					href="/demo-diamant/reservation"
-					class="inline-block rounded-xl bg-gradient-to-r from-jasmine-500 to-jasmine-600 px-8 py-4 text-sm font-bold uppercase tracking-widest text-stone-950 shadow-[0_0_20px_rgba(235,188,102,0.2)] transition-all hover:from-jasmine-400 hover:to-jasmine-500 hover:shadow-[0_0_30px_rgba(235,188,102,0.4)]"
+					class="inline-block rounded-xl bg-deep-teal-500 px-8 py-4 text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-deep-teal-400"
 				>
 					Prendre Rendez-vous
 				</a>
 			</div>
-			<div class="relative group" data-aos="fade-left">
-				<div class="absolute -inset-4 bg-gradient-to-r from-deep-teal-600 to-jasmine-600 rounded-2xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
-				<div class="relative overflow-hidden rounded-2xl border border-white/10 bg-stone-900 aspect-square shadow-2xl">
-					<img src="/images/about_salon.jpg" alt="Notre équipe" class="h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
+			<div class="section-fade">
+				<div class="overflow-hidden rounded-2xl border border-stone-100 aspect-square shadow-md">
+					<img src="/images/about_salon.jpg" alt="Notre équipe" class="h-full w-full object-cover hover:scale-105 transition-transform duration-700" />
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<!-- Notre histoire -->
-	<section class="relative py-24 bg-stone-900 border-y border-white/5">
-		<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1600948836101-f9ffda59d250?w=1200&auto=format&fit=crop&q=60')] bg-cover bg-center opacity-5 mix-blend-luminosity"></div>
-		<div class="mx-auto max-w-3xl px-6 relative z-10 text-center" data-aos="fade-up">
-			<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-jasmine-400 mb-6"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-			<h2 class="text-3xl font-bold text-white mb-8">Notre héritage</h2>
-			<p class="text-stone-400 text-lg leading-relaxed italic">
+	<!-- Notre héritage -->
+	<section class="py-20 bg-deep-teal-50 border-y border-deep-teal-100">
+		<div class="mx-auto max-w-3xl px-6 text-center section-fade">
+			<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-deep-teal-400 mb-6"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+			<h2 class="text-3xl font-bold text-stone-900 mb-8">Notre héritage</h2>
+			<p class="text-stone-600 text-lg leading-relaxed italic">
 				"{siteConfig.about.story}"
 			</p>
 		</div>
 	</section>
 
-	<!-- Nos objectifs et motivations -->
-	<section class="mx-auto max-w-6xl px-6 py-24 relative z-10">
-		<div class="text-center mb-16" data-aos="fade-up">
-			<h2 class="text-sm font-bold text-jasmine-400 uppercase tracking-widest mb-2">Exigences</h2>
-			<h3 class="text-3xl md:text-4xl font-bold text-white">Nos engagements</h3>
+	<!-- Engagements -->
+	<section class="mx-auto max-w-6xl px-6 py-20">
+		<div class="text-center mb-14 section-fade">
+			<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-2">Exigences</p>
+			<h2 class="text-3xl md:text-4xl font-bold text-stone-900">Nos engagements</h2>
 		</div>
-		<div class="grid gap-8 md:grid-cols-3">
+		<div class="grid gap-6 md:grid-cols-3">
 			{
 				siteConfig.about.objectives.map((objective, index) => (
-					<div
-						class="group rounded-2xl border border-white/10 bg-stone-900/50 backdrop-blur-sm p-8 shadow-xl hover:bg-stone-900 transition-all hover:-translate-y-1 relative overflow-hidden"
-						data-aos="fade-up"
-						data-aos-delay={index * 100}
-					>
-						<div class="absolute top-0 right-0 w-24 h-24 bg-deep-teal-900/10 rounded-full blur-[30px] group-hover:bg-deep-teal-900/30 transition-colors"></div>
-						<div class="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-jasmine-400 mb-6">
+					<div class="group rounded-2xl border border-stone-200 bg-white p-7 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all section-fade">
+						<div class="w-11 h-11 rounded-xl bg-deep-teal-50 border border-deep-teal-100 flex items-center justify-center text-deep-teal-500 mb-5">
 							<span class="font-black text-lg">{index + 1}</span>
 						</div>
-						<p class="font-bold text-white text-lg mb-3">{objective.title}</p>
-						<p class="text-stone-400 leading-relaxed">{objective.description}</p>
+						<p class="font-bold text-stone-900 text-lg mb-3">{objective.title}</p>
+						<p class="text-stone-500 leading-relaxed text-sm">{objective.description}</p>
 					</div>
 				))
 			}
 		</div>
 	</section>
 
-	<!-- Diplômes et certifications -->
-	<section class="py-24 bg-stone-900 border-t border-white/5 relative">
+	<!-- Diplômes -->
+	<section class="py-20 bg-stone-50 border-t border-stone-100">
 		<div class="mx-auto max-w-3xl px-6">
-			<div class="text-center mb-16" data-aos="fade-up">
-				<h2 class="text-sm font-bold text-jasmine-400 uppercase tracking-widest mb-2">Expertise</h2>
-				<h3 class="text-3xl md:text-4xl font-bold text-white">Diplômes & Certifications</h3>
+			<div class="text-center mb-14 section-fade">
+				<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-2">Expertise</p>
+				<h2 class="text-3xl md:text-4xl font-bold text-stone-900">Diplômes & Certifications</h2>
 			</div>
-			<ul class="space-y-6">
+			<ul class="space-y-4">
 				{
-					siteConfig.about.diplomas.map((diploma, index) => (
-						<li
-							class="group flex flex-col md:flex-row md:items-center justify-between rounded-2xl border border-white/10 bg-stone-950 p-6 shadow-xl hover:border-jasmine-400/30 transition-all"
-							data-aos="fade-up"
-							data-aos-delay={index * 100}
-						>
-							<div class="mb-4 md:mb-0">
-								<p class="font-bold text-white text-lg">{diploma.title}</p>
-								<p class="text-stone-500 mt-1">{diploma.institution}</p>
+					siteConfig.about.diplomas.map((diploma) => (
+						<li class="group flex flex-col md:flex-row md:items-center justify-between rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-deep-teal-200 transition-all section-fade">
+							<div class="mb-3 md:mb-0">
+								<p class="font-bold text-stone-900">{diploma.title}</p>
+								<p class="text-stone-500 text-sm mt-0.5">{diploma.institution}</p>
 							</div>
-							<div class="flex items-center gap-3">
-								<div class="h-[1px] w-12 bg-white/10 hidden md:block"></div>
-								<span class="text-sm font-black text-jasmine-400 bg-jasmine-400/10 px-4 py-2 rounded-full border border-jasmine-400/20">{diploma.year}</span>
-							</div>
+							<span class="text-sm font-bold text-deep-teal-600 bg-deep-teal-50 px-4 py-1.5 rounded-full border border-deep-teal-100 self-start md:self-auto">{diploma.year}</span>
 						</li>
 					))
 				}

@@ -4,22 +4,29 @@ import SignupForm from '@/components/auth/SignupForm';
 ---
 
 <DiamantLayout title="Inscription" description="Créez votre compte.">
-	<section class="relative min-h-[80vh] flex items-center justify-center py-20 px-6 bg-stone-950">
-		<div class="absolute inset-0 z-0 opacity-30">
-			<div class="absolute left-1/4 top-10 w-[500px] h-[500px] bg-deep-teal-900/20 rounded-full blur-[100px] pointer-events-none"></div>
-		</div>
+	<section class="relative min-h-[100vh] flex items-center justify-center py-24 px-6 bg-[#fff7f1]">
+		<div class="absolute top-0 left-0 w-80 h-80 bg-deep-teal-100/40 rounded-full -translate-y-1/2 -translate-x-1/3 pointer-events-none"></div>
+		<div class="absolute bottom-0 right-0 w-64 h-64 bg-jasmine-100/40 rounded-full translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+
 		<div class="w-full max-w-md relative z-10">
 			<div class="text-center mb-10">
-				<h1 class="text-3xl font-black text-white mb-2 tracking-tight">Rejoindre la Maison</h1>
-				<p class="text-stone-400">Créez votre compte</p>
+				<div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white border border-stone-200 shadow-sm mb-6">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f08080" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
+						<line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/>
+						<line x1="8.12" y1="8.12" x2="12" y2="12"/>
+					</svg>
+				</div>
+				<h1 class="text-3xl font-black text-stone-900 mb-2 tracking-tight">Rejoindre la Maison</h1>
+				<p class="text-stone-500">Créez votre compte</p>
 			</div>
 			
-			<div class="rounded-2xl border border-white/10 bg-stone-900/80 backdrop-blur-md p-8 shadow-2xl [&_h2]:!hidden [&_form]:!mt-0 [&_input]:!bg-stone-950/50 [&_input]:!border-white/10 [&_input]:!text-stone-200 [&_input:focus]:!ring-jasmine-500 [&_input:focus]:!border-jasmine-500 [&_label]:!text-stone-400 [&_button[type=submit]]:!bg-gradient-to-r [&_button[type=submit]]:!from-jasmine-500 [&_button[type=submit]]:!to-jasmine-600 [&_button[type=submit]]:!text-stone-950 [&_button[type=submit]]:!font-bold [&_button[type=submit]]:!uppercase [&_button[type=submit]]:!tracking-widest [&_a]:!text-jasmine-400 [&_a:hover]:!text-jasmine-300">
+			<div class="rounded-2xl border border-stone-200 bg-white p-8 shadow-sm [&_h2]:!hidden [&_form]:!mt-0 [&_input]:!bg-stone-50 [&_input]:!border-stone-300 [&_input]:!text-stone-900 [&_input:focus]:!ring-deep-teal-300 [&_input:focus]:!border-deep-teal-400 [&_label]:!text-stone-700 [&_button[type=submit]]:!bg-deep-teal-500 [&_button[type=submit]]:!text-white [&_button[type=submit]]:!font-bold [&_button[type=submit]]:!uppercase [&_button[type=submit]]:!tracking-widest [&_button[type=submit]:hover]:!bg-deep-teal-400 [&_a]:!text-deep-teal-600 [&_a:hover]:!text-deep-teal-500">
 				<SignupForm basePath="/demo-diamant" client:load />
 				
-				<div class="mt-6 text-center text-sm text-stone-400 border-t border-white/5 pt-6">
+				<div class="mt-6 text-center text-sm text-stone-500 border-t border-stone-100 pt-6">
 					Déjà membre ?{' '}
-					<a href="/demo-diamant/connexion" class="font-bold text-jasmine-400 hover:text-jasmine-300 transition-colors">
+					<a href="/demo-diamant/connexion" class="font-bold text-deep-teal-600 hover:text-deep-teal-500 transition-colors">
 						Se connecter
 					</a>
 				</div>

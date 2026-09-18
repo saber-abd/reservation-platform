@@ -4,20 +4,20 @@ import ReservationForm from '@/components/reservation/ReservationForm';
 ---
 
 <DiamantLayout title="Réservation" description="Prenez rendez-vous en ligne.">
-	<section class="relative pt-40 pb-20 overflow-hidden border-b border-white/5 bg-stone-950">
-		<div class="absolute inset-0 z-0 opacity-30">
-			<div class="absolute left-1/4 top-10 w-96 h-96 bg-deep-teal-900/40 rounded-full blur-[100px] pointer-events-none"></div>
-		</div>
-		<div class="relative z-10 mx-auto max-w-4xl px-6 text-center">
-			<h1 class="text-3xl md:text-4xl font-black text-white mb-6 tracking-tight">Réserver un Moment</h1>
-			<p class="text-xl text-stone-400">
+	<!-- Hero page -->
+	<section class="pt-28 pb-12 bg-[#fff7f1] border-b border-stone-100">
+		<div class="mx-auto max-w-4xl px-6 text-center">
+			<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-3">Réservation</p>
+			<h1 class="text-3xl md:text-4xl font-black text-stone-900 mb-4 tracking-tight">Réserver un Moment</h1>
+			<p class="text-lg text-stone-500">
 				Programmez votre prochaine expérience sur-mesure dans notre Maison.
 			</p>
 		</div>
 	</section>
 
-	<section class="mx-auto max-w-5xl px-6 py-20 relative z-10">
-		<div class="rounded-2xl border border-white/10 bg-stone-900/50 p-6 md:p-10 shadow-2xl [&>div]:!bg-transparent [&>div]:!shadow-none [&>div]:!border-none [&_h2]:!text-white [&_p]:!text-stone-400 [&_div.bg-white]:!bg-stone-800/50 [&_div.border-border]:!border-white/5 [&_.text-stone-900]:!text-white [&_.text-stone-500]:!text-stone-400 [&_button.bg-rose-600]:!bg-jasmine-500 [&_button.bg-rose-600]:!text-stone-950 [&_button.border-border]:!border-white/10 [&_button.border-border]:!text-white [&_button.border-border:hover]:!bg-white/5 [&_input]:!bg-stone-950/50 [&_input]:!border-white/10 [&_input]:!text-stone-200">
+	<!-- Formulaire -->
+	<section class="mx-auto max-w-5xl px-6 py-16">
+		<div class="rounded-2xl border border-stone-200 bg-white p-6 md:p-10 shadow-sm">
 			<ReservationForm client:load />
 		</div>
 	</section>

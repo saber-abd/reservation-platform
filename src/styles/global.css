@@ -341,7 +341,25 @@
     font-family: 'Coolvetica', sans-serif !important;
 }
 
-.theme-diamant, .theme-diamant * {
+.theme-diamant {
+    --background: #fff7f1;
+    --foreground: #1c1917;
+    --card: #ffffff;
+    --card-foreground: #1c1917;
+    --popover: #ffffff;
+    --popover-foreground: #1c1917;
+    --primary: #f08080;
+    --primary-foreground: #ffffff;
+    --secondary: #fce5e5;
+    --secondary-foreground: #420808;
+    --muted: #fef3ee;
+    --muted-foreground: #78716c;
+    --accent: #fbc4ab;
+    --accent-foreground: #1c1917;
+    --destructive: #e63946;
+    --border: #fddccd;
+    --input: #ffffff;
+    --ring: #f08080;
     --font-heading: 'Monimer Serif', serif;
     --font-sans: 'Recoleta', serif;
     font-family: 'Recoleta', serif !important;

@@ -1,85 +1,76 @@
-import React, { useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Environment, Float, PresentationControls, ContactShadows } from '@react-three/drei';
-import * as THREE from 'three';
-
-// Un composant qui crée une paire de ciseaux stylisée et luxueuse
-function StylizedScissors() {
-	const groupRef = useRef<THREE.Group>(null);
-
-	useFrame((state) => {
-		if (groupRef.current) {
-			groupRef.current.rotation.y = state.clock.elapsedTime * 0.3;
-		}
-	});
-
-	const goldMaterial = new THREE.MeshPhysicalMaterial({
-		color: '#ebbc66', // jasmine-400
-		metalness: 0.9,
-		roughness: 0.1,
-		clearcoat: 1,
-		clearcoatRoughness: 0.1,
-	});
-
-	const darkSteelMaterial = new THREE.MeshPhysicalMaterial({
-		color: '#143438', // deep-teal-900
-		metalness: 0.7,
-		roughness: 0.2,
-		clearcoat: 0.5,
-	});
-
-	return (
-		<group ref={groupRef} scale={1.5}>
-			<Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
-				{/* Lame 1 (Haut) */}
-				<mesh material={darkSteelMaterial} position={[0, 0.8, 0.05]} rotation={[0, 0, -0.2]}>
-					<boxGeometry args={[0.2, 2.5, 0.05]} />
-				</mesh>
-				
-				{/* Anneau 1 (Bas) */}
-				<mesh material={goldMaterial} position={[-0.4, -0.8, 0.05]} rotation={[0, 0, -0.2]}>
-					<torusGeometry args={[0.3, 0.08, 16, 32]} />
-				</mesh>
-
-				{/* Lame 2 (Haut) */}
-				<mesh material={goldMaterial} position={[0, 0.8, -0.05]} rotation={[0, 0, 0.2]}>
-					<boxGeometry args={[0.2, 2.5, 0.05]} />
-				</mesh>
-
-				{/* Anneau 2 (Bas) */}
-				<mesh material={darkSteelMaterial} position={[0.4, -0.8, -0.05]} rotation={[0, 0, 0.2]}>
-					<torusGeometry args={[0.3, 0.08, 16, 32]} />
-				</mesh>
-
-				{/* Pivot central */}
-				<mesh material={goldMaterial} position={[0, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
-					<cylinderGeometry args={[0.15, 0.15, 0.2, 16]} />
-				</mesh>
-			</Float>
-		</group>
-	);
-}
+// Logo SVG animé simple — ciseaux de coiffeur qui tournent lentement
+// Non-interactif, léger, zéro dépendance Three.js
 
 export default function Diamant3DLogo() {
 	return (
-		<div className="w-full h-full min-h-[400px] relative pointer-events-auto">
-			<Canvas camera={{ position: [0, 0, 6], fov: 45 }} dpr={[1, 1.5]}>
-				<ambientLight intensity={0.5} />
-				<spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
-				
-				<PresentationControls
-					global={false}
-					rotation={[0, 0.3, 0]}
-					polar={[-0.4, 0.4]}
-					azimuth={[-1, 1]}
-					config={{ mass: 1, tension: 170, friction: 26 }}
-					snap={{ mass: 2, tension: 150 }}
-				>
-					<StylizedScissors />
-				</PresentationControls>
+		<div className="w-full h-full min-h-[340px] flex items-center justify-center select-none pointer-events-none">
+			<style>{`
+				@keyframes scissors-rotate {
+					from { transform: rotate(0deg); }
+					to { transform: rotate(360deg); }
+				}
+				@keyframes scissors-pulse {
+					0%, 100% { opacity: 1; }
+					50% { opacity: 0.85; }
+				}
+				.scissors-logo {
+					animation: scissors-rotate 14s linear infinite, scissors-pulse 4s ease-in-out infinite;
+					transform-origin: center;
+				}
+				@keyframes orbit-dot {
+					from { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+					to { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
+				}
+				.orbit-1 { animation: orbit-dot 8s linear infinite; }
+				.orbit-2 { animation: orbit-dot 12s linear infinite reverse; animation-delay: -4s; }
+			`}</style>
 
-				<Environment preset="city" />
-			</Canvas>
+			<div className="relative w-72 h-72">
+				{/* Cercles décoratifs */}
+				<div className="absolute inset-0 rounded-full border border-deep-teal-200/50" style={{margin: '16px'}}></div>
+				<div className="absolute inset-0 rounded-full border border-dashed border-peach-300/30" style={{margin: '32px'}}></div>
+
+				{/* Petits points en orbite */}
+				<div className="absolute inset-0 flex items-center justify-center">
+					<div className="orbit-1 w-2.5 h-2.5 rounded-full bg-deep-teal-400" style={{position: 'absolute'}}></div>
+				</div>
+				<div className="absolute inset-0 flex items-center justify-center">
+					<div className="orbit-2 w-1.5 h-1.5 rounded-full bg-jasmine-400" style={{position: 'absolute'}}></div>
+				</div>
+
+				{/* SVG Ciseaux principal */}
+				<div className="absolute inset-0 flex items-center justify-center">
+					<svg
+						className="scissors-logo"
+						width="140"
+						height="140"
+						viewBox="0 0 100 100"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						{/* Lame supérieure */}
+						<line x1="50" y1="50" x2="85" y2="15" stroke="#f08080" strokeWidth="5" strokeLinecap="round" />
+						{/* Lame inférieure */}
+						<line x1="50" y1="50" x2="85" y2="85" stroke="#fbc4ab" strokeWidth="5" strokeLinecap="round" />
+						{/* Queue supérieure */}
+						<line x1="50" y1="50" x2="20" y2="20" stroke="#f08080" strokeWidth="4.5" strokeLinecap="round" />
+						{/* Queue inférieure */}
+						<line x1="50" y1="50" x2="20" y2="80" stroke="#fbc4ab" strokeWidth="4.5" strokeLinecap="round" />
+						{/* Anneau supérieur */}
+						<circle cx="14" cy="14" r="8" stroke="#f08080" strokeWidth="4" fill="none" />
+						{/* Anneau inférieur */}
+						<circle cx="14" cy="86" r="8" stroke="#fbc4ab" strokeWidth="4" fill="none" />
+						{/* Pivot central */}
+						<circle cx="50" cy="50" r="5" fill="#f08080" />
+						<circle cx="50" cy="50" r="2.5" fill="white" />
+					</svg>
+				</div>
+
+				{/* Texte sous le logo */}
+				<div className="absolute bottom-0 left-1/2 -translate-x-1/2 whitespace-nowrap">
+					<span className="text-xs font-bold tracking-[0.3em] text-stone-400 uppercase">Maison Prestige</span>
+				</div>
+			</div>
 		</div>
 	);
 }

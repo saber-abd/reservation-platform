@@ -1,9 +1,7 @@
 ---
 import '../styles/global.css';
-import 'aos/dist/aos.css';
 import DiamantHeader from '@/components/diamant/DiamantHeader.astro';
 import DiamantFooter from '@/components/diamant/DiamantFooter.astro';
-import SmoothScroll from '@/components/SmoothScroll.astro';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname);
@@ -25,7 +23,7 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 ---
 
 <!doctype html>
-<html lang="fr" class="theme-diamant bg-stone-950 text-stone-300">
+<html lang="fr" class="theme-diamant">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -47,9 +45,22 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 		<meta name="twitter:title" content={pageTitle} />
 		<meta name="twitter:description" content={description} />
 
-		<meta name="theme-color" content="#0c0a09" />
+		<meta name="theme-color" content="#fff7f1" />
+
+		<style>
+			/* Fade-in animation légère pour les sections */
+			.section-fade {
+				opacity: 0;
+				transform: translateY(24px);
+				transition: opacity 0.6s ease, transform 0.6s ease;
+			}
+			.section-fade.visible {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		</style>
 	</head>
-	<body class="flex min-h-screen flex-col bg-stone-950 text-stone-300 selection:bg-jasmine-500/30 selection:text-jasmine-200 antialiased font-sans">
+	<body class="flex min-h-screen flex-col bg-[#fff7f1] text-stone-800 antialiased font-sans">
 		<DiamantHeader />
 		
 		<main class="flex-1 overflow-x-hidden relative">
@@ -59,16 +70,19 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 		<DiamantFooter />
 		
 		<script>
-			import AOS from 'aos';
-
-			AOS.init({
-				duration: 800,
-				easing: 'ease-out-cubic',
-				once: true,
-				mirror: false,
-				offset: 50,
-			});
+			// Intersection Observer léger pour les animations
+			const observer = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((e) => {
+						if (e.isIntersecting) {
+							e.target.classList.add('visible');
+							observer.unobserve(e.target);
+						}
+					});
+				},
+				{ threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+			);
+			document.querySelectorAll('.section-fade').forEach((el) => observer.observe(el));
 		</script>
-		<SmoothScroll />
 	</body>
 </html>
