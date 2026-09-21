@@ -27,13 +27,13 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 		<!-- Google Fonts -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
 		<style>
-			.theme-diamant body { font-family: 'Lato', sans-serif; }
+			.theme-diamant body { font-family: 'Coolvetica', sans-serif !important; }
 			.theme-diamant h1, .theme-diamant h2, .theme-diamant h3,
 			.theme-diamant h4, .theme-diamant h5, .theme-diamant h6,
 			.theme-diamant .font-black, .theme-diamant .font-bold {
-				font-family: 'Playfair Display', serif;
+				font-family: 'Coolvetica', sans-serif !important;
 			}
 			.card-hover {
 				transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -44,16 +44,16 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 			}
 		</style>
 	</head>
-	<body class="bg-stone-50 text-stone-800 overflow-hidden font-sans">
+	<body class="bg-stone-50 text-stone-800 overflow-hidden font-coolvetica">
 		<div class="flex h-screen relative">
 			{/* Sidebar */}
 			<aside class="w-64 flex-shrink-0 border-r border-stone-200 bg-white flex flex-col hidden md:flex shadow-sm z-10 relative">
 				<div class="p-5 border-b border-stone-100 flex items-center gap-3">
-					<a href={`${basePath}/`} aria-label="Accueil Prestige" class="flex items-center gap-3 group">
+					<a href={`${basePath}/`} aria-label="Accueil" class="flex items-center gap-3 group">
 						<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-deep-teal-400 to-deep-teal-600 text-white transition-transform group-hover:scale-105">
 							<Scissors size={18} />
 						</span>
-						<span class="text-base font-bold tracking-widest text-stone-800 uppercase">Prestige</span>
+						<span class="text-base font-bold tracking-widest text-stone-800 uppercase">{siteConfig.business.name}</span>
 					</a>
 				</div>
 				<div class="flex-1 overflow-y-auto p-4">

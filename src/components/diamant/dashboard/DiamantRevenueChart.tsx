@@ -1,26 +1,26 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import type { Appointment } from '@/lib/queries';
 
-const data = [
-	{ name: 'Jan', ca: 45000, rdv: 120 },
-	{ name: 'Fév', ca: 52000, rdv: 140 },
-	{ name: 'Mar', ca: 48000, rdv: 130 },
-	{ name: 'Avr', ca: 61000, rdv: 165 },
-	{ name: 'Mai', ca: 59000, rdv: 155 },
-	{ name: 'Juin', ca: 75000, rdv: 190 },
-	{ name: 'Juil', ca: 82000, rdv: 210 },
-];
+type AppointmentWithService = Appointment & {
+	services: { name: string; duration_minutes: number; price: number } | null;
+};
+
+interface Props {
+	appointments?: AppointmentWithService[];
+	range?: 'week' | 'month' | 'year' | 'custom';
+}
 
 const CustomTooltip = ({ active, payload, label }: any) => {
 	if (active && payload && payload.length) {
 		return (
-			<div className="bg-stone-900 border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-md">
-				<p className="text-jasmine-400 font-bold mb-2">{label}</p>
-				<p className="text-white text-sm">
+			<div className="bg-white border border-stone-200 p-4 rounded-xl shadow-lg">
+				<p className="text-stone-900 font-bold mb-2">{label}</p>
+				<p className="text-stone-700 text-sm">
 					Chiffre d'affaires : <span className="font-bold">{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(payload[0].value)}</span>
 				</p>
-				<p className="text-stone-400 text-sm mt-1">
-					Rendez-vous : <span className="font-bold text-stone-300">{payload[1].value}</span>
+				<p className="text-stone-500 text-sm mt-1">
+					Rendez-vous : <span className="font-bold text-stone-600">{payload[1].value}</span>
 				</p>
 			</div>
 		);
@@ -28,7 +28,67 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 	return null;
 };
 
-export default function DiamantRevenueChart() {
+export default function DiamantRevenueChart({ appointments = [], range = 'month' }: Props) {
+	const data = useMemo(() => {
+		if (appointments.length === 0) return [];
+
+		// Group by day or month based on range
+		const grouped: Record<string, { ca: number; rdv: number }> = {};
+		
+		appointments.forEach(app => {
+			const date = new Date(app.start_time);
+			let key = '';
+			if (range === 'year') {
+				// Group by month
+				key = date.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' });
+			} else {
+				// Group by day
+				key = date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+			}
+
+			if (!grouped[key]) {
+				grouped[key] = { ca: 0, rdv: 0 };
+			}
+			grouped[key].rdv += 1;
+			grouped[key].ca += app.services?.price || 0;
+		});
+
+		// Convert to array and sort
+		// To sort correctly, we could parse the key back, but simple string sort might fail
+		// Let's rely on chronological insertion if we sort the base appointments first
+		const sortedAppointments = [...appointments].sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+		
+		const orderedGrouped: Record<string, { ca: number; rdv: number }> = {};
+		sortedAppointments.forEach(app => {
+			const date = new Date(app.start_time);
+			let key = '';
+			if (range === 'year') {
+				key = date.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' });
+			} else {
+				key = date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+			}
+			if (!orderedGrouped[key]) {
+				orderedGrouped[key] = { ca: 0, rdv: 0 };
+			}
+			orderedGrouped[key].rdv += 1;
+			orderedGrouped[key].ca += app.services?.price || 0;
+		});
+
+		return Object.entries(orderedGrouped).map(([name, values]) => ({
+			name,
+			ca: values.ca,
+			rdv: values.rdv
+		}));
+	}, [appointments, range]);
+
+	if (data.length === 0) {
+		return (
+			<div className="h-[300px] w-full flex items-center justify-center bg-stone-50 rounded-xl border border-stone-100">
+				<p className="text-stone-400 text-sm font-bold uppercase tracking-widest">Aucune donnée sur la période</p>
+			</div>
+		);
+	}
+
 	return (
 		<div className="h-[300px] w-full">
 			<ResponsiveContainer width="100%" height="100%">
@@ -38,35 +98,35 @@ export default function DiamantRevenueChart() {
 				>
 					<defs>
 						<linearGradient id="colorCa" x1="0" y1="0" x2="0" y2="1">
-							<stop offset="5%" stopColor="#ebbc66" stopOpacity={0.3} />
-							<stop offset="95%" stopColor="#ebbc66" stopOpacity={0} />
+							<stop offset="5%" stopColor="#14b8a6" stopOpacity={0.2} />
+							<stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
 						</linearGradient>
 					</defs>
-					<CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+					<CartesianGrid strokeDasharray="3 3" stroke="#f5f5f4" vertical={false} />
 					<XAxis 
 						dataKey="name" 
-						stroke="rgba(255,255,255,0.3)" 
-						tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12 }} 
+						stroke="#a8a29e" 
+						tick={{ fill: '#78716c', fontSize: 12, fontWeight: 600 }} 
 						axisLine={false}
 						tickLine={false}
 						dy={10}
 					/>
 					<YAxis 
-						stroke="rgba(255,255,255,0.3)" 
-						tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12 }}
+						stroke="#a8a29e" 
+						tick={{ fill: '#78716c', fontSize: 12, fontWeight: 600 }}
 						axisLine={false}
 						tickLine={false}
-						tickFormatter={(value) => `${value / 1000}k€`}
+						tickFormatter={(value) => `${value}€`}
 					/>
-					<Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(235,188,102,0.2)', strokeWidth: 2 }} />
+					<Tooltip content={<CustomTooltip />} cursor={{ stroke: '#f0fdfa', strokeWidth: 2 }} />
 					<Area 
 						type="monotone" 
 						dataKey="ca" 
-						stroke="#ebbc66" 
+						stroke="#14b8a6" 
 						strokeWidth={3}
 						fillOpacity={1} 
 						fill="url(#colorCa)" 
-						activeDot={{ r: 6, fill: '#ebbc66', stroke: '#1c1917', strokeWidth: 2 }}
+						activeDot={{ r: 6, fill: '#14b8a6', stroke: '#ffffff', strokeWidth: 2 }}
 					/>
 					{/* Donnée invisible juste pour le tooltip */}
 					<Area type="monotone" dataKey="rdv" stroke="none" fill="none" />

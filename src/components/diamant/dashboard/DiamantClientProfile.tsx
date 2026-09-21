@@ -46,15 +46,15 @@ export default function DiamantClientProfile() {
 
 	function generateAvatar(seed: string) {
 		const encoded = encodeURIComponent(seed);
-		return `https://api.dicebear.com/7.x/initials/svg?seed=${encoded}&backgroundColor=f08080,f8ad9d,ffdab9&textColor=ffffff`;
+		return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encoded}&backgroundColor=f08080,f8ad9d,ffdab9`;
 	}
 
 	const avatarOptions = [
 		`${firstName} ${lastName}`,
-		'VB',
-		'Client',
-		'Style',
-		'Prestige'
+		'Sophie',
+		'Elodie',
+		'Lucas',
+		'Marie'
 	];
 
 	return (

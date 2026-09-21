@@ -220,8 +220,8 @@ export default function DiamantDashboardOverview() {
 								<h2 className="text-base font-bold text-stone-800">Évolution du CA</h2>
 								<a href="/demo-diamant/dashboard/statistiques" className="text-xs font-bold uppercase tracking-widest text-deep-teal-500 hover:text-deep-teal-400">Rapport complet →</a>
 							</div>
-							{/* On utilise les données statiques du composant original pour la forme, mais on pourrait le dynamiser */}
-							<DiamantRevenueChart />
+							{/* On utilise les données dynamiques */}
+							<DiamantRevenueChart appointments={appointments} range={range} />
 						</div>
 
 						{/* Prochains RDV / Derniers RDV */}
