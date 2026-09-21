@@ -375,8 +375,12 @@
     font-family: 'Recoleta', serif !important;
 }
 
-.theme-diamant h1, .theme-diamant h2, .theme-diamant h3, .theme-diamant h4, .theme-diamant h5, .theme-diamant h6, .theme-diamant .font-black {
+.theme-diamant h1, .theme-diamant h2, .theme-diamant h3, .theme-diamant h4, .theme-diamant h5, .theme-diamant h6 {
     font-family: 'Monimer Serif', serif !important;
+}
+
+.font-coolvetica, .theme-diamant .font-coolvetica {
+    font-family: 'Coolvetica', sans-serif !important;
 }
 
 .theme-auto input:not([type="checkbox"]):not([type="radio"]), 

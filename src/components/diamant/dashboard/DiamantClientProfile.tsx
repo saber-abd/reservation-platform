@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Save, RefreshCw, Upload, Check } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function DiamantClientProfile() {
 	const [saving, setSaving] = useState(false);
@@ -15,17 +16,32 @@ export default function DiamantClientProfile() {
 	const [preferences, setPreferences] = useState('Cheveux fins, tendance sèche. Sensible au PPD (Paraphénylènediamine). Préfère les produits naturels.');
 
 	useEffect(() => {
-		const saved = localStorage.getItem('diamant_client_profile');
-		if (saved) {
+		async function fetchProfile() {
 			try {
-				const data = JSON.parse(saved);
-				setFirstName(data.firstName || 'Victoria');
-				setLastName(data.lastName || 'Belmont');
-				setPhone(data.phone || '06 12 34 56 78');
-				setPreferences(data.preferences || '');
-				setSelectedAvatarSeed(data.avatarSeed || `${data.firstName || 'Victoria'} ${data.lastName || 'Belmont'}`);
-			} catch (e) {}
+				const { data: { session } } = await supabase.auth.getSession();
+				if (!session) return;
+				setEmail(session.user.email || '');
+
+				const { data } = await supabase
+					.from('clients')
+					.select('*')
+					.eq('id', session.user.id)
+					.maybeSingle();
+
+				if (data) {
+					const nameParts = (data.full_name || '').split(' ');
+					setFirstName(nameParts[0] || 'Victoria');
+					setLastName(nameParts.slice(1).join(' ') || 'Belmont');
+					setPhone(data.phone || '06 12 34 56 78');
+					if (data.avatar_url) {
+						setSelectedAvatarSeed(data.avatar_url);
+					}
+				}
+			} catch (e) {
+				console.error(e);
+			}
 		}
+		fetchProfile();
 	}, []);
 
 	async function handleSave(e: React.FormEvent) {
@@ -33,18 +49,30 @@ export default function DiamantClientProfile() {
 		setSaving(true);
 		setSuccessMsg('');
 
-		await new Promise(resolve => setTimeout(resolve, 800));
+		try {
+			const { data: { session } } = await supabase.auth.getSession();
+			if (session) {
+				await supabase
+					.from('clients')
+					.update({
+						full_name: `${firstName} ${lastName}`.trim(),
+						phone: phone,
+						avatar_url: generateAvatar(selectedAvatarSeed)
+					})
+					.eq('id', session.user.id);
+			}
 
-		localStorage.setItem('diamant_client_profile', JSON.stringify({
-			firstName, lastName, phone, preferences, avatarSeed: selectedAvatarSeed
-		}));
-
-		setSuccessMsg('Vos informations ont été mises à jour avec succès.');
-		setSaving(false);
-		setTimeout(() => setSuccessMsg(''), 3000);
+			setSuccessMsg('Vos informations ont été mises à jour avec succès.');
+		} catch (e) {
+			console.error(e);
+		} finally {
+			setSaving(false);
+			setTimeout(() => setSuccessMsg(''), 3000);
+		}
 	}
 
 	function generateAvatar(seed: string) {
+		if (seed.startsWith('http')) return seed;
 		const encoded = encodeURIComponent(seed);
 		return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encoded}&backgroundColor=f08080,f8ad9d,ffdab9`;
 	}

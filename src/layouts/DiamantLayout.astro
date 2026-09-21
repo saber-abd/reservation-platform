@@ -49,8 +49,7 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 		<style>
 			.theme-diamant body { font-family: 'Lato', sans-serif; }
 			.theme-diamant h1, .theme-diamant h2, .theme-diamant h3,
-			.theme-diamant h4, .theme-diamant h5, .theme-diamant h6,
-			.theme-diamant .font-black, .theme-diamant .font-bold {
+			.theme-diamant h4, .theme-diamant h5, .theme-diamant h6 {
 				font-family: 'Monimer Serif', serif;
 			}
 			/* Fade-in animation pour les sections */
@@ -85,21 +84,32 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 		
 		<script>
 			// Animation observer for section-fade elements
-			document.addEventListener('DOMContentLoaded', () => {
-				const observer = new IntersectionObserver((entries) => {
-					entries.forEach(entry => {
-						if (entry.isIntersecting) {
-							entry.target.classList.add('visible');
-							observer.unobserve(entry.target);
-						}
-					});
-				}, {
-					threshold: 0.1,
-					rootMargin: "0px 0px -50px 0px"
+			const observer = new IntersectionObserver((entries) => {
+				entries.forEach(entry => {
+					if (entry.isIntersecting) {
+						entry.target.classList.add('visible');
+						observer.unobserve(entry.target);
+					}
 				});
-
-				document.querySelectorAll('.section-fade').forEach(el => observer.observe(el));
+			}, {
+				threshold: 0.1,
+				rootMargin: "0px 0px -50px 0px"
 			});
+
+			function observeElements() {
+				document.querySelectorAll('.section-fade:not(.observed)').forEach(el => {
+					el.classList.add('observed');
+					observer.observe(el);
+				});
+			}
+
+			document.addEventListener('DOMContentLoaded', observeElements);
+			observeElements();
+			
+			const mutationObserver = new MutationObserver(() => {
+				observeElements();
+			});
+			mutationObserver.observe(document.body, { childList: true, subtree: true });
 		</script>
 	</body>
 </html>
