@@ -43,6 +43,18 @@
 }
 
 @font-face {
+    font-family: 'Coolvetica';
+    src: url('/fonts/Coolvetica-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+.font-coolvetica {
+    font-family: 'Coolvetica', sans-serif !important;
+}
+
+@font-face {
     font-family: 'Recoleta';
     src: url('/fonts/recoleta.woff2') format('woff2'),
          url('/fonts/recoleta.woff') format('woff'),

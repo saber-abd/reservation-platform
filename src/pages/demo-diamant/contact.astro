@@ -46,8 +46,8 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 					</ul>
 				</div>
 
-				<div class="rounded-2xl overflow-hidden border border-stone-200 shadow-sm h-[280px]">
-					<Map lat={siteConfig.business.lat} lng={siteConfig.business.lng} label={siteConfig.business.name} />
+				<div class="rounded-2xl overflow-hidden border border-stone-200 shadow-sm h-[280px] z-0 relative isolate">
+					<Map lat={siteConfig.business.lat} lng={siteConfig.business.lng} label={siteConfig.business.name} class="w-full h-full" />
 				</div>
 			</div>
 

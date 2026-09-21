@@ -30,23 +30,29 @@ export default function DiamantClientNav({ basePath }: DiamantClientNavProps) {
 						href={link.href}
 						className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
 							isActive
-								? 'bg-gradient-to-r from-jasmine-500/10 to-transparent text-jasmine-400 border-l-2 border-jasmine-400 shadow-[inset_0_0_20px_rgba(235,188,102,0.05)]'
-								: 'text-stone-400 hover:bg-white/5 hover:text-stone-200 border-l-2 border-transparent'
+								? 'bg-deep-teal-50 text-deep-teal-700 border border-deep-teal-200 shadow-sm'
+								: 'text-stone-600 hover:bg-stone-50 hover:text-stone-900 border border-transparent'
 						}`}
 					>
-						<Icon size={18} className={isActive ? 'text-jasmine-400' : 'opacity-70'} />
+						<Icon size={18} className={isActive ? 'text-deep-teal-500' : 'text-stone-400'} />
 						{link.label}
 					</a>
 				);
 			})}
 
-			<div className="mt-8 pt-8 border-t border-white/5 px-3">
+			<div className="mt-8 pt-8 border-t border-stone-200 px-3 flex flex-col gap-2">
 				<a
 					href={basePath}
-					className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-rose-500 hover:bg-rose-500/10 transition-colors"
+					className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-stone-500 hover:bg-stone-50 transition-colors"
 				>
 					<LogOut size={18} />
 					Déconnexion
+				</a>
+				<a
+					href="/"
+					className="flex items-center justify-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-stone-500 transition-colors hover:border-deep-teal-300 hover:text-deep-teal-600 hover:bg-deep-teal-50 mt-4"
+				>
+					Retour Portfolio
 				</a>
 			</div>
 		</nav>

@@ -1,16 +1,16 @@
 ---
 import DiamantDashboardLayout from '@/layouts/DiamantDashboardLayout.astro';
-import DiamantClientNav from '@/components/diamant/dashboard/DiamantClientNav';
+import DiamantDashboardNav from '@/components/diamant/dashboard/DiamantDashboardNav';
 import DiamantMessenger from '@/components/diamant/dashboard/DiamantMessenger';
 ---
 
 <DiamantDashboardLayout title="Messagerie">
-	<DiamantClientNav slot="sidebar" basePath="/demo-diamant" client:load />
+	<DiamantDashboardNav slot="sidebar" basePath="/demo-diamant" client:load />
 	
 	<div class="mb-8">
 		<h1 class="text-3xl font-black text-stone-800 tracking-tight">Messagerie</h1>
-		<p class="text-stone-500 mt-2">Échangez directement avec votre artisan coiffeur.</p>
+		<p class="text-stone-500 mt-2">Gérez vos conversations avec vos clients.</p>
 	</div>
 
-	<DiamantMessenger isPro={false} client:only="react" />
+	<DiamantMessenger isPro={true} client:only="react" />
 </DiamantDashboardLayout>

@@ -87,57 +87,5 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 			</main>
 		</div>
 
-		<script>
-			// Barre de recherche fonctionnelle — filtre en temps réel
-			const searchInput = document.getElementById('dashboard-search') as HTMLInputElement | null;
-			
-			if (searchInput) {
-				function performSearch(query: string) {
-					const q = query.toLowerCase().trim();
-					// Cherche tous les éléments portant data-searchable
-					const items = document.querySelectorAll('[data-searchable]');
-					if (items.length === 0) return; // pas de contenu filtrable sur cette page
-					
-					items.forEach((item) => {
-						const text = (item.textContent || '').toLowerCase();
-						const el = item as HTMLElement;
-						if (q === '' || text.includes(q)) {
-							el.style.display = '';
-						} else {
-							el.style.display = 'none';
-						}
-					});
-
-					// Afficher un message si aucun résultat
-					let noResult = document.getElementById('search-no-result');
-					const container = items[0]?.parentElement;
-					const visible = Array.from(items).filter((el) => (el as HTMLElement).style.display !== 'none');
-					
-					if (q !== '' && visible.length === 0 && container) {
-						if (!noResult) {
-							noResult = document.createElement('p');
-							noResult.id = 'search-no-result';
-							noResult.className = 'text-sm text-stone-400 text-center py-8';
-							noResult.textContent = 'Aucun résultat pour cette recherche.';
-							container.appendChild(noResult);
-						}
-						noResult.style.display = '';
-					} else if (noResult) {
-						noResult.style.display = 'none';
-					}
-				}
-
-				searchInput.addEventListener('input', (e) => {
-					performSearch((e.target as HTMLInputElement).value);
-				});
-
-				searchInput.addEventListener('keydown', (e) => {
-					if (e.key === 'Escape') {
-						searchInput.value = '';
-						performSearch('');
-					}
-				});
-			}
-		</script>
 	</body>
 </html>

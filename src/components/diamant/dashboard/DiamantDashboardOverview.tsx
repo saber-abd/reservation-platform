@@ -176,7 +176,7 @@ export default function DiamantDashboardOverview() {
 								<span className="text-xs font-bold text-stone-400 group-hover:text-deep-teal-500 transition-colors flex items-center gap-1">Détails <ArrowUpRight size={12}/></span>
 							</div>
 							<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Chiffre d'Affaires</p>
-							<p className="text-2xl font-black text-stone-800">{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(stats.ca)}</p>
+							<p className="text-2xl font-black text-stone-800 font-coolvetica">{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(stats.ca)}</p>
 						</a>
 
 						<a href="/demo-diamant/dashboard/disponibilites" className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-jasmine-200 hover:shadow-md transition-all card-hover group">
@@ -187,7 +187,7 @@ export default function DiamantDashboardOverview() {
 								<span className="text-xs font-bold text-stone-400 group-hover:text-jasmine-600 transition-colors flex items-center gap-1">Détails <ArrowUpRight size={12}/></span>
 							</div>
 							<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">RDV de la période</p>
-							<p className="text-2xl font-black text-stone-800">{stats.rdv}</p>
+							<p className="text-2xl font-black text-stone-800 font-coolvetica">{stats.rdv}</p>
 						</a>
 
 						<a href="/demo-diamant/dashboard/clients" className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-deep-teal-200 hover:shadow-md transition-all card-hover group">
@@ -198,7 +198,7 @@ export default function DiamantDashboardOverview() {
 								<span className="text-xs font-bold text-stone-400 group-hover:text-deep-teal-500 transition-colors flex items-center gap-1">Détails <ArrowUpRight size={12}/></span>
 							</div>
 							<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Nouveaux Clients (est.)</p>
-							<p className="text-2xl font-black text-stone-800">{stats.newClients}</p>
+							<p className="text-2xl font-black text-stone-800 font-coolvetica">{stats.newClients}</p>
 						</a>
 
 						<a href="/demo-diamant/dashboard/statistiques" className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-jasmine-200 hover:shadow-md transition-all card-hover group">
@@ -209,7 +209,7 @@ export default function DiamantDashboardOverview() {
 								<span className="text-xs font-bold text-stone-400 group-hover:text-jasmine-600 transition-colors flex items-center gap-1">Détails <ArrowUpRight size={12}/></span>
 							</div>
 							<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Panier Moyen</p>
-							<p className="text-2xl font-black text-stone-800">{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(stats.panier)}</p>
+							<p className="text-2xl font-black text-stone-800 font-coolvetica">{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(stats.panier)}</p>
 						</a>
 					</div>
 
