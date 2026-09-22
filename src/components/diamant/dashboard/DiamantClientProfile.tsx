@@ -50,6 +50,12 @@ export default function DiamantClientProfile() {
 		setSuccessMsg('');
 
 		try {
+			const avatarUrl = generateAvatar(selectedAvatarSeed);
+			try {
+				localStorage.setItem('diamant_client_avatar', avatarUrl);
+				window.dispatchEvent(new CustomEvent('diamant:avatar-changed', { detail: { avatarUrl } }));
+			} catch {}
+
 			const { data: { session } } = await supabase.auth.getSession();
 			if (session) {
 				await supabase
@@ -57,7 +63,7 @@ export default function DiamantClientProfile() {
 					.update({
 						full_name: `${firstName} ${lastName}`.trim(),
 						phone: phone,
-						avatar_url: generateAvatar(selectedAvatarSeed)
+						avatar_url: avatarUrl
 					})
 					.eq('id', session.user.id);
 			}
@@ -75,6 +81,27 @@ export default function DiamantClientProfile() {
 		if (seed.startsWith('http')) return seed;
 		const encoded = encodeURIComponent(seed);
 		return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encoded}&backgroundColor=f08080,f8ad9d,ffdab9`;
+	}
+
+	async function handleAvatarSelect(seed: string) {
+		setSelectedAvatarSeed(seed);
+		setShowAvatarSelector(false);
+		const avatarUrl = generateAvatar(seed);
+
+		try {
+			localStorage.setItem('diamant_client_avatar', avatarUrl);
+			window.dispatchEvent(new CustomEvent('diamant:avatar-changed', { detail: { avatarUrl } }));
+
+			const { data: { session } } = await supabase.auth.getSession();
+			if (session) {
+				await supabase
+					.from('clients')
+					.update({ avatar_url: avatarUrl })
+					.eq('id', session.user.id);
+			}
+		} catch (e) {
+			console.error('Erreur mise à jour avatar:', e);
+		}
 	}
 
 	const avatarOptions = [
@@ -96,10 +123,8 @@ export default function DiamantClientProfile() {
 							{avatarOptions.map(seed => (
 								<button 
 									key={seed}
-									onClick={() => {
-										setSelectedAvatarSeed(seed);
-										setShowAvatarSelector(false);
-									}}
+									type="button"
+									onClick={() => handleAvatarSelect(seed)}
 									className={`relative w-14 h-14 rounded-full border-2 overflow-hidden transition-all ${selectedAvatarSeed === seed ? 'border-deep-teal-500 scale-110 shadow-md' : 'border-stone-200 hover:border-deep-teal-300'}`}
 								>
 									<img src={generateAvatar(seed)} alt={seed} className="w-full h-full object-cover" />

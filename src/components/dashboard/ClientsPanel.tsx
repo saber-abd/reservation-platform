@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
-import { getClientNote, getRegisteredClients, upsertClientNote, getAppointmentsForClient, type Client, type Appointment } from '@/lib/queries';
+import { getClientNote, getRegisteredClients, upsertClientNote, getAppointmentsForClient, getPrimaryProfessional, getDemoTag, type Client, type Appointment, type Professional } from '@/lib/queries';
+import { DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
 import MessageThread from '@/components/shared/MessageThread';
 
 function ClientNoteCard({ professionalId, client }: { professionalId: string; client: Client }) {
@@ -110,17 +111,67 @@ function ClientAppointments({ clientId }: { clientId: string }) {
 }
 
 export default function ClientsPanel() {
-	const { loading, professional, error } = useAuthedProfessional();
+	const { loading: authLoading, professional: authedPro } = useAuthedProfessional();
+	const [fallbackPro, setFallbackPro] = useState<Professional | null>(null);
 	const [clients, setClients] = useState<Client[]>([]);
 	const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+	const [loading, setLoading] = useState(true);
+
+	const professional = authedPro || fallbackPro;
 
 	useEffect(() => {
-		if (!professional) return;
-		getRegisteredClients(professional.id).then(setClients);
-	}, [professional]);
+		let isMounted = true;
+		async function loadProAndClients() {
+			try {
+				const tag = getDemoTag();
+				let pro = authedPro;
+				if (!pro) {
+					pro = await getPrimaryProfessional(tag);
+					if (isMounted && pro) setFallbackPro(pro);
+				}
 
-	if (loading) return <p className="text-sm text-muted-foreground">Chargement...</p>;
-	if (error) return <p className="text-sm text-red-600">{error}</p>;
+				if (pro) {
+					const registered = await getRegisteredClients(pro.id, tag).catch(() => []);
+					const allClients = [...registered];
+
+					if (tag === 'diamant') {
+						DEMO_DIAMANT_CLIENTS.forEach(demoClient => {
+							if (!allClients.find(c => c.id === demoClient.id)) {
+								allClients.push(demoClient as Client);
+							}
+						});
+					}
+
+					if (isMounted) {
+						setClients(allClients);
+
+						// Auto-select client if passed via URL parameter ?clientId=...
+						const params = new URLSearchParams(window.location.search);
+						const targetId = params.get('clientId');
+						if (targetId) {
+							const found = allClients.find(c => c.id === targetId);
+							if (found) {
+								setSelectedClient(found);
+							} else if (allClients.length > 0) {
+								setSelectedClient(allClients[0]);
+							}
+						} else if (allClients.length > 0) {
+							setSelectedClient(allClients[0]);
+						}
+					}
+				}
+			} catch (e) {
+				console.error(e);
+			} finally {
+				if (isMounted) setLoading(false);
+			}
+		}
+
+		loadProAndClients();
+		return () => { isMounted = false; };
+	}, [authedPro]);
+
+	if (loading && authLoading) return <p className="text-sm text-muted-foreground">Chargement...</p>;
 
 	return (
 		<div>
@@ -138,8 +189,8 @@ export default function ClientsPanel() {
 							onClick={() => setSelectedClient(client)}
 							className={`rounded-xl border p-3 text-left text-sm transition-colors ${
 								selectedClient?.id === client.id
-									? 'border-rose-600 bg-rose-50'
-									: 'border-border bg-card hover:border-rose-300'
+									? 'border-deep-teal-500 bg-deep-teal-50/70 text-deep-teal-950 font-medium'
+									: 'border-border bg-card hover:border-deep-teal-200'
 							}`}
 						>
 							<p className="font-medium text-foreground">{client.full_name || 'Client'}</p>

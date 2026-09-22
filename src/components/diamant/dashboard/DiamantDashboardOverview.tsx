@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getPrimaryProfessional, getDemoTag, type Appointment } from '@/lib/queries';
+import { generateDiamantDemoAppointments, DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
+import DiamantNewClientsModal, { type PeriodClientDetail } from './DiamantNewClientsModal';
 import { ArrowUpRight, Users, Calendar, TrendingUp, Clock, MapPin, ChevronDown } from 'lucide-react';
 import DiamantRevenueChart from './DiamantRevenueChart';
 
@@ -18,6 +20,8 @@ export default function DiamantDashboardOverview() {
 	const [loading, setLoading] = useState(true);
 	const [stats, setStats] = useState({ ca: 0, rdv: 0, newClients: 0, panier: 0 });
 	const [appointments, setAppointments] = useState<AppointmentWithService[]>([]);
+	const [periodClients, setPeriodClients] = useState<PeriodClientDetail[]>([]);
+	const [showNewClientsModal, setShowNewClientsModal] = useState(false);
 	
 	// Pour afficher les RDV "Prochains" ou "Derniers" si aucun prochain
 	const [displayAppointments, setDisplayAppointments] = useState<{ type: 'prochains' | 'derniers', list: AppointmentWithService[] }>({ type: 'prochains', list: [] });
@@ -26,12 +30,20 @@ export default function DiamantDashboardOverview() {
 		fetchDashboardData();
 	}, [range, customStart, customEnd]);
 
+	function getRangeLabel(r: TimeRange): string {
+		switch (r) {
+			case 'week': return '7 derniers jours';
+			case 'month': return '30 derniers jours';
+			case 'year': return '1 an';
+			case 'custom': return 'Période personnalisée';
+		}
+	}
+
 	async function fetchDashboardData() {
 		try {
 			setLoading(true);
 			const tag = getDemoTag();
 			const pro = await getPrimaryProfessional(tag);
-			if (!pro) return;
 
 			// Définir la plage de dates
 			let startDate = new Date();
@@ -47,60 +59,111 @@ export default function DiamantDashboardOverview() {
 			} else if (range === 'custom' && customStart && customEnd) {
 				startDate = new Date(customStart);
 				endDate = new Date(customEnd);
-				endDate.setHours(23, 59, 59, 999);
 			}
+			startDate.setHours(0, 0, 0, 0);
+			endDate.setHours(23, 59, 59, 999);
 
-			// 1. Récupérer tous les RDV de la période pour les stats
-			const { data: periodData, error: periodError } = await supabase
-				.from('appointments')
-				.select('*, services(name, duration_minutes, price)')
-				.eq('professional_id', pro.id)
-				.eq('tag_bd', tag)
-				.gte('start_time', startDate.toISOString())
-				.lte('start_time', endDate.toISOString());
+			let periodData: AppointmentWithService[] | null = null;
 
-			if (!periodError && periodData) {
-				const rdvs = periodData as AppointmentWithService[];
-				const completed = rdvs.filter(r => r.status !== 'cancelled');
-				
-				const totalCa = completed.reduce((sum, r) => sum + (r.services?.price || 0), 0);
-				const uniqueClients = new Set(completed.map(r => r.client_email || r.client_name)).size;
-				const panierMoyen = completed.length > 0 ? totalCa / completed.length : 0;
-
-				setStats({
-					ca: totalCa,
-					rdv: completed.length,
-					newClients: uniqueClients, // Approximation
-					panier: Math.round(panierMoyen)
-				});
-			}
-
-			// 2. Récupérer les prochains RDV
-			const { data: nextData, error: nextError } = await supabase
-				.from('appointments')
-				.select('*, services(name, duration_minutes, price)')
-				.eq('professional_id', pro.id)
-				.eq('tag_bd', tag)
-				.gte('start_time', now.toISOString())
-				.order('start_time', { ascending: true })
-				.limit(3);
-
-			if (!nextError && nextData && nextData.length > 0) {
-				setDisplayAppointments({ type: 'prochains', list: nextData as AppointmentWithService[] });
-			} else {
-				// Fallback : derniers RDV passés
-				const { data: pastData, error: pastError } = await supabase
+			// 1. Récupérer tous les RDV de la période pour les stats depuis Supabase
+			if (pro) {
+				const { data, error } = await supabase
 					.from('appointments')
 					.select('*, services(name, duration_minutes, price)')
 					.eq('professional_id', pro.id)
 					.eq('tag_bd', tag)
-					.lt('start_time', now.toISOString())
-					.order('start_time', { ascending: false })
-					.limit(3);
-				
-				if (!pastError && pastData) {
-					setDisplayAppointments({ type: 'derniers', list: pastData as AppointmentWithService[] });
+					.gte('start_time', startDate.toISOString())
+					.lte('start_time', endDate.toISOString());
+				if (!error && data && data.length > 0) {
+					periodData = data as AppointmentWithService[];
 				}
+			}
+
+			// Fallback démo réaliste si aucune donnée en base (mode démo public)
+			const allDemoAppointments = generateDiamantDemoAppointments();
+			const rdvs = (periodData && periodData.length > 0)
+				? periodData
+				: allDemoAppointments.filter(app => {
+					const t = new Date(app.start_time).getTime();
+					return t >= startDate.getTime() && t <= endDate.getTime();
+				});
+
+			const completed = rdvs.filter(r => r.status !== 'cancelled');
+			
+			// Fix : stocker les rendez-vous dans le state pour alimenter DiamantRevenueChart
+			setAppointments(completed);
+
+			const totalCa = completed.reduce((sum, r) => sum + (r.services?.price || 0), 0);
+			const panierMoyen = completed.length > 0 ? totalCa / completed.length : 0;
+
+			// Détail des nouveaux clients
+			const clientsMap = new Map<string, PeriodClientDetail>();
+			completed.forEach(app => {
+				const key = app.client_email || app.client_name;
+				if (!clientsMap.has(key)) {
+					const demo = DEMO_DIAMANT_CLIENTS.find(d => d.email === app.client_email || d.full_name === app.client_name);
+					clientsMap.set(key, {
+						id: app.client_id || demo?.id || `client-${encodeURIComponent(key)}`,
+						name: app.client_name,
+						email: app.client_email || 'client@demo.fr',
+						phone: app.client_phone || demo?.phone,
+						date: app.start_time,
+						serviceName: app.services?.name || 'Prestation',
+						price: app.services?.price || 0
+					});
+				}
+			});
+			const uniqueClientsList = Array.from(clientsMap.values());
+			setPeriodClients(uniqueClientsList);
+
+			setStats({
+				ca: totalCa,
+				rdv: completed.length,
+				newClients: uniqueClientsList.length,
+				panier: Math.round(panierMoyen)
+			});
+
+			// 2. Prochains RDV
+			let nextAppointments: AppointmentWithService[] = [];
+			if (pro) {
+				const { data: nextData } = await supabase
+					.from('appointments')
+					.select('*, services(name, duration_minutes, price)')
+					.eq('professional_id', pro.id)
+					.eq('tag_bd', tag)
+					.gte('start_time', now.toISOString())
+					.order('start_time', { ascending: true })
+					.limit(3);
+				if (nextData && nextData.length > 0) {
+					nextAppointments = nextData as AppointmentWithService[];
+				}
+			}
+
+			if (nextAppointments.length > 0) {
+				setDisplayAppointments({ type: 'prochains', list: nextAppointments });
+			} else {
+				// Fallback : derniers RDV passés
+				let pastAppointments: AppointmentWithService[] = [];
+				if (pro) {
+					const { data: pastData } = await supabase
+						.from('appointments')
+						.select('*, services(name, duration_minutes, price)')
+						.eq('professional_id', pro.id)
+						.eq('tag_bd', tag)
+						.lt('start_time', now.toISOString())
+						.order('start_time', { ascending: false })
+						.limit(3);
+					if (pastData && pastData.length > 0) {
+						pastAppointments = pastData as AppointmentWithService[];
+					}
+				}
+
+				if (pastAppointments.length === 0) {
+					// Prendre les 3 derniers depuis les rendez-vous de démo
+					pastAppointments = [...allDemoAppointments].reverse().slice(0, 3);
+				}
+
+				setDisplayAppointments({ type: 'derniers', list: pastAppointments });
 			}
 
 		} catch (err) {
@@ -190,16 +253,20 @@ export default function DiamantDashboardOverview() {
 							<p className="text-2xl font-black text-stone-800 font-coolvetica">{stats.rdv}</p>
 						</a>
 
-						<a href="/demo-diamant/dashboard/clients" className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-deep-teal-200 hover:shadow-md transition-all card-hover group">
+						<button 
+							type="button"
+							onClick={() => setShowNewClientsModal(true)} 
+							className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-deep-teal-300 hover:shadow-md transition-all card-hover group text-left cursor-pointer"
+						>
 							<div className="flex items-center justify-between mb-3">
-								<div className="w-9 h-9 rounded-xl bg-deep-teal-50 border border-deep-teal-100 flex items-center justify-center text-deep-teal-500">
+								<div className="w-9 h-9 rounded-xl bg-deep-teal-50 border border-deep-teal-100 flex items-center justify-center text-deep-teal-500 group-hover:scale-105 group-hover:bg-deep-teal-500 group-hover:text-white transition-all">
 									<Users size={18} />
 								</div>
-								<span className="text-xs font-bold text-stone-400 group-hover:text-deep-teal-500 transition-colors flex items-center gap-1">Détails <ArrowUpRight size={12}/></span>
+								<span className="text-xs font-bold text-stone-400 group-hover:text-deep-teal-600 transition-colors flex items-center gap-1">Voir liste <ArrowUpRight size={12}/></span>
 							</div>
-							<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Nouveaux Clients (est.)</p>
+							<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Nouveaux Clients</p>
 							<p className="text-2xl font-black text-stone-800 font-coolvetica">{stats.newClients}</p>
-						</a>
+						</button>
 
 						<a href="/demo-diamant/dashboard/statistiques" className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-jasmine-200 hover:shadow-md transition-all card-hover group">
 							<div className="flex items-center justify-between mb-3">
@@ -265,6 +332,14 @@ export default function DiamantDashboardOverview() {
 					</div>
 				</>
 			)}
+
+			{/* Modale de détail des nouveaux clients */}
+			<DiamantNewClientsModal 
+				isOpen={showNewClientsModal}
+				onClose={() => setShowNewClientsModal(false)}
+				clients={periodClients}
+				rangeLabel={getRangeLabel(range)}
+			/>
 		</div>
 	);
 }

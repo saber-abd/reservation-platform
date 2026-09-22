@@ -65,6 +65,11 @@ export default function HeaderAuthButton({ basePath = '' }: { basePath?: string 
 					}
 				}
 
+				if (!avatarKey && typeof window !== 'undefined') {
+					const cached = localStorage.getItem('diamant_client_avatar');
+					if (cached) avatarKey = cached;
+				}
+
 				if (!cancelled) {
 					setUser({
 						id: session.user.id,
@@ -90,14 +95,29 @@ export default function HeaderAuthButton({ basePath = '' }: { basePath?: string 
 			loadUser();
 		});
 
+		// Listen to custom avatar change events
+		function handleAvatarUpdate(e: any) {
+			const newAvatar = e.detail?.avatarUrl;
+			if (newAvatar) {
+				setUser((prev) => (prev ? { ...prev, avatarKey: newAvatar } : null));
+			}
+		}
+		window.addEventListener('diamant:avatar-changed', handleAvatarUpdate);
+
 		return () => {
 			cancelled = true;
 			subscription.unsubscribe();
+			window.removeEventListener('diamant:avatar-changed', handleAvatarUpdate);
 		};
 	}, []);
 
 	async function handleSignOut() {
-		await signOut();
+		try {
+			localStorage.removeItem('diamant_client_avatar');
+			await signOut();
+		} catch (e) {
+			console.error(e);
+		}
 		window.location.href = basePath ? `${basePath}/` : '/';
 	}
 

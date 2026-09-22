@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getPrimaryProfessional, getDemoTag, sendMessage, getMessages, getRegisteredClients, type Message, type Client } from '@/lib/queries';
-import { Send, Image as ImageIcon, User, Loader2 } from 'lucide-react';
+import { DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
+import { Send, Image as ImageIcon, User, ExternalLink } from 'lucide-react';
 
 interface Props {
 	isPro: boolean;
@@ -32,18 +33,22 @@ export default function DiamantMessenger({ isPro }: Props) {
 				if (isPro) {
 					// Load clients who have interacted or booked
 					const registered = await getRegisteredClients(pro.id, tag);
-					// Ensure our demo client is always visible for testing if we are in demo
 					const allClients = [...registered];
-					if (!allClients.find(c => c.id === demoClientId)) {
-						allClients.unshift({
-							id: demoClientId,
-							full_name: demoClientName,
-							phone: null,
-							avatar_url: null,
-							created_at: new Date().toISOString(),
-							tag_bd: tag
-						});
-					}
+					
+					// Ensure all demo clients are available for interactive testing
+					DEMO_DIAMANT_CLIENTS.forEach(demoClient => {
+						if (!allClients.find(c => c.id === demoClient.id)) {
+							allClients.push({
+								id: demoClient.id,
+								full_name: demoClient.full_name,
+								phone: demoClient.phone || null,
+								avatar_url: demoClient.avatar_url || null,
+								created_at: demoClient.created_at || new Date().toISOString(),
+								tag_bd: tag
+							});
+						}
+					});
+
 					setClients(allClients);
 					if (allClients.length > 0) {
 						setActiveClientId(allClients[0].id);
@@ -176,19 +181,54 @@ export default function DiamantMessenger({ isPro }: Props) {
 			{/* Chat Area */}
 			<div className="flex-1 flex flex-col relative bg-stone-50">
 				{/* En-tête */}
-				<div className="p-4 border-b border-stone-200 flex items-center gap-4 bg-white/80 backdrop-blur-sm z-10 sticky top-0">
-					<div className="w-10 h-10 rounded-full bg-deep-teal-100 flex items-center justify-center border border-deep-teal-200 text-deep-teal-600">
-						<User size={20} />
-					</div>
-					<div>
-						<h2 className="text-stone-900 font-bold text-base">
-							{isPro ? (clients.find(c => c.id === activeClientId)?.full_name || 'Client') : 'Maison Prestige'}
-						</h2>
-						<p className="text-deep-teal-600 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
-							<span className="w-1.5 h-1.5 rounded-full bg-deep-teal-500 animate-pulse"></span>
-							En ligne
-						</p>
-					</div>
+				<div className="p-4 border-b border-stone-200 flex items-center justify-between bg-white/80 backdrop-blur-sm z-10 sticky top-0">
+					{isPro && activeClientId ? (
+						<a 
+							href={`/demo-diamant/dashboard/clients?clientId=${encodeURIComponent(activeClientId)}`}
+							className="flex items-center gap-4 group cursor-pointer hover:opacity-90 transition-all"
+							title="Voir la fiche client détaillée"
+						>
+							<div className="w-10 h-10 rounded-full bg-deep-teal-100 flex items-center justify-center border border-deep-teal-200 text-deep-teal-600 group-hover:border-deep-teal-400 group-hover:scale-105 transition-all">
+								<User size={20} />
+							</div>
+							<div>
+								<div className="flex items-center gap-2">
+									<h2 className="text-stone-900 font-bold text-base group-hover:text-deep-teal-600 transition-colors">
+										{clients.find(c => c.id === activeClientId)?.full_name || 'Client'}
+									</h2>
+									<span className="text-[10px] bg-stone-100 text-stone-600 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider group-hover:bg-deep-teal-50 group-hover:text-deep-teal-700 transition-colors">
+										Voir fiche client
+									</span>
+								</div>
+								<p className="text-deep-teal-600 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
+									<span className="w-1.5 h-1.5 rounded-full bg-deep-teal-500 animate-pulse"></span>
+									En ligne
+								</p>
+							</div>
+						</a>
+					) : (
+						<div className="flex items-center gap-4">
+							<div className="w-10 h-10 rounded-full bg-deep-teal-100 flex items-center justify-center border border-deep-teal-200 text-deep-teal-600">
+								<User size={20} />
+							</div>
+							<div>
+								<h2 className="text-stone-900 font-bold text-base">Maison Prestige</h2>
+								<p className="text-deep-teal-600 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
+									<span className="w-1.5 h-1.5 rounded-full bg-deep-teal-500 animate-pulse"></span>
+									En ligne
+								</p>
+							</div>
+						</div>
+					)}
+					{isPro && activeClientId && (
+						<a 
+							href={`/demo-diamant/dashboard/clients?clientId=${encodeURIComponent(activeClientId)}`}
+							className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 text-stone-600 hover:text-deep-teal-600 hover:border-deep-teal-300 hover:bg-deep-teal-50 text-xs font-bold transition-colors"
+						>
+							<span>Fiche client</span>
+							<ExternalLink size={13} />
+						</a>
+					)}
 				</div>
 
 				{/* Messages */}
@@ -205,9 +245,9 @@ export default function DiamantMessenger({ isPro }: Props) {
 									<div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-xs shadow-sm border ${isMine ? 'bg-deep-teal-500 text-white border-deep-teal-600' : 'bg-white text-stone-500 border-stone-200'}`}>
 										{isMine ? (isPro ? 'P' : 'C') : (isPro ? 'C' : 'P')}
 									</div>
-									<div className={`p-4 ${isMine ? 'bg-deep-teal-50 border border-deep-teal-100 rounded-2xl rounded-br-sm' : 'bg-white border border-stone-200 rounded-2xl rounded-bl-sm shadow-sm'}`}>
-										<p className={isMine ? 'text-deep-teal-900' : 'text-stone-700'}>{msg.body}</p>
-										<span className={`text-[10px] uppercase font-bold tracking-widest mt-2 block ${isMine ? 'text-deep-teal-600/70 text-right' : 'text-stone-400'}`}>{time}</span>
+									<div className={`p-4 bg-white border border-stone-200 shadow-sm ${isMine ? 'rounded-2xl rounded-br-sm' : 'rounded-2xl rounded-bl-sm'}`}>
+										<p className="text-stone-900 text-sm leading-relaxed">{msg.body}</p>
+										<span className={`text-[10px] uppercase font-bold tracking-widest mt-2 block text-stone-400 ${isMine ? 'text-right' : 'text-left'}`}>{time}</span>
 									</div>
 								</div>
 							);

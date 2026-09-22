@@ -63,11 +63,11 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 		<div class="grid gap-6 md:grid-cols-3">
 			{
 				siteConfig.about.objectives.map((objective, index) => (
-					<div class="group rounded-2xl border border-stone-200 bg-white p-7 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all section-fade card-hover" data-aos="fade-up" data-aos-delay={index * 100}>
-						<div class="w-11 h-11 rounded-xl bg-deep-teal-50 border border-deep-teal-100 flex items-center justify-center text-deep-teal-500 mb-5">
+					<div class="group rounded-2xl border border-stone-200 bg-white p-7 shadow-sm hover:shadow-lg hover:border-deep-teal-200 transition-all duration-300 section-fade card-hover cursor-pointer" data-aos="fade-up" data-aos-delay={index * 100}>
+						<div class="w-11 h-11 rounded-xl bg-deep-teal-50 border border-deep-teal-100 flex items-center justify-center text-deep-teal-600 mb-5 group-hover:scale-110 group-hover:bg-deep-teal-500 group-hover:text-white transition-all duration-300 shadow-2xs">
 							<span class="font-black text-lg">{index + 1}</span>
 						</div>
-						<p class="font-bold text-stone-900 text-lg mb-3">{objective.title}</p>
+						<p class="font-bold text-stone-900 text-lg mb-3 group-hover:text-deep-teal-600 transition-colors">{objective.title}</p>
 						<p class="text-stone-500 leading-relaxed text-sm">{objective.description}</p>
 					</div>
 				))
@@ -85,12 +85,12 @@ const siteConfig = await getSiteConfig(Astro.url.pathname);
 			<ul class="space-y-4">
 				{
 					siteConfig.about.diplomas.map((diploma, index) => (
-						<li class="group flex flex-col md:flex-row md:items-center justify-between rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-deep-teal-200 transition-all section-fade card-hover" data-aos="fade-up" data-aos-delay={index * 75}>
+						<li class="group flex flex-col md:flex-row md:items-center justify-between rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-deep-teal-300 hover:shadow-md transition-all duration-300 section-fade card-hover cursor-pointer" data-aos="fade-up" data-aos-delay={index * 75}>
 							<div class="mb-3 md:mb-0">
-								<p class="font-bold text-stone-900">{diploma.title}</p>
+								<p class="font-bold text-stone-900 group-hover:text-deep-teal-600 transition-colors">{diploma.title}</p>
 								<p class="text-stone-500 text-sm mt-0.5">{diploma.institution}</p>
 							</div>
-							<span class="text-sm font-bold text-deep-teal-600 bg-deep-teal-50 px-4 py-1.5 rounded-full border border-deep-teal-100 self-start md:self-auto">{diploma.year}</span>
+							<span class="text-sm font-bold text-deep-teal-600 bg-deep-teal-50 px-4 py-1.5 rounded-full border border-deep-teal-100 self-start md:self-auto group-hover:bg-deep-teal-500 group-hover:text-white group-hover:border-deep-teal-500 transition-all duration-300">{diploma.year}</span>
 						</li>
 					))
 				}

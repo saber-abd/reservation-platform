@@ -32,30 +32,7 @@ export default function DiamantRevenueChart({ appointments = [], range = 'month'
 	const data = useMemo(() => {
 		if (appointments.length === 0) return [];
 
-		// Group by day or month based on range
-		const grouped: Record<string, { ca: number; rdv: number }> = {};
-		
-		appointments.forEach(app => {
-			const date = new Date(app.start_time);
-			let key = '';
-			if (range === 'year') {
-				// Group by month
-				key = date.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' });
-			} else {
-				// Group by day
-				key = date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
-			}
-
-			if (!grouped[key]) {
-				grouped[key] = { ca: 0, rdv: 0 };
-			}
-			grouped[key].rdv += 1;
-			grouped[key].ca += app.services?.price || 0;
-		});
-
-		// Convert to array and sort
-		// To sort correctly, we could parse the key back, but simple string sort might fail
-		// Let's rely on chronological insertion if we sort the base appointments first
+		// Sort base appointments chronologically
 		const sortedAppointments = [...appointments].sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
 		
 		const orderedGrouped: Record<string, { ca: number; rdv: number }> = {};

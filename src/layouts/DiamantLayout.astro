@@ -65,13 +65,21 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 				transform: translateY(0);
 			}
 
-			/* Hover sur les cards */
+			/* Hover sur les cards avec priorité face à AOS */
 			.card-hover {
-				transition: transform 0.25s ease, box-shadow 0.25s ease;
+				transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease !important;
+				will-change: transform;
 			}
-			.card-hover:hover {
-				transform: translateY(-4px);
-				box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+			.card-hover:hover,
+			[data-aos].card-hover:hover,
+			[data-aos].aos-animate.card-hover:hover,
+			html:not(.no-js) [data-aos].card-hover.aos-animate:hover {
+				transform: translateY(-5px) !important;
+				box-shadow: 0 14px 34px -8px rgba(0, 0, 0, 0.12) !important;
+			}
+			li.card-hover:hover,
+			[data-aos].card-hover:hover {
+				border-color: #5eead4 !important;
 			}
 		</style>
 	</head>

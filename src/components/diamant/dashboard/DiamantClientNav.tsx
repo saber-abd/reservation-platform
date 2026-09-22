@@ -1,4 +1,5 @@
 import React from 'react';
+import { supabase } from '@/lib/supabase';
 import { Calendar, Star, MessageSquare, User, LogOut } from 'lucide-react';
 
 interface DiamantClientNavProps {
@@ -14,6 +15,16 @@ export default function DiamantClientNav({ basePath }: DiamantClientNavProps) {
 		{ href: `${basePath}/espace-client/messages`, label: 'Messagerie', icon: MessageSquare },
 		{ href: `${basePath}/espace-client/profil`, label: 'Mon Profil', icon: User },
 	];
+
+	async function handleLogout() {
+		try {
+			await supabase.auth.signOut();
+			localStorage.removeItem('diamant_client_avatar');
+		} catch (e) {
+			console.error('Erreur déconnexion:', e);
+		}
+		window.location.href = `${basePath}/connexion`;
+	}
 
 	return (
 		<nav className="flex flex-col gap-2">
@@ -41,19 +52,14 @@ export default function DiamantClientNav({ basePath }: DiamantClientNavProps) {
 			})}
 
 			<div className="mt-8 pt-8 border-t border-stone-200 px-3 flex flex-col gap-2">
-				<a
-					href={basePath}
-					className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-stone-500 hover:bg-stone-50 transition-colors"
+				<button
+					type="button"
+					onClick={handleLogout}
+					className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-stone-500 hover:bg-rose-50 hover:text-rose-600 transition-colors border border-transparent cursor-pointer text-left"
 				>
 					<LogOut size={18} />
 					Déconnexion
-				</a>
-				<a
-					href="/"
-					className="flex items-center justify-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-stone-500 transition-colors hover:border-deep-teal-300 hover:text-deep-teal-600 hover:bg-deep-teal-50 mt-4"
-				>
-					Retour Portfolio
-				</a>
+				</button>
 			</div>
 		</nav>
 	);

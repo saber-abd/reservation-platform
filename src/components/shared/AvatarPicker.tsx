@@ -346,12 +346,24 @@ export function AvatarDisplay({
 	size?: number;
 	className?: string;
 }) {
+	// Support direct URLs (e.g. Dicebear avatar URL saved in client profile)
+	if (avatarKey && (avatarKey.startsWith('http://') || avatarKey.startsWith('https://') || avatarKey.startsWith('/') || avatarKey.startsWith('data:'))) {
+		return (
+			<span
+				className={`inline-block overflow-hidden rounded-full border border-stone-200 bg-white shrink-0 ${className}`}
+				style={{ width: size, height: size }}
+			>
+				<img src={avatarKey} alt="Avatar" className="w-full h-full object-cover" />
+			</span>
+		);
+	}
+
 	const avatar = AVATARS.find((a) => a.key === avatarKey);
 	if (!avatar) {
 		// Default placeholder: user icon
 		return (
 			<span
-				className={`flex items-center justify-center rounded-full bg-stone-200 text-stone-500 ${className}`}
+				className={`flex items-center justify-center rounded-full bg-stone-200 text-stone-500 shrink-0 ${className}`}
 				style={{ width: size, height: size, fontSize: size * 0.45 }}
 			>
 				👤
@@ -360,7 +372,7 @@ export function AvatarDisplay({
 	}
 	return (
 		<span
-			className={`inline-block overflow-hidden rounded-full ${className}`}
+			className={`inline-block overflow-hidden rounded-full shrink-0 ${className}`}
 			style={{ width: size, height: size }}
 			dangerouslySetInnerHTML={{ __html: avatar.svg }}
 		/>
