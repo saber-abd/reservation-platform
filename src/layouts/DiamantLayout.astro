@@ -6,7 +6,7 @@ import DiamantFooter from '@/components/diamant/DiamantFooter.astro';
 import SmoothScroll from '@/components/SmoothScroll.astro';
 import { getSiteConfig } from '@/config/site';
 
-const siteConfig = await getSiteConfig(Astro.url.pathname);
+const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 
 interface Props {
 	title?: string;
@@ -50,9 +50,13 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 		<meta name="theme-color" content="#fff7f1" />
 		<style is:global>
 			.theme-diamant body { font-family: 'Lato', sans-serif; }
-			.theme-diamant h1, .theme-diamant h2, .theme-diamant h3,
-			.theme-diamant h4, .theme-diamant h5, .theme-diamant h6 {
-				font-family: 'Monimer Serif', serif;
+			.theme-diamant:not(.dashboard-diamant) h1, 
+			.theme-diamant:not(.dashboard-diamant) h2, 
+			.theme-diamant:not(.dashboard-diamant) h3,
+			.theme-diamant:not(.dashboard-diamant) h4, 
+			.theme-diamant:not(.dashboard-diamant) h5, 
+			.theme-diamant:not(.dashboard-diamant) h6 {
+				font-family: 'Monimer Serif', 'Lato', serif;
 			}
 			/* Animations section-fade */
 			.section-fade {

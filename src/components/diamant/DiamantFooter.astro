@@ -1,7 +1,7 @@
 ---
 import { getSiteConfig } from '@/config/site';
 
-const siteConfig = await getSiteConfig(Astro.url.pathname);
+const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 const currentYear = new Date().getFullYear();
 ---
 
@@ -11,8 +11,8 @@ const currentYear = new Date().getFullYear();
 			<!-- Marque -->
 			<div class="md:col-span-1">
 				<a href="/demo-diamant/" class="inline-block mb-5">
-					<span class="text-xl font-bold tracking-widest text-stone-800 uppercase">
-						Prestige
+					<span class="text-xl font-bold tracking-widest text-stone-800 uppercase" data-diamant-business-name>
+						{siteConfig.business.name}
 					</span>
 				</a>
 				<p class="text-stone-500 text-sm leading-relaxed mb-7">
@@ -63,7 +63,7 @@ const currentYear = new Date().getFullYear();
 
 		<div class="pt-8 border-t border-stone-200 flex flex-col md:flex-row items-center justify-between gap-4">
 			<p class="text-stone-400 text-sm">
-				&copy; {currentYear} Prestige by {siteConfig.business.name}. Tous droits réservés.
+				&copy; {currentYear} <span data-diamant-business-name>{siteConfig.business.name}</span>. Tous droits réservés.
 			</p>
 			<p class="text-stone-300 text-sm">
 				Demo Diamant — Plateforme de Réservation
@@ -71,3 +71,33 @@ const currentYear = new Date().getFullYear();
 		</div>
 	</div>
 </footer>
+
+<script is:inline>
+	function syncDiamantFooter() {
+		try {
+			var saved = localStorage.getItem('diamant_pro_profile');
+			var name = null;
+			if (saved) {
+				var parsed = JSON.parse(saved);
+				if (parsed && parsed.business_name) name = parsed.business_name;
+			}
+			if (!name) {
+				var match = document.cookie.match(/(?:^|;\s*)diamant_business_name=([^;]+)/);
+				if (match) name = decodeURIComponent(match[1]);
+			}
+			if (name) {
+				document.querySelectorAll('[data-diamant-business-name]').forEach(function(el) {
+					el.textContent = name;
+				});
+			}
+		} catch (e) {}
+	}
+	syncDiamantFooter();
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', syncDiamantFooter);
+	}
+	window.addEventListener('storage', function(e) {
+		if (e.key === 'diamant_pro_profile') syncDiamantFooter();
+	});
+	window.addEventListener('diamant:profile-updated', syncDiamantFooter);
+</script>

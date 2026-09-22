@@ -21,9 +21,15 @@ export default function DiamantProProfile() {
 		async function fetchPro() {
 			try {
 				const tag = getDemoTag();
-				const p = await getPrimaryProfessional(tag);
+				let p = null;
+				try {
+					p = await getPrimaryProfessional(tag);
+				} catch (e) {
+					console.warn("Could not fetch primary professional:", e);
+				}
+
 				// Check local storage for overrides
-				const localDataStr = localStorage.getItem('diamant_pro_profile');
+				const localDataStr = typeof window !== 'undefined' ? localStorage.getItem('diamant_pro_profile') : null;
 				let localData = null;
 				if (localDataStr) {
 					try {
@@ -31,13 +37,43 @@ export default function DiamantProProfile() {
 					} catch (e) {}
 				}
 
+				// Check cookie as fallback
+				let cookieBusinessName = null;
+				if (typeof document !== 'undefined') {
+					const match = document.cookie.match(/(^|;)\s*diamant_business_name=([^;]+)/);
+					if (match) cookieBusinessName = decodeURIComponent(match[2]);
+				}
+
+				const resolvedBusinessName = localData?.business_name ?? cookieBusinessName ?? p?.business_name ?? 'Maison Prestige';
+				const resolvedName = localData?.name ?? p?.name ?? 'Alexandre de Paris';
+				const resolvedEmail = localData?.email ?? p?.email ?? 'contact@prestige-diamant.fr';
+				const resolvedPhone = localData?.phone ?? p?.phone ?? '01 42 68 55 00';
+				const resolvedAddress = localData?.address ?? p?.address ?? '18 Place Vendôme, 75001 Paris';
+
+				setBusinessName(resolvedBusinessName);
+				setName(resolvedName);
+				setEmail(resolvedEmail);
+				setPhone(resolvedPhone);
+				setAddress(resolvedAddress);
+
 				if (p) {
 					setPro(p);
-					setBusinessName(localData?.business_name ?? p.business_name ?? '');
-					setName(localData?.name ?? p.name ?? '');
-					setEmail(localData?.email ?? p.email ?? '');
-					setPhone(localData?.phone ?? p.phone ?? '');
-					setAddress(localData?.address ?? p.address ?? '');
+				} else {
+					// Fallback pro object for demo mode
+					setPro({
+						id: 'demo-pro-diamant',
+						user_id: 'demo-user-diamant',
+						business_name: resolvedBusinessName,
+						activity: 'Haute Coiffure & Soins Précieux',
+						description: 'Salon de prestige dédié à l\'élégance.',
+						phone: resolvedPhone,
+						email: resolvedEmail,
+						address: resolvedAddress,
+						logo_url: null,
+						avatar_url: null,
+						opening_hours: null,
+						tag_bd: tag
+					});
 				}
 			} catch (err) {
 				console.error(err);
@@ -50,42 +86,58 @@ export default function DiamantProProfile() {
 
 	async function handleSave(e: React.FormEvent) {
 		e.preventDefault();
-		if (!pro) return;
 
 		setSaving(true);
 		setSuccessMsg('');
 		setErrorMsg('');
 
 		try {
-			// Save locally to persist across reloads in demo mode
+			// 1. Save locally to persist across reloads
 			localStorage.setItem('diamant_pro_profile', JSON.stringify({
 				business_name: businessName,
 				name, email, phone, address
 			}));
 
-			// Try to save to DB (may fail if RLS is enabled without auth)
-			await supabase
-				.from('professionals')
-				.update({
-					business_name: businessName,
-					name: name,
-					email: email,
-					phone: phone,
-					address: address
-				})
-				.eq('id', pro.id);
+			// 2. Set cookie for immediate SSR sync across all site pages
+			document.cookie = `diamant_business_name=${encodeURIComponent(businessName)}; path=/; max-age=31536000; SameSite=Lax`;
+
+			// 3. Immediately update all elements with data-diamant-business-name in current DOM
+			document.querySelectorAll('[data-diamant-business-name]').forEach((el) => {
+				el.textContent = businessName;
+			});
+
+			// 4. Dispatch custom event for any listening components
+			window.dispatchEvent(new CustomEvent('diamant:profile-updated', {
+				detail: { business_name: businessName }
+			}));
+
+			// 5. Try to save to DB (may fail if RLS is enabled without auth in demo mode)
+			if (pro && pro.id !== 'demo-pro-diamant') {
+				await supabase
+					.from('professionals')
+					.update({
+						business_name: businessName,
+						name: name,
+						email: email,
+						phone: phone,
+						address: address
+					})
+					.eq('id', pro.id);
+			}
 
 		} catch (err: any) {
 			console.warn("DB update failed (likely RLS), but saved locally.", err);
 		} finally {
-			setSuccessMsg('Profil mis à jour avec succès.');
+			setSuccessMsg('Profil et nom de l\'établissement mis à jour avec succès.');
 			
 			// MAJ locale state
-			setPro({
-				...pro,
-				business_name: businessName,
-				name, email, phone, address
-			});
+			if (pro) {
+				setPro({
+					...pro,
+					business_name: businessName,
+					name, email, phone, address
+				});
+			}
 
 			setSaving(false);
 			setTimeout(() => setSuccessMsg(''), 3000);

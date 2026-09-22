@@ -3,7 +3,7 @@ import DiamantLayout from '@/layouts/DiamantLayout.astro';
 import Map from '@/components/Map.astro';
 import { getSiteConfig } from '@/config/site';
 
-const siteConfig = await getSiteConfig(Astro.url.pathname);
+const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 ---
 
 <DiamantLayout title="Contact" description={`Contactez ${siteConfig.business.name}.`}>

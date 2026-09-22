@@ -1,7 +1,7 @@
 ---
 import DiamantLayout from '@/layouts/DiamantLayout.astro';
 import { getSiteConfig } from '@/config/site';
-const siteConfig = await getSiteConfig(Astro.url.pathname);
+const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 ---
 
 <DiamantLayout title="La Maison Prestige" description={`En savoir plus sur ${siteConfig.business.name}.`}>

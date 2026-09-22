@@ -279,7 +279,7 @@ export const itRepairConfig = {
 	],
 };
 
-export async function getSiteConfig(currentPath?: string) {
+export async function getSiteConfig(currentPath?: string, cookies?: any) {
 	try {
 		const tag = currentPath ? (currentPath.match(/^\/demo-([^/]+)/)?.[1] || 'diamant') : 'diamant';
 		
@@ -288,13 +288,21 @@ export async function getSiteConfig(currentPath?: string) {
 			baseConfig = itRepairConfig;
 		}
 
+		let overrideBusinessName: string | null = null;
+		if (tag === 'diamant' && cookies) {
+			try {
+				const cookieVal = typeof cookies.get === 'function' ? cookies.get('diamant_business_name')?.value : cookies['diamant_business_name'];
+				if (cookieVal) overrideBusinessName = decodeURIComponent(cookieVal);
+			} catch (e) {}
+		}
+
 		const pro = await getPrimaryProfessional(tag);
 		if (pro) {
 			return {
 				...baseConfig,
 				business: {
 					...baseConfig.business,
-					name: pro.business_name || baseConfig.business.name,
+					name: overrideBusinessName || pro.business_name || baseConfig.business.name,
 					activity: pro.activity || baseConfig.business.activity,
 					description: pro.description || baseConfig.business.description,
 					phone: pro.phone || baseConfig.business.phone,
@@ -304,6 +312,16 @@ export async function getSiteConfig(currentPath?: string) {
 			};
 		}
 		
+		if (overrideBusinessName) {
+			return {
+				...baseConfig,
+				business: {
+					...baseConfig.business,
+					name: overrideBusinessName,
+				}
+			};
+		}
+
 		return baseConfig;
 	} catch (e) {
 		console.error("Error fetching primary professional", e);

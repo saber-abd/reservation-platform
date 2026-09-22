@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getPrimaryProfessional, getDemoTag, sendMessage, getMessages, getRegisteredClients, type Message, type Client } from '@/lib/queries';
 import { DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
-import { Send, Image as ImageIcon, User, ExternalLink } from 'lucide-react';
+import { Send, Image as ImageIcon, User, ExternalLink, Loader2 } from 'lucide-react';
 
 interface Props {
 	isPro: boolean;
@@ -26,13 +26,25 @@ export default function DiamantMessenger({ isPro }: Props) {
 		async function init() {
 			try {
 				const tag = getDemoTag();
-				const pro = await getPrimaryProfessional(tag);
-				if (!pro) return;
-				setProId(pro.id);
+				let pro = null;
+				try {
+					pro = await getPrimaryProfessional(tag);
+				} catch (e) {
+					console.warn('Could not fetch professional, using fallback pro ID:', e);
+				}
+				const effectiveProId = pro?.id || 'demo-pro-diamant';
+				setProId(effectiveProId);
 
 				if (isPro) {
 					// Load clients who have interacted or booked
-					const registered = await getRegisteredClients(pro.id, tag);
+					let registered: Client[] = [];
+					if (pro?.id) {
+						try {
+							registered = await getRegisteredClients(pro.id, tag);
+						} catch (e) {
+							console.warn('Could not fetch registered clients:', e);
+						}
+					}
 					const allClients = [...registered];
 					
 					// Ensure all demo clients are available for interactive testing
@@ -70,33 +82,114 @@ export default function DiamantMessenger({ isPro }: Props) {
 			fetchMessages();
 			
 			// Setup realtime subscription
-			const channel = supabase
-				.channel('public:messages')
-				.on('postgres_changes', { 
-					event: 'INSERT', 
-					schema: 'public', 
-					table: 'messages',
-					filter: `professional_id=eq.${proId}` 
-				}, (payload) => {
-					const newMsg = payload.new as Message;
-					if (newMsg.client_id === activeClientId) {
-						setMessages(prev => [...prev, newMsg]);
+			let channel: any = null;
+			try {
+				channel = supabase
+					.channel(`public:messages:${proId}:${activeClientId}`)
+					.on('postgres_changes', { 
+						event: 'INSERT', 
+						schema: 'public', 
+						table: 'messages',
+						filter: `professional_id=eq.${proId}` 
+					}, (payload) => {
+						const newMsg = payload.new as Message;
+						if (newMsg.client_id === activeClientId) {
+							setMessages(prev => {
+								if (prev.some(m => m.id === newMsg.id)) return prev;
+								return [...prev, newMsg];
+							});
+							scrollToBottom();
+						}
+					})
+					.subscribe();
+			} catch (e) {
+				console.warn('Realtime channel subscription error:', e);
+			}
+
+			// LocalStorage sync across browser tabs for demo
+			const handleStorage = (e: StorageEvent) => {
+				if (e.key === `diamant_messages_${proId}_${activeClientId}` && e.newValue) {
+					try {
+						const parsed = JSON.parse(e.newValue);
+						setMessages(parsed);
 						scrollToBottom();
+					} catch (err) {
+						console.error(err);
 					}
-				})
-				.subscribe();
+				}
+			};
+			window.addEventListener('storage', handleStorage);
 
 			return () => {
-				supabase.removeChannel(channel);
+				if (channel) {
+					supabase.removeChannel(channel);
+				}
+				window.removeEventListener('storage', handleStorage);
 			};
 		}
 	}, [proId, activeClientId]);
 
+	function getStorageKey(pid: string, cid: string) {
+		return `diamant_messages_${pid}_${cid}`;
+	}
+
+	function getInitialDemoMessages(pid: string, cid: string): Message[] {
+		return [
+			{
+				id: 'demo-msg-1',
+				professional_id: pid,
+				client_id: cid,
+				sender: 'client',
+				body: 'Bonjour, est-il possible de décaler mon rendez-vous de 15 minutes ?',
+				created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+				read_at: null,
+				tag_bd: getDemoTag()
+			},
+			{
+				id: 'demo-msg-2',
+				professional_id: pid,
+				client_id: cid,
+				sender: 'professional',
+				body: 'Bonjour ! Oui tout à fait, aucun problème, je vous attends à 14h15 avec plaisir.',
+				created_at: new Date(Date.now() - 3600000).toISOString(),
+				read_at: null,
+				tag_bd: getDemoTag()
+			}
+		];
+	}
+
 	async function fetchMessages() {
 		if (!proId || !activeClientId) return;
 		try {
-			const msgs = await getMessages(proId, activeClientId);
-			setMessages(msgs);
+			// Check localStorage cache first
+			const storageKey = getStorageKey(proId, activeClientId);
+			const saved = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null;
+			let localMsgs: Message[] = [];
+			if (saved) {
+				try {
+					localMsgs = JSON.parse(saved);
+				} catch (e) {
+					console.error(e);
+				}
+			}
+
+			let dbMsgs: Message[] = [];
+			try {
+				dbMsgs = await getMessages(proId, activeClientId);
+			} catch (e) {
+				console.warn('Could not query Supabase messages:', e);
+			}
+
+			if (dbMsgs && dbMsgs.length > 0) {
+				setMessages(dbMsgs);
+				localStorage.setItem(storageKey, JSON.stringify(dbMsgs));
+			} else if (localMsgs.length > 0) {
+				setMessages(localMsgs);
+			} else {
+				const defaults = getInitialDemoMessages(proId, activeClientId);
+				setMessages(defaults);
+				localStorage.setItem(storageKey, JSON.stringify(defaults));
+			}
 			scrollToBottom();
 		} catch (err) {
 			console.error(err);
@@ -115,30 +208,37 @@ export default function DiamantMessenger({ isPro }: Props) {
 
 		setSending(true);
 		try {
+			const bodyText = newMessage.trim();
 			// Optimistic UI
 			const optimisticMsg: Message = {
-				id: Math.random().toString(),
+				id: 'msg-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
 				professional_id: proId,
 				client_id: activeClientId,
 				sender: isPro ? 'professional' : 'client',
-				body: newMessage,
+				body: bodyText,
 				created_at: new Date().toISOString(),
 				read_at: null,
 				tag_bd: getDemoTag()
 			};
-			setMessages(prev => [...prev, optimisticMsg]);
+
+			const nextMessages = [...messages, optimisticMsg];
+			setMessages(nextMessages);
 			scrollToBottom();
 			setNewMessage('');
 
+			// Persist to localStorage for demo reliability & cross-tab sync
+			const storageKey = getStorageKey(proId, activeClientId);
+			localStorage.setItem(storageKey, JSON.stringify(nextMessages));
+
+			// Persist to Supabase if connected
 			await sendMessage({
 				professional_id: proId,
 				client_id: activeClientId,
 				sender: isPro ? 'professional' : 'client',
-				body: optimisticMsg.body
+				body: bodyText
+			}).catch(err => {
+				console.warn('Message saved locally (Supabase demo mode fallback):', err);
 			});
-			// On relance fetchMessages juste au cas où pour avoir les vrais IDs, 
-			// mais le channel realtime va aussi déclencher. 
-			// Dans une app parfaite on dédupliquerait.
 		} catch (err) {
 			console.error(err);
 		} finally {

@@ -40,6 +40,7 @@
     font-weight: normal;
     font-style: normal;
     font-display: swap;
+    unicode-range: U+0000-002F, U+003A-FFFF;
 }
 
 @font-face {
@@ -375,8 +376,25 @@
     font-family: 'Recoleta', serif !important;
 }
 
-.theme-diamant h1, .theme-diamant h2, .theme-diamant h3, .theme-diamant h4, .theme-diamant h5, .theme-diamant h6 {
-    font-family: 'Monimer Serif', serif !important;
+.theme-diamant:not(.dashboard-diamant) h1, 
+.theme-diamant:not(.dashboard-diamant) h2, 
+.theme-diamant:not(.dashboard-diamant) h3, 
+.theme-diamant:not(.dashboard-diamant) h4, 
+.theme-diamant:not(.dashboard-diamant) h5, 
+.theme-diamant:not(.dashboard-diamant) h6 {
+    font-family: 'Monimer Serif', 'Lato', sans-serif !important;
+}
+
+.dashboard-diamant, .dashboard-diamant body {
+    --font-heading: 'Coolvetica', sans-serif;
+    --font-sans: 'Coolvetica', sans-serif;
+    font-family: 'Coolvetica', sans-serif !important;
+}
+
+.dashboard-diamant h1, .dashboard-diamant h2, .dashboard-diamant h3, 
+.dashboard-diamant h4, .dashboard-diamant h5, .dashboard-diamant h6, 
+.dashboard-diamant .font-black, .dashboard-diamant .font-bold {
+    font-family: 'Coolvetica', sans-serif !important;
 }
 
 .font-coolvetica, .theme-diamant .font-coolvetica {

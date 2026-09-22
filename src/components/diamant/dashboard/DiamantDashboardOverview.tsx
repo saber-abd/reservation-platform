@@ -284,7 +284,7 @@ export default function DiamantDashboardOverview() {
 						{/* Chart */}
 						<div className="lg:col-span-2 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
 							<div className="flex items-center justify-between mb-5">
-								<h2 className="text-base font-bold text-stone-800">Évolution du CA</h2>
+								<h2 className="text-base font-bold text-stone-800 font-coolvetica">Évolution du CA</h2>
 								<a href="/demo-diamant/dashboard/statistiques" className="text-xs font-bold uppercase tracking-widest text-deep-teal-500 hover:text-deep-teal-400">Rapport complet →</a>
 							</div>
 							{/* On utilise les données dynamiques */}
@@ -294,7 +294,7 @@ export default function DiamantDashboardOverview() {
 						{/* Prochains RDV / Derniers RDV */}
 						<div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
 							<div className="flex items-center justify-between mb-5">
-								<h2 className="text-base font-bold text-stone-800">
+								<h2 className="text-base font-bold text-stone-800 font-coolvetica">
 									{displayAppointments.type === 'prochains' ? 'Prochains RDV' : 'Derniers RDV'}
 								</h2>
 								{displayAppointments.type === 'derniers' && (

@@ -6,7 +6,7 @@ import ServicesCarousel from '@/components/ServicesCarousel';
 import TestimonialsCarousel from '@/components/TestimonialsCarousel';
 import { getSiteConfig } from '@/config/site';
 
-const siteConfig = await getSiteConfig(Astro.url.pathname);
+const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 ---
 
 <DiamantLayout>

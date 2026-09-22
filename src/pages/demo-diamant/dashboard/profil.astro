@@ -4,7 +4,7 @@ import DiamantDashboardNav from '@/components/diamant/dashboard/DiamantDashboard
 import DiamantProProfile from '@/components/diamant/dashboard/DiamantProProfile';
 import { getSiteConfig } from '@/config/site';
 
-const siteConfig = await getSiteConfig(Astro.url.pathname);
+const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 ---
 
 <DiamantDashboardLayout title="Profil Maison">

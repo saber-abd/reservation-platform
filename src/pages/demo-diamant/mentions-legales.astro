@@ -2,7 +2,7 @@
 import DiamantLayout from '@/layouts/DiamantLayout.astro';
 import { getSiteConfig } from '@/config/site';
 
-const siteConfig = await getSiteConfig(Astro.url.pathname);
+const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 ---
 
 <DiamantLayout title="Mentions Légales" description="Mentions légales de la plateforme.">
