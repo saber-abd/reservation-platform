@@ -171,9 +171,9 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 			} catch (e) {}
 
 			const basePath = getEffectiveBasePath();
-			window.location.href = proAccount.role === 'admin' 
-				? `${basePath}/dashboard` 
-				: `${basePath}/dashboard/disponibilites`;
+			window.location.href = proAccount.role === 'employee'
+				? `${basePath}/dashboard/disponibilites`
+				: `${basePath}/dashboard`;
 			return;
 		}
 

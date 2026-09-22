@@ -15,6 +15,7 @@ import {
 	type Professional 
 } from '@/lib/queries';
 import { DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
+import { isRoleReadOnly } from '@/lib/permissions';
 import MessageThread from '@/components/shared/MessageThread';
 import { User, Phone, Mail, Calendar, MessageSquare, Search, ExternalLink, ShieldCheck, Clock, FileText, Pencil, X, Check, Sparkles } from 'lucide-react';
 
@@ -33,6 +34,11 @@ function ClientNoteCard({ professionalId, client }: { professionalId: string; cl
 	}, [professionalId, client.id]);
 
 	async function handleSave() {
+		if (isRoleReadOnly()) {
+			setStatus("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			setTimeout(() => setStatus(null), 3000);
+			return;
+		}
 		setSaving(true);
 		setStatus(null);
 		try {
@@ -176,6 +182,10 @@ export default function ClientsPanel() {
 
 	async function handleSaveEdit(e: React.FormEvent) {
 		e.preventDefault();
+		if (isRoleReadOnly()) {
+			showEditToast("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			return;
+		}
 		if (!selectedClient) return;
 		setIsSavingClient(true);
 		try {

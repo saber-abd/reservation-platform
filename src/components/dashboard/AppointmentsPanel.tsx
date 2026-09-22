@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
+import { isRoleReadOnly } from '@/lib/permissions';
 import { getAppointmentsForProfessional, updateAppointmentStatus, type Appointment } from '@/lib/queries';
 
 type AppointmentWithService = Appointment & {
@@ -156,16 +157,28 @@ export default function AppointmentsPanel() {
 	}, [professional]);
 
 	async function handleCancel(id: string) {
+		if (isRoleReadOnly()) {
+			alert("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			return;
+		}
 		const updated = await updateAppointmentStatus(id, 'cancelled');
 		setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, ...updated } : a)));
 	}
 
 	async function handleConfirm(id: string) {
+		if (isRoleReadOnly()) {
+			alert("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			return;
+		}
 		const updated = await updateAppointmentStatus(id, 'confirmed');
 		setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, ...updated } : a)));
 	}
 
 	async function handleComplete(id: string) {
+		if (isRoleReadOnly()) {
+			alert("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			return;
+		}
 		const updated = await updateAppointmentStatus(id, 'completed');
 		setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, ...updated } : a)));
 	}

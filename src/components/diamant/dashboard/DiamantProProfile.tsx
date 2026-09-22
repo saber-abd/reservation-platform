@@ -95,6 +95,11 @@ export default function DiamantProProfile() {
 	async function handleSave(e: React.FormEvent) {
 		e.preventDefault();
 
+		if (role === 'employee' || role === 'demo') {
+			setErrorMsg("Action désactivée : modifications non autorisées dans ce mode.");
+			return;
+		}
+
 		setSaving(true);
 		setSuccessMsg('');
 		setErrorMsg('');
@@ -178,16 +183,28 @@ export default function DiamantProProfile() {
 				</div>
 			)}
 
-			{/* Alerte Mode Employé */}
-			{role === 'employee' && (
-				<div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3.5 text-amber-950 shadow-2xs">
-					<div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0 text-amber-800">
+			{/* Alerte Mode Employé ou Démo */}
+			{(role === 'employee' || role === 'demo') && (
+				<div className={`mb-6 p-4 rounded-2xl border flex items-start gap-3.5 shadow-2xs ${
+					role === 'demo' 
+						? 'bg-purple-50 border-purple-200 text-purple-950' 
+						: 'bg-amber-50 border-amber-200 text-amber-950'
+				}`}>
+					<div className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 ${
+						role === 'demo' 
+							? 'bg-purple-100 border-purple-300 text-purple-800' 
+							: 'bg-amber-100 border-amber-300 text-amber-800'
+					}`}>
 						<Lock size={16} />
 					</div>
 					<div>
-						<p className="font-bold text-sm">Mode Employé — Modification Verrouillée</p>
-						<p className="text-xs text-amber-800 mt-0.5 leading-relaxed">
-							Vous êtes connecté avec les droits <strong>Employé</strong>. Vous n'avez pas la permission de modifier les informations de l'établissement. Ce formulaire est consultable en lecture seule.
+						<p className="font-bold text-sm">
+							{role === 'demo' ? 'Mode Démo Commercial — Consultation Seule' : 'Mode Employé — Modification Verrouillée'}
+						</p>
+						<p className="text-xs mt-0.5 leading-relaxed opacity-90">
+							{role === 'demo'
+								? "Vous explorez le profil en mode Démo Commercial. Toutes les informations sont visibles pour vos prospects, mais les modifications sont désactivées."
+								: "Vous êtes connecté avec les droits Employé. Vous n'avez pas la permission de modifier les informations de l'établissement."}
 						</p>
 					</div>
 				</div>
@@ -220,7 +237,7 @@ export default function DiamantProProfile() {
 					<div className="md:col-span-2">
 						<div className="flex items-center justify-between mb-5">
 							<h3 className="text-base font-bold text-stone-800">Informations Publiques</h3>
-							{role === 'employee' && (
+							{(role === 'employee' || role === 'demo') && (
 								<span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-500 border border-stone-200 flex items-center gap-1">
 									<Lock size={11} /> Lecture Seule
 								</span>
@@ -232,7 +249,7 @@ export default function DiamantProProfile() {
 									<label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Building2 size={12}/> Nom de l'établissement</label>
 									<input 
 										type="text" 
-										disabled={role === 'employee'}
+										disabled={role === 'employee' || role === 'demo'}
 										value={businessName} 
 										onChange={e => setBusinessName(e.target.value)} 
 										className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400 disabled:opacity-60 disabled:cursor-not-allowed" 
@@ -242,7 +259,7 @@ export default function DiamantProProfile() {
 									<label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-2"><User size={12}/> Nom du gérant / Praticien</label>
 									<input 
 										type="text" 
-										disabled={role === 'employee'}
+										disabled={role === 'employee' || role === 'demo'}
 										value={name} 
 										onChange={e => setName(e.target.value)} 
 										className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400 disabled:opacity-60 disabled:cursor-not-allowed" 
@@ -254,7 +271,7 @@ export default function DiamantProProfile() {
 								<label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-2"><MapPin size={12}/> Adresse postale</label>
 								<input 
 									type="text" 
-									disabled={role === 'employee'}
+									disabled={role === 'employee' || role === 'demo'}
 									value={address} 
 									onChange={e => setAddress(e.target.value)} 
 									className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400 disabled:opacity-60 disabled:cursor-not-allowed" 
@@ -266,7 +283,7 @@ export default function DiamantProProfile() {
 									<label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Phone size={12}/> Téléphone</label>
 									<input 
 										type="tel" 
-										disabled={role === 'employee'}
+										disabled={role === 'employee' || role === 'demo'}
 										value={phone} 
 										onChange={e => setPhone(e.target.value)} 
 										className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400 disabled:opacity-60 disabled:cursor-not-allowed" 
@@ -276,7 +293,7 @@ export default function DiamantProProfile() {
 									<label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Mail size={12}/> Email de contact</label>
 									<input 
 										type="email" 
-										disabled={role === 'employee'}
+										disabled={role === 'employee' || role === 'demo'}
 										value={email} 
 										onChange={e => setEmail(e.target.value)} 
 										className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400 disabled:opacity-60 disabled:cursor-not-allowed" 
@@ -285,10 +302,10 @@ export default function DiamantProProfile() {
 							</div>
 
 							<div className="pt-4 flex justify-end">
-								{role === 'employee' ? (
+								{role === 'employee' || role === 'demo' ? (
 									<div className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-stone-100 text-stone-400 font-bold text-xs border border-stone-200">
 										<Lock size={14} />
-										<span>Modification réservée à l'administrateur</span>
+										<span>{role === 'demo' ? 'Lecture seule (Mode Démo)' : 'Modification réservée à l\'administrateur'}</span>
 									</div>
 								) : (
 									<button type="submit" disabled={saving} className="flex items-center gap-2 px-6 py-3 rounded-xl bg-deep-teal-500 text-white font-bold text-sm hover:bg-deep-teal-600 transition-colors disabled:opacity-50 cursor-pointer shadow-xs">

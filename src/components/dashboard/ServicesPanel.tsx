@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
+import { isRoleReadOnly } from '@/lib/permissions';
 import { createService, deleteService, getAllServices, updateService, uploadServiceImage, type Service } from '@/lib/queries';
 import { getServiceImageFallback } from '@/lib/serviceImages';
 import ImageCropper from '@/components/ui/ImageCropper';
@@ -70,6 +71,10 @@ export default function ServicesPanel() {
 	}
 
 	async function onSubmit(values: FormValues) {
+		if (isRoleReadOnly()) {
+			setFormError("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			return;
+		}
 		if (!professional) return;
 		setFormError(null);
 		try {
@@ -113,11 +118,19 @@ export default function ServicesPanel() {
 	}
 
 	async function handleToggleActive(service: Service) {
+		if (isRoleReadOnly()) {
+			alert("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			return;
+		}
 		const updated = await updateService(service.id, { is_active: !service.is_active });
 		setServices((prev) => prev.map((s) => (s.id === service.id ? updated : s)));
 	}
 
 	async function handleDelete(id: string) {
+		if (isRoleReadOnly()) {
+			alert("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			return;
+		}
 		await deleteService(id);
 		setServices((prev) => prev.filter((s) => s.id !== id));
 	}

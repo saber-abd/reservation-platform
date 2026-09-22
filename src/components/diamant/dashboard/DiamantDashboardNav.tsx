@@ -78,20 +78,20 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 		}
 	}
 
-	// Liste complète des liens pour l'Administrateur
+	// Liste complète des liens pour l'Administrateur et le mode Démo (lecture seule)
 	const allLinks = [
-		{ href: `${basePath}/dashboard`, label: 'Tableau de bord', icon: Home, roles: ['admin'] },
-		{ href: `${basePath}/dashboard/disponibilites`, label: 'Planning & RDV', icon: Calendar, roles: ['admin', 'employee'] },
-		{ href: `${basePath}/dashboard/clients`, label: 'Clientèle', icon: Users, roles: ['admin', 'employee'] },
-		{ href: `${basePath}/dashboard/messages`, label: 'Messagerie', icon: MessageSquare, badge: unreadCount, roles: ['admin', 'employee'] },
-		{ href: `${basePath}/dashboard/services`, label: 'Gestion des prestations', icon: Scissors, roles: ['admin'] },
-		{ href: `${basePath}/dashboard/statistiques`, label: 'Performances', icon: BarChart3, roles: ['admin'] },
-		{ href: `${basePath}/dashboard/recherche`, label: 'Recherche', icon: Search, roles: ['admin', 'employee'] },
-		{ href: `${basePath}/dashboard/profil`, label: 'Profil Maison', icon: Settings, roles: ['admin'] },
-		{ href: `${basePath}/dashboard/droits`, label: 'Gestion des droits', icon: ShieldCheck, roles: ['admin'] },
+		{ href: `${basePath}/dashboard`, label: 'Tableau de bord', icon: Home, roles: ['admin', 'demo'] },
+		{ href: `${basePath}/dashboard/disponibilites`, label: 'Planning & RDV', icon: Calendar, roles: ['admin', 'employee', 'demo'] },
+		{ href: `${basePath}/dashboard/clients`, label: 'Clientèle', icon: Users, roles: ['admin', 'employee', 'demo'] },
+		{ href: `${basePath}/dashboard/messages`, label: 'Messagerie', icon: MessageSquare, badge: unreadCount, roles: ['admin', 'employee', 'demo'] },
+		{ href: `${basePath}/dashboard/services`, label: 'Gestion des prestations', icon: Scissors, roles: ['admin', 'demo'] },
+		{ href: `${basePath}/dashboard/statistiques`, label: 'Performances', icon: BarChart3, roles: ['admin', 'demo'] },
+		{ href: `${basePath}/dashboard/recherche`, label: 'Recherche', icon: Search, roles: ['admin', 'employee', 'demo'] },
+		{ href: `${basePath}/dashboard/profil`, label: 'Profil Maison', icon: Settings, roles: ['admin', 'demo'] },
+		{ href: `${basePath}/dashboard/droits`, label: 'Gestion des droits', icon: ShieldCheck, roles: ['admin', 'demo'] },
 	];
 
-	// Filtrer selon le rôle actif : l'employé n'accède QU'À planning, clientèle, messagerie, recherche
+	// Filtrer selon le rôle actif : l'employé n'accède QU'À planning, clientèle, messagerie, recherche. Le mode démo accède à tout en lecture seule.
 	const visibleLinks = allLinks.filter(link => link.roles.includes(role));
 
 	async function handleLogout() {
@@ -117,15 +117,17 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 				)}
 				<div className="flex items-center justify-between mb-2">
 					<span className="text-[10px] font-black uppercase tracking-wider text-stone-400">Rôle Actif</span>
-					<span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+					<span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
 						role === 'admin' 
-							? 'bg-amber-100 text-amber-800 border border-amber-200' 
-							: 'bg-deep-teal-100 text-deep-teal-800 border border-deep-teal-200'
+							? 'bg-amber-100 text-amber-800 border-amber-200' 
+							: role === 'demo'
+							? 'bg-purple-100 text-purple-800 border-purple-200'
+							: 'bg-deep-teal-100 text-deep-teal-800 border-deep-teal-200'
 					}`}>
-						{role === 'admin' ? 'Gérant' : 'Employé'}
+						{role === 'admin' ? 'Gérant' : role === 'demo' ? 'Mode Démo' : 'Employé'}
 					</span>
 				</div>
-				<div className="grid grid-cols-2 gap-1 p-0.5 bg-stone-200/70 rounded-xl">
+				<div className="grid grid-cols-3 gap-1 p-0.5 bg-stone-200/70 rounded-xl">
 					<button
 						type="button"
 						onClick={() => handleSwitchRole('admin')}
@@ -134,6 +136,7 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 								? 'bg-white text-stone-900 shadow-2xs' 
 								: 'text-stone-500 hover:text-stone-900'
 						}`}
+						title="Accès Administrateur complet"
 					>
 						Admin
 					</button>
@@ -145,15 +148,37 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 								? 'bg-deep-teal-600 text-white shadow-2xs' 
 								: 'text-stone-500 hover:text-stone-900'
 						}`}
+						title="Accès Employé opérationnel"
 					>
 						Employé
+					</button>
+					<button
+						type="button"
+						onClick={() => handleSwitchRole('demo')}
+						className={`py-1 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
+							role === 'demo' 
+								? 'bg-purple-600 text-white shadow-2xs' 
+								: 'text-stone-500 hover:text-stone-900'
+						}`}
+						title="Mode Démo découverte (Lecture seule pour prospects)"
+					>
+						Démo
 					</button>
 				</div>
 			</div>
 
+			{role === 'demo' && (
+				<div className="mx-1 mb-3 p-2.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-900 text-[11px] leading-snug">
+					<span className="font-bold flex items-center gap-1 text-purple-950 mb-0.5">
+						Mode Découverte Commerciale
+					</span>
+					Consultation complète en lecture seule. Les modifications et suppressions sont désactivées.
+				</div>
+			)}
+
 			<div className="mb-2 px-2">
 				<p className="text-xs font-bold text-stone-400 uppercase tracking-widest">
-					{role === 'admin' ? 'Espace Administrateur' : 'Espace Collaborateur'}
+					{role === 'admin' ? 'Espace Administrateur' : role === 'demo' ? 'Espace Découverte Démo' : 'Espace Collaborateur'}
 				</p>
 			</div>
 

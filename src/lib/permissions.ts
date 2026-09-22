@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import { getDemoTag } from './queries';
 
-export type ProRole = 'admin' | 'employee';
+export type ProRole = 'admin' | 'employee' | 'demo';
 
 export interface TeamMember {
 	id: string;
@@ -27,8 +27,13 @@ const DEFAULT_TEAM_MEMBERS: TeamMember[] = [];
 export function getActiveProRole(): ProRole {
 	if (typeof window === 'undefined') return 'admin';
 	const saved = localStorage.getItem('pro_active_role');
-	if (saved === 'employee' || saved === 'admin') return saved;
+	if (saved === 'employee' || saved === 'admin' || saved === 'demo') return saved;
 	return 'admin';
+}
+
+export function isRoleReadOnly(role?: ProRole): boolean {
+	const current = role || getActiveProRole();
+	return current === 'demo';
 }
 
 export function setActiveProRole(role: ProRole): void {
@@ -350,7 +355,7 @@ export async function deleteClientAccount(clientId: string): Promise<void> {
  * Vérifie si une route donnée est accessible pour un rôle donné
  */
 export function isTabAllowedForRole(pathname: string, role: ProRole): boolean {
-	if (role === 'admin') return true;
+	if (role === 'admin' || role === 'demo') return true; // Le rôle Démo a accès à tous les onglets en consultation complète
 
 	// Pour l'employé, seuls ces 4 onglets sont autorisés :
 	// - Planning & RDV (/dashboard/disponibilites)
