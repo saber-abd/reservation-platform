@@ -460,6 +460,22 @@ export async function getAllClients(
 		} catch (e) {}
 	}
 
+	// 7. Merge cached client emails from auth/login
+	if (typeof window !== 'undefined') {
+		try {
+			const emailsMap = JSON.parse(localStorage.getItem('diamant_client_emails') || '{}');
+			for (const cid in emailsMap) {
+				const em = emailsMap[cid];
+				if (em && clientsMap.has(cid)) {
+					const existing = clientsMap.get(cid)!;
+					if (!existing.email) {
+						existing.email = em;
+					}
+				}
+			}
+		} catch (e) {}
+	}
+
 	return Array.from(clientsMap.values());
 }
 

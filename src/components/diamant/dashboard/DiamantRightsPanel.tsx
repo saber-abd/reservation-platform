@@ -210,8 +210,23 @@ export default function DiamantRightsPanel() {
 
 	function handleBanClientSubmit() {
 		if (!banModalClient) return;
-		const finalReason = banReason === 'Autre motif' ? customBanReason.trim() : banReason;
-		banClient(banModalClient.id, banModalClient.full_name || 'Client', finalReason, banModalClient.email);
+		const finalReason = (banReason === 'Autre motif' ? customBanReason.trim() : banReason) || 'Non-respect des conditions de réservation';
+		
+		let resolvedEmail = banModalClient.email;
+		if (!resolvedEmail && typeof window !== 'undefined') {
+			try {
+				const map = JSON.parse(localStorage.getItem('diamant_client_emails') || '{}');
+				if (map[banModalClient.id]) resolvedEmail = map[banModalClient.id];
+			} catch (e) {}
+			if (!resolvedEmail) {
+				try {
+					const overrides = JSON.parse(localStorage.getItem('diamant_client_overrides') || '{}');
+					if (overrides[banModalClient.id]?.email) resolvedEmail = overrides[banModalClient.id].email;
+				} catch (e) {}
+			}
+		}
+
+		banClient(banModalClient.id, banModalClient.full_name || 'Client', finalReason, resolvedEmail);
 		setBanModalClient(null);
 		setCustomBanReason('');
 		showToast(`Client ${banModalClient.full_name || ''} banni avec succès.`);

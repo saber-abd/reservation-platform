@@ -98,43 +98,128 @@ export function getBannedClients(): Record<string, BannedClientRecord> {
 		const saved = localStorage.getItem('diamant_banned_clients');
 		if (saved) return JSON.parse(saved);
 	} catch (e) {}
+
+	// Fallback cookie
+	try {
+		const match = document.cookie.match(/(?:^|;\s*)diamant_banned_clients=([^;]+)/);
+		if (match) {
+			const parsed = JSON.parse(decodeURIComponent(match[1]));
+			if (parsed && typeof parsed === 'object') return parsed;
+		}
+	} catch (e) {}
 	return {};
 }
 
-export function isClientBanned(clientId: string, clientEmail?: string | null): boolean {
+export function getBannedClientRecord(
+	clientId?: string | null, 
+	clientEmail?: string | null, 
+	clientName?: string | null
+): BannedClientRecord | null {
 	const banned = getBannedClients();
-	if (banned[clientId]) return true;
-	if (clientEmail) {
-		const lower = clientEmail.toLowerCase();
-		for (const k in banned) {
-			if (banned[k].clientEmail && banned[k].clientEmail!.toLowerCase() === lower) {
-				return true;
-			}
+	if (!banned || Object.keys(banned).length === 0) return null;
+
+	// 1. Recherche directe par ID client
+	if (clientId && banned[clientId]) {
+		return banned[clientId];
+	}
+
+	const emailLower = clientEmail ? clientEmail.toLowerCase().trim() : null;
+	const nameLower = clientName ? clientName.toLowerCase().trim() : null;
+
+	for (const id in banned) {
+		const rec = banned[id];
+		// Correspondance par ID
+		if (clientId && rec.clientId === clientId) {
+			return rec;
+		}
+		// Correspondance par Email
+		if (emailLower && rec.clientEmail && rec.clientEmail.toLowerCase().trim() === emailLower) {
+			return rec;
+		}
+		// Correspondance par Nom
+		if (nameLower && rec.clientName && rec.clientName.toLowerCase().trim() === nameLower) {
+			return rec;
 		}
 	}
-	return false;
+
+	// Recherche par email stocké dans la session client active
+	if (typeof window !== 'undefined') {
+		try {
+			const savedEmail = localStorage.getItem('diamant_client_email') || sessionStorage.getItem('diamant_client_email');
+			if (savedEmail) {
+				const sLower = savedEmail.toLowerCase().trim();
+				for (const id in banned) {
+					if (banned[id].clientEmail && banned[id].clientEmail!.toLowerCase().trim() === sLower) {
+						return banned[id];
+					}
+				}
+			}
+		} catch (e) {}
+	}
+
+	return null;
+}
+
+export function isClientBanned(clientId?: string | null, clientEmail?: string | null, clientName?: string | null): boolean {
+	return getBannedClientRecord(clientId, clientEmail, clientName) !== null;
 }
 
 export function banClient(clientId: string, clientName: string, reason: string, clientEmail?: string | null): void {
 	if (typeof window === 'undefined') return;
 	const banned = getBannedClients();
-	banned[clientId] = {
+
+	// Tenter de résoudre l'email si absent
+	let resolvedEmail = clientEmail ? clientEmail.toLowerCase().trim() : null;
+	if (!resolvedEmail) {
+		try {
+			const emailsMap = JSON.parse(localStorage.getItem('diamant_client_emails') || '{}');
+			if (emailsMap[clientId]) resolvedEmail = emailsMap[clientId].toLowerCase().trim();
+		} catch (e) {}
+	}
+	if (!resolvedEmail) {
+		try {
+			const overrides = JSON.parse(localStorage.getItem('diamant_clients_overrides') || '{}');
+			if (overrides[clientId]?.email) resolvedEmail = overrides[clientId].email.toLowerCase().trim();
+		} catch (e) {}
+	}
+
+	const record: BannedClientRecord = {
 		clientId,
-		clientName,
-		clientEmail,
-		reason: reason.trim() || 'Comportement non conforme ou absences répétées',
+		clientName: clientName.trim(),
+		clientEmail: resolvedEmail,
+		reason: reason.trim() || 'Absences non prévenues ou non-respect des conditions du salon',
 		bannedAt: new Date().toISOString()
 	};
-	localStorage.setItem('diamant_banned_clients', JSON.stringify(banned));
-	window.dispatchEvent(new CustomEvent('diamant:client-banned', { detail: { clientId, reason } }));
+
+	banned[clientId] = record;
+	const serialized = JSON.stringify(banned);
+	localStorage.setItem('diamant_banned_clients', serialized);
+	document.cookie = `diamant_banned_clients=${encodeURIComponent(serialized)}; path=/; max-age=31536000; SameSite=Lax`;
+	window.dispatchEvent(new CustomEvent('diamant:client-banned', { detail: { clientId, reason, record } }));
 }
 
 export function unbanClient(clientId: string): void {
 	if (typeof window === 'undefined') return;
 	const banned = getBannedClients();
+	let modified = false;
+
 	if (banned[clientId]) {
 		delete banned[clientId];
-		localStorage.setItem('diamant_banned_clients', JSON.stringify(banned));
+		modified = true;
+	} else {
+		// Supprimer par correspondance
+		for (const k in banned) {
+			if (banned[k].clientId === clientId || banned[k].clientEmail === clientId.toLowerCase()) {
+				delete banned[k];
+				modified = true;
+			}
+		}
+	}
+
+	if (modified) {
+		const serialized = JSON.stringify(banned);
+		localStorage.setItem('diamant_banned_clients', serialized);
+		document.cookie = `diamant_banned_clients=${encodeURIComponent(serialized)}; path=/; max-age=31536000; SameSite=Lax`;
 		window.dispatchEvent(new CustomEvent('diamant:client-unbanned', { detail: { clientId } }));
 	}
 }

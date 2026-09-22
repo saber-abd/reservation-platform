@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { signUp, getSession, getUser } from '@/lib/auth';
 import { createClient } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
+import { getBannedClientRecord } from '@/lib/permissions';
 
 const baseSchema = z.object({
 	fullName: z.string().min(2, 'Nom obligatoire'),
@@ -54,6 +55,17 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 					const user = await getUser();
 					if (user) {
 						const meta = user.user_metadata;
+						const ban = getBannedClientRecord(
+							user.id,
+							user.email,
+							meta?.full_name || meta?.name
+						);
+						if (ban) {
+							await supabase.auth.signOut();
+							localStorage.removeItem('diamant_client_avatar');
+							setError(`Inscription ou accès impossible : ce compte est suspendu par l'établissement. Motif : « ${ban.reason} »`);
+							return;
+						}
 						
 						// Si les métadonnées contiennent déjà qu'il est client, ou si on a son nom complet (ex: Google Auth)
 						if (meta?.account_role === 'client' || meta?.full_name || meta?.name) {
@@ -83,6 +95,13 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 		setSubmitting(true);
 		setError(null);
 		try {
+			const ban = getBannedClientRecord(existingUser.id, existingUser.email, values.fullName);
+			if (ban) {
+				await supabase.auth.signOut();
+				setError(`Inscription refusée : compte suspendu par l'établissement. Motif : « ${ban.reason} »`);
+				return;
+			}
+
 			const metadata = {
 				account_role: 'client',
 				full_name: values.fullName
@@ -115,6 +134,15 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 		setSubmitting(true);
 		setError(null);
 		setPendingConfirmationEmail(null);
+
+		// Ban check on email or name
+		const preBan = getBannedClientRecord(null, values.email, values.fullName);
+		if (preBan) {
+			setError(`Inscription impossible : cette adresse email fait l'objet d'une suspension par l'établissement. Motif : « ${preBan.reason} »`);
+			setSubmitting(false);
+			return;
+		}
+
 		try {
 			const metadata = {
 				account_role: 'client',

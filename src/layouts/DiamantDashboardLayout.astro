@@ -3,6 +3,8 @@ import '../styles/global.css';
 import { Scissors, ArrowLeft } from 'lucide-react';
 import { getSiteConfig } from '@/config/site';
 
+import DiamantClientBanGuard from '@/components/diamant/dashboard/DiamantClientBanGuard';
+
 const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 
 interface Props {
@@ -14,6 +16,7 @@ const { title = 'Espace Prestige' } = Astro.props;
 const currentPath = Astro.url.pathname;
 const basePathMatch = currentPath.match(/^\/(demo-[^/]+)/);
 const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
+const isClientSpace = currentPath.includes('/espace-client');
 ---
 
 <!doctype html>
@@ -49,6 +52,10 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 				transform: translateY(-3px);
 				box-shadow: 0 10px 28px rgba(0,0,0,0.08);
 			}
+			/* Protection anti-flicker si banni */
+			html.diamant-client-banned #dashboard-content > *:not([data-ban-guard]) {
+				display: none !important;
+			}
 		</style>
 		<script is:inline>
 			function syncDiamantBusinessName() {
@@ -78,6 +85,28 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 				if (e.key === 'diamant_pro_profile') syncDiamantBusinessName();
 			});
 			window.addEventListener('diamant:profile-updated', syncDiamantBusinessName);
+
+			// Détection rapide ban client
+			try {
+				if (window.location.pathname.indexOf('/espace-client') !== -1) {
+					var bannedCookie = document.cookie.match(/(?:^|;\s*)diamant_banned_clients=([^;]+)/);
+					var bList = [];
+					if (bannedCookie) {
+						bList = JSON.parse(decodeURIComponent(bannedCookie[1]));
+					} else {
+						var rawB = localStorage.getItem('diamant_banned_clients');
+						if (rawB) bList = JSON.parse(rawB);
+					}
+					var uEmail = localStorage.getItem('diamant_client_email');
+					if (uEmail && Array.isArray(bList)) {
+						var isB = bList.some(function(b) {
+							return (b.clientEmail && b.clientEmail.toLowerCase() === uEmail.toLowerCase()) ||
+							       (b.email && b.email.toLowerCase() === uEmail.toLowerCase());
+						});
+						if (isB) document.documentElement.classList.add('diamant-client-banned');
+					}
+				}
+			} catch (e) {}
 		</script>
 	</head>
 	<body class="bg-stone-50 text-stone-800 overflow-hidden font-coolvetica">
@@ -117,7 +146,13 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 
 				<div class="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-10">
 				<div id="dashboard-content">
-					<slot />
+					{isClientSpace ? (
+						<DiamantClientBanGuard client:load basePath={basePath}>
+							<slot />
+						</DiamantClientBanGuard>
+					) : (
+						<slot />
+					)}
 				</div>
 				</div>
 			</main>

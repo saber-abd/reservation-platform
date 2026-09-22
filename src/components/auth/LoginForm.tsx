@@ -4,6 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { resendConfirmationEmail, signIn, getSession, getUser } from '@/lib/auth';
 import { getAccountType, createProfessional, createClient } from '@/lib/queries';
+import { supabase } from '@/lib/supabase';
+import { getBannedClientRecord } from '@/lib/permissions';
+import { ShieldAlert } from 'lucide-react';
 
 const schema = z.object({
 	email: z.string().email('Email invalide'),
@@ -39,12 +42,33 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 	}
 
 	useEffect(() => {
+		// Check for ban error from OAuth redirect
+		if (typeof window !== 'undefined') {
+			const storedBanErr = sessionStorage.getItem('ban_error_message');
+			if (storedBanErr) {
+				setError(storedBanErr);
+				sessionStorage.removeItem('ban_error_message');
+			}
+		}
+
 		async function checkExisting() {
 			try {
 				const session = await getSession();
 				if (session) {
 					const user = await getUser();
 					if (user) {
+						// Ban check
+						const ban = getBannedClientRecord(
+							user.id,
+							user.email,
+							user.user_metadata?.full_name || user.user_metadata?.name
+						);
+						if (ban) {
+							await supabase.auth.signOut();
+							localStorage.removeItem('diamant_client_avatar');
+							setError(`Connexion refusée : votre compte est suspendu par l'établissement. Motif : « ${ban.reason} ». L'accès à votre espace client et aux réservations est bloqué.`);
+							return;
+						}
 						await routeUser(user);
 					}
 				}
@@ -58,10 +82,36 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 	async function routeUser(user: any) {
 		const basePath = getEffectiveBasePath();
 
+		// Save user email to cache & map for consistent ban and pro lookup
+		if (typeof window !== 'undefined' && user.email) {
+			localStorage.setItem('diamant_client_email', user.email);
+			try {
+				const map = JSON.parse(localStorage.getItem('diamant_client_emails') || '{}');
+				map[user.id] = user.email;
+				localStorage.setItem('diamant_client_emails', JSON.stringify(map));
+			} catch (e) {}
+		}
+
 		const accountType = await getAccountType(user.id);
 		if (accountType === 'professional') {
 			window.location.href = `${basePath}/dashboard`;
-		} else if (accountType === 'client') {
+			return;
+		}
+
+		// Client ban check
+		const ban = getBannedClientRecord(
+			user.id,
+			user.email,
+			user.user_metadata?.full_name || user.user_metadata?.name
+		);
+		if (ban) {
+			await supabase.auth.signOut();
+			localStorage.removeItem('diamant_client_avatar');
+			setError(`Connexion refusée : votre compte a été suspendu par l'établissement. Motif : « ${ban.reason} ». L'accès à votre espace client et aux réservations est bloqué.`);
+			return;
+		}
+
+		if (accountType === 'client') {
 			window.location.href = `${basePath}/espace-client`;
 		} else {
 			const meta = user.user_metadata;
@@ -88,6 +138,15 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 		setSubmitting(true);
 		setError(null);
 		setUnconfirmedEmail(null);
+
+		// Pre-check if client email is already banned
+		const preBan = getBannedClientRecord(null, values.email);
+		if (preBan) {
+			setError(`Connexion refusée : votre compte est suspendu par l'établissement. Motif : « ${preBan.reason} ». L'accès à votre espace client et aux réservations est bloqué.`);
+			setSubmitting(false);
+			return;
+		}
+
 		try {
 			const { user } = await signIn(values.email, values.password);
 			if (!user) throw new Error('Connexion impossible.');
@@ -146,7 +205,15 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 					Mot de passe oublié ?
 				</a>
 			</div>
-			{error && <p className="text-sm text-destructive">{error}</p>}
+			{error && (
+				<div className="rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs md:text-sm text-rose-800 animate-in fade-in">
+					<div className="font-bold flex items-center gap-2 mb-1 text-rose-900">
+						<ShieldAlert size={16} className="text-rose-600 shrink-0" />
+						<span>{error.includes('suspendu') || error.includes('refusée') ? 'Accès suspendu' : 'Erreur'}</span>
+					</div>
+					<p className="leading-relaxed">{error}</p>
+				</div>
+			)}
 			{unconfirmedEmail && (
 				<div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800">
 					<p className="mb-2">Le message de confirmation a pu être filtré comme spam.</p>
