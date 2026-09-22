@@ -2,16 +2,19 @@
 import DiamantDashboardLayout from '@/layouts/DiamantDashboardLayout.astro';
 import DiamantDashboardNav from '@/components/diamant/dashboard/DiamantDashboardNav';
 import DiamantDashboardOverview from '@/components/diamant/dashboard/DiamantDashboardOverview';
+import DiamantAdminOnlyGuard from '@/components/diamant/dashboard/DiamantAdminOnlyGuard';
 ---
 
 <DiamantDashboardLayout title="Tableau de Bord">
 	<DiamantDashboardNav slot="sidebar" basePath="/demo-diamant" client:load />
 	
-	<div class="mb-8">
-		<h1 class="text-3xl font-black text-stone-800 tracking-tight">Vue d'ensemble</h1>
-		<p class="text-stone-500 mt-1">Bienvenue dans votre espace de gestion Prestige.</p>
-	</div>
+	<DiamantAdminOnlyGuard client:load pageName="Tableau de bord & Chiffre d'affaires">
+		<div class="mb-8">
+			<h1 class="text-3xl font-black text-stone-800 tracking-tight">Vue d'ensemble</h1>
+			<p class="text-stone-500 mt-1">Bienvenue dans votre espace de gestion Prestige.</p>
+		</div>
 
-	<DiamantDashboardOverview client:load />
+		<DiamantDashboardOverview client:load />
+	</DiamantAdminOnlyGuard>
 
 </DiamantDashboardLayout>

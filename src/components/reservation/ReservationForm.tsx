@@ -15,6 +15,7 @@ import {
 import { generateSlotsForDate, type GeneratedSlot } from '@/lib/slots';
 import { getSession } from '@/lib/auth';
 import { getServiceImageFallback } from '@/lib/serviceImages';
+import { isClientBanned } from '@/lib/permissions';
 
 const clientSchema = z.object({
 	clientName: z.string().min(2, 'Nom trop court'),
@@ -122,6 +123,13 @@ export default function ReservationForm() {
 		setError(null);
 		try {
 			const session = await getSession();
+			const clientId = session?.user.id || '';
+			if (isClientBanned(clientId, values.clientEmail)) {
+				setError("Votre compte est actuellement suspendu par l'établissement. Vous ne pouvez pas effectuer de nouvelle réservation. Veuillez contacter le salon directement.");
+				setSubmitting(false);
+				return;
+			}
+
 			await createAppointment({
 				professional_id: professional.id,
 				service_id: selectedService.id,

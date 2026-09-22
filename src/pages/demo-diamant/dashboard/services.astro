@@ -2,22 +2,25 @@
 import DiamantDashboardLayout from '@/layouts/DiamantDashboardLayout.astro';
 import DiamantDashboardNav from '@/components/diamant/dashboard/DiamantDashboardNav';
 import ServicesPanel from '@/components/dashboard/ServicesPanel';
+import DiamantAdminOnlyGuard from '@/components/diamant/dashboard/DiamantAdminOnlyGuard';
 ---
 
 <DiamantDashboardLayout title="Gestion des prestations">
 	<DiamantDashboardNav slot="sidebar" basePath="/demo-diamant" client:load />
 	
-	<div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-		<div>
-			<h1 class="text-3xl font-black text-stone-900 tracking-tight">Gestion des prestations</h1>
-			<p class="text-stone-500 mt-1">Gérez vos prestations et forfaits.</p>
+	<DiamantAdminOnlyGuard client:load pageName="Gestion des prestations & Tarifs">
+		<div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+			<div>
+				<h1 class="text-3xl font-black text-stone-900 tracking-tight">Gestion des prestations</h1>
+				<p class="text-stone-500 mt-1">Gérez vos prestations et forfaits.</p>
+			</div>
+			<button class="px-4 py-2 rounded-xl bg-deep-teal-500 text-white font-bold text-sm hover:bg-deep-teal-400 transition-colors">
+				+ Nouvelle prestation
+			</button>
 		</div>
-		<button class="px-4 py-2 rounded-xl bg-deep-teal-500 text-white font-bold text-sm hover:bg-deep-teal-400 transition-colors">
-			+ Nouvelle prestation
-		</button>
-	</div>
 
-	<div class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-		<ServicesPanel client:load />
-	</div>
+		<div class="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+			<ServicesPanel client:load />
+		</div>
+	</DiamantAdminOnlyGuard>
 </DiamantDashboardLayout>

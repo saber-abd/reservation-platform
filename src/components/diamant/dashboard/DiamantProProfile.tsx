@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getPrimaryProfessional, getDemoTag, type Professional } from '@/lib/queries';
-import { User, Mail, Phone, MapPin, Building2, Save, CreditCard, RefreshCw, Upload } from 'lucide-react';
+import { getActiveProRole, type ProRole } from '@/lib/permissions';
+import { User, Mail, Phone, MapPin, Building2, Save, CreditCard, RefreshCw, Upload, Lock } from 'lucide-react';
 
 export default function DiamantProProfile() {
 	const [pro, setPro] = useState<Professional | null>(null);
@@ -9,6 +10,7 @@ export default function DiamantProProfile() {
 	const [saving, setSaving] = useState(false);
 	const [successMsg, setSuccessMsg] = useState('');
 	const [errorMsg, setErrorMsg] = useState('');
+	const [role, setRole] = useState<ProRole>('admin');
 
 	// FormData
 	const [businessName, setBusinessName] = useState('');
@@ -18,6 +20,12 @@ export default function DiamantProProfile() {
 	const [address, setAddress] = useState('');
 
 	useEffect(() => {
+		setRole(getActiveProRole());
+		const onRoleChange = (e: any) => {
+			if (e.detail?.role) setRole(e.detail.role);
+		};
+		window.addEventListener('pro:role-changed', onRoleChange);
+
 		async function fetchPro() {
 			try {
 				const tag = getDemoTag();
@@ -44,7 +52,7 @@ export default function DiamantProProfile() {
 					if (match) cookieBusinessName = decodeURIComponent(match[2]);
 				}
 
-				const resolvedBusinessName = localData?.business_name ?? cookieBusinessName ?? p?.business_name ?? 'Maison Prestige';
+				const resolvedBusinessName = localData?.business_name ?? cookieBusinessName ?? p?.business_name ?? "On'hair";
 				const resolvedName = localData?.name ?? p?.name ?? 'Alexandre de Paris';
 				const resolvedEmail = localData?.email ?? p?.email ?? 'contact@prestige-diamant.fr';
 				const resolvedPhone = localData?.phone ?? p?.phone ?? '01 42 68 55 00';
@@ -170,6 +178,21 @@ export default function DiamantProProfile() {
 				</div>
 			)}
 
+			{/* Alerte Mode Employé */}
+			{role === 'employee' && (
+				<div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3.5 text-amber-950 shadow-2xs">
+					<div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0 text-amber-800">
+						<Lock size={16} />
+					</div>
+					<div>
+						<p className="font-bold text-sm">Mode Employé — Modification Verrouillée</p>
+						<p className="text-xs text-amber-800 mt-0.5 leading-relaxed">
+							Vous êtes connecté avec les droits <strong>Employé</strong>. Vous n'avez pas la permission de modifier les informations de l'établissement. Ce formulaire est consultable en lecture seule.
+						</p>
+					</div>
+				</div>
+			)}
+
 			{/* Carte identité */}
 			<div className="rounded-2xl border border-stone-200 bg-white p-7 shadow-sm mb-6">
 				<div className="flex flex-col md:flex-row items-center gap-6 mb-8 border-b border-stone-100 pb-7">
@@ -177,13 +200,15 @@ export default function DiamantProProfile() {
 						<div className="w-24 h-24 rounded-2xl bg-stone-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-md">
 							<img src={generateAvatar()} alt="Avatar" className="w-full h-full object-cover" />
 						</div>
-						<button 
-							onClick={() => alert('Fonctionnalité d\'upload d\'image à venir. Les avatars sont générés automatiquement pour la démo.')}
-							className="absolute inset-0 bg-black/50 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl cursor-pointer"
-						>
-							<Upload size={18} className="mb-1" />
-							<span className="text-[10px] font-bold uppercase tracking-wider">Modifier</span>
-						</button>
+						{role === 'admin' && (
+							<button 
+								onClick={() => alert('Fonctionnalité d\'upload d\'image à venir. Les avatars sont générés automatiquement pour la démo.')}
+								className="absolute inset-0 bg-black/50 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl cursor-pointer"
+							>
+								<Upload size={18} className="mb-1" />
+								<span className="text-[10px] font-bold uppercase tracking-wider">Modifier</span>
+							</button>
+						)}
 					</div>
 					<div className="text-center md:text-left">
 						<h2 className="text-2xl font-bold text-stone-900 mb-1">{businessName || 'Mon Établissement'}</h2>
@@ -193,40 +218,84 @@ export default function DiamantProProfile() {
 
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-7">
 					<div className="md:col-span-2">
-						<h3 className="text-base font-bold text-stone-800 mb-5">Informations Publiques</h3>
+						<div className="flex items-center justify-between mb-5">
+							<h3 className="text-base font-bold text-stone-800">Informations Publiques</h3>
+							{role === 'employee' && (
+								<span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-500 border border-stone-200 flex items-center gap-1">
+									<Lock size={11} /> Lecture Seule
+								</span>
+							)}
+						</div>
 						<form onSubmit={handleSave} className="space-y-4">
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<div>
 									<label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Building2 size={12}/> Nom de l'établissement</label>
-									<input type="text" value={businessName} onChange={e => setBusinessName(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400" />
+									<input 
+										type="text" 
+										disabled={role === 'employee'}
+										value={businessName} 
+										onChange={e => setBusinessName(e.target.value)} 
+										className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400 disabled:opacity-60 disabled:cursor-not-allowed" 
+									/>
 								</div>
 								<div>
 									<label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-2"><User size={12}/> Nom du gérant / Praticien</label>
-									<input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400" />
+									<input 
+										type="text" 
+										disabled={role === 'employee'}
+										value={name} 
+										onChange={e => setName(e.target.value)} 
+										className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400 disabled:opacity-60 disabled:cursor-not-allowed" 
+									/>
 								</div>
 							</div>
 							
 							<div>
 								<label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-2"><MapPin size={12}/> Adresse postale</label>
-								<input type="text" value={address} onChange={e => setAddress(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400" />
+								<input 
+									type="text" 
+									disabled={role === 'employee'}
+									value={address} 
+									onChange={e => setAddress(e.target.value)} 
+									className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400 disabled:opacity-60 disabled:cursor-not-allowed" 
+								/>
 							</div>
 
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<div>
 									<label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Phone size={12}/> Téléphone</label>
-									<input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400" />
+									<input 
+										type="tel" 
+										disabled={role === 'employee'}
+										value={phone} 
+										onChange={e => setPhone(e.target.value)} 
+										className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400 disabled:opacity-60 disabled:cursor-not-allowed" 
+									/>
 								</div>
 								<div>
 									<label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Mail size={12}/> Email de contact</label>
-									<input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400" />
+									<input 
+										type="email" 
+										disabled={role === 'employee'}
+										value={email} 
+										onChange={e => setEmail(e.target.value)} 
+										className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400 disabled:opacity-60 disabled:cursor-not-allowed" 
+									/>
 								</div>
 							</div>
 
 							<div className="pt-4 flex justify-end">
-								<button type="submit" disabled={saving} className="flex items-center gap-2 px-6 py-3 rounded-xl bg-deep-teal-500 text-white font-bold text-sm hover:bg-deep-teal-600 transition-colors disabled:opacity-50">
-									{saving ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
-									{saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
-								</button>
+								{role === 'employee' ? (
+									<div className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-stone-100 text-stone-400 font-bold text-xs border border-stone-200">
+										<Lock size={14} />
+										<span>Modification réservée à l'administrateur</span>
+									</div>
+								) : (
+									<button type="submit" disabled={saving} className="flex items-center gap-2 px-6 py-3 rounded-xl bg-deep-teal-500 text-white font-bold text-sm hover:bg-deep-teal-600 transition-colors disabled:opacity-50 cursor-pointer shadow-xs">
+										{saving ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
+										{saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
+									</button>
+								)}
 							</div>
 						</form>
 					</div>
