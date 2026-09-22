@@ -432,3 +432,24 @@
 .commercial-page h1, .commercial-page h2, .commercial-page h3, .commercial-page h4, .commercial-page h5, .commercial-page h6 {
   font-family: var(--font-heading);
 }
+
+/* Animations et transitions globales démo Diamant */
+@layer utilities {
+  .section-fade {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .section-fade.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .card-hover {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  }
+}

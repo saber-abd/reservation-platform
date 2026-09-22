@@ -1,7 +1,9 @@
 ---
 import '../styles/global.css';
+import 'aos/dist/aos.css';
 import DiamantHeader from '@/components/diamant/DiamantHeader.astro';
 import DiamantFooter from '@/components/diamant/DiamantFooter.astro';
+import SmoothScroll from '@/components/SmoothScroll.astro';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname);
@@ -46,13 +48,13 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 		<meta name="twitter:description" content={description} />
 
 		<meta name="theme-color" content="#fff7f1" />
-		<style>
+		<style is:global>
 			.theme-diamant body { font-family: 'Lato', sans-serif; }
 			.theme-diamant h1, .theme-diamant h2, .theme-diamant h3,
 			.theme-diamant h4, .theme-diamant h5, .theme-diamant h6 {
 				font-family: 'Monimer Serif', serif;
 			}
-			/* Fade-in animation pour les sections */
+			/* Animations section-fade */
 			.section-fade {
 				opacity: 0;
 				transform: translateY(24px);
@@ -83,33 +85,47 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 		<DiamantFooter />
 		
 		<script>
-			// Animation observer for section-fade elements
-			const observer = new IntersectionObserver((entries) => {
-				entries.forEach(entry => {
-					if (entry.isIntersecting) {
-						entry.target.classList.add('visible');
-						observer.unobserve(entry.target);
-					}
-				});
-			}, {
-				threshold: 0.1,
-				rootMargin: "0px 0px -50px 0px"
-			});
+			import AOS from 'aos';
 
-			function observeElements() {
-				document.querySelectorAll('.section-fade:not(.observed)').forEach(el => {
-					el.classList.add('observed');
-					observer.observe(el);
+			function initAnimations() {
+				AOS.init({
+					duration: 700,
+					easing: 'ease-out-cubic',
+					once: true,
+					offset: 60,
 				});
+
+				// Support des éléments avec classe .section-fade
+				if ('IntersectionObserver' in window) {
+					const observer = new IntersectionObserver((entries) => {
+						entries.forEach(entry => {
+							if (entry.isIntersecting) {
+								entry.target.classList.add('visible');
+								observer.unobserve(entry.target);
+							}
+						});
+					}, {
+						threshold: 0.1,
+						rootMargin: "0px 0px -30px 0px"
+					});
+
+					document.querySelectorAll('.section-fade:not(.visible)').forEach(el => {
+						observer.observe(el);
+					});
+				} else {
+					document.querySelectorAll('.section-fade').forEach(el => {
+						el.classList.add('visible');
+					});
+				}
 			}
 
-			document.addEventListener('DOMContentLoaded', observeElements);
-			observeElements();
-			
-			const mutationObserver = new MutationObserver(() => {
-				observeElements();
-			});
-			mutationObserver.observe(document.body, { childList: true, subtree: true });
+			if (document.readyState === 'loading') {
+				document.addEventListener('DOMContentLoaded', initAnimations);
+			} else {
+				initAnimations();
+			}
+			document.addEventListener('astro:page-load', initAnimations);
 		</script>
+		<SmoothScroll />
 	</body>
 </html>

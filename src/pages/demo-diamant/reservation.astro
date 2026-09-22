@@ -6,7 +6,7 @@ import ReservationForm from '@/components/reservation/ReservationForm';
 <DiamantLayout title="Réservation" description="Prenez rendez-vous en ligne.">
 	<!-- Hero page -->
 	<section class="pt-28 pb-12 bg-[#fff7f1] border-b border-stone-100">
-		<div class="mx-auto max-w-4xl px-6 text-center">
+		<div class="mx-auto max-w-4xl px-6 text-center" data-aos="fade-up">
 			<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-3">Réservation</p>
 			<h1 class="text-3xl md:text-4xl font-black text-stone-900 mb-4 tracking-tight">Réserver un Moment</h1>
 			<p class="text-lg text-stone-500">
@@ -16,8 +16,8 @@ import ReservationForm from '@/components/reservation/ReservationForm';
 	</section>
 
 	<!-- Formulaire -->
-	<section class="mx-auto max-w-5xl px-6 py-16">
-		<div class="rounded-2xl border border-stone-200 bg-white p-6 md:p-10 shadow-sm">
+	<section class="mx-auto max-w-5xl px-6 py-16" data-aos="fade-up" data-aos-delay="150">
+		<div class="rounded-2xl border border-stone-200 bg-white p-6 md:p-10 shadow-sm card-hover">
 			<ReservationForm client:load />
 		</div>
 	</section>
