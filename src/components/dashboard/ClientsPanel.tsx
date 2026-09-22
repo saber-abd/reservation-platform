@@ -9,13 +9,14 @@ import {
 	getPrimaryProfessional, 
 	getProfessionalByUserId, 
 	getDemoTag, 
+	updateClient,
 	type Client, 
 	type Appointment, 
 	type Professional 
 } from '@/lib/queries';
 import { DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
 import MessageThread from '@/components/shared/MessageThread';
-import { User, Phone, Mail, Calendar, MessageSquare, Search, ExternalLink, ShieldCheck, Clock, FileText } from 'lucide-react';
+import { User, Phone, Mail, Calendar, MessageSquare, Search, ExternalLink, ShieldCheck, Clock, FileText, Pencil, X, Check, Sparkles } from 'lucide-react';
 
 function ClientNoteCard({ professionalId, client }: { professionalId: string; client: Client }) {
 	const [note, setNote] = useState('');
@@ -153,6 +154,49 @@ export default function ClientsPanel() {
 	const [loading, setLoading] = useState(true);
 	const [searchQuery, setSearchQuery] = useState('');
 
+	// Modal d'édition des infos client
+	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+	const [editFullName, setEditFullName] = useState('');
+	const [editPhone, setEditPhone] = useState('');
+	const [editEmail, setEditEmail] = useState('');
+	const [isSavingClient, setIsSavingClient] = useState(false);
+	const [editToast, setEditToast] = useState<string | null>(null);
+
+	function showEditToast(msg: string) {
+		setEditToast(msg);
+		setTimeout(() => setEditToast(null), 3500);
+	}
+
+	function handleOpenEdit(client: Client) {
+		setEditFullName(client.full_name || '');
+		setEditPhone(client.phone || '');
+		setEditEmail(client.email || '');
+		setIsEditModalOpen(true);
+	}
+
+	async function handleSaveEdit(e: React.FormEvent) {
+		e.preventDefault();
+		if (!selectedClient) return;
+		setIsSavingClient(true);
+		try {
+			const updated = await updateClient(selectedClient.id, {
+				full_name: editFullName.trim(),
+				phone: editPhone.trim() || null,
+				email: editEmail.trim() || null
+			});
+
+			setSelectedClient(prev => prev ? { ...prev, ...updated } : null);
+			setClients(prev => prev.map(c => c.id === selectedClient.id ? { ...c, ...updated } : c));
+			setIsEditModalOpen(false);
+			showEditToast(`Fiche de ${editFullName.trim() || 'ce client'} mise à jour avec succès.`);
+		} catch (err) {
+			console.error('Error updating client in ClientsPanel:', err);
+			showEditToast("Erreur lors de la mise à jour des coordonnées.");
+		} finally {
+			setIsSavingClient(false);
+		}
+	}
+
 	useEffect(() => {
 		let isMounted = true;
 
@@ -211,7 +255,21 @@ export default function ClientsPanel() {
 		}
 
 		loadData();
-		return () => { isMounted = false; };
+
+		const onClientUpdated = (e: any) => {
+			const upd = e.detail?.client;
+			if (upd && isMounted) {
+				setClients(prev => prev.map(c => c.id === upd.id ? { ...c, ...upd } : c));
+				setSelectedClient(prev => prev && prev.id === upd.id ? { ...prev, ...upd } : prev);
+			}
+		};
+
+		window.addEventListener('diamant:client-updated', onClientUpdated);
+
+		return () => { 
+			isMounted = false;
+			window.removeEventListener('diamant:client-updated', onClientUpdated);
+		};
 	}, []);
 
 	// Filtrage des clients par recherche
@@ -346,15 +404,26 @@ export default function ClientsPanel() {
 										</div>
 									</div>
 
-									{/* Action rapide : ouvrir messagerie */}
-									<a
-										href={`${basePath}/dashboard/messages?clientId=${encodeURIComponent(selectedClient.id)}`}
-										className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-all shadow-xs shrink-0 self-start sm:self-auto"
-									>
-										<MessageSquare size={15} />
-										<span>Ouvrir dans la messagerie</span>
-										<ExternalLink size={13} />
-									</a>
+									{/* Actions : Modifier informations & ouvrir messagerie */}
+									<div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start sm:self-auto">
+										<button
+											type="button"
+											onClick={() => handleOpenEdit(selectedClient)}
+											className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-700 text-xs font-bold hover:bg-deep-teal-50 hover:border-deep-teal-300 hover:text-deep-teal-700 transition-all shadow-2xs cursor-pointer"
+											title="Modifier les coordonnées du client"
+										>
+											<Pencil size={14} />
+											<span>Modifier la fiche</span>
+										</button>
+										<a
+											href={`${basePath}/dashboard/messages?clientId=${encodeURIComponent(selectedClient.id)}`}
+											className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-all shadow-xs"
+										>
+											<MessageSquare size={15} />
+											<span>Ouvrir dans la messagerie</span>
+											<ExternalLink size={13} />
+										</a>
+									</div>
 								</div>
 
 								{/* Grille des coordonnées */}
@@ -436,6 +505,106 @@ export default function ClientsPanel() {
 					)}
 				</div>
 			</div>
+
+			{/* Toast notification */}
+			{editToast && (
+				<div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-stone-900 text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-bold border border-stone-800 animate-in fade-in slide-in-from-bottom-4">
+					<Sparkles size={16} className="text-amber-400" />
+					<span>{editToast}</span>
+				</div>
+			)}
+
+			{/* Modal d'édition des coordonnées client */}
+			{isEditModalOpen && selectedClient && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95">
+						<div className="flex items-center justify-between pb-4 border-b border-stone-100">
+							<div className="flex items-center gap-2.5">
+								<div className="w-9 h-9 rounded-xl bg-deep-teal-100 text-deep-teal-700 flex items-center justify-center">
+									<Pencil size={18} />
+								</div>
+								<div>
+									<h4 className="font-bold text-stone-900 text-base">Modifier la fiche client</h4>
+									<p className="text-xs text-stone-400">Mise à jour des coordonnées par le professionnel</p>
+								</div>
+							</div>
+							<button
+								type="button"
+								onClick={() => setIsEditModalOpen(false)}
+								className="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg cursor-pointer"
+							>
+								<X size={18} />
+							</button>
+						</div>
+
+						<form onSubmit={handleSaveEdit} className="mt-4 space-y-4">
+							<div>
+								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+									Nom complet *
+								</label>
+								<input
+									type="text"
+									required
+									value={editFullName}
+									onChange={e => setEditFullName(e.target.value)}
+									placeholder="Ex : Sophie Martin"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+								/>
+							</div>
+
+							<div>
+								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+									Numéro de téléphone
+								</label>
+								<input
+									type="tel"
+									value={editPhone}
+									onChange={e => setEditPhone(e.target.value)}
+									placeholder="Ex : 06 12 34 56 78"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+								/>
+							</div>
+
+							<div>
+								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+									Adresse Email
+								</label>
+								<input
+									type="email"
+									value={editEmail}
+									onChange={e => setEditEmail(e.target.value)}
+									placeholder="Ex : sophie.martin@email.com"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+								/>
+							</div>
+
+							<div className="pt-2 flex items-center justify-end gap-2.5">
+								<button
+									type="button"
+									onClick={() => setIsEditModalOpen(false)}
+									className="px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-xs font-bold hover:bg-stone-50 cursor-pointer"
+								>
+									Annuler
+								</button>
+								<button
+									type="submit"
+									disabled={isSavingClient}
+									className="px-5 py-2.5 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+								>
+									{isSavingClient ? (
+										<span>Enregistrement...</span>
+									) : (
+										<>
+											<Check size={14} />
+											<span>Enregistrer</span>
+										</>
+									)}
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

@@ -21,44 +21,7 @@ export interface BannedClientRecord {
 	bannedAt: string;
 }
 
-const DEFAULT_TEAM_MEMBERS: TeamMember[] = [
-	{
-		id: 'member-owner-1',
-		name: 'Alexandre de Paris',
-		email: 'direction@prestige-diamant.fr',
-		role: 'admin',
-		specialty: 'Directeur Artistique & Fondateur',
-		status: 'active',
-		created_at: '2026-01-15T09:00:00.000Z'
-	},
-	{
-		id: 'member-emp-1',
-		name: 'Léa Martin',
-		email: 'lea.martin@prestige-diamant.fr',
-		role: 'employee',
-		specialty: 'Experte Coloriste & Balayage',
-		status: 'active',
-		created_at: '2026-03-10T10:30:00.000Z'
-	},
-	{
-		id: 'member-emp-2',
-		name: 'Thomas Mercier',
-		email: 'thomas.m@prestige-diamant.fr',
-		role: 'employee',
-		specialty: 'Maître Barbier & Coupe Ciseaux',
-		status: 'active',
-		created_at: '2026-04-02T14:15:00.000Z'
-	},
-	{
-		id: 'member-emp-3',
-		name: 'Chloé Vasseur',
-		email: 'chloe.v@prestige-diamant.fr',
-		role: 'employee',
-		specialty: 'Soins Botaniques & Coiffage',
-		status: 'active',
-		created_at: '2026-05-18T11:00:00.000Z'
-	}
-];
+const DEFAULT_TEAM_MEMBERS: TeamMember[] = [];
 
 export function getActiveProRole(): ProRole {
 	if (typeof window === 'undefined') return 'admin';
@@ -80,10 +43,16 @@ export function getTeamMembers(proId: string): TeamMember[] {
 		const saved = localStorage.getItem(key);
 		if (saved) {
 			const parsed = JSON.parse(saved);
-			if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+			if (Array.isArray(parsed)) {
+				// Purger les anciens comptes fictifs de démonstration
+				const legacyMockIds = ['member-owner-1', 'member-emp-1', 'member-emp-2', 'member-emp-3'];
+				const cleaned = parsed.filter(m => !legacyMockIds.includes(m.id));
+				if (cleaned.length !== parsed.length) {
+					localStorage.setItem(key, JSON.stringify(cleaned));
+				}
+				return cleaned;
+			}
 		}
-		// Initialiser avec l'équipe par défaut
-		localStorage.setItem(key, JSON.stringify(DEFAULT_TEAM_MEMBERS));
 		return DEFAULT_TEAM_MEMBERS;
 	} catch (e) {
 		return DEFAULT_TEAM_MEMBERS;

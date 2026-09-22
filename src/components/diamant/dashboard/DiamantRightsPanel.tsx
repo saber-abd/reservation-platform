@@ -14,7 +14,7 @@ import {
 	type ProRole, 
 	type BannedClientRecord 
 } from '@/lib/permissions';
-import { getAllClients, getPrimaryProfessional, getDemoTag, type Client } from '@/lib/queries';
+import { getAllClients, getPrimaryProfessional, getDemoTag, updateClient, type Client } from '@/lib/queries';
 import { DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
 import { 
 	ShieldCheck, 
@@ -39,7 +39,9 @@ import {
 	Settings, 
 	Check, 
 	X,
-	Plus
+	Plus,
+	Pencil,
+	Phone
 } from 'lucide-react';
 
 export default function DiamantRightsPanel() {
@@ -62,6 +64,13 @@ export default function DiamantRightsPanel() {
 	const [clientSearch, setClientSearch] = useState('');
 	const [clientFilter, setClientFilter] = useState<'all' | 'active' | 'banned'>('all');
 	
+	// Edit Client Modal State
+	const [editClientModal, setEditClientModal] = useState<Client | null>(null);
+	const [editFullName, setEditFullName] = useState('');
+	const [editPhone, setEditPhone] = useState('');
+	const [editEmail, setEditEmail] = useState('');
+	const [isSavingClient, setIsSavingClient] = useState(false);
+
 	// Ban Modal State
 	const [banModalClient, setBanModalClient] = useState<Client | null>(null);
 	const [banReason, setBanReason] = useState('No-shows répétés (absences non prévenues)');
@@ -111,12 +120,19 @@ export default function DiamantRightsPanel() {
 		const onBannedUpdate = () => {
 			setBannedClients(getBannedClients());
 		};
+		const onClientUpdated = (e: any) => {
+			const upd = e.detail?.client;
+			if (upd) {
+				setClients(prev => prev.map(c => c.id === upd.id ? { ...c, ...upd } : c));
+			}
+		};
 
 		window.addEventListener('pro:role-changed', onRoleChange);
 		window.addEventListener('diamant:team-updated', onTeamUpdate);
 		window.addEventListener('diamant:client-banned', onBannedUpdate);
 		window.addEventListener('diamant:client-unbanned', onBannedUpdate);
 		window.addEventListener('diamant:client-deleted', onBannedUpdate);
+		window.addEventListener('diamant:client-updated', onClientUpdated);
 
 		return () => {
 			window.removeEventListener('pro:role-changed', onRoleChange);
@@ -124,8 +140,38 @@ export default function DiamantRightsPanel() {
 			window.removeEventListener('diamant:client-banned', onBannedUpdate);
 			window.removeEventListener('diamant:client-unbanned', onBannedUpdate);
 			window.removeEventListener('diamant:client-deleted', onBannedUpdate);
+			window.removeEventListener('diamant:client-updated', onClientUpdated);
 		};
 	}, []);
+
+	function handleOpenEditClient(client: Client) {
+		setEditClientModal(client);
+		setEditFullName(client.full_name || '');
+		setEditPhone(client.phone || '');
+		setEditEmail(client.email || '');
+	}
+
+	async function handleSaveClientSubmit(e: React.FormEvent) {
+		e.preventDefault();
+		if (!editClientModal) return;
+		setIsSavingClient(true);
+		try {
+			const updated = await updateClient(editClientModal.id, {
+				full_name: editFullName.trim(),
+				phone: editPhone.trim() || null,
+				email: editEmail.trim() || null
+			});
+
+			setClients(prev => prev.map(c => c.id === editClientModal.id ? { ...c, ...updated } : c));
+			setEditClientModal(null);
+			showToast(`Informations de ${editFullName.trim() || 'ce client'} mises à jour.`);
+		} catch (err) {
+			console.error('Erreur mise à jour client:', err);
+			showToast("Erreur lors de l'enregistrement des modifications.");
+		} finally {
+			setIsSavingClient(false);
+		}
+	}
 
 	function handleSwitchRole(role: ProRole) {
 		setActiveProRole(role);
@@ -236,7 +282,7 @@ export default function DiamantRightsPanel() {
 									? 'bg-amber-100 text-amber-800 border border-amber-200' 
 									: 'bg-deep-teal-100 text-deep-teal-800 border border-deep-teal-300'
 							}`}>
-								{activeRole === 'admin' ? '👑 Mode Administrateur' : '👤 Mode Employé'}
+								{activeRole === 'admin' ? 'Mode Administrateur' : 'Mode Employé'}
 							</span>
 						</div>
 						<p className="text-xs text-stone-500 mt-1 max-w-xl leading-relaxed">
@@ -256,7 +302,8 @@ export default function DiamantRightsPanel() {
 								: 'text-stone-500 hover:text-stone-900'
 						}`}
 					>
-						<span>👑 Administrateur</span>
+						<ShieldCheck size={14} className={activeRole === 'admin' ? 'text-amber-600' : 'text-stone-400'} />
+						<span>Administrateur</span>
 					</button>
 					<button
 						type="button"
@@ -267,7 +314,8 @@ export default function DiamantRightsPanel() {
 								: 'text-stone-500 hover:text-stone-900'
 						}`}
 					>
-						<span>👤 Tester en tant qu'Employé</span>
+						<UserCheck size={14} className={activeRole === 'employee' ? 'text-white' : 'text-stone-400'} />
+						<span>Tester en tant qu'Employé</span>
 					</button>
 				</div>
 			</div>
@@ -349,54 +397,73 @@ export default function DiamantRightsPanel() {
 								</tr>
 							</thead>
 							<tbody className="divide-y divide-stone-100">
-								{members.map((member) => {
-									const isOwner = member.role === 'admin';
-									return (
-										<tr key={member.id} className="hover:bg-stone-50/50 transition-colors">
-											<td className="px-5 py-4">
-												<div className="flex items-center gap-3">
-													<div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
-														isOwner 
-															? 'bg-amber-100 text-amber-800 border border-amber-200 shadow-2xs' 
-															: 'bg-deep-teal-100 text-deep-teal-800 border border-deep-teal-200'
-													}`}>
-														{member.name.charAt(0).toUpperCase()}
-													</div>
-													<div>
-														<div className="flex items-center gap-2">
-															<p className="font-bold text-stone-900">{member.name}</p>
-															{isOwner && (
-																<span className="text-[10px] bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-bold">
-																	Gérant
-																</span>
-															)}
+								{members.length === 0 ? (
+									<tr>
+										<td colSpan={4} className="p-8 text-center text-xs text-stone-400">
+											Aucun collaborateur configuré pour le moment.
+											<div className="mt-3">
+												<button
+													type="button"
+													onClick={() => setShowAddModal(true)}
+													className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-all cursor-pointer shadow-2xs"
+												>
+													<UserPlus size={14} />
+													<span>Créer un premier compte employé</span>
+												</button>
+											</div>
+										</td>
+									</tr>
+								) : (
+									members.map((member) => {
+										const isOwner = member.role === 'admin';
+										return (
+											<tr key={member.id} className="hover:bg-stone-50/50 transition-colors">
+												<td className="px-5 py-4">
+													<div className="flex items-center gap-3">
+														<div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+															isOwner 
+																? 'bg-amber-100 text-amber-800 border border-amber-200 shadow-2xs' 
+																: 'bg-deep-teal-100 text-deep-teal-800 border border-deep-teal-200'
+														}`}>
+															{member.name.charAt(0).toUpperCase()}
 														</div>
-														<p className="text-xs text-stone-500 mt-0.5">{member.specialty} • {member.email}</p>
-													</div>
-												</div>
-											</td>
-											<td className="px-5 py-4">
-												{isOwner ? (
-													<div>
-														<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
-															<span>👑 Administrateur (Accès Total)</span>
-														</span>
-														<p className="text-[11px] text-stone-400 mt-1">Tous les onglets & modification profil</p>
-													</div>
-												) : (
-													<div>
-														<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-deep-teal-50 text-deep-teal-800 border border-deep-teal-200">
-															<span>👤 Employé (Accès restreint)</span>
-														</span>
-														<div className="flex flex-wrap gap-1 mt-1.5">
-															<span className="text-[10px] font-semibold bg-stone-100 text-stone-600 px-2 py-0.5 rounded">Planning</span>
-															<span className="text-[10px] font-semibold bg-stone-100 text-stone-600 px-2 py-0.5 rounded">Clientèle</span>
-															<span className="text-[10px] font-semibold bg-stone-100 text-stone-600 px-2 py-0.5 rounded">Messagerie</span>
-															<span className="text-[10px] font-semibold bg-stone-100 text-stone-600 px-2 py-0.5 rounded">Recherche</span>
+														<div>
+															<div className="flex items-center gap-2">
+																<p className="font-bold text-stone-900">{member.name}</p>
+																{isOwner && (
+																	<span className="text-[10px] bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-bold">
+																		Gérant
+																	</span>
+																)}
+															</div>
+															<p className="text-xs text-stone-500 mt-0.5">{member.specialty} • {member.email}</p>
 														</div>
 													</div>
-												)}
-											</td>
+												</td>
+												<td className="px-5 py-4">
+													{isOwner ? (
+														<div>
+															<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+																<ShieldCheck size={13} className="text-amber-700" />
+																<span>Administrateur (Accès Total)</span>
+															</span>
+															<p className="text-[11px] text-stone-400 mt-1">Tous les onglets & modification profil</p>
+														</div>
+													) : (
+														<div>
+															<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-deep-teal-50 text-deep-teal-800 border border-deep-teal-200">
+																<UserCheck size={13} className="text-deep-teal-700" />
+																<span>Employé (Accès restreint)</span>
+															</span>
+															<div className="flex flex-wrap gap-1 mt-1.5">
+																<span className="text-[10px] font-semibold bg-stone-100 text-stone-600 px-2 py-0.5 rounded">Planning</span>
+																<span className="text-[10px] font-semibold bg-stone-100 text-stone-600 px-2 py-0.5 rounded">Clientèle</span>
+																<span className="text-[10px] font-semibold bg-stone-100 text-stone-600 px-2 py-0.5 rounded">Messagerie</span>
+																<span className="text-[10px] font-semibold bg-stone-100 text-stone-600 px-2 py-0.5 rounded">Recherche</span>
+															</div>
+														</div>
+													)}
+												</td>
 											<td className="px-5 py-4">
 												<span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${
 													member.status === 'active' 
@@ -431,7 +498,8 @@ export default function DiamantRightsPanel() {
 											</td>
 										</tr>
 									);
-								})}
+								})
+							)}
 							</tbody>
 						</table>
 					</div>
@@ -559,6 +627,16 @@ export default function DiamantRightsPanel() {
 												</td>
 												<td className="px-5 py-4 text-right">
 													<div className="inline-flex items-center gap-2">
+														<button
+															type="button"
+															onClick={() => handleOpenEditClient(client)}
+															className="px-2.5 py-1.5 rounded-lg border border-stone-200 text-stone-700 hover:text-deep-teal-700 hover:border-deep-teal-300 hover:bg-deep-teal-50 text-xs font-bold transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
+															title="Modifier les coordonnées du client"
+														>
+															<Pencil size={13} />
+															<span>Modifier</span>
+														</button>
+
 														{isBanned ? (
 															<button
 																type="button"
@@ -580,7 +658,7 @@ export default function DiamantRightsPanel() {
 														<button
 															type="button"
 															onClick={() => setDeleteConfirm({ type: 'client', id: client.id, name: client.full_name || 'Client' })}
-															className="p-1.5 rounded-lg border border-stone-200 text-stone-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-colors"
+															className="p-1.5 rounded-lg border border-stone-200 text-stone-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-colors cursor-pointer"
 															title="Supprimer définitivement ce compte client"
 														>
 															<Trash2 size={15} />
@@ -612,8 +690,8 @@ export default function DiamantRightsPanel() {
 							<thead className="bg-stone-50 text-xs uppercase font-bold text-stone-400 border-b border-stone-100">
 								<tr>
 									<th className="px-5 py-3.5">Module / Onglet</th>
-									<th className="px-5 py-3.5">👑 Administrateur (Gérant)</th>
-									<th className="px-5 py-3.5">👤 Employé (Collaborateur)</th>
+									<th className="px-5 py-3.5">Administrateur (Gérant)</th>
+									<th className="px-5 py-3.5">Employé (Collaborateur)</th>
 									<th className="px-5 py-3.5">Règle de Sécurité</th>
 								</tr>
 							</thead>
@@ -623,8 +701,18 @@ export default function DiamantRightsPanel() {
 										<Calendar size={15} className="text-deep-teal-600" />
 										<span>Planning & Rendez-vous</span>
 									</td>
-									<td className="px-5 py-3.5 text-emerald-700 font-bold">✅ Accès total (Lecture / Écriture)</td>
-									<td className="px-5 py-3.5 text-emerald-700 font-bold">✅ Accès total (Prise & modif RDV)</td>
+									<td className="px-5 py-3.5">
+										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+											<Check size={14} />
+											<span>Accès total (Lecture / Écriture)</span>
+										</span>
+									</td>
+									<td className="px-5 py-3.5">
+										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+											<Check size={14} />
+											<span>Accès total (Prise & modif RDV)</span>
+										</span>
+									</td>
 									<td className="px-5 py-3.5 text-stone-500">Nécessaire à l'activité quotidienne du salon</td>
 								</tr>
 								<tr>
@@ -632,8 +720,18 @@ export default function DiamantRightsPanel() {
 										<User size={15} className="text-deep-teal-600" />
 										<span>Fiches Clientèle & Notes</span>
 									</td>
-									<td className="px-5 py-3.5 text-emerald-700 font-bold">✅ Accès total</td>
-									<td className="px-5 py-3.5 text-emerald-700 font-bold">✅ Accès total</td>
+									<td className="px-5 py-3.5">
+										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+											<Check size={14} />
+											<span>Accès total</span>
+										</span>
+									</td>
+									<td className="px-5 py-3.5">
+										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+											<Check size={14} />
+											<span>Accès total</span>
+										</span>
+									</td>
 									<td className="px-5 py-3.5 text-stone-500">Pour consulter l'historique et notes techniques</td>
 								</tr>
 								<tr>
@@ -641,8 +739,18 @@ export default function DiamantRightsPanel() {
 										<MessageSquare size={15} className="text-deep-teal-600" />
 										<span>Messagerie Directe</span>
 									</td>
-									<td className="px-5 py-3.5 text-emerald-700 font-bold">✅ Accès total</td>
-									<td className="px-5 py-3.5 text-emerald-700 font-bold">✅ Accès total</td>
+									<td className="px-5 py-3.5">
+										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+											<Check size={14} />
+											<span>Accès total</span>
+										</span>
+									</td>
+									<td className="px-5 py-3.5">
+										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+											<Check size={14} />
+											<span>Accès total</span>
+										</span>
+									</td>
 									<td className="px-5 py-3.5 text-stone-500">Pour échanger en direct avec la clientèle</td>
 								</tr>
 								<tr>
@@ -650,8 +758,18 @@ export default function DiamantRightsPanel() {
 										<Search size={15} className="text-deep-teal-600" />
 										<span>Moteur de Recherche</span>
 									</td>
-									<td className="px-5 py-3.5 text-emerald-700 font-bold">✅ Accès total</td>
-									<td className="px-5 py-3.5 text-emerald-700 font-bold">✅ Accès total</td>
+									<td className="px-5 py-3.5">
+										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+											<Check size={14} />
+											<span>Accès total</span>
+										</span>
+									</td>
+									<td className="px-5 py-3.5">
+										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+											<Check size={14} />
+											<span>Accès total</span>
+										</span>
+									</td>
 									<td className="px-5 py-3.5 text-stone-500">Recherche rapide de réservations et clients</td>
 								</tr>
 								<tr className="bg-stone-50/40">
@@ -659,8 +777,18 @@ export default function DiamantRightsPanel() {
 										<Settings size={15} className="text-amber-600" />
 										<span>Profil Maison (Coordonnées/Infos)</span>
 									</td>
-									<td className="px-5 py-3.5 text-emerald-700 font-bold">✅ Modification autorisée</td>
-									<td className="px-5 py-3.5 text-amber-700 font-bold">🔒 Lecture seule verrouillée</td>
+									<td className="px-5 py-3.5">
+										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+											<Check size={14} />
+											<span>Modification autorisée</span>
+										</span>
+									</td>
+									<td className="px-5 py-3.5">
+										<span className="inline-flex items-center gap-1 text-amber-700 font-bold">
+											<Lock size={14} />
+											<span>Lecture seule verrouillée</span>
+										</span>
+									</td>
 									<td className="px-5 py-3.5 text-amber-800 font-medium">L'employé ne peut pas modifier les données de l'établissement</td>
 								</tr>
 								<tr className="bg-stone-50/40">
@@ -668,8 +796,18 @@ export default function DiamantRightsPanel() {
 										<Scissors size={15} className="text-rose-600" />
 										<span>Gestion des Prestations & Prix</span>
 									</td>
-									<td className="px-5 py-3.5 text-emerald-700 font-bold">✅ Ajout / Modif / Prix</td>
-									<td className="px-5 py-3.5 text-rose-700 font-bold">❌ Masqué & Accès refusé</td>
+									<td className="px-5 py-3.5">
+										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+											<Check size={14} />
+											<span>Ajout / Modif / Prix</span>
+										</span>
+									</td>
+									<td className="px-5 py-3.5">
+										<span className="inline-flex items-center gap-1 text-rose-700 font-bold">
+											<X size={14} />
+											<span>Masqué & Accès refusé</span>
+										</span>
+									</td>
 									<td className="px-5 py-3.5 text-stone-500">Tarification réservée au propriétaire</td>
 								</tr>
 								<tr className="bg-stone-50/40">
@@ -677,8 +815,18 @@ export default function DiamantRightsPanel() {
 										<BarChart3 size={15} className="text-rose-600" />
 										<span>Performances & Statistiques (CA)</span>
 									</td>
-									<td className="px-5 py-3.5 text-emerald-700 font-bold">✅ Chiffre d'affaires & bilans</td>
-									<td className="px-5 py-3.5 text-rose-700 font-bold">❌ Masqué & Accès refusé</td>
+									<td className="px-5 py-3.5">
+										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+											<Check size={14} />
+											<span>Chiffre d'affaires & bilans</span>
+										</span>
+									</td>
+									<td className="px-5 py-3.5">
+										<span className="inline-flex items-center gap-1 text-rose-700 font-bold">
+											<X size={14} />
+											<span>Masqué & Accès refusé</span>
+										</span>
+									</td>
 									<td className="px-5 py-3.5 text-stone-500">Données financières confidentielles</td>
 								</tr>
 								<tr className="bg-stone-50/40">
@@ -686,8 +834,18 @@ export default function DiamantRightsPanel() {
 										<ShieldCheck size={15} className="text-rose-600" />
 										<span>Gestion des Droits & Comptes</span>
 									</td>
-									<td className="px-5 py-3.5 text-emerald-700 font-bold">✅ Gestion totale</td>
-									<td className="px-5 py-3.5 text-rose-700 font-bold">❌ Masqué & Accès refusé</td>
+									<td className="px-5 py-3.5">
+										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+											<Check size={14} />
+											<span>Gestion totale</span>
+										</span>
+									</td>
+									<td className="px-5 py-3.5">
+										<span className="inline-flex items-center gap-1 text-rose-700 font-bold">
+											<X size={14} />
+											<span>Masqué & Accès refusé</span>
+										</span>
+									</td>
 									<td className="px-5 py-3.5 text-stone-500">Réservé exclusivement à l'administrateur</td>
 								</tr>
 							</tbody>
@@ -775,7 +933,10 @@ export default function DiamantRightsPanel() {
 												: 'border-stone-200 hover:border-stone-300'
 										}`}
 									>
-										<p className="font-bold text-xs text-stone-900">👤 Employé</p>
+										<div className="flex items-center gap-1.5 font-bold text-xs text-stone-900">
+											<UserCheck size={14} className="text-deep-teal-600" />
+											<span>Employé</span>
+										</div>
 										<p className="text-[10px] text-stone-500 mt-0.5">Accès limité (4 onglets)</p>
 									</button>
 									<button
@@ -787,7 +948,10 @@ export default function DiamantRightsPanel() {
 												: 'border-stone-200 hover:border-stone-300'
 										}`}
 									>
-										<p className="font-bold text-xs text-stone-900">👑 Administrateur</p>
+										<div className="flex items-center gap-1.5 font-bold text-xs text-stone-900">
+											<ShieldCheck size={14} className="text-amber-600" />
+											<span>Administrateur</span>
+										</div>
 										<p className="text-[10px] text-stone-500 mt-0.5">Accès intégral</p>
 									</button>
 								</div>
@@ -910,6 +1074,98 @@ export default function DiamantRightsPanel() {
 								Supprimer
 							</button>
 						</div>
+					</div>
+				</div>
+			)}
+
+			{/* MODAL MODIFICATION CLIENT */}
+			{editClientModal && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95">
+						<div className="flex items-center justify-between pb-4 border-b border-stone-100">
+							<div className="flex items-center gap-2.5">
+								<div className="w-9 h-9 rounded-xl bg-deep-teal-100 text-deep-teal-700 flex items-center justify-center">
+									<Pencil size={18} />
+								</div>
+								<div>
+									<h4 className="font-bold text-stone-900 text-base">Modifier la fiche client</h4>
+									<p className="text-xs text-stone-400">Mise à jour des coordonnées par l'administrateur</p>
+								</div>
+							</div>
+							<button
+								type="button"
+								onClick={() => setEditClientModal(null)}
+								className="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg cursor-pointer"
+							>
+								<X size={18} />
+							</button>
+						</div>
+
+						<form onSubmit={handleSaveClientSubmit} className="mt-4 space-y-4">
+							<div>
+								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+									Nom complet *
+								</label>
+								<input
+									type="text"
+									required
+									value={editFullName}
+									onChange={e => setEditFullName(e.target.value)}
+									placeholder="Ex : Sophie Martin"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+								/>
+							</div>
+
+							<div>
+								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+									Numéro de téléphone
+								</label>
+								<input
+									type="tel"
+									value={editPhone}
+									onChange={e => setEditPhone(e.target.value)}
+									placeholder="Ex : 06 12 34 56 78"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+								/>
+							</div>
+
+							<div>
+								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+									Adresse Email
+								</label>
+								<input
+									type="email"
+									value={editEmail}
+									onChange={e => setEditEmail(e.target.value)}
+									placeholder="Ex : sophie.martin@email.com"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+								/>
+							</div>
+
+							<div className="pt-2 flex items-center justify-end gap-2.5">
+								<button
+									type="button"
+									onClick={() => setEditClientModal(null)}
+									className="px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-xs font-bold hover:bg-stone-50 cursor-pointer"
+								>
+									Annuler
+								</button>
+								<button
+									type="submit"
+									disabled={isSavingClient}
+									className="px-5 py-2.5 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+								>
+									{isSavingClient ? (
+										<span>Enregistrement...</span>
+									) : (
+										<>
+											<Check size={14} />
+											<span>Enregistrer</span>
+										</>
+									)}
+								</button>
+							</div>
+						</form>
 					</div>
 				</div>
 			)}

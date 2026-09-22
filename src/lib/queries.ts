@@ -430,6 +430,36 @@ export async function getAllClients(
 		} catch (e) {}
 	}
 
+	// 6. Apply local client overrides (modifications by pro)
+	if (typeof window !== 'undefined') {
+		try {
+			const overrides = getClientOverrides();
+			for (const cid in overrides) {
+				const ov = overrides[cid];
+				if (clientsMap.has(cid)) {
+					const existing = clientsMap.get(cid)!;
+					clientsMap.set(cid, {
+						...existing,
+						...(ov.full_name !== undefined ? { full_name: ov.full_name } : {}),
+						...(ov.phone !== undefined ? { phone: ov.phone } : {}),
+						...(ov.email !== undefined ? { email: ov.email } : {}),
+						...(ov.avatar_url !== undefined ? { avatar_url: ov.avatar_url } : {})
+					});
+				} else {
+					clientsMap.set(cid, {
+						id: cid,
+						full_name: ov.full_name || 'Client',
+						phone: ov.phone || null,
+						email: ov.email || null,
+						avatar_url: ov.avatar_url || null,
+						created_at: ov.created_at || new Date().toISOString(),
+						tag_bd: tag
+					});
+				}
+			}
+		} catch (e) {}
+	}
+
 	return Array.from(clientsMap.values());
 }
 
@@ -632,10 +662,100 @@ export async function createClient(client: Pick<Client, 'id'> & Partial<Client>,
 	return data as Client;
 }
 
-export async function updateClient(id: string, changes: Partial<Client>, tag = getDemoTag()) {
-	const { data, error } = await supabase.from('clients').update(changes).eq('id', id).eq('tag_bd', tag).select().single();
-	if (error) throw error;
-	return data as Client;
+export function getClientOverrides(): Record<string, Partial<Client>> {
+	if (typeof window === 'undefined') return {};
+	try {
+		const raw = localStorage.getItem('diamant_clients_overrides');
+		return raw ? JSON.parse(raw) : {};
+	} catch (e) {
+		return {};
+	}
+}
+
+export function saveClientOverride(clientId: string, changes: Partial<Client>): void {
+	if (typeof window === 'undefined') return;
+	try {
+		const overrides = getClientOverrides();
+		overrides[clientId] = {
+			...(overrides[clientId] || {}),
+			...changes
+		};
+		localStorage.setItem('diamant_clients_overrides', JSON.stringify(overrides));
+	} catch (e) {}
+}
+
+export async function updateClient(id: string, changes: Partial<Client>, tag = getDemoTag()): Promise<Client> {
+	// 1. Sauvegarder immédiatement les surcharges locales pour persistance instantanée
+	saveClientOverride(id, changes);
+
+	// Mettre à jour les métadonnées de conversation si existantes
+	if (typeof window !== 'undefined') {
+		try {
+			const metaRaw = localStorage.getItem('diamant_conversations_meta');
+			if (metaRaw) {
+				const meta = JSON.parse(metaRaw);
+				if (meta[id]) {
+					if (changes.full_name !== undefined) meta[id].full_name = changes.full_name;
+					if (changes.phone !== undefined) meta[id].phone = changes.phone;
+					if (changes.email !== undefined) meta[id].email = changes.email;
+					localStorage.setItem('diamant_conversations_meta', JSON.stringify(meta));
+				}
+			}
+		} catch (e) {}
+	}
+
+	// 2. Tenter la mise à jour dans la table clients de Supabase
+	let updated: Client | null = null;
+	try {
+		const { data, error } = await supabase
+			.from('clients')
+			.update({
+				...(changes.full_name !== undefined ? { full_name: changes.full_name } : {}),
+				...(changes.phone !== undefined ? { phone: changes.phone } : {}),
+			})
+			.eq('id', id)
+			.select()
+			.maybeSingle();
+
+		if (!error && data) {
+			updated = {
+				...data,
+				email: changes.email !== undefined ? changes.email : (data as any).email
+			};
+		}
+	} catch (e) {
+		console.warn('Could not update client table in Supabase:', e);
+	}
+
+	// 3. Mettre à jour les rendez-vous associés à ce client (nom, email, téléphone)
+	try {
+		const aptUpdates: Record<string, any> = {};
+		if (changes.full_name !== undefined) aptUpdates.client_name = changes.full_name;
+		if (changes.phone !== undefined) aptUpdates.client_phone = changes.phone;
+		if (changes.email !== undefined) aptUpdates.client_email = changes.email;
+		if (Object.keys(aptUpdates).length > 0) {
+			await supabase.from('appointments').update(aptUpdates).eq('client_id', id);
+		}
+	} catch (e) {
+		console.warn('Could not update appointments for client:', e);
+	}
+
+	const result: Client = updated || {
+		id,
+		full_name: changes.full_name ?? null,
+		phone: changes.phone ?? null,
+		email: changes.email ?? null,
+		avatar_url: changes.avatar_url ?? null,
+		created_at: new Date().toISOString(),
+		tag_bd: tag
+	};
+
+	// 4. Émettre un événement global pour que tous les composants React se synchronisent
+	if (typeof window !== 'undefined') {
+		window.dispatchEvent(new CustomEvent('diamant:client-updated', { detail: { client: result } }));
+	}
+
+	return result;
 }
 
 export async function getAppointmentsForClient(clientId: string, tag = getDemoTag()): Promise<(Appointment & { services: { name: string } | null })[]> {

@@ -114,7 +114,7 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 							? 'bg-amber-100 text-amber-800 border border-amber-200' 
 							: 'bg-deep-teal-100 text-deep-teal-800 border border-deep-teal-200'
 					}`}>
-						{role === 'admin' ? '👑 Gérant' : '👤 Employé'}
+						{role === 'admin' ? 'Gérant' : 'Employé'}
 					</span>
 				</div>
 				<div className="grid grid-cols-2 gap-1 p-0.5 bg-stone-200/70 rounded-xl">
@@ -141,11 +141,6 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 						Employé
 					</button>
 				</div>
-				{role === 'employee' && (
-					<p className="text-[10px] text-deep-teal-700 font-semibold mt-2 text-center">
-						Accès restreint aux 4 onglets autorisés
-					</p>
-				)}
 			</div>
 
 			<div className="mb-2 px-2">
