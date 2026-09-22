@@ -14,11 +14,48 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 	const [sending, setSending] = useState(false);
 	const bottomRef = useRef<HTMLDivElement>(null);
 
+	function getStorageKey(pid: string, cid: string) {
+		return `diamant_messages_${pid}_${cid}`;
+	}
+
 	useEffect(() => {
 		setLoading(true);
+		const storageKey = getStorageKey(professionalId, clientId);
+		const cached = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null;
+		let localMsgs: Message[] = [];
+		if (cached) {
+			try {
+				localMsgs = JSON.parse(cached).filter((m: any) => m && !m.id?.startsWith('demo-msg-'));
+				setMessages(localMsgs);
+			} catch (e) {}
+		}
+
 		getMessages(professionalId, clientId)
-			.then(setMessages)
+			.then((dbMsgs) => {
+				const cleaned = dbMsgs.filter(m => !m.id?.startsWith('demo-msg-'));
+				if (cleaned.length > 0) {
+					setMessages(cleaned);
+					if (typeof window !== 'undefined') {
+						localStorage.setItem(storageKey, JSON.stringify(cleaned));
+					}
+				}
+			})
 			.finally(() => setLoading(false));
+
+		const handleNewMsg = (e: any) => {
+			const detail = e.detail;
+			if (detail && detail.clientId === clientId) {
+				setMessages(prev => {
+					if (prev.some(m => m.id === detail.message.id)) return prev;
+					return [...prev, detail.message];
+				});
+			}
+		};
+
+		window.addEventListener('diamant:new-message', handleNewMsg);
+		return () => {
+			window.removeEventListener('diamant:new-message', handleNewMsg);
+		};
 	}, [professionalId, clientId]);
 
 	useEffect(() => {
@@ -39,10 +76,35 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 		e.preventDefault();
 		if (!body.trim()) return;
 		setSending(true);
+		const text = body.trim();
 		try {
-			const created = await sendMessage({ professional_id: professionalId, client_id: clientId, sender: role, body });
-			setMessages((prev) => [...prev, created]);
+			const created = await sendMessage({ professional_id: professionalId, client_id: clientId, sender: role, body: text });
+			const next = [...messages, created];
+			setMessages(next);
 			setBody('');
+
+			if (typeof window !== 'undefined') {
+				const storageKey = getStorageKey(professionalId, clientId);
+				localStorage.setItem(storageKey, JSON.stringify(next));
+
+				try {
+					const metaRaw = localStorage.getItem('diamant_conversations_meta');
+					const meta = metaRaw ? JSON.parse(metaRaw) : {};
+					if (!meta[clientId]) meta[clientId] = { id: clientId, full_name: 'Client' };
+					meta[clientId].last_message = text;
+					meta[clientId].last_message_at = created.created_at;
+					if (role === 'client') {
+						meta[clientId].unread_by_pro = (meta[clientId].unread_by_pro || 0) + 1;
+					} else {
+						meta[clientId].unread_by_pro = 0;
+					}
+					localStorage.setItem('diamant_conversations_meta', JSON.stringify(meta));
+				} catch (e) {}
+
+				window.dispatchEvent(new CustomEvent('diamant:new-message', {
+					detail: { professionalId, clientId, message: created }
+				}));
+			}
 
 			// Notification Email (en asynchrone)
 			resolveRecipientEmail()
@@ -54,7 +116,7 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 						body: JSON.stringify({
 							to: recipient,
 							subject: `Nouveau message reçu`,
-							html: `<p>Vous avez reçu un nouveau message :</p><p><em>"${body}"</em></p><p>Connectez-vous pour répondre.</p>`,
+							html: `<p>Vous avez reçu un nouveau message :</p><p><em>"${text}"</em></p><p>Connectez-vous pour répondre.</p>`,
 						}),
 					});
 				})

@@ -8,12 +8,44 @@ interface DiamantDashboardNavProps {
 
 export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavProps) {
 	const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+	const [unreadCount, setUnreadCount] = React.useState(0);
+
+	React.useEffect(() => {
+		async function checkUnread() {
+			try {
+				let total = 0;
+				if (typeof window !== 'undefined') {
+					const saved = localStorage.getItem('diamant_conversations_meta');
+					if (saved) {
+						const parsed = JSON.parse(saved);
+						for (const k in parsed) {
+							if (parsed[k]?.unread_by_pro) total += parsed[k].unread_by_pro;
+						}
+					}
+				}
+				setUnreadCount(total);
+			} catch (e) {}
+		}
+
+		checkUnread();
+
+		const onUpdate = () => checkUnread();
+		window.addEventListener('diamant:new-message', onUpdate);
+		window.addEventListener('diamant:messages-read', onUpdate);
+		window.addEventListener('storage', onUpdate);
+
+		return () => {
+			window.removeEventListener('diamant:new-message', onUpdate);
+			window.removeEventListener('diamant:messages-read', onUpdate);
+			window.removeEventListener('storage', onUpdate);
+		};
+	}, []);
 
 	const links = [
 		{ href: `${basePath}/dashboard`, label: 'Tableau de bord', icon: Home },
 		{ href: `${basePath}/dashboard/disponibilites`, label: 'Planning & RDV', icon: Calendar },
 		{ href: `${basePath}/dashboard/clients`, label: 'Clientèle', icon: Users },
-		{ href: `${basePath}/dashboard/messages`, label: 'Messagerie', icon: MessageSquare },
+		{ href: `${basePath}/dashboard/messages`, label: 'Messagerie', icon: MessageSquare, badge: unreadCount },
 		{ href: `${basePath}/dashboard/services`, label: 'Gestion des prestations', icon: Scissors },
 		{ href: `${basePath}/dashboard/statistiques`, label: 'Performances', icon: BarChart3 },
 		{ href: `${basePath}/dashboard/recherche`, label: 'Recherche', icon: Search },
@@ -50,7 +82,12 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 						}`}
 					>
 						<Icon size={17} className={isActive ? 'text-deep-teal-500' : 'text-stone-400'} />
-						{link.label}
+						<span className="flex-1">{link.label}</span>
+						{link.badge && link.badge > 0 ? (
+							<span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-deep-teal-600 text-white shadow-2xs animate-pulse">
+								{link.badge}
+							</span>
+						) : null}
 					</a>
 				);
 			})}
