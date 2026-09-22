@@ -29,6 +29,7 @@ import {
 	XCircle, 
 	AlertTriangle, 
 	Eye, 
+	EyeOff,
 	User, 
 	Mail, 
 	Sparkles, 
@@ -57,6 +58,7 @@ export default function DiamantRightsPanel() {
 	const [newMemberSpecialty, setNewMemberSpecialty] = useState('');
 	const [newMemberRole, setNewMemberRole] = useState<ProRole>('employee');
 	const [newMemberPassword, setNewMemberPassword] = useState('Pro2026!');
+	const [showNewPassword, setShowNewPassword] = useState(false);
 
 	// Clients State
 	const [clients, setClients] = useState<Client[]>([]);
@@ -186,20 +188,31 @@ export default function DiamantRightsPanel() {
 	function handleCreateMember(e: React.FormEvent) {
 		e.preventDefault();
 		if (!newMemberName.trim() || !newMemberEmail.trim()) return;
+		if (!newMemberPassword || newMemberPassword.length < 6) {
+			showToast("Le mot de passe doit comporter au moins 6 caractères.");
+			return;
+		}
 
 		const created = addTeamMember(proId, {
 			name: newMemberName.trim(),
 			email: newMemberEmail.trim(),
 			role: newMemberRole,
-			specialty: newMemberSpecialty.trim() || 'Coiffeur(se) Artisan',
-			status: 'active'
+			specialty: newMemberSpecialty.trim() || (newMemberRole === 'admin' ? 'Co-gérant / Administrateur' : 'Coiffeur(se) Artisan'),
+			status: 'active',
+			password: newMemberPassword
 		});
 
 		setShowAddModal(false);
 		setNewMemberName('');
 		setNewMemberEmail('');
 		setNewMemberSpecialty('');
-		showToast(`Compte professionnel créé pour ${created.name} (${created.role === 'employee' ? 'Employé' : 'Admin'}).`);
+		setNewMemberPassword('Pro2026!');
+		setShowNewPassword(false);
+		showToast(
+			created.role === 'admin'
+				? `Compte Administrateur créé pour ${created.name} ! Vous pouvez vous connecter avec ${created.email}.`
+				: `Compte Collaborateur créé pour ${created.name} (Employé). Vous pouvez vous connecter avec ${created.email}.`
+		);
 	}
 
 	function handleToggleMemberStatus(member: TeamMember) {
@@ -390,14 +403,30 @@ export default function DiamantRightsPanel() {
 								Les employés accèdent uniquement aux 4 onglets opérationnels (Planning, Clientèle, Messagerie, Recherche). Le Profil Maison et les finances leur sont inaccessibles.
 							</p>
 						</div>
-						<button
-							type="button"
-							onClick={() => setShowAddModal(true)}
-							className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-all shadow-xs cursor-pointer shrink-0 self-start sm:self-auto"
-						>
-							<UserPlus size={16} />
-							<span>Créer un compte employé</span>
-						</button>
+						<div className="flex flex-wrap items-center gap-2 shrink-0 self-start sm:self-auto">
+							<button
+								type="button"
+								onClick={() => {
+									setNewMemberRole('admin');
+									setShowAddModal(true);
+								}}
+								className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-amber-600 text-white text-xs font-bold hover:bg-amber-700 transition-all shadow-xs cursor-pointer"
+							>
+								<ShieldCheck size={15} />
+								<span>Créer un compte Admin</span>
+							</button>
+							<button
+								type="button"
+								onClick={() => {
+									setNewMemberRole('employee');
+									setShowAddModal(true);
+								}}
+								className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-all shadow-xs cursor-pointer"
+							>
+								<UserPlus size={15} />
+								<span>Créer un compte Collaborateur</span>
+							</button>
+						</div>
 					</div>
 
 					{/* Liste des collaborateurs */}
@@ -416,14 +445,28 @@ export default function DiamantRightsPanel() {
 									<tr>
 										<td colSpan={4} className="p-8 text-center text-xs text-stone-400">
 											Aucun collaborateur configuré pour le moment.
-											<div className="mt-3">
+											<div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
 												<button
 													type="button"
-													onClick={() => setShowAddModal(true)}
-													className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-all cursor-pointer shadow-2xs"
+													onClick={() => {
+														setNewMemberRole('admin');
+														setShowAddModal(true);
+													}}
+													className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold hover:bg-amber-700 transition-all cursor-pointer shadow-xs"
+												>
+													<ShieldCheck size={14} />
+													<span>Créer un compte Admin</span>
+												</button>
+												<button
+													type="button"
+													onClick={() => {
+														setNewMemberRole('employee');
+														setShowAddModal(true);
+													}}
+													className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-all cursor-pointer shadow-xs"
 												>
 													<UserPlus size={14} />
-													<span>Créer un premier compte employé</span>
+													<span>Créer un compte Collaborateur</span>
 												</button>
 											</div>
 										</td>
@@ -875,12 +918,20 @@ export default function DiamantRightsPanel() {
 					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95">
 						<div className="flex items-center justify-between pb-4 border-b border-stone-100">
 							<div className="flex items-center gap-2.5">
-								<div className="w-9 h-9 rounded-xl bg-deep-teal-100 text-deep-teal-700 flex items-center justify-center">
-									<UserPlus size={18} />
+								<div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+									newMemberRole === 'admin' 
+										? 'bg-amber-100 text-amber-700' 
+										: 'bg-deep-teal-100 text-deep-teal-700'
+								}`}>
+									{newMemberRole === 'admin' ? <ShieldCheck size={18} /> : <UserPlus size={18} />}
 								</div>
 								<div>
-									<h4 className="font-bold text-stone-900 text-base">Nouveau Compte Collaborateur</h4>
-									<p className="text-xs text-stone-400">Création d'un accès pro sécurisé</p>
+									<h4 className="font-bold text-stone-900 text-base">
+										{newMemberRole === 'admin' ? 'Nouveau Compte Administrateur' : 'Nouveau Compte Collaborateur'}
+									</h4>
+									<p className="text-xs text-stone-400">
+										{newMemberRole === 'admin' ? 'Accès intégral à tous les onglets et gestion' : 'Accès limité aux onglets opérationnels'}
+									</p>
 								</div>
 							</div>
 							<button
@@ -923,13 +974,41 @@ export default function DiamantRightsPanel() {
 
 							<div>
 								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+									Mot de passe de connexion *
+								</label>
+								<div className="relative">
+									<input
+										type={showNewPassword ? 'text' : 'password'}
+										required
+										minLength={6}
+										value={newMemberPassword}
+										onChange={e => setNewMemberPassword(e.target.value)}
+										placeholder="Minimum 6 caractères"
+										className="w-full rounded-xl border border-stone-200 bg-stone-50 pl-3.5 pr-11 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+									/>
+									<button
+										type="button"
+										onClick={() => setShowNewPassword(!showNewPassword)}
+										className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 p-1 rounded-md transition-colors"
+										title={showNewPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+									>
+										{showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+									</button>
+								</div>
+								<p className="text-[11px] text-stone-400 mt-1">
+									Permettra de se connecter immédiatement sur la page de connexion.
+								</p>
+							</div>
+
+							<div>
+								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
 									Spécialité / Fonction
 								</label>
 								<input
 									type="text"
 									value={newMemberSpecialty}
 									onChange={e => setNewMemberSpecialty(e.target.value)}
-									placeholder="Ex : Experte Soins & Brushing"
+									placeholder={newMemberRole === 'admin' ? "Ex : Co-gérant / Responsable" : "Ex : Experte Soins & Brushing"}
 									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
 								/>
 							</div>
@@ -982,9 +1061,13 @@ export default function DiamantRightsPanel() {
 								</button>
 								<button
 									type="submit"
-									className="px-5 py-2.5 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 shadow-xs cursor-pointer"
+									className={`px-5 py-2.5 rounded-xl text-white text-xs font-bold shadow-xs cursor-pointer transition-all ${
+										newMemberRole === 'admin' 
+											? 'bg-amber-600 hover:bg-amber-700' 
+											: 'bg-deep-teal-600 hover:bg-deep-teal-700'
+									}`}
 								>
-									Créer le collaborateur
+									{newMemberRole === 'admin' ? 'Créer le compte Administrateur' : 'Créer le compte Collaborateur'}
 								</button>
 							</div>
 						</form>

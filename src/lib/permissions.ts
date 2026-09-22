@@ -11,6 +11,7 @@ export interface TeamMember {
 	specialty?: string;
 	status: 'active' | 'suspended';
 	created_at: string;
+	password?: string;
 }
 
 export interface BannedClientRecord {
@@ -34,6 +35,90 @@ export function setActiveProRole(role: ProRole): void {
 	if (typeof window === 'undefined') return;
 	localStorage.setItem('pro_active_role', role);
 	window.dispatchEvent(new CustomEvent('pro:role-changed', { detail: { role } }));
+}
+
+/**
+ * Enregistre ou met à jour un compte pro dans le registre global de la démo
+ */
+export function saveProAccount(member: TeamMember): void {
+	if (typeof window === 'undefined') return;
+	try {
+		const raw = localStorage.getItem('diamant_pro_accounts') || '[]';
+		const list: TeamMember[] = JSON.parse(raw);
+		const idx = list.findIndex(m => m.email.toLowerCase().trim() === member.email.toLowerCase().trim());
+		if (idx >= 0) {
+			list[idx] = { ...list[idx], ...member };
+		} else {
+			list.push(member);
+		}
+		localStorage.setItem('diamant_pro_accounts', JSON.stringify(list));
+	} catch (e) {}
+}
+
+/**
+ * Recherche un compte pro (collaborateur ou admin) par son adresse email
+ */
+export function findProAccount(email: string): TeamMember | null {
+	if (typeof window === 'undefined' || !email) return null;
+	const cleanEmail = email.toLowerCase().trim();
+
+	// 1. Recherche dans le registre global des comptes créés
+	try {
+		const raw = localStorage.getItem('diamant_pro_accounts');
+		if (raw) {
+			const list: TeamMember[] = JSON.parse(raw);
+			const found = list.find(m => m.email && m.email.toLowerCase().trim() === cleanEmail);
+			if (found) return found;
+		}
+	} catch (e) {}
+
+	// 2. Recherche dans toutes les clés diamant_team_members_* du localStorage
+	try {
+		for (let i = 0; i < localStorage.length; i++) {
+			const key = localStorage.key(i);
+			if (key && key.startsWith('diamant_team_members_')) {
+				const raw = localStorage.getItem(key);
+				if (raw) {
+					const list: TeamMember[] = JSON.parse(raw);
+					if (Array.isArray(list)) {
+						const found = list.find(m => m.email && m.email.toLowerCase().trim() === cleanEmail);
+						if (found) return found;
+					}
+				}
+			}
+		}
+	} catch (e) {}
+
+	return null;
+}
+
+export function setProSession(member: TeamMember): void {
+	if (typeof window === 'undefined') return;
+	localStorage.setItem('diamant_pro_user', JSON.stringify({
+		id: member.id,
+		name: member.name,
+		email: member.email,
+		role: member.role,
+		specialty: member.specialty
+	}));
+	localStorage.setItem('diamant_client_email', member.email);
+	setActiveProRole(member.role);
+}
+
+export function getProSession(): { id: string; name: string; email: string; role: ProRole; specialty?: string } | null {
+	if (typeof window === 'undefined') return null;
+	try {
+		const raw = localStorage.getItem('diamant_pro_user');
+		if (raw) return JSON.parse(raw);
+	} catch (e) {}
+	return null;
+}
+
+export function clearProSession(): void {
+	if (typeof window === 'undefined') return;
+	localStorage.removeItem('diamant_pro_user');
+	localStorage.removeItem('pro_active_role');
+	localStorage.removeItem('diamant_client_email');
 }
 
 export function getTeamMembers(proId: string): TeamMember[] {
@@ -69,6 +154,7 @@ export function addTeamMember(proId: string, member: Omit<TeamMember, 'id' | 'cr
 	const updated = [...current, newMember];
 	if (typeof window !== 'undefined') {
 		localStorage.setItem(`diamant_team_members_${proId}`, JSON.stringify(updated));
+		saveProAccount(newMember);
 		window.dispatchEvent(new CustomEvent('diamant:team-updated', { detail: { members: updated } }));
 	}
 	return newMember;
@@ -79,15 +165,28 @@ export function updateTeamMember(proId: string, id: string, changes: Partial<Tea
 	const updated = current.map(m => m.id === id ? { ...m, ...changes } : m);
 	if (typeof window !== 'undefined') {
 		localStorage.setItem(`diamant_team_members_${proId}`, JSON.stringify(updated));
+		const modified = updated.find(m => m.id === id);
+		if (modified) saveProAccount(modified);
 		window.dispatchEvent(new CustomEvent('diamant:team-updated', { detail: { members: updated } }));
 	}
 }
 
 export function deleteTeamMember(proId: string, id: string): void {
 	const current = getTeamMembers(proId);
+	const toDelete = current.find(m => m.id === id);
 	const updated = current.filter(m => m.id !== id);
 	if (typeof window !== 'undefined') {
 		localStorage.setItem(`diamant_team_members_${proId}`, JSON.stringify(updated));
+		if (toDelete?.email) {
+			try {
+				const raw = localStorage.getItem('diamant_pro_accounts');
+				if (raw) {
+					const list: TeamMember[] = JSON.parse(raw);
+					const filtered = list.filter(m => m.email.toLowerCase().trim() !== toDelete.email.toLowerCase().trim());
+					localStorage.setItem('diamant_pro_accounts', JSON.stringify(filtered));
+				}
+			} catch (e) {}
+		}
 		window.dispatchEvent(new CustomEvent('diamant:team-updated', { detail: { members: updated } }));
 	}
 }

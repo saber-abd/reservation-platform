@@ -13,7 +13,7 @@ import {
 	ShieldCheck,
 	Lock
 } from 'lucide-react';
-import { getActiveProRole, setActiveProRole, type ProRole } from '@/lib/permissions';
+import { getActiveProRole, setActiveProRole, getProSession, clearProSession, type ProRole } from '@/lib/permissions';
 
 interface DiamantDashboardNavProps {
 	basePath: string;
@@ -23,6 +23,7 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 	const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
 	const [unreadCount, setUnreadCount] = React.useState(0);
 	const [role, setRole] = React.useState<ProRole>('admin');
+	const [proUser, setProUser] = React.useState(getProSession());
 
 	React.useEffect(() => {
 		setRole(getActiveProRole());
@@ -97,6 +98,7 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 		try {
 			await supabase.auth.signOut();
 			localStorage.removeItem('diamant_client_avatar');
+			clearProSession();
 		} catch (e) {
 			console.error('Erreur déconnexion:', e);
 		}
@@ -107,6 +109,12 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 		<nav className="flex flex-col gap-1">
 			{/* Sélecteur & Indicateur de Rôle Actif */}
 			<div className="mx-1 mb-4 p-3 rounded-2xl border border-stone-200 bg-stone-50/90 shadow-2xs">
+				{proUser && (
+					<div className="mb-2.5 pb-2 border-b border-stone-200/80">
+						<p className="text-xs font-bold text-stone-900 truncate">{proUser.name}</p>
+						<p className="text-[11px] text-stone-500 truncate">{proUser.email}</p>
+					</div>
+				)}
 				<div className="flex items-center justify-between mb-2">
 					<span className="text-[10px] font-black uppercase tracking-wider text-stone-400">Rôle Actif</span>
 					<span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${

@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { resendConfirmationEmail, signIn, getSession, getUser } from '@/lib/auth';
 import { getAccountType, createProfessional, createClient } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
-import { getBannedClientRecord } from '@/lib/permissions';
+import { getBannedClientRecord, findProAccount, setProSession, setActiveProRole } from '@/lib/permissions';
 import { ShieldAlert } from 'lucide-react';
 
 const schema = z.object({
@@ -144,6 +144,36 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 		if (preBan) {
 			setError(`Connexion refusée : votre compte est suspendu par l'établissement. Motif : « ${preBan.reason} ». L'accès à votre espace client et aux réservations est bloqué.`);
 			setSubmitting(false);
+			return;
+		}
+
+		// Check if credentials match a created Pro/Admin account
+		const proAccount = findProAccount(values.email);
+		if (proAccount) {
+			if (proAccount.password && proAccount.password !== values.password) {
+				setError('Mot de passe incorrect pour ce compte.');
+				setSubmitting(false);
+				return;
+			}
+			if (proAccount.status === 'suspended') {
+				setError("Connexion refusée : votre compte collaborateur est actuellement suspendu par l'administrateur.");
+				setSubmitting(false);
+				return;
+			}
+
+			// Initialiser la session professionnelle
+			setProSession(proAccount);
+			setActiveProRole(proAccount.role);
+
+			// Tenter en arrière-plan une synchronisation Supabase si possible
+			try {
+				await signIn(values.email, values.password).catch(() => null);
+			} catch (e) {}
+
+			const basePath = getEffectiveBasePath();
+			window.location.href = proAccount.role === 'admin' 
+				? `${basePath}/dashboard` 
+				: `${basePath}/dashboard/disponibilites`;
 			return;
 		}
 
