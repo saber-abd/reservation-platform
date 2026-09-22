@@ -1,0 +1,12 @@
+---
+import CommercialLayout from '@/layouts/CommercialLayout.astro';
+import OAuthCallback from '@/components/auth/OAuthCallback';
+---
+
+<CommercialLayout title="Connexion" description="Authentification en cours...">
+	<section class="flex min-h-[70vh] items-center justify-center py-20 px-6">
+		<div class="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
+			<OAuthCallback client:load />
+		</div>
+	</section>
+</CommercialLayout>

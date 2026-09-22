@@ -1,0 +1,23 @@
+---
+import CommercialLayout from '@/layouts/CommercialLayout.astro';
+---
+
+<CommercialLayout title="Réinitialisation" description="Redirection vers la réinitialisation de mot de passe...">
+	<section class="flex min-h-[70vh] items-center justify-center py-20 px-6">
+		<div class="flex flex-col items-center justify-center gap-4 text-center">
+			<div class="h-10 w-10 animate-spin rounded-full border-4 border-stone-200 border-t-rose-600"></div>
+			<p class="text-sm font-semibold text-stone-700">Redirection vers votre espace...</p>
+		</div>
+	</section>
+
+	<script is:inline>
+		(function() {
+			var targetDemo = sessionStorage.getItem('oauth_demo_redirect') 
+				|| localStorage.getItem('preferred_demo') 
+				|| '/demo-premium';
+			var hash = window.location.hash || '';
+			var search = window.location.search || '';
+			window.location.replace(targetDemo + '/reinitialiser-mot-de-passe' + search + hash);
+		})();
+	</script>
+</CommercialLayout>

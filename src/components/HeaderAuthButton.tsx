@@ -23,6 +23,8 @@ export default function HeaderAuthButton({ basePath = '' }: { basePath?: string 
 	const [loading, setLoading] = useState(true);
 	const [menuOpen, setMenuOpen] = useState(false);
 
+	const effectiveBasePath = basePath || (typeof window !== 'undefined' ? (window.location.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '') : '');
+
 	useEffect(() => {
 		let cancelled = false;
 
@@ -118,7 +120,7 @@ export default function HeaderAuthButton({ basePath = '' }: { basePath?: string 
 		} catch (e) {
 			console.error(e);
 		}
-		window.location.href = basePath ? `${basePath}/` : '/';
+		window.location.href = effectiveBasePath ? `${effectiveBasePath}/` : '/';
 	}
 
 	if (loading) {
@@ -129,7 +131,7 @@ export default function HeaderAuthButton({ basePath = '' }: { basePath?: string 
 	if (!user) {
 		return (
 			<a
-				href={`${basePath}/connexion`}
+				href={`${effectiveBasePath}/connexion`}
 				className="flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-2 text-sm font-semibold text-stone-700 shadow-sm transition-colors hover:border-rose-300 hover:text-rose-600"
 			>
 				{/* LogIn icon inline SVG */}
@@ -154,7 +156,7 @@ export default function HeaderAuthButton({ basePath = '' }: { basePath?: string 
 	}
 
 	// Logged in — show avatar + name + dropdown
-	const dashboardHref = user.accountType === 'professional' ? `${basePath}/dashboard` : `${basePath}/espace-client`;
+	const dashboardHref = user.accountType === 'professional' ? `${effectiveBasePath}/dashboard` : `${effectiveBasePath}/espace-client`;
 	const firstWord = user.displayName.split(' ')[0] ?? user.displayName;
 
 	return (

@@ -26,16 +26,19 @@ export function useAuthedClient(): AuthedClientState {
 
 		async function load() {
 			try {
+				const match = typeof window !== 'undefined' ? window.location.pathname.match(/^\/(demo-[^/]+)/) : null;
+				const basePath = match ? `/${match[1]}` : (typeof window !== 'undefined' ? (sessionStorage.getItem('oauth_demo_redirect') || localStorage.getItem('preferred_demo') || '/demo-premium') : '/demo-premium');
+
 				const session = await getSession();
 				if (!session) {
-					window.location.href = '/connexion';
+					window.location.href = `${basePath}/connexion`;
 					return;
 				}
 				const client = await getClientById(session.user.id);
 				if (!client) {
 					// Compte professionnel connecté sur l'espace client : renvoyer vers son propre espace, pas vers l'inscription.
 					const professional = await getProfessionalByUserId(session.user.id);
-					window.location.href = professional ? '/dashboard' : '/inscription';
+					window.location.href = professional ? `${basePath}/dashboard` : `${basePath}/inscription`;
 					return;
 				}
 				if (!cancelled) {

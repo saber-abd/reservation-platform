@@ -10,7 +10,11 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-export default function ForgotPasswordForm() {
+interface ForgotPasswordFormProps {
+	basePath?: string;
+}
+
+export default function ForgotPasswordForm({ basePath: propBasePath }: ForgotPasswordFormProps = {}) {
 	const [error, setError] = useState<string | null>(null);
 	const [sent, setSent] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
@@ -20,11 +24,23 @@ export default function ForgotPasswordForm() {
 		formState: { errors },
 	} = useForm<FormValues>({ resolver: zodResolver(schema) });
 
+	function getEffectiveBasePath() {
+		if (propBasePath) return propBasePath;
+		if (typeof window !== 'undefined') {
+			const match = window.location.pathname.match(/^\/(demo-[^/]+)/);
+			if (match) return `/${match[1]}`;
+			const stored = sessionStorage.getItem('oauth_demo_redirect') || localStorage.getItem('preferred_demo');
+			if (stored) return stored;
+		}
+		return '/demo-premium';
+	}
+
 	async function onSubmit(values: FormValues) {
 		setSubmitting(true);
 		setError(null);
 		try {
-			await resetPasswordForEmail(values.email);
+			const basePath = getEffectiveBasePath();
+			await resetPasswordForEmail(values.email, `${window.location.origin}${basePath}/reinitialiser-mot-de-passe`);
 			setSent(true);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Erreur lors de l'envoi de l'email.");

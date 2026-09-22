@@ -10,7 +10,11 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-export default function ResetPasswordForm() {
+interface ResetPasswordFormProps {
+	basePath?: string;
+}
+
+export default function ResetPasswordForm({ basePath: propBasePath }: ResetPasswordFormProps = {}) {
 	const [error, setError] = useState<string | null>(null);
 	const [done, setDone] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
@@ -19,6 +23,17 @@ export default function ResetPasswordForm() {
 		handleSubmit,
 		formState: { errors },
 	} = useForm<FormValues>({ resolver: zodResolver(schema) });
+
+	function getEffectiveBasePath() {
+		if (propBasePath) return propBasePath;
+		if (typeof window !== 'undefined') {
+			const match = window.location.pathname.match(/^\/(demo-[^/]+)/);
+			if (match) return `/${match[1]}`;
+			const stored = sessionStorage.getItem('oauth_demo_redirect') || localStorage.getItem('preferred_demo');
+			if (stored) return stored;
+		}
+		return '/demo-premium';
+	}
 
 	async function onSubmit(values: FormValues) {
 		setSubmitting(true);
@@ -37,14 +52,9 @@ export default function ResetPasswordForm() {
 		return (
 			<div>
 				<p className="text-sm text-green-700">Votre mot de passe a bien été mis à jour.</p>
-			{(() => {
-				const basePath = typeof window !== 'undefined' ? (window.location.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '') : '';
-				return (
-					<a href={`${basePath}/connexion`} className="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
-						Retour à la connexion
-					</a>
-				);
-			})()}
+				<a href={`${getEffectiveBasePath()}/connexion`} className="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
+					Retour à la connexion
+				</a>
 			</div>
 		);
 	}

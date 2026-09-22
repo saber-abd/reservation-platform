@@ -11,6 +11,7 @@ const links = [
 
 export default function PremiumClientNav({ basePath = '' }: { basePath?: string }) {
 	const [currentPath, setCurrentPath] = useState('');
+	const effectiveBasePath = basePath || (typeof window !== 'undefined' ? (window.location.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '') : '');
 
 	useEffect(() => {
 		setCurrentPath(window.location.pathname);
@@ -18,7 +19,7 @@ export default function PremiumClientNav({ basePath = '' }: { basePath?: string 
 
 	async function handleSignOut() {
 		await signOut();
-		window.location.href = basePath ? `${basePath}/connexion` : '/connexion';
+		window.location.href = effectiveBasePath ? `${effectiveBasePath}/connexion` : '/demo-premium/connexion';
 	}
 
 	return (

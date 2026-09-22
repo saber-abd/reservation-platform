@@ -388,13 +388,18 @@ export async function rescheduleAppointment(id: string, startTime: string, endTi
 }
 
 export async function getClientById(userId: string, tag = getDemoTag()): Promise<Client | null> {
-	const { data, error } = await supabase.from('clients').select('*').eq('id', userId).eq('tag_bd', tag).maybeSingle();
+	const { data: taggedData, error: taggedError } = await supabase.from('clients').select('*').eq('id', userId).eq('tag_bd', tag).maybeSingle();
+	if (taggedError) throw taggedError;
+	if (taggedData) return taggedData;
+
+	// Fallback : Vérifier si le client existe dans une autre démo
+	const { data, error } = await supabase.from('clients').select('*').eq('id', userId).maybeSingle();
 	if (error) throw error;
 	return data;
 }
 
 export async function createClient(client: Pick<Client, 'id'> & Partial<Client>, tag = getDemoTag()) {
-	const { data, error } = await supabase.from('clients').insert({ ...client, tag_bd: tag }).select().single();
+	const { data, error } = await supabase.from('clients').upsert({ ...client, tag_bd: tag }, { onConflict: 'id' }).select().single();
 	if (error) throw error;
 	return data as Client;
 }

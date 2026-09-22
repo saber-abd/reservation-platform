@@ -12,7 +12,11 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-export default function LoginForm() {
+interface LoginFormProps {
+	basePath?: string;
+}
+
+export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {}) {
 	const [error, setError] = useState<string | null>(null);
 	const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
 	const [resendStatus, setResendStatus] = useState<string | null>(null);
@@ -22,6 +26,17 @@ export default function LoginForm() {
 		handleSubmit,
 		formState: { errors },
 	} = useForm<FormValues>({ resolver: zodResolver(schema) });
+
+	function getEffectiveBasePath() {
+		if (propBasePath) return propBasePath;
+		if (typeof window !== 'undefined') {
+			const match = window.location.pathname.match(/^\/(demo-[^/]+)/);
+			if (match) return `/${match[1]}`;
+			const stored = sessionStorage.getItem('oauth_demo_redirect') || localStorage.getItem('preferred_demo');
+			if (stored) return stored;
+		}
+		return '/demo-premium';
+	}
 
 	useEffect(() => {
 		async function checkExisting() {
@@ -41,14 +56,13 @@ export default function LoginForm() {
 	}, []);
 
 	async function routeUser(user: any) {
-		const match = window.location.pathname.match(/^\/(demo-[^/]+)/);
-		const basePath = match ? `/${match[1]}` : '';
+		const basePath = getEffectiveBasePath();
 
 		const accountType = await getAccountType(user.id);
 		if (accountType === 'professional') {
-			window.location.href = basePath ? `${basePath}/dashboard` : '/dashboard';
+			window.location.href = `${basePath}/dashboard`;
 		} else if (accountType === 'client') {
-			window.location.href = basePath ? `${basePath}/espace-client` : '/espace-client';
+			window.location.href = `${basePath}/espace-client`;
 		} else {
 			const meta = user.user_metadata;
 			if (meta?.account_role === 'professional') {
@@ -57,12 +71,15 @@ export default function LoginForm() {
 					business_name: meta.business_name || 'Mon activité',
 					email: user.email!,
 				});
-				window.location.href = basePath ? `${basePath}/dashboard` : '/dashboard';
-			} else if (meta?.account_role === 'client') {
-				await createClient({ id: user.id, full_name: meta.full_name || null });
-				window.location.href = basePath ? `${basePath}/espace-client` : '/espace-client';
+				window.location.href = `${basePath}/dashboard`;
 			} else {
-				window.location.href = basePath ? `${basePath}/inscription` : '/inscription';
+				// Par défaut (ex: Google OAuth), créer le profil client et rediriger
+				await createClient({ 
+					id: user.id, 
+					full_name: meta?.full_name || meta?.name || 'Client',
+					avatar_url: meta?.avatar_url || meta?.picture || null
+				});
+				window.location.href = `${basePath}/espace-client`;
 			}
 		}
 	}
@@ -92,8 +109,9 @@ export default function LoginForm() {
 		if (!unconfirmedEmail) return;
 		setResendStatus(null);
 		try {
-			await resendConfirmationEmail(unconfirmedEmail);
-			setResendStatus("Email de confirmation renvoyé.");
+			const basePath = getEffectiveBasePath();
+			await resendConfirmationEmail(unconfirmedEmail, `${window.location.origin}${basePath}/connexion`);
+			setResendStatus("Email de confirmation renvoyé. Pensez à vérifier vos spams !");
 		} catch (err) {
 			setResendStatus(err instanceof Error ? err.message : "Erreur lors de l'envoi.");
 		}
@@ -124,26 +142,22 @@ export default function LoginForm() {
 					{...register('password')}
 				/>
 				{errors.password && <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>}
-				{(() => {
-					const basePath = typeof window !== 'undefined' ? (window.location.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '') : '';
-					return (
-						<a href={`${basePath}/mot-de-passe-oublie`} className="mt-1 inline-block text-xs font-medium text-primary hover:underline">
-							Mot de passe oublié ?
-						</a>
-					);
-				})()}
+				<a href={`${getEffectiveBasePath()}/mot-de-passe-oublie`} className="mt-1 inline-block text-xs font-medium text-primary hover:underline">
+					Mot de passe oublié ?
+				</a>
 			</div>
 			{error && <p className="text-sm text-destructive">{error}</p>}
 			{unconfirmedEmail && (
-				<div>
+				<div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800">
+					<p className="mb-2">Le message de confirmation a pu être filtré comme spam.</p>
 					<button
 						type="button"
 						onClick={handleResendConfirmation}
-						className="text-xs font-medium text-primary hover:underline"
+						className="font-bold underline text-amber-900 hover:text-amber-700"
 					>
 						Renvoyer l'email de confirmation
 					</button>
-					{resendStatus && <p className="mt-1 text-xs text-muted-foreground">{resendStatus}</p>}
+					{resendStatus && <p className="mt-1 font-medium">{resendStatus}</p>}
 				</div>
 			)}
 			<button
@@ -160,11 +174,12 @@ export default function LoginForm() {
 				<div className="flex-grow border-t border-stone-200"></div>
 			</div>
 
-				<button
+			<button
 				type="button"
 				onClick={async () => {
 					const { signInWithGoogle } = await import('@/lib/auth');
-					await signInWithGoogle();
+					const basePath = getEffectiveBasePath();
+					await signInWithGoogle(`${window.location.origin}${basePath}/connexion`);
 				}}
 				className="flex w-full items-center justify-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-4 py-2 text-sm font-semibold text-stone-700 transition-colors hover:bg-stone-100"
 			>
