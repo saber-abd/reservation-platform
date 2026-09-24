@@ -3,9 +3,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { signUp, getSession, getUser } from '@/lib/auth';
-import { createClient } from '@/lib/queries';
+import { createClient, getDemoTag } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
-import { getBannedClientRecord } from '@/lib/permissions';
+import { getBannedClientRecord, checkIsClientBannedInDb } from '@/lib/permissions';
 
 const baseSchema = z.object({
 	fullName: z.string().min(2, 'Nom obligatoire'),
@@ -55,26 +55,41 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 					const user = await getUser();
 					if (user) {
 						const meta = user.user_metadata;
-						const ban = getBannedClientRecord(
+						let ban = getBannedClientRecord(
 							user.id,
 							user.email,
 							meta?.full_name || meta?.name
 						);
+						if (!ban) {
+							const dbBan = await checkIsClientBannedInDb(user.id, user.email);
+							if (dbBan) {
+								ban = {
+									clientId: user.id,
+									clientName: meta?.full_name || meta?.name || 'Client',
+									clientEmail: user.email,
+									reason: dbBan.reason || 'Compte suspendu par l’établissement',
+									bannedAt: new Date().toISOString()
+								};
+							}
+						}
 						if (ban) {
 							await supabase.auth.signOut();
 							localStorage.removeItem('diamant_client_avatar');
+							localStorage.removeItem('diamant_client_email');
 							setError(`Inscription ou accès impossible : ce compte est suspendu par l'établissement. Motif : « ${ban.reason} »`);
 							return;
 						}
 						
 						// Si les métadonnées contiennent déjà qu'il est client, ou si on a son nom complet (ex: Google Auth)
 						if (meta?.account_role === 'client' || meta?.full_name || meta?.name) {
+							const basePath = getEffectiveBasePath();
+							const currentTag = getDemoTag(basePath);
 							await createClient({ 
 								id: user.id, 
 								full_name: meta.full_name || meta.name || 'Client',
+								email: user.email || null,
 								avatar_url: meta.avatar_url || meta.picture || null
-							});
-							const basePath = getEffectiveBasePath();
+							}, currentTag);
 							window.location.href = `${basePath}/espace-client`;
 							return;
 						}
@@ -95,23 +110,44 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 		setSubmitting(true);
 		setError(null);
 		try {
-			const ban = getBannedClientRecord(existingUser.id, existingUser.email, values.fullName);
+			let ban = getBannedClientRecord(existingUser.id, existingUser.email, values.fullName);
+			if (!ban) {
+				const dbBan = await checkIsClientBannedInDb(existingUser.id, existingUser.email);
+				if (dbBan) {
+					ban = {
+						clientId: existingUser.id,
+						clientName: values.fullName,
+						clientEmail: existingUser.email,
+						reason: dbBan.reason || 'Compte suspendu par l’établissement',
+						bannedAt: new Date().toISOString()
+					};
+				}
+			}
 			if (ban) {
 				await supabase.auth.signOut();
+				localStorage.removeItem('diamant_client_avatar');
+				localStorage.removeItem('diamant_client_email');
 				setError(`Inscription refusée : compte suspendu par l'établissement. Motif : « ${ban.reason} »`);
 				return;
 			}
 
+			const basePath = getEffectiveBasePath();
+			const currentTag = getDemoTag(basePath);
+
 			const metadata = {
 				account_role: 'client',
-				full_name: values.fullName
+				full_name: values.fullName,
+				demo_tag: currentTag
 			};
 			
 			const { error: updateError } = await supabase.auth.updateUser({ data: metadata });
 			if (updateError) throw updateError;
 
-			await createClient({ id: existingUser.id, full_name: values.fullName });
-			const basePath = getEffectiveBasePath();
+			await createClient({ 
+				id: existingUser.id, 
+				full_name: values.fullName,
+				email: existingUser.email || null
+			}, currentTag);
 			window.location.href = `${basePath}/espace-client`;
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Erreur lors de la création du profil.");
@@ -135,8 +171,20 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 		setError(null);
 		setPendingConfirmationEmail(null);
 
-		// Ban check on email or name
-		const preBan = getBannedClientRecord(null, values.email, values.fullName);
+		// Ban check on email or name (Local + BDD Supabase)
+		let preBan = getBannedClientRecord(null, values.email, values.fullName);
+		if (!preBan) {
+			const dbBan = await checkIsClientBannedInDb(null, values.email);
+			if (dbBan) {
+				preBan = {
+					clientId: 'unknown',
+					clientName: values.fullName,
+					clientEmail: values.email,
+					reason: dbBan.reason || 'Compte suspendu par l’établissement',
+					bannedAt: new Date().toISOString()
+				};
+			}
+		}
 		if (preBan) {
 			setError(`Inscription impossible : cette adresse email fait l'objet d'une suspension par l'établissement. Motif : « ${preBan.reason} »`);
 			setSubmitting(false);
@@ -144,11 +192,14 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 		}
 
 		try {
+			const basePath = getEffectiveBasePath();
+			const currentTag = getDemoTag(basePath);
+
 			const metadata = {
 				account_role: 'client',
-				full_name: values.fullName
+				full_name: values.fullName,
+				demo_tag: currentTag
 			};
-			const basePath = getEffectiveBasePath();
 			const { user, session } = await signUp(
 				values.email,
 				values.password,
@@ -161,8 +212,9 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 				// Compte créé et immédiatement connecté
 				await createClient({
 					id: user.id,
-					full_name: values.fullName
-				});
+					full_name: values.fullName,
+					email: values.email
+				}, currentTag);
 				window.location.href = `${basePath}/espace-client`;
 				return;
 			}

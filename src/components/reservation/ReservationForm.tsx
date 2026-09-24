@@ -15,7 +15,7 @@ import {
 import { generateSlotsForDate, type GeneratedSlot } from '@/lib/slots';
 import { getSession } from '@/lib/auth';
 import { getServiceImageFallback } from '@/lib/serviceImages';
-import { getBannedClientRecord } from '@/lib/permissions';
+import { getBannedClientRecord, checkIsClientBannedInDb } from '@/lib/permissions';
 
 const clientSchema = z.object({
 	clientName: z.string().min(2, 'Nom trop court'),
@@ -124,7 +124,19 @@ export default function ReservationForm() {
 		try {
 			const session = await getSession();
 			const clientId = session?.user.id || '';
-			const ban = getBannedClientRecord(clientId, values.clientEmail, values.clientName);
+			let ban = getBannedClientRecord(clientId, values.clientEmail, values.clientName);
+			if (!ban) {
+				const dbBan = await checkIsClientBannedInDb(clientId || null, values.clientEmail);
+				if (dbBan) {
+					ban = {
+						clientId: clientId || 'unknown',
+						clientName: values.clientName,
+						clientEmail: values.clientEmail,
+						reason: dbBan.reason || 'Compte suspendu par l’établissement',
+						bannedAt: new Date().toISOString()
+					};
+				}
+			}
 			if (ban) {
 				setError(`Votre compte est actuellement suspendu par l'établissement. Motif : « ${ban.reason} ». Vous ne pouvez pas effectuer de nouvelle réservation.`);
 				setSubmitting(false);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { getBannedClientRecord, type BannedClientRecord } from '@/lib/permissions';
+import { getBannedClientRecord, checkIsClientBannedInDb, type BannedClientRecord } from '@/lib/permissions';
 import { ShieldAlert, AlertTriangle, LogOut, Phone, Mail, ArrowRight } from 'lucide-react';
 
 interface DiamantClientBanGuardProps {
@@ -33,11 +33,25 @@ export default function DiamantClientBanGuard({ basePath, children }: DiamantCli
 			}
 			const { data: { session } } = await supabase.auth.getSession();
 			const user = session?.user;
-			const ban = getBannedClientRecord(
+			let ban = getBannedClientRecord(
 				user?.id,
 				user?.email,
 				user?.user_metadata?.full_name || user?.user_metadata?.name
 			);
+
+			if (!ban && (user?.id || user?.email || cachedEmail)) {
+				const dbBan = await checkIsClientBannedInDb(user?.id, user?.email || cachedEmail);
+				if (dbBan) {
+					ban = {
+						clientId: user?.id || 'unknown',
+						clientName: user?.user_metadata?.full_name || user?.user_metadata?.name || 'Client',
+						clientEmail: user?.email || cachedEmail,
+						reason: dbBan.reason || 'Compte suspendu par l’établissement',
+						bannedAt: new Date().toISOString()
+					};
+				}
+			}
+
 			setBannedRecord(ban);
 			if (typeof document !== 'undefined') {
 				if (ban) {

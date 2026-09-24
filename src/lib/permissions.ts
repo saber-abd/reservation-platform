@@ -268,88 +268,223 @@ export function isClientBanned(clientId?: string | null, clientEmail?: string | 
 	return getBannedClientRecord(clientId, clientEmail, clientName) !== null;
 }
 
-export function banClient(clientId: string, clientName: string, reason: string, clientEmail?: string | null): void {
-	if (typeof window === 'undefined') return;
-	const banned = getBannedClients();
+/**
+ * Vérifie en temps réel dans la base de données Supabase si un client est banni (par ID ou email)
+ */
+export async function checkIsClientBannedInDb(
+	userId?: string | null, 
+	userEmail?: string | null
+): Promise<{ isBanned: boolean; reason: string | null } | null> {
+	if (!userId && !userEmail) return null;
 
-	// Tenter de résoudre l'email si absent
-	let resolvedEmail = clientEmail ? clientEmail.toLowerCase().trim() : null;
-	if (!resolvedEmail) {
-		try {
-			const emailsMap = JSON.parse(localStorage.getItem('diamant_client_emails') || '{}');
-			if (emailsMap[clientId]) resolvedEmail = emailsMap[clientId].toLowerCase().trim();
-		} catch (e) {}
-	}
-	if (!resolvedEmail) {
-		try {
-			const overrides = JSON.parse(localStorage.getItem('diamant_clients_overrides') || '{}');
-			if (overrides[clientId]?.email) resolvedEmail = overrides[clientId].email.toLowerCase().trim();
-		} catch (e) {}
-	}
+	try {
+		let query = supabase.from('clients').select('id, email, is_banned, ban, ban_reason');
+		const cleanEmail = userEmail ? userEmail.toLowerCase().trim() : null;
 
-	const record: BannedClientRecord = {
-		clientId,
-		clientName: clientName.trim(),
-		clientEmail: resolvedEmail,
-		reason: reason.trim() || 'Absences non prévenues ou non-respect des conditions du salon',
-		bannedAt: new Date().toISOString()
-	};
+		if (userId && cleanEmail) {
+			query = query.or(`id.eq.${userId},email.eq.${cleanEmail}`);
+		} else if (userId) {
+			query = query.eq('id', userId);
+		} else if (cleanEmail) {
+			query = query.eq('email', cleanEmail);
+		}
 
-	banned[clientId] = record;
-	const serialized = JSON.stringify(banned);
-	localStorage.setItem('diamant_banned_clients', serialized);
-	document.cookie = `diamant_banned_clients=${encodeURIComponent(serialized)}; path=/; max-age=31536000; SameSite=Lax`;
-	window.dispatchEvent(new CustomEvent('diamant:client-banned', { detail: { clientId, reason, record } }));
-}
-
-export function unbanClient(clientId: string): void {
-	if (typeof window === 'undefined') return;
-	const banned = getBannedClients();
-	let modified = false;
-
-	if (banned[clientId]) {
-		delete banned[clientId];
-		modified = true;
-	} else {
-		// Supprimer par correspondance
-		for (const k in banned) {
-			if (banned[k].clientId === clientId || banned[k].clientEmail === clientId.toLowerCase()) {
-				delete banned[k];
-				modified = true;
+		const { data, error } = await query;
+		if (!error && data && data.length > 0) {
+			const bannedRow = data.find(r => r.is_banned === true || r.ban === 'oui');
+			if (bannedRow) {
+				return {
+					isBanned: true,
+					reason: bannedRow.ban_reason || 'Non-respect des conditions de réservation'
+				};
 			}
 		}
+	} catch (e) {
+		console.warn('Erreur vérification ban en base de données:', e);
 	}
 
-	if (modified) {
+	return null;
+}
+
+/**
+ * Bannit un client : applique la sanction en base de données (public.clients + auth.users) et en local
+ */
+export async function banClient(
+	clientId: string, 
+	clientName: string, 
+	reason: string, 
+	clientEmail?: string | null
+): Promise<void> {
+	const finalReason = reason.trim() || 'Absences non prévenues ou non-respect des conditions du salon';
+
+	// 1. Tenter l'appel RPC de bannissement sécurisé (met à jour clients + verrouille auth.users)
+	try {
+		await supabase.rpc('ban_user_by_admin', {
+			target_user_id: clientId,
+			reason: finalReason
+		});
+	} catch (e) {
+		console.warn('RPC ban_user_by_admin:', e);
+	}
+
+	// 2. Mise à jour directe de la table public.clients en BD
+	try {
+		await supabase
+			.from('clients')
+			.update({
+				is_banned: true,
+				ban: 'oui',
+				ban_reason: finalReason,
+				banned_at: new Date().toISOString()
+			})
+			.eq('id', clientId);
+	} catch (e) {
+		console.warn('Direct clients table ban update:', e);
+	}
+
+	// 3. Mise à jour du cache local pour réactivité instantanée
+	if (typeof window !== 'undefined') {
+		const banned = getBannedClients();
+
+		// Tenter de résoudre l'email si absent
+		let resolvedEmail = clientEmail ? clientEmail.toLowerCase().trim() : null;
+		if (!resolvedEmail) {
+			try {
+				const emailsMap = JSON.parse(localStorage.getItem('diamant_client_emails') || '{}');
+				if (emailsMap[clientId]) resolvedEmail = emailsMap[clientId].toLowerCase().trim();
+			} catch (e) {}
+		}
+		if (!resolvedEmail) {
+			try {
+				const overrides = JSON.parse(localStorage.getItem('diamant_clients_overrides') || '{}');
+				if (overrides[clientId]?.email) resolvedEmail = overrides[clientId].email.toLowerCase().trim();
+			} catch (e) {}
+		}
+
+		const record: BannedClientRecord = {
+			clientId,
+			clientName: clientName.trim(),
+			clientEmail: resolvedEmail,
+			reason: finalReason,
+			bannedAt: new Date().toISOString()
+		};
+
+		banned[clientId] = record;
 		const serialized = JSON.stringify(banned);
 		localStorage.setItem('diamant_banned_clients', serialized);
 		document.cookie = `diamant_banned_clients=${encodeURIComponent(serialized)}; path=/; max-age=31536000; SameSite=Lax`;
-		window.dispatchEvent(new CustomEvent('diamant:client-unbanned', { detail: { clientId } }));
+		window.dispatchEvent(new CustomEvent('diamant:client-banned', { detail: { clientId, reason: finalReason, record } }));
 	}
 }
 
-export async function deleteClientAccount(clientId: string): Promise<void> {
-	// Supprimer de Supabase si possible
+/**
+ * Lève le bannissement d'un client en base de données et en local
+ */
+export async function unbanClient(clientId: string): Promise<void> {
+	// 1. Tenter le déverrouillage via RPC
 	try {
-		await supabase.from('clients').delete().eq('id', clientId);
+		await supabase.rpc('unban_user_by_admin', {
+			target_user_id: clientId
+		});
 	} catch (e) {
-		console.warn('Could not delete client from Supabase:', e);
+		console.warn('RPC unban_user_by_admin:', e);
 	}
 
-	// Nettoyer localement
+	// 2. Mise à jour directe de la table public.clients en BD
+	try {
+		await supabase
+			.from('clients')
+			.update({
+				is_banned: false,
+				ban: 'non',
+				ban_reason: null,
+				banned_at: null
+			})
+			.eq('id', clientId);
+	} catch (e) {
+		console.warn('Direct clients table unban update:', e);
+	}
+
+	// 3. Mise à jour du cache local
+	if (typeof window !== 'undefined') {
+		const banned = getBannedClients();
+		let modified = false;
+
+		if (banned[clientId]) {
+			delete banned[clientId];
+			modified = true;
+		} else {
+			for (const k in banned) {
+				if (banned[k].clientId === clientId || (banned[k].clientEmail && banned[k].clientEmail === clientId.toLowerCase())) {
+					delete banned[k];
+					modified = true;
+				}
+			}
+		}
+
+		if (modified) {
+			const serialized = JSON.stringify(banned);
+			localStorage.setItem('diamant_banned_clients', serialized);
+			document.cookie = `diamant_banned_clients=${encodeURIComponent(serialized)}; path=/; max-age=31536000; SameSite=Lax`;
+			window.dispatchEvent(new CustomEvent('diamant:client-unbanned', { detail: { clientId } }));
+		}
+	}
+}
+
+/**
+ * Supprime définitivement un compte client en base de données (cascade tables + auth.users)
+ */
+export async function deleteClientAccount(clientId: string): Promise<void> {
+	// 1. Suppression complète via fonction RPC sécurisée (supprime dans public.* ET dans auth.users)
+	let rpcSuccess = false;
+	try {
+		const { data, error } = await supabase.rpc('delete_user_by_admin', { target_user_id: clientId });
+		if (!error && data === true) {
+			rpcSuccess = true;
+		}
+	} catch (e) {
+		console.warn('RPC delete_user_by_admin error:', e);
+	}
+
+	// 2. Si le RPC n'est pas encore actif, suppression directe des tables en BD
+	if (!rpcSuccess) {
+		try {
+			await supabase.from('appointments').delete().eq('client_id', clientId);
+		} catch (e) {}
+		try {
+			await supabase.from('messages').delete().eq('client_id', clientId);
+		} catch (e) {}
+		try {
+			await supabase.from('client_notes').delete().eq('client_id', clientId);
+		} catch (e) {}
+		try {
+			await supabase.from('clients').delete().eq('id', clientId);
+		} catch (e) {
+			console.warn('Could not delete client from clients table:', e);
+		}
+	}
+
+	// 3. Nettoyer les caches locaux et bannissements
 	if (typeof window !== 'undefined') {
 		try {
-			unbanClient(clientId);
+			await unbanClient(clientId);
 			const metaRaw = localStorage.getItem('diamant_conversations_meta');
 			if (metaRaw) {
 				const meta = JSON.parse(metaRaw);
 				delete meta[clientId];
 				localStorage.setItem('diamant_conversations_meta', JSON.stringify(meta));
 			}
+			const emailsMapRaw = localStorage.getItem('diamant_client_emails');
+			if (emailsMapRaw) {
+				const map = JSON.parse(emailsMapRaw);
+				delete map[clientId];
+				localStorage.setItem('diamant_client_emails', JSON.stringify(map));
+			}
 			window.dispatchEvent(new CustomEvent('diamant:client-deleted', { detail: { clientId } }));
 		} catch (e) {}
 	}
 }
+
 
 /**
  * Vérifie si une route donnée est accessible pour un rôle donné

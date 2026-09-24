@@ -3,9 +3,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { resendConfirmationEmail, signIn, getSession, getUser } from '@/lib/auth';
-import { getAccountType, createProfessional, createClient } from '@/lib/queries';
+import { getAccountType, createProfessional, enrollClientInDemo, getDemoTag } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
-import { getBannedClientRecord, findProAccount, setProSession, setActiveProRole } from '@/lib/permissions';
+import { getBannedClientRecord, checkIsClientBannedInDb, findProAccount, setProSession, setActiveProRole } from '@/lib/permissions';
 import { ShieldAlert } from 'lucide-react';
 
 const schema = z.object({
@@ -57,15 +57,28 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 				if (session) {
 					const user = await getUser();
 					if (user) {
-						// Ban check
-						const ban = getBannedClientRecord(
+						// Ban check (Local + BDD Supabase)
+						let ban = getBannedClientRecord(
 							user.id,
 							user.email,
 							user.user_metadata?.full_name || user.user_metadata?.name
 						);
+						if (!ban) {
+							const dbBan = await checkIsClientBannedInDb(user.id, user.email);
+							if (dbBan) {
+								ban = {
+									clientId: user.id,
+									clientName: user.user_metadata?.full_name || user.user_metadata?.name || 'Client',
+									clientEmail: user.email,
+									reason: dbBan.reason || 'Compte suspendu par l’établissement',
+									bannedAt: new Date().toISOString()
+								};
+							}
+						}
 						if (ban) {
 							await supabase.auth.signOut();
 							localStorage.removeItem('diamant_client_avatar');
+							localStorage.removeItem('diamant_client_email');
 							setError(`Connexion refusée : votre compte est suspendu par l'établissement. Motif : « ${ban.reason} ». L'accès à votre espace client et aux réservations est bloqué.`);
 							return;
 						}
@@ -81,6 +94,7 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 
 	async function routeUser(user: any) {
 		const basePath = getEffectiveBasePath();
+		const currentTag = getDemoTag(basePath);
 
 		// Save user email to cache & map for consistent ban and pro lookup
 		if (typeof window !== 'undefined' && user.email) {
@@ -92,46 +106,58 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 			} catch (e) {}
 		}
 
-		const accountType = await getAccountType(user.id);
+		const accountType = await getAccountType(user.id, currentTag);
 		if (accountType === 'professional') {
 			window.location.href = `${basePath}/dashboard`;
 			return;
 		}
 
-		// Client ban check
-		const ban = getBannedClientRecord(
+		// Client ban check (Local + BDD Supabase)
+		let ban = getBannedClientRecord(
 			user.id,
 			user.email,
 			user.user_metadata?.full_name || user.user_metadata?.name
 		);
+		if (!ban) {
+			const dbBan = await checkIsClientBannedInDb(user.id, user.email);
+			if (dbBan) {
+				ban = {
+					clientId: user.id,
+					clientName: user.user_metadata?.full_name || user.user_metadata?.name || 'Client',
+					clientEmail: user.email,
+					reason: dbBan.reason || 'Compte suspendu par l’établissement',
+					bannedAt: new Date().toISOString()
+				};
+			}
+		}
 		if (ban) {
 			await supabase.auth.signOut();
 			localStorage.removeItem('diamant_client_avatar');
+			localStorage.removeItem('diamant_client_email');
 			setError(`Connexion refusée : votre compte a été suspendu par l'établissement. Motif : « ${ban.reason} ». L'accès à votre espace client et aux réservations est bloqué.`);
 			return;
 		}
 
-		if (accountType === 'client') {
-			window.location.href = `${basePath}/espace-client`;
-		} else {
-			const meta = user.user_metadata;
-			if (meta?.account_role === 'professional') {
-				await createProfessional({
-					user_id: user.id,
-					business_name: meta.business_name || 'Mon activité',
-					email: user.email!,
-				});
-				window.location.href = `${basePath}/dashboard`;
-			} else {
-				// Par défaut (ex: Google OAuth), créer le profil client et rediriger
-				await createClient({ 
-					id: user.id, 
-					full_name: meta?.full_name || meta?.name || 'Client',
-					avatar_url: meta?.avatar_url || meta?.picture || null
-				});
-				window.location.href = `${basePath}/espace-client`;
-			}
+		const meta = user.user_metadata;
+		if (meta?.account_role === 'professional') {
+			await createProfessional({
+				user_id: user.id,
+				business_name: meta.business_name || 'Mon activité',
+				email: user.email!,
+			}, currentTag);
+			window.location.href = `${basePath}/dashboard`;
+			return;
 		}
+
+		// Enrôler systématiquement le client dans la démo courante (avec son email et avatar)
+		// sans effacer ses inscriptions précédentes s'il appartenait à une autre démo
+		await enrollClientInDemo(user.id, currentTag, {
+			full_name: meta?.full_name || meta?.name || 'Client',
+			email: user.email || null,
+			avatar_url: meta?.avatar_url || meta?.picture || null
+		});
+
+		window.location.href = `${basePath}/espace-client`;
 	}
 
 	async function onSubmit(values: FormValues) {
@@ -139,8 +165,20 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 		setError(null);
 		setUnconfirmedEmail(null);
 
-		// Pre-check if client email is already banned
-		const preBan = getBannedClientRecord(null, values.email);
+		// Pre-check if client email is already banned (Local + BDD Supabase)
+		let preBan = getBannedClientRecord(null, values.email);
+		if (!preBan) {
+			const dbBan = await checkIsClientBannedInDb(null, values.email);
+			if (dbBan) {
+				preBan = {
+					clientId: 'unknown',
+					clientName: 'Client',
+					clientEmail: values.email,
+					reason: dbBan.reason || 'Compte suspendu par l’établissement',
+					bannedAt: new Date().toISOString()
+				};
+			}
+		}
 		if (preBan) {
 			setError(`Connexion refusée : votre compte est suspendu par l'établissement. Motif : « ${preBan.reason} ». L'accès à votre espace client et aux réservations est bloqué.`);
 			setSubmitting(false);

@@ -9,8 +9,48 @@ export function getDemoTag(path?: string): string {
 	if (typeof window !== 'undefined') {
 		const match = window.location.pathname.match(/^\/demo-([^/]+)/);
 		if (match) return match[1];
+		const stored = sessionStorage.getItem('oauth_demo_redirect') || localStorage.getItem('preferred_demo');
+		if (stored) {
+			const m = stored.match(/^\/demo-([^/]+)/);
+			if (m) return m[1];
+		}
 	}
 	return 'diamant'; // fallback default tag
+}
+
+/**
+ * Vérifie si un client appartient à une démo spécifique.
+ * Gère le multi-taggage séparé par des virgules (ex: 'diamant,premium').
+ * Pour rétrocompatibilité : si tag_bd est absent ou vide, il est considéré comme 'diamant'.
+ */
+export function hasDemoTag(tagBd: string | null | undefined, tag: string): boolean {
+	if (!tagBd || !tagBd.trim()) {
+		return tag.toLowerCase() === 'diamant';
+	}
+	const list = tagBd.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+	return list.includes(tag.toLowerCase()) || list.includes('*') || list.includes('all');
+}
+
+/**
+ * Ajoute un tag de démo à une liste de tags existante sans doublon.
+ * Permet à un même utilisateur d'appartenir à plusieurs démos sans écraser ses inscriptions.
+ */
+export function addDemoTag(existingTags: string | null | undefined, newTag: string): string {
+	const cleanNew = newTag.trim().toLowerCase();
+	if (!existingTags || !existingTags.trim()) return cleanNew;
+	const list = existingTags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+	if (!list.includes(cleanNew)) {
+		list.push(cleanNew);
+	}
+	return list.join(',');
+}
+
+/**
+ * Renvoie le tableau des tags de démo pour un client donné.
+ */
+export function getClientDemoTags(tagBd: string | null | undefined): string[] {
+	if (!tagBd || !tagBd.trim()) return ['diamant'];
+	return tagBd.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
 }
 
 export interface Professional {
@@ -61,6 +101,10 @@ export interface Client {
 	created_at: string;
 	tag_bd: string;
 	email?: string | null;
+	is_banned?: boolean;
+	ban?: string;
+	ban_reason?: string | null;
+	banned_at?: string | null;
 }
 
 export interface AvailabilityRule {
@@ -305,7 +349,7 @@ export async function getRegisteredClients(professionalId: string, tag = getDemo
 	const rows = (data ?? []) as unknown as { clients: Client | null }[];
 	const byId = new Map<string, Client>();
 	for (const row of rows) {
-		if (row.clients && (!row.clients.tag_bd || row.clients.tag_bd === tag)) {
+		if (row.clients && hasDemoTag(row.clients.tag_bd, tag)) {
 			byId.set(row.clients.id, row.clients);
 		}
 	}
@@ -319,13 +363,20 @@ export async function getAllClients(
 ): Promise<Client[]> {
 	const clientsMap = new Map<string, Client>();
 
-	// 1. Clients directly from clients table
+	// 1. Clients directly from clients table (filtrés strictement pour cette démo)
 	try {
 		const { data, error } = await supabase.from('clients').select('*');
 		if (!error && data) {
 			for (const c of data) {
-				if (!c.tag_bd || c.tag_bd === tag) {
-					clientsMap.set(c.id, c);
+				if (hasDemoTag(c.tag_bd, tag)) {
+					clientsMap.set(c.id, {
+						...c,
+						email: c.email || null,
+						is_banned: c.is_banned === true || c.ban === 'oui',
+						ban: c.ban || (c.is_banned ? 'oui' : 'non'),
+						ban_reason: c.ban_reason || null,
+						banned_at: c.banned_at || null
+					});
 				}
 			}
 		}
@@ -339,12 +390,16 @@ export async function getAllClients(
 			.from('appointments')
 			.select('client_id, client_name, client_phone, client_email, created_at, clients(id, full_name, phone, avatar_url, created_at, tag_bd)')
 			.eq('professional_id', professionalId)
+			.eq('tag_bd', tag)
 			.not('client_id', 'is', null);
 
 		if (!error && apts) {
 			for (const apt of apts) {
 				if (apt.client_id) {
 					const cObj = apt.clients as unknown as Client | null;
+					if (cObj && !hasDemoTag(cObj.tag_bd, tag)) {
+						continue; // Ne pas inclure de client d'une autre démo
+					}
 					const existing = clientsMap.get(apt.client_id);
 					if (existing) {
 						if (!existing.email && apt.client_email) existing.email = apt.client_email;
@@ -372,24 +427,16 @@ export async function getAllClients(
 		const { data: msgs, error } = await supabase
 			.from('messages')
 			.select('client_id, created_at')
-			.eq('professional_id', professionalId);
+			.eq('professional_id', professionalId)
+			.eq('tag_bd', tag);
 
 		if (!error && msgs) {
 			for (const m of msgs) {
 				if (m.client_id && !clientsMap.has(m.client_id)) {
 					try {
 						const { data: cData } = await supabase.from('clients').select('*').eq('id', m.client_id).maybeSingle();
-						if (cData) {
+						if (cData && hasDemoTag(cData.tag_bd, tag)) {
 							clientsMap.set(cData.id, cData);
-						} else {
-							clientsMap.set(m.client_id, {
-								id: m.client_id,
-								full_name: 'Client ' + m.client_id.substring(0, 6),
-								phone: null,
-								avatar_url: null,
-								created_at: m.created_at || new Date().toISOString(),
-								tag_bd: tag,
-							});
 						}
 					} catch (e) {}
 				}
@@ -399,9 +446,9 @@ export async function getAllClients(
 		console.warn('Could not query clients from messages:', e);
 	}
 
-	// 4. Merge extra/demo clients passed in
+	// 4. Merge extra/demo clients passed in (filtrés strictement pour cette démo)
 	for (const demoClient of extraClients) {
-		if (!clientsMap.has(demoClient.id)) {
+		if (hasDemoTag(demoClient.tag_bd, tag) && !clientsMap.has(demoClient.id)) {
 			clientsMap.set(demoClient.id, demoClient);
 		}
 	}
@@ -444,16 +491,6 @@ export async function getAllClients(
 						...(ov.phone !== undefined ? { phone: ov.phone } : {}),
 						...(ov.email !== undefined ? { email: ov.email } : {}),
 						...(ov.avatar_url !== undefined ? { avatar_url: ov.avatar_url } : {})
-					});
-				} else {
-					clientsMap.set(cid, {
-						id: cid,
-						full_name: ov.full_name || 'Client',
-						phone: ov.phone || null,
-						email: ov.email || null,
-						avatar_url: ov.avatar_url || null,
-						created_at: ov.created_at || new Date().toISOString(),
-						tag_bd: tag
 					});
 				}
 			}
@@ -661,21 +698,122 @@ export async function rescheduleAppointment(id: string, startTime: string, endTi
 	return data as Appointment;
 }
 
-export async function getClientById(userId: string, tag = getDemoTag()): Promise<Client | null> {
-	const { data: taggedData, error: taggedError } = await supabase.from('clients').select('*').eq('id', userId).eq('tag_bd', tag).maybeSingle();
-	if (taggedError) throw taggedError;
-	if (taggedData) return taggedData;
-
-	// Fallback : Vérifier si le client existe dans une autre démo
+export async function getClientById(userId: string, tag?: string): Promise<Client | null> {
 	const { data, error } = await supabase.from('clients').select('*').eq('id', userId).maybeSingle();
 	if (error) throw error;
-	return data;
+	if (!data) return null;
+	const client = data as Client;
+	if (tag && !hasDemoTag(client.tag_bd, tag)) {
+		return null;
+	}
+	return client;
 }
 
-export async function createClient(client: Pick<Client, 'id'> & Partial<Client>, tag = getDemoTag()) {
-	const { data, error } = await supabase.from('clients').upsert({ ...client, tag_bd: tag }, { onConflict: 'id' }).select().single();
-	if (error) throw error;
-	return data as Client;
+/**
+ * Enrôle un client dans une démo spécifique sans écraser ses inscriptions précédentes.
+ * Met à jour le tag_bd en mode multi-démos (ex: 'diamant' + 'premium' -> 'diamant,premium').
+ */
+export async function enrollClientInDemo(
+	userId: string,
+	tag = getDemoTag(),
+	metadata?: { full_name?: string | null; email?: string | null; avatar_url?: string | null; phone?: string | null }
+): Promise<Client> {
+	// 1. Récupérer le client existant (si déjà présent en BDD)
+	let existing: Client | null = null;
+	try {
+		const { data } = await supabase.from('clients').select('*').eq('id', userId).maybeSingle();
+		if (data) existing = data as Client;
+	} catch (e) {
+		console.warn('Could not check existing client before enrollment:', e);
+	}
+
+	// Si le compte est marqué comme banni en BDD, refuser immédiatement l'inscription / connexion
+	if (existing && (existing.is_banned === true || existing.ban === 'oui')) {
+		throw new Error(`Ce compte a été suspendu par l'établissement : ${existing.ban_reason || 'Accès restreint par l’administrateur.'}`);
+	}
+
+	const mergedTag = addDemoTag(existing?.tag_bd, tag);
+	const fullName = metadata?.full_name || existing?.full_name || 'Client';
+	const email = metadata?.email || existing?.email || null;
+	const avatarUrl = metadata?.avatar_url || existing?.avatar_url || null;
+	const phone = metadata?.phone || existing?.phone || null;
+
+	// Cache de l'email en local
+	if (email && typeof window !== 'undefined') {
+		try {
+			const map = JSON.parse(localStorage.getItem('diamant_client_emails') || '{}');
+			map[userId] = email;
+			localStorage.setItem('diamant_client_emails', JSON.stringify(map));
+		} catch (e) {}
+	}
+
+	// 2. Upsert dans Supabase (avec gestion de repli si la colonne email n'est pas encore migrée)
+	let savedClient: Client | null = null;
+	try {
+		const { data, error } = await supabase
+			.from('clients')
+			.upsert(
+				{
+					id: userId,
+					full_name: fullName,
+					email: email,
+					avatar_url: avatarUrl,
+					phone: phone,
+					tag_bd: mergedTag
+				},
+				{ onConflict: 'id' }
+			)
+			.select()
+			.single();
+
+		if (!error && data) {
+			savedClient = data as Client;
+		}
+	} catch (err) {
+		// Repli sans la colonne email si absente
+		try {
+			const { data, error } = await supabase
+				.from('clients')
+				.upsert(
+					{
+						id: userId,
+						full_name: fullName,
+						avatar_url: avatarUrl,
+						phone: phone,
+						tag_bd: mergedTag
+					},
+					{ onConflict: 'id' }
+				)
+				.select()
+				.single();
+
+			if (!error && data) {
+				savedClient = { ...(data as Client), email };
+			}
+		} catch (fallbackErr) {
+			console.warn('Could not upsert client into Supabase:', fallbackErr);
+		}
+	}
+
+	const finalClient: Client = savedClient || {
+		id: userId,
+		full_name: fullName,
+		email: email,
+		avatar_url: avatarUrl,
+		phone: phone,
+		tag_bd: mergedTag,
+		created_at: existing?.created_at || new Date().toISOString()
+	};
+
+	if (typeof window !== 'undefined') {
+		window.dispatchEvent(new CustomEvent('diamant:client-updated', { detail: { client: finalClient } }));
+	}
+
+	return finalClient;
+}
+
+export async function createClient(client: Pick<Client, 'id'> & Partial<Client>, tag = getDemoTag()): Promise<Client> {
+	return enrollClientInDemo(client.id, tag, client);
 }
 
 export function getClientOverrides(): Record<string, Partial<Client>> {

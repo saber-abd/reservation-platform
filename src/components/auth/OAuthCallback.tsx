@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { getAccountType, createClient, createProfessional } from '@/lib/queries';
-import { getBannedClientRecord } from '@/lib/permissions';
+import { getAccountType, enrollClientInDemo, createProfessional, getDemoTag } from '@/lib/queries';
+import { getBannedClientRecord, checkIsClientBannedInDb } from '@/lib/permissions';
 
 export default function OAuthCallback() {
 	const [status, setStatus] = useState('Connexion en cours...');
@@ -13,7 +13,8 @@ export default function OAuthCallback() {
 				const { data: { session }, error } = await supabase.auth.getSession();
 				if (error) throw error;
 
-				const targetDemo = (typeof window !== 'undefined' ? (sessionStorage.getItem('oauth_demo_redirect') || localStorage.getItem('preferred_demo')) : null) || '/demo-premium';
+				const targetDemo = (typeof window !== 'undefined' ? (sessionStorage.getItem('oauth_demo_redirect') || localStorage.getItem('preferred_demo')) : null) || '/demo-diamant';
+				const demoTag = getDemoTag(targetDemo);
 
 				if (session && session.user) {
 					const user = session.user;
@@ -28,15 +29,30 @@ export default function OAuthCallback() {
 						} catch (e) {}
 					}
 
-					// Vérification bannissement
-					const ban = getBannedClientRecord(
+					// Vérification bannissement (Local + Base de données Supabase)
+					let ban = getBannedClientRecord(
 						user.id,
 						user.email,
 						user.user_metadata?.full_name || user.user_metadata?.name
 					);
+
+					if (!ban) {
+						const dbBan = await checkIsClientBannedInDb(user.id, user.email);
+						if (dbBan) {
+							ban = {
+								clientId: user.id,
+								clientName: user.user_metadata?.full_name || user.user_metadata?.name || 'Client',
+								clientEmail: user.email,
+								reason: dbBan.reason || 'Compte suspendu par l’établissement',
+								bannedAt: new Date().toISOString()
+							};
+						}
+					}
+
 					if (ban) {
 						await supabase.auth.signOut();
 						localStorage.removeItem('diamant_client_avatar');
+						localStorage.removeItem('diamant_client_email');
 						sessionStorage.setItem(
 							'ban_error_message',
 							`Connexion refusée : votre compte est suspendu par l'établissement. Motif : « ${ban.reason} ». L'accès à votre espace client et aux réservations est bloqué.`
@@ -46,7 +62,7 @@ export default function OAuthCallback() {
 					}
 
 					setStatus('Redirection vers votre espace...');
-					const accountType = await getAccountType(user.id);
+					const accountType = await getAccountType(user.id, demoTag);
 
 					if (accountType === 'professional') {
 						window.location.replace(`${targetDemo}/dashboard`);
@@ -60,12 +76,12 @@ export default function OAuthCallback() {
 							user_id: user.id,
 							business_name: meta.business_name || 'Mon activité',
 							email: user.email!,
-						});
+						}, demoTag);
 						window.location.replace(`${targetDemo}/dashboard`);
 					} else {
-						await createClient({
-							id: user.id,
+						await enrollClientInDemo(user.id, demoTag, {
 							full_name: meta?.full_name || meta?.name || 'Client',
+							email: user.email || null,
 							avatar_url: meta?.avatar_url || meta?.picture || null,
 						});
 						window.location.replace(`${targetDemo}/espace-client`);

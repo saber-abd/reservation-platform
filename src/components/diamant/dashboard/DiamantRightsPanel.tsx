@@ -46,7 +46,8 @@ import {
 	X,
 	Plus,
 	Pencil,
-	Phone
+	Phone,
+	RefreshCw
 } from 'lucide-react';
 
 export default function DiamantRightsPanel() {
@@ -121,8 +122,21 @@ export default function DiamantRightsPanel() {
 			const all = await getAllClients(effectiveId, tag, DEMO_DIAMANT_CLIENTS);
 			setClients(all);
 
-			// Load banned clients
-			setBannedClients(getBannedClients());
+			// Load banned clients (Local + BDD Supabase)
+			const localBanned = getBannedClients();
+			const dbBanned: Record<string, BannedClientRecord> = {};
+			for (const c of all) {
+				if (c.is_banned || c.ban === 'oui') {
+					dbBanned[c.id] = {
+						clientId: c.id,
+						clientName: c.full_name || 'Client',
+						clientEmail: c.email || null,
+						reason: c.ban_reason || 'Non-respect des conditions de réservation',
+						bannedAt: c.banned_at || c.created_at || new Date().toISOString()
+					};
+				}
+			}
+			setBannedClients({ ...localBanned, ...dbBanned });
 		}
 
 		init();
@@ -308,7 +322,7 @@ export default function DiamantRightsPanel() {
 		showToast(`Statut de ${member.name} mis à jour : ${nextStatus === 'active' ? 'Actif' : 'Suspendu'}.`);
 	}
 
-	function handleBanClientSubmit() {
+	async function handleBanClientSubmit() {
 		if (checkReadOnly()) return;
 		if (!banModalClient) return;
 		const finalReason = (banReason === 'Autre motif' ? customBanReason.trim() : banReason) || 'Non-respect des conditions de réservation';
@@ -327,16 +341,53 @@ export default function DiamantRightsPanel() {
 			}
 		}
 
-		banClient(banModalClient.id, banModalClient.full_name || 'Client', finalReason, resolvedEmail);
+		await banClient(banModalClient.id, banModalClient.full_name || 'Client', finalReason, resolvedEmail);
+
+		// Synchroniser l'état local des clients
+		setClients(prev => prev.map(c => c.id === banModalClient.id ? {
+			...c,
+			is_banned: true,
+			ban: 'oui',
+			ban_reason: finalReason,
+			banned_at: new Date().toISOString()
+		} : c));
+
+		setBannedClients(prev => ({
+			...prev,
+			[banModalClient.id]: {
+				clientId: banModalClient.id,
+				clientName: banModalClient.full_name || 'Client',
+				clientEmail: resolvedEmail,
+				reason: finalReason,
+				bannedAt: new Date().toISOString()
+			}
+		}));
+
 		setBanModalClient(null);
 		setCustomBanReason('');
-		showToast(`Client ${banModalClient.full_name || ''} banni avec succès.`);
+		showToast(`Client ${banModalClient.full_name || ''} banni avec succès en base de données.`);
 	}
 
-	function handleUnban(client: Client) {
+	async function handleUnban(client: Client) {
 		if (checkReadOnly()) return;
-		unbanClient(client.id);
-		showToast(`Le bannissement de ${client.full_name || 'ce client'} a été levé.`);
+		await unbanClient(client.id);
+
+		// Synchroniser l'état local des clients
+		setClients(prev => prev.map(c => c.id === client.id ? {
+			...c,
+			is_banned: false,
+			ban: 'non',
+			ban_reason: null,
+			banned_at: null
+		} : c));
+
+		setBannedClients(prev => {
+			const next = { ...prev };
+			delete next[client.id];
+			return next;
+		});
+
+		showToast(`Le bannissement de ${client.full_name || 'ce client'} a été levé en base de données.`);
 	}
 
 	async function confirmDelete() {
@@ -354,15 +405,51 @@ export default function DiamantRightsPanel() {
 		} else {
 			await deleteClientAccount(deleteConfirm.id);
 			setClients(prev => prev.filter(c => c.id !== deleteConfirm.id));
-			showToast(`Compte client ${deleteConfirm.name} supprimé définitivement.`);
+			setBannedClients(prev => {
+				const next = { ...prev };
+				delete next[deleteConfirm.id];
+				return next;
+			});
+			showToast(`Compte client ${deleteConfirm.name} supprimé définitivement en base de données.`);
 		}
 		setDeleteConfirm(null);
+	}
+
+	const [isSyncing, setIsSyncing] = useState(false);
+
+	async function handleRefreshClients() {
+		setIsSyncing(true);
+		try {
+			const tag = getDemoTag();
+			const all = await getAllClients(proId, tag, DEMO_DIAMANT_CLIENTS);
+			setClients(all);
+
+			const localBanned = getBannedClients();
+			const dbBanned: Record<string, BannedClientRecord> = {};
+			for (const c of all) {
+				if (c.is_banned || c.ban === 'oui') {
+					dbBanned[c.id] = {
+						clientId: c.id,
+						clientName: c.full_name || 'Client',
+						clientEmail: c.email || null,
+						reason: c.ban_reason || 'Non-respect des conditions de réservation',
+						bannedAt: c.banned_at || c.created_at || new Date().toISOString()
+					};
+				}
+			}
+			setBannedClients({ ...localBanned, ...dbBanned });
+			showToast(`Actualisation : ${all.length} client(s) Diamant synchronisé(s).`);
+		} catch (e) {
+			showToast("Erreur lors de la synchronisation.");
+		} finally {
+			setIsSyncing(false);
+		}
 	}
 
 	// Filtrage des clients
 	const filteredClients = useMemo(() => {
 		return clients.filter(c => {
-			const isBanned = !!bannedClients[c.id];
+			const isBanned = !!bannedClients[c.id] || c.is_banned === true || c.ban === 'oui';
 			if (clientFilter === 'active' && isBanned) return false;
 			if (clientFilter === 'banned' && !isBanned) return false;
 
@@ -735,35 +822,48 @@ export default function DiamantRightsPanel() {
 							</p>
 						</div>
 
-						{/* Filtres de statut */}
-						<div className="flex items-center gap-2 bg-stone-100 p-1 rounded-xl border border-stone-200">
+						<div className="flex flex-wrap items-center gap-2.5">
 							<button
 								type="button"
-								onClick={() => setClientFilter('all')}
-								className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-									clientFilter === 'all' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-500'
-								}`}
+								onClick={handleRefreshClients}
+								disabled={isSyncing}
+								className="px-3.5 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-700 hover:text-deep-teal-700 hover:border-deep-teal-300 hover:bg-deep-teal-50 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+								title="Recharger la liste des clients inscrits pour la démo Diamant"
 							>
-								Tous ({clients.length})
+								<RefreshCw size={13} className={isSyncing ? 'animate-spin text-deep-teal-600' : 'text-stone-500'} />
+								<span>{isSyncing ? 'Synchronisation...' : 'Actualiser'}</span>
 							</button>
-							<button
-								type="button"
-								onClick={() => setClientFilter('active')}
-								className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-									clientFilter === 'active' ? 'bg-white text-emerald-700 shadow-xs' : 'text-stone-500'
-								}`}
-							>
-								Actifs ({clients.length - Object.keys(bannedClients).length})
-							</button>
-							<button
-								type="button"
-								onClick={() => setClientFilter('banned')}
-								className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-									clientFilter === 'banned' ? 'bg-white text-rose-700 shadow-xs' : 'text-stone-500'
-								}`}
-							>
-								Bannis ({Object.keys(bannedClients).length})
-							</button>
+
+							{/* Filtres de statut */}
+							<div className="flex items-center gap-2 bg-stone-100 p-1 rounded-xl border border-stone-200">
+								<button
+									type="button"
+									onClick={() => setClientFilter('all')}
+									className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+										clientFilter === 'all' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-500'
+									}`}
+								>
+									Tous ({clients.length})
+								</button>
+								<button
+									type="button"
+									onClick={() => setClientFilter('active')}
+									className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+										clientFilter === 'active' ? 'bg-white text-emerald-700 shadow-xs' : 'text-stone-500'
+									}`}
+								>
+									Actifs ({clients.length - Object.keys(bannedClients).length})
+								</button>
+								<button
+									type="button"
+									onClick={() => setClientFilter('banned')}
+									className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+										clientFilter === 'banned' ? 'bg-white text-rose-700 shadow-xs' : 'text-stone-500'
+									}`}
+								>
+									Bannis ({Object.keys(bannedClients).length})
+								</button>
+							</div>
 						</div>
 					</div>
 
@@ -799,7 +899,13 @@ export default function DiamantRightsPanel() {
 									</tr>
 								) : (
 									filteredClients.map((client) => {
-										const banInfo = bannedClients[client.id];
+										const banInfo = bannedClients[client.id] || (client.is_banned || client.ban === 'oui' ? {
+											clientId: client.id,
+											clientName: client.full_name || 'Client',
+											clientEmail: client.email || null,
+											reason: client.ban_reason || 'Non-respect des conditions de réservation',
+											bannedAt: client.banned_at || client.created_at || new Date().toISOString()
+										} : null);
 										const isBanned = !!banInfo;
 
 										return (

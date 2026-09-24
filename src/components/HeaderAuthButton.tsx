@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { signOut } from '@/lib/auth';
-import { getAccountType } from '@/lib/queries';
+import { getAccountType, getDemoTag, hasDemoTag } from '@/lib/queries';
 import { AvatarDisplay } from '@/components/shared/AvatarPicker';
 
 interface UserInfo {
@@ -39,11 +39,25 @@ export default function HeaderAuthButton({ basePath = '' }: { basePath?: string 
 					return;
 				}
 
-				const accountType = await getAccountType(session.user.id);
+				const currentTag = getDemoTag(effectiveBasePath);
+				let accountType = await getAccountType(session.user.id, currentTag);
 
-				// Try to get avatar from the appropriate table
-				let displayName = session.user.email ?? '';
-				let avatarKey: string | null = null;
+				// Fallback pour les utilisateurs authentifiés
+				if (!accountType) {
+					const { data: c } = await supabase.from('clients').select('id, full_name, avatar_url, tag_bd').eq('id', session.user.id).maybeSingle();
+					if (c && hasDemoTag(c.tag_bd, currentTag)) {
+						accountType = 'client';
+					} else if (session.user.user_metadata?.account_role === 'professional') {
+						accountType = 'professional';
+					} else {
+						accountType = 'client';
+					}
+				}
+
+				// Try to get avatar and display name from the appropriate source
+				const meta = session.user.user_metadata;
+				let displayName = (meta?.full_name || meta?.name || session.user.email) ?? '';
+				let avatarKey: string | null = meta?.avatar_url || meta?.picture || null;
 
 				if (accountType === 'professional') {
 					const { data } = await supabase
@@ -53,7 +67,7 @@ export default function HeaderAuthButton({ basePath = '' }: { basePath?: string 
 						.maybeSingle();
 					if (data) {
 						displayName = data.business_name ?? displayName;
-						avatarKey = data.avatar_url ?? null;
+						avatarKey = data.avatar_url ?? avatarKey;
 					}
 				} else if (accountType === 'client') {
 					const { data } = await supabase
@@ -63,7 +77,7 @@ export default function HeaderAuthButton({ basePath = '' }: { basePath?: string 
 						.maybeSingle();
 					if (data) {
 						displayName = data.full_name ?? displayName;
-						avatarKey = data.avatar_url ?? null;
+						avatarKey = data.avatar_url ?? avatarKey;
 					}
 				}
 
