@@ -56,7 +56,7 @@ export default function DiamantClientNav({ basePath }: DiamantClientNavProps) {
 	const links = [
 		{ href: `${basePath}/espace-client`, label: 'Mes Rendez-vous', icon: Calendar },
 		{ href: `${basePath}/espace-client/historique`, label: 'Historique des RDV', icon: History },
-		{ href: `${basePath}/espace-client/fidelite`, label: 'Avantages VIP', icon: Star },
+		{ href: `${basePath}/espace-client/fidelite`, label: 'Fidélité', icon: Star },
 		{ href: `${basePath}/espace-client/messages`, label: 'Messagerie', icon: MessageSquare },
 		{ href: `${basePath}/espace-client/profil`, label: 'Mon Profil', icon: User },
 	];

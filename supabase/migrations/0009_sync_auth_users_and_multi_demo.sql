@@ -8,6 +8,7 @@ ALTER TABLE public.clients ADD COLUMN IF NOT EXISTS email TEXT;
 ALTER TABLE public.clients ADD COLUMN IF NOT EXISTS tag_bd TEXT NOT NULL DEFAULT 'diamant';
 ALTER TABLE public.clients ADD COLUMN IF NOT EXISTS avatar_url TEXT DEFAULT NULL;
 ALTER TABLE public.clients ADD COLUMN IF NOT EXISTS phone TEXT DEFAULT NULL;
+ALTER TABLE public.clients ADD COLUMN IF NOT EXISTS preferences TEXT DEFAULT NULL;
 
 -- Colonnes de bannissement en base de données
 ALTER TABLE public.clients ADD COLUMN IF NOT EXISTS is_banned BOOLEAN NOT NULL DEFAULT false;

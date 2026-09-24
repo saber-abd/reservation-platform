@@ -98,7 +98,7 @@ const DEMO_PAST_APPOINTMENTS: PastAppointment[] = [
 ];
 
 export default function DiamantClientHistory() {
-	const [appointments, setAppointments] = useState<PastAppointment[]>(DEMO_PAST_APPOINTMENTS);
+	const [appointments, setAppointments] = useState<PastAppointment[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [selectedPeriod, setSelectedPeriod] = useState<'all' | '3months' | '2025'>('all');
@@ -128,6 +128,7 @@ export default function DiamantClientHistory() {
 
 				if (error) {
 					console.warn('Could not load appointments from Supabase:', error);
+					setAppointments([]);
 				} else if (data && data.length > 0) {
 					const mapped: PastAppointment[] = data.map((appt: any, idx: number) => {
 						const dateObj = new Date(appt.start_time);
@@ -137,24 +138,27 @@ export default function DiamantClientHistory() {
 						return {
 							id: appt.id || `db-${idx}`,
 							serviceName: appt.services?.name || 'Prestation Personnalisée',
-							stylistName: appt.professionals?.business_name || 'Équipe Diamant',
+							stylistName: appt.professionals?.business_name || 'Diamant Prestige',
 							date: dateStr.charAt(0).toUpperCase() + dateStr.slice(1),
 							time: timeStr,
 							rawDate: appt.start_time,
-							duration: appt.services?.duration_minutes ? `${appt.services.duration_minutes} min` : '1h',
-							price: appt.services?.price || 90,
+							duration: appt.services?.duration_minutes ? `${appt.services.duration_minutes} min` : '45 min',
+							price: appt.services?.price || 0,
 							status: (appt.status === 'cancelled' ? 'cancelled' : 'completed') as any,
 							rating: 5,
-							pointsEarned: Math.floor(appt.services?.price || 90),
+							pointsEarned: Math.floor(appt.services?.price || 50),
 							receiptNumber: `REC-${dateObj.getFullYear()}-${String(idx + 1).padStart(4, '0')}`
 						};
 					});
 
-					// Combiner avec les données de démo s'il y a peu de rendez-vous
-					setAppointments([...mapped, ...DEMO_PAST_APPOINTMENTS]);
+					// Uniquement les vraies données de la base de données
+					setAppointments(mapped);
+				} else {
+					setAppointments([]);
 				}
 			} catch (e) {
 				console.error(e);
+				setAppointments([]);
 			} finally {
 				setLoading(false);
 			}
@@ -190,9 +194,17 @@ export default function DiamantClientHistory() {
 		});
 	}, [appointments, selectedPeriod, searchQuery]);
 
-	// Statistiques cumulées
+	// Statistiques cumulées réelles
 	const totalPrestations = appointments.filter(a => a.status === 'completed').length;
 	const totalPointsEarned = appointments.reduce((acc, a) => acc + (a.status === 'completed' ? a.pointsEarned : 0), 0);
+	const favoriteStylist = useMemo(() => {
+		if (appointments.length === 0) return 'Diamant Prestige';
+		const counts: Record<string, number> = {};
+		for (const a of appointments) {
+			counts[a.stylistName] = (counts[a.stylistName] || 0) + 1;
+		}
+		return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0] || 'Diamant Prestige';
+	}, [appointments]);
 
 	return (
 		<div className="space-y-8">
@@ -213,7 +225,7 @@ export default function DiamantClientHistory() {
 						</div>
 						<div>
 							<p className="text-xs text-stone-500 font-bold uppercase tracking-wider">Prestations honorées</p>
-							<p className="text-2xl font-black text-stone-900 mt-0.5 font-coolvetica">{totalPrestations} visites</p>
+							<p className="text-2xl font-black text-stone-900 mt-0.5 font-coolvetica">{totalPrestations} visite{totalPrestations > 1 ? 's' : ''}</p>
 						</div>
 					</div>
 				</div>
@@ -236,8 +248,8 @@ export default function DiamantClientHistory() {
 							<Scissors size={20} />
 						</div>
 						<div>
-							<p className="text-xs text-stone-500 font-bold uppercase tracking-wider">Artisan Coiffeur Favori</p>
-							<p className="text-base font-black text-stone-900 mt-0.5 font-coolvetica">Sarah Delorme</p>
+							<p className="text-xs text-stone-500 font-bold uppercase tracking-wider">Établissement & Coiffeur</p>
+							<p className="text-base font-black text-stone-900 mt-0.5 font-coolvetica">{favoriteStylist}</p>
 						</div>
 					</div>
 				</div>

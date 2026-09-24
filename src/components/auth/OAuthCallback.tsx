@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getAccountType, enrollClientInDemo, createProfessional, getDemoTag } from '@/lib/queries';
 import { getBannedClientRecord, checkIsClientBannedInDb } from '@/lib/permissions';
+import CompleteProfileForm from './CompleteProfileForm';
 
 export default function OAuthCallback() {
 	const [status, setStatus] = useState('Connexion en cours...');
+	const [showCompletion, setShowCompletion] = useState(false);
+	const [pendingUser, setPendingUser] = useState<any | null>(null);
+	const [targetDemoPath, setTargetDemoPath] = useState('/demo-diamant');
 
 	useEffect(() => {
 		async function handleAuth() {
@@ -14,6 +18,7 @@ export default function OAuthCallback() {
 				if (error) throw error;
 
 				const targetDemo = (typeof window !== 'undefined' ? (sessionStorage.getItem('oauth_demo_redirect') || localStorage.getItem('preferred_demo')) : null) || '/demo-diamant';
+				setTargetDemoPath(targetDemo);
 				const demoTag = getDemoTag(targetDemo);
 
 				if (session && session.user) {
@@ -61,7 +66,7 @@ export default function OAuthCallback() {
 						return;
 					}
 
-					setStatus('Redirection vers votre espace...');
+					setStatus('Vérification du profil...');
 					const accountType = await getAccountType(user.id, demoTag);
 
 					if (accountType === 'professional') {
@@ -69,7 +74,6 @@ export default function OAuthCallback() {
 						return;
 					}
 
-					// Client ou nouvel utilisateur Google
 					const meta = user.user_metadata;
 					if (meta?.account_role === 'professional') {
 						await createProfessional({
@@ -78,14 +82,32 @@ export default function OAuthCallback() {
 							email: user.email!,
 						}, demoTag);
 						window.location.replace(`${targetDemo}/dashboard`);
-					} else {
-						await enrollClientInDemo(user.id, demoTag, {
-							full_name: meta?.full_name || meta?.name || 'Client',
-							email: user.email || null,
-							avatar_url: meta?.avatar_url || meta?.picture || null,
-						});
-						window.location.replace(`${targetDemo}/espace-client`);
+						return;
 					}
+
+					// Vérifier si le client a déjà complété ses coordonnées (téléphone présent)
+					const { data: existingClient } = await supabase
+						.from('clients')
+						.select('id, phone, full_name')
+						.eq('id', user.id)
+						.maybeSingle();
+
+					const isAlreadyComplete = !!(existingClient?.phone && existingClient.phone.trim() !== '');
+
+					if (!isAlreadyComplete) {
+						// Nouvel utilisateur ou profil incomplet : afficher le formulaire de finalisation
+						setPendingUser(user);
+						setShowCompletion(true);
+						return;
+					}
+
+					// Profil déjà complet : enrôler et rediriger directement vers l'espace client
+					await enrollClientInDemo(user.id, demoTag, {
+						full_name: existingClient.full_name || meta?.full_name || meta?.name || 'Client',
+						email: user.email || null,
+						phone: existingClient.phone
+					});
+					window.location.replace(`${targetDemo}/espace-client`);
 					return;
 				}
 
@@ -101,9 +123,21 @@ export default function OAuthCallback() {
 		handleAuth();
 	}, []);
 
+	if (showCompletion && pendingUser) {
+		return (
+			<CompleteProfileForm 
+				user={pendingUser} 
+				targetDemo={targetDemoPath} 
+				onCompleted={() => {
+					window.location.replace(`${targetDemoPath}/espace-client`);
+				}}
+			/>
+		);
+	}
+
 	return (
 		<div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center px-6">
-			<div className="h-10 w-10 animate-spin rounded-full border-4 border-stone-200 border-t-rose-600"></div>
+			<div className="h-10 w-10 animate-spin rounded-full border-4 border-stone-200 border-t-deep-teal-600"></div>
 			<p className="text-sm font-semibold text-stone-700">{status}</p>
 		</div>
 	);

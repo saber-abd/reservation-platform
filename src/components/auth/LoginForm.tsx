@@ -6,6 +6,7 @@ import { resendConfirmationEmail, signIn, getSession, getUser } from '@/lib/auth
 import { getAccountType, createProfessional, enrollClientInDemo, getDemoTag } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { getBannedClientRecord, checkIsClientBannedInDb, findProAccount, setProSession, setActiveProRole } from '@/lib/permissions';
+import CompleteProfileForm from './CompleteProfileForm';
 import { ShieldAlert } from 'lucide-react';
 
 const schema = z.object({
@@ -24,6 +25,8 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 	const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
 	const [resendStatus, setResendStatus] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
+	const [pendingUser, setPendingUser] = useState<any | null>(null);
+	const [showCompletion, setShowCompletion] = useState(false);
 	const {
 		register,
 		handleSubmit,
@@ -149,12 +152,25 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 			return;
 		}
 
-		// Enrôler systématiquement le client dans la démo courante (avec son email et avatar)
-		// sans effacer ses inscriptions précédentes s'il appartenait à une autre démo
+		// Vérifier si le client a déjà complété ses coordonnées (téléphone présent en BD)
+		const { data: existingClient } = await supabase
+			.from('clients')
+			.select('id, phone, full_name')
+			.eq('id', user.id)
+			.maybeSingle();
+
+		const isAlreadyComplete = !!(existingClient?.phone && existingClient.phone.trim() !== '');
+
+		if (!isAlreadyComplete) {
+			setPendingUser(user);
+			setShowCompletion(true);
+			return;
+		}
+
 		await enrollClientInDemo(user.id, currentTag, {
-			full_name: meta?.full_name || meta?.name || 'Client',
+			full_name: existingClient.full_name || meta?.full_name || meta?.name || 'Client',
 			email: user.email || null,
-			avatar_url: meta?.avatar_url || meta?.picture || null
+			phone: existingClient.phone
 		});
 
 		window.location.href = `${basePath}/espace-client`;
@@ -242,6 +258,18 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 		} catch (err) {
 			setResendStatus(err instanceof Error ? err.message : "Erreur lors de l'envoi.");
 		}
+	}
+
+	if (showCompletion && pendingUser) {
+		return (
+			<CompleteProfileForm 
+				user={pendingUser} 
+				targetDemo={getEffectiveBasePath()} 
+				onCompleted={() => {
+					window.location.href = `${getEffectiveBasePath()}/espace-client`;
+				}}
+			/>
+		);
 	}
 
 	return (

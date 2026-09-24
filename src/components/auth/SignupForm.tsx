@@ -6,6 +6,7 @@ import { signUp, getSession, getUser } from '@/lib/auth';
 import { createClient, getDemoTag } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { getBannedClientRecord, checkIsClientBannedInDb } from '@/lib/permissions';
+import CompleteProfileForm from './CompleteProfileForm';
 
 const baseSchema = z.object({
 	fullName: z.string().min(2, 'Nom obligatoire'),
@@ -28,6 +29,8 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 	const [existingUser, setExistingUser] = useState<any>(null);
 	const [pendingConfirmationEmail, setPendingConfirmationEmail] = useState<string | null>(null);
 	const [resendStatus, setResendStatus] = useState<string | null>(null);
+	const [pendingUser, setPendingUser] = useState<any | null>(null);
+	const [showCompletion, setShowCompletion] = useState(false);
 
 	const {
 		register,
@@ -94,8 +97,24 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 							return;
 						}
 						
-						// Sinon, on a besoin qu'il saisisse son nom complet manuellement
-						setExistingUser(user);
+						// Vérifier si le client a déjà complété ses coordonnées (téléphone présent en BD)
+						const { data: existingClient } = await supabase
+							.from('clients')
+							.select('id, phone, full_name')
+							.eq('id', user.id)
+							.maybeSingle();
+
+						const isAlreadyComplete = !!(existingClient?.phone && existingClient.phone.trim() !== '');
+
+						if (!isAlreadyComplete) {
+							setPendingUser(user);
+							setShowCompletion(true);
+							return;
+						}
+
+						const basePath = getEffectiveBasePath();
+						window.location.href = `${basePath}/espace-client`;
+						return;
 					}
 				}
 			} catch (e) {
@@ -238,6 +257,18 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 		} catch (err) {
 			setResendStatus(err instanceof Error ? err.message : "Erreur lors du renvoi.");
 		}
+	}
+
+	if (showCompletion && pendingUser) {
+		return (
+			<CompleteProfileForm 
+				user={pendingUser} 
+				targetDemo={getEffectiveBasePath()} 
+				onCompleted={() => {
+					window.location.href = `${getEffectiveBasePath()}/espace-client`;
+				}}
+			/>
+		);
 	}
 
 	if (pendingConfirmationEmail) {
