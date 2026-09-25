@@ -1,6 +1,23 @@
 ---
 import CommercialLayout from '@/layouts/CommercialLayout.astro';
-import { Sparkles, Code2, Paintbrush, Rocket, Blocks, KeySquare, MonitorSmartphone, Euro, HeartHandshake } from 'lucide-react';
+import { 
+	Sparkles, 
+	Code2, 
+	Paintbrush, 
+	Rocket, 
+	Blocks, 
+	KeySquare, 
+	MonitorSmartphone, 
+	Euro, 
+	HeartHandshake,
+	Users,
+	ShieldAlert,
+	Search,
+	MessageSquare,
+	Award,
+	LineChart,
+	CalendarCheck
+} from 'lucide-react';
 ---
 
 <CommercialLayout title="Formules - Démo Diamant" description="Découvrez la démo Diamant : Le sur-mesure absolu pour votre entreprise.">
@@ -37,8 +54,8 @@ import { Sparkles, Code2, Paintbrush, Rocket, Blocks, KeySquare, MonitorSmartpho
 					<div class="absolute inset-0 bg-gradient-to-r from-deep-teal-400 to-deep-teal-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 					<span class="relative flex items-center gap-2">Visiter la Démo <Rocket size={20} /></span>
 				</a>
-				<a href="#couts" class="px-8 py-4 bg-white/5 backdrop-blur-lg border border-white/10 text-white rounded-2xl font-bold text-lg hover:bg-white/10 transition-colors">
-					Comprendre l'offre
+				<a href="#fonctionnalites" class="px-8 py-4 bg-white/5 backdrop-blur-lg border border-white/10 text-white rounded-2xl font-bold text-lg hover:bg-white/10 transition-colors">
+					Explorer les fonctionnalités
 				</a>
 			</div>
 		</div>
@@ -97,6 +114,142 @@ import { Sparkles, Code2, Paintbrush, Rocket, Blocks, KeySquare, MonitorSmartpho
 		</div>
 	</section>
 
+	<!-- Section Fonctionnalités Exclusives Diamant -->
+	<section id="fonctionnalites" class="py-32 bg-stone-950 border-t border-white/5 relative overflow-hidden">
+		<!-- Glowing ambient blobs -->
+		<div class="absolute left-1/4 top-1/3 w-[500px] h-[500px] bg-deep-teal-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+		<div class="absolute right-1/4 bottom-10 w-[450px] h-[450px] bg-jasmine-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+		
+		<div class="mx-auto max-w-6xl px-6 relative z-10">
+			<div class="text-center mb-20" data-aos="fade-up">
+				<div class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-deep-teal-900/40 backdrop-blur-md border border-deep-teal-500/30 text-deep-teal-300 font-bold mb-6 text-sm">
+					<Sparkles size={16} class="text-jasmine-400" />
+					Nouvelles Capacités Métier
+				</div>
+				<h2 class="text-4xl md:text-5xl font-bold text-white mb-6">L'Armada Fonctionnelle Diamant</h2>
+				<p class="text-xl text-stone-400 max-w-3xl mx-auto font-light leading-relaxed">
+					Conçue comme une véritable plateforme applicative haut de gamme, la démo Diamant intègre nativement une panoplie complète d'outils opérationnels, de sécurité et d'expérience client.
+				</p>
+			</div>
+
+			<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+				<!-- Card 1: Équipe & Permissions RBAC -->
+				<div data-aos="fade-up" data-aos-delay="0" class="group h-full bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl hover:bg-white/10 hover:border-deep-teal-500/40 transition-all duration-300 flex flex-col justify-between">
+					<div>
+						<div class="flex items-center justify-between mb-6">
+							<div class="p-3 bg-deep-teal-900/50 rounded-2xl border border-deep-teal-500/30 text-deep-teal-300 group-hover:scale-110 group-hover:text-jasmine-300 transition-all">
+								<Users className="w-8 h-8" />
+							</div>
+							<span class="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full bg-deep-teal-500/10 text-deep-teal-300 border border-deep-teal-500/20">RBAC Avancé</span>
+						</div>
+						<h3 class="text-2xl font-bold text-white mb-3">Équipe & Rôles Granulaires</h3>
+						<p class="text-stone-300 leading-relaxed text-sm">
+							Gestion complète des profils (Admin, Collaborateur, Démo). Verrouillage physique des zones sensibles (<code class="text-deep-teal-300 text-xs">DiamantAdminOnlyGuard</code>), assignation personnalisée des prestations et plannings dédiés par praticien.
+						</p>
+					</div>
+					<div class="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs text-jasmine-300 font-semibold">
+						<span>✓ Isolation stricte des permissions</span>
+					</div>
+				</div>
+
+				<!-- Card 2: Protection Anti-No-Show & Modération -->
+				<div data-aos="fade-up" data-aos-delay="100" class="group h-full bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl hover:bg-white/10 hover:border-deep-teal-500/40 transition-all duration-300 flex flex-col justify-between">
+					<div>
+						<div class="flex items-center justify-between mb-6">
+							<div class="p-3 bg-deep-teal-900/50 rounded-2xl border border-deep-teal-500/30 text-jasmine-400 group-hover:scale-110 group-hover:text-white transition-all">
+								<ShieldAlert className="w-8 h-8" />
+							</div>
+							<span class="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full bg-jasmine-500/10 text-jasmine-300 border border-jasmine-500/20">Anti-No-Show</span>
+						</div>
+						<h3 class="text-2xl font-bold text-white mb-3">Modération & Bannissement</h3>
+						<p class="text-stone-300 leading-relaxed text-sm">
+							Protection active contre les abus : bannissement immédiat en 1 clic avec motif consigné, révocation instantanée des sessions (<code class="text-deep-teal-300 text-xs">banned_until</code>) et blocage préventif au tunnel de réservation. Purge RGPD en cascade intégrée.
+						</p>
+					</div>
+					<div class="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs text-jasmine-300 font-semibold">
+						<span>✓ Sérénité & Respect du planning</span>
+					</div>
+				</div>
+
+				<!-- Card 3: Recherche Multi-Critères Temps Réel -->
+				<div data-aos="fade-up" data-aos-delay="200" class="group h-full bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl hover:bg-white/10 hover:border-deep-teal-500/40 transition-all duration-300 flex flex-col justify-between">
+					<div>
+						<div class="flex items-center justify-between mb-6">
+							<div class="p-3 bg-deep-teal-900/50 rounded-2xl border border-deep-teal-500/30 text-deep-teal-300 group-hover:scale-110 group-hover:text-jasmine-300 transition-all">
+								<Search className="w-8 h-8" />
+							</div>
+							<span class="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full bg-deep-teal-500/10 text-deep-teal-300 border border-deep-teal-500/20">Ultra-Rapide</span>
+						</div>
+						<h3 class="text-2xl font-bold text-white mb-3">Recherche Unifiée Instantanée</h3>
+						<p class="text-stone-300 leading-relaxed text-sm">
+							Moteur d'indexation instantané sur l'ensemble de votre base : retrouvez n'importe quel rendez-vous, historique ou fiche client en tapant son nom, son numéro de téléphone, son adresse e-mail ou sa prestation.
+						</p>
+					</div>
+					<div class="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs text-jasmine-300 font-semibold">
+						<span>✓ Recherche globale sans latence</span>
+					</div>
+				</div>
+
+				<!-- Card 4: Messagerie Instantanée Salon-Client -->
+				<div data-aos="fade-up" data-aos-delay="300" class="group h-full bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl hover:bg-white/10 hover:border-deep-teal-500/40 transition-all duration-300 flex flex-col justify-between">
+					<div>
+						<div class="flex items-center justify-between mb-6">
+							<div class="p-3 bg-deep-teal-900/50 rounded-2xl border border-deep-teal-500/30 text-jasmine-400 group-hover:scale-110 group-hover:text-white transition-all">
+								<MessageSquare className="w-8 h-8" />
+							</div>
+							<span class="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full bg-jasmine-500/10 text-jasmine-300 border border-jasmine-500/20">Messagerie Salon</span>
+						</div>
+						<h3 class="text-2xl font-bold text-white mb-3">Fil de Discussion Dédié</h3>
+						<p class="text-stone-300 leading-relaxed text-sm">
+							Canal de communication direct et confidentiel pro ↔ client intégré à l'application. Compteur de messages non lus, accusés de lecture et centralisation des échanges préparatoires ou demandes sur-mesure.
+						</p>
+					</div>
+					<div class="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs text-jasmine-300 font-semibold">
+						<span>✓ Relation client fluide et sans intermédiaire</span>
+					</div>
+				</div>
+
+				<!-- Card 5: Programme VIP 4 Paliers -->
+				<div data-aos="fade-up" data-aos-delay="400" class="group h-full bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl hover:bg-white/10 hover:border-deep-teal-500/40 transition-all duration-300 flex flex-col justify-between">
+					<div>
+						<div class="flex items-center justify-between mb-6">
+							<div class="p-3 bg-deep-teal-900/50 rounded-2xl border border-deep-teal-500/30 text-deep-teal-300 group-hover:scale-110 group-hover:text-jasmine-300 transition-all">
+								<Award className="w-8 h-8" />
+							</div>
+							<span class="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full bg-deep-teal-500/10 text-deep-teal-300 border border-deep-teal-500/20">Fidélité Prestige</span>
+						</div>
+						<h3 class="text-2xl font-bold text-white mb-3">Programme VIP Gamifié</h3>
+						<p class="text-stone-300 leading-relaxed text-sm">
+							Parcours fidélité statutaire à 4 niveaux d'excellence : <em>Cristal</em>, <em>Argent</em>, <em>Or</em> et <em>Diamant</em>. Calcul automatique selon l'assiduité avec badge visible et déblocage de rituels et privilèges exclusifs.
+						</p>
+					</div>
+					<div class="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs text-jasmine-300 font-semibold">
+						<span>✓ Rétention et engagement maximisés</span>
+					</div>
+				</div>
+
+				<!-- Card 6: Télémétrie Graphique & Notes Privées -->
+				<div data-aos="fade-up" data-aos-delay="500" class="group h-full bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl hover:bg-white/10 hover:border-deep-teal-500/40 transition-all duration-300 flex flex-col justify-between">
+					<div>
+						<div class="flex items-center justify-between mb-6">
+							<div class="p-3 bg-deep-teal-900/50 rounded-2xl border border-deep-teal-500/30 text-jasmine-400 group-hover:scale-110 group-hover:text-white transition-all">
+								<LineChart className="w-8 h-8" />
+							</div>
+							<span class="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full bg-jasmine-500/10 text-jasmine-300 border border-jasmine-500/20">Pilotage & Suivi</span>
+						</div>
+						<h3 class="text-2xl font-bold text-white mb-3">Télémétrie & Notes Privées</h3>
+						<p class="text-stone-300 leading-relaxed text-sm">
+							Graphiques d'activité interactifs (Recharts) analysant taux de réservation et tendances, couplés à un carnet technique confidentiel (<code class="text-deep-teal-300 text-xs">client_notes</code>) consignant formules, colorimétrie et sensibilités.
+						</p>
+					</div>
+					<div class="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs text-jasmine-300 font-semibold">
+						<span>✓ Personnalisation extrême à chaque visite</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
 	<!-- Section Technologies -->
 	<section id="technologies" class="py-32 bg-stone-50">
 		<div class="mx-auto max-w-6xl px-6">
@@ -142,8 +295,15 @@ import { Sparkles, Code2, Paintbrush, Rocket, Blocks, KeySquare, MonitorSmartpho
 						<div class="flex gap-4 items-start">
 							<KeySquare className="w-8 h-8 text-deep-teal-600 shrink-0 mt-1" />
 							<div>
-								<h4 class="font-bold text-xl text-stone-900">Sécurité Maximale</h4>
-								<p class="text-stone-600 mt-2">Authentification Multi-Facteurs (MFA), chiffrement des données sensibles, et conformité RGPD stricte.</p>
+								<h4 class="font-bold text-xl text-stone-900">Sécurité & Permissions RBAC</h4>
+								<p class="text-stone-600 mt-2">Authentification sécurisée, Row Level Security (RLS) PostgreSQL, isolation des rôles collaborateur vs admin et conformité RGPD stricte.</p>
+							</div>
+						</div>
+						<div class="flex gap-4 items-start">
+							<CalendarCheck className="w-8 h-8 text-deep-teal-600 shrink-0 mt-1" />
+							<div>
+								<h4 class="font-bold text-xl text-stone-900">Double Synchronisation Temps Réel</h4>
+								<p class="text-stone-600 mt-2">Passerelle bidirectionnelle entre PostgreSQL sécurisé et l'API Google Calendar (Service Account JWT RS256). Zéro conflit d'agenda et mise à jour instantanée.</p>
 							</div>
 						</div>
 					</div>
@@ -178,7 +338,7 @@ import { Sparkles, Code2, Paintbrush, Rocket, Blocks, KeySquare, MonitorSmartpho
 					<HeartHandshake className="w-10 h-10 text-deep-teal-600 mb-6" />
 					<h3 class="text-2xl font-bold mb-4 text-stone-900">Maintenance Évolutive</h3>
 					<p class="text-stone-600 mb-8 leading-relaxed">
-						L'infrastructure (Cloudflare, Supabase) est facturée à l'usage réel. Nous proposons un contrat de maintenance pour garantir les mises à jour de sécurité et l'ajout de nouvelles fonctionnalités.
+						L'infrastructure (Cloudflare, Supabase) est calculée selon l'usage réel. Nous proposons un contrat de maintenance pour garantir les mises à jour de sécurité et l'ajout de nouvelles fonctionnalités.
 					</p>
 					<ul class="space-y-3 text-sm text-stone-600 font-medium">
 						<li class="flex items-center gap-2">✓ Monitoring 24/7</li>

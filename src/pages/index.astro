@@ -29,69 +29,214 @@ import { Mail, Phone, CalendarCheck, ShieldCheck, Gem } from 'lucide-react';
 			<h2 class="text-3xl font-bold text-stone-900" data-aos="fade-up">Tarification & Formules</h2>
 			<p class="mt-4 text-stone-600" data-aos="fade-up" data-aos-delay="100">Choisissez la solution qui s'adapte le mieux à l'évolution de votre activité.</p>
 		</div>
-		<div class="grid gap-8 lg:grid-cols-3">
+		<div class="grid gap-8 lg:grid-cols-3 items-stretch">
 			
 			<!-- Standard -->
-			<div class="flex flex-col rounded-3xl border border-stone-200 bg-white p-8 shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up">
+			<div class="flex flex-col rounded-3xl border border-stone-200 bg-white p-8 shadow-sm hover:shadow-md transition-all" data-aos="fade-up">
 				<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-stone-100 text-stone-700">
 					<CalendarCheck size={24} />
 				</div>
 				<h3 class="text-2xl font-bold text-stone-900">Formule Standard</h3>
-				<p class="mt-4 flex-1 text-sm text-stone-600">
-					L'essentiel pour démarrer. Un site vitrine élégant couplé à une API (ex: Google Calendar) pour gérer vos réservations sans avoir besoin d'une base de données complexe.
+				<p class="mt-2 text-xs font-semibold uppercase tracking-wider text-stone-500">Pack Essentiel & Zéro-DB</p>
+				<p class="mt-4 text-sm text-stone-600 leading-relaxed">
+					L'essentiel pour démarrer. Un site vitrine ultra-rapide couplé en direct à votre Google Calendar, sans base de données à administrer ni frais d'hébergement récurrents.
 				</p>
-				<ul class="mt-8 space-y-3 text-sm text-stone-600">
-					<li class="flex items-center gap-3">✓ Site Vitrine moderne</li>
-					<li class="flex items-center gap-3">✓ Prise de rendez-vous</li>
-					<li class="flex items-center gap-3">✓ Hébergement léger</li>
-					<li class="flex items-center gap-3 text-stone-400">✗ Pas d'espace client</li>
-				</ul>
-				<a href="/demo-standard/" class="mt-8 block w-full rounded-xl bg-stone-900 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-stone-800 transition-colors">
-					Voir la Démo Standard
-				</a>
+
+				<div class="mt-6 border-t border-stone-100 pt-6">
+					<p class="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-3">Forces & Inclus :</p>
+					<ul class="space-y-2.5 text-xs text-stone-700 font-medium">
+						<li class="flex items-start gap-2.5">
+							<span class="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Vitesse & SEO d'exception</strong> (PageSpeed > 95%)</span>
+						</li>
+						<li class="flex items-start gap-2.5">
+							<span class="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Zéro base de données</strong> (coût hébergement ~0 €/mois)</span>
+						</li>
+						<li class="flex items-start gap-2.5">
+							<span class="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Google Calendar direct</strong> (RDV injectés sur votre agenda)</span>
+						</li>
+						<li class="flex items-start gap-2.5">
+							<span class="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>E-mails de confirmation</strong> automatiques au client</span>
+						</li>
+						<li class="flex items-start gap-2.5">
+							<span class="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Carte interactive Leaflet</strong> (zone d'intervention)</span>
+						</li>
+					</ul>
+				</div>
+
+				<div class="mt-6 border-t border-stone-100 pt-4">
+					<p class="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">Non inclus :</p>
+					<ul class="space-y-1.5 text-xs text-stone-500">
+						<li class="flex items-center gap-2 text-stone-400">
+							<span class="shrink-0 text-stone-300">✗</span> Pas de base de données relationnelle
+						</li>
+						<li class="flex items-center gap-2 text-stone-400">
+							<span class="shrink-0 text-stone-300">✗</span> Pas d'espace client personnel avec compte
+						</li>
+						<li class="flex items-center gap-2 text-stone-400">
+							<span class="shrink-0 text-stone-300">✗</span> Pas de suivi de CA ni télémétrie financière
+						</li>
+						<li class="flex items-center gap-2 text-stone-400">
+							<span class="shrink-0 text-stone-300">✗</span> Pas de système de fidélité ni messagerie
+						</li>
+					</ul>
+				</div>
+
+				<div class="mt-8 pt-4 border-t border-stone-100 flex flex-col gap-3">
+					<a href="/demo-standard/" class="block w-full rounded-xl bg-stone-900 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-stone-800 transition-colors">
+						Voir la Démo Standard
+					</a>
+					<a href="/galerie/standard" class="text-center text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 transition-colors py-1">
+						Détail de l'offre Standard →
+					</a>
+				</div>
 			</div>
 
 			<!-- Premium -->
-			<div class="relative flex flex-col rounded-3xl border-2 border-rose-600 bg-white p-8 shadow-md hover:shadow-lg transition-shadow" data-aos="fade-up" data-aos-delay="100">
-				<div class="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-rose-600 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white">
+			<div class="relative flex flex-col rounded-3xl border-2 border-rose-600 bg-white p-8 shadow-md hover:shadow-lg transition-all" data-aos="fade-up" data-aos-delay="100">
+				<div class="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-rose-600 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-sm">
 					Recommandé
 				</div>
 				<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
 					<ShieldCheck size={24} />
 				</div>
 				<h3 class="text-2xl font-bold text-stone-900">Formule Premium</h3>
-				<p class="mt-4 flex-1 text-sm text-stone-600">
-					Une plateforme complète avec Base de données. Espace client, tableau de bord professionnel, système de fidélité et de messagerie.
+				<p class="mt-2 text-xs font-semibold uppercase tracking-wider text-rose-600">Le Choix des Pros</p>
+				<p class="mt-4 text-sm text-stone-600 leading-relaxed">
+					Une plateforme complète propulsée par une base de données PostgreSQL. Idéal pour les ateliers, garages et PME souhaitant suivre leur clientèle et analyser leur activité.
 				</p>
-				<ul class="mt-8 space-y-3 text-sm text-stone-600">
-					<li class="flex items-center gap-3 font-medium text-rose-700">Tout de Standard, plus :</li>
-					<li class="flex items-center gap-3">✓ Base de données</li>
-					<li class="flex items-center gap-3">✓ Tableau de bord Pro & Client</li>
-					<li class="flex items-center gap-3">✓ Système de Fidélité</li>
-				</ul>
-				<a href="/demo-premium/" class="mt-8 block w-full rounded-xl bg-rose-600 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-rose-700 transition-colors">
-					Voir la Démo Premium
-				</a>
+
+				<div class="mt-6 border-t border-stone-100 pt-6">
+					<p class="text-xs font-bold uppercase tracking-wider text-rose-700 mb-3">Forces & Inclus :</p>
+					<ul class="space-y-2.5 text-xs text-stone-700 font-medium">
+						<li class="flex items-start gap-2.5">
+							<span class="text-rose-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Base PostgreSQL (Supabase)</strong> sécurisée par RLS</span>
+						</li>
+						<li class="flex items-start gap-2.5">
+							<span class="text-rose-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Espace client dédié</strong> (suivi RDV & reprogrammation >24h)</span>
+						</li>
+						<li class="flex items-start gap-2.5">
+							<span class="text-rose-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Télémétrie financière Recharts</strong> (Graphiques CA & Top services)</span>
+						</li>
+						<li class="flex items-start gap-2.5">
+							<span class="text-rose-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Carnet d'atelier & Notes privées</strong> par client / véhicule</span>
+						</li>
+						<li class="flex items-start gap-2.5">
+							<span class="text-rose-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Messagerie bilatérale</strong> Pro ↔ Client intégrée</span>
+						</li>
+						<li class="flex items-start gap-2.5">
+							<span class="text-rose-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Programme de fidélité</strong> avec points et avantages</span>
+						</li>
+					</ul>
+				</div>
+
+				<div class="mt-6 border-t border-stone-100 pt-4">
+					<p class="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">Non inclus :</p>
+					<ul class="space-y-1.5 text-xs text-stone-500">
+						<li class="flex items-center gap-2 text-stone-400">
+							<span class="shrink-0 text-stone-300">✗</span> Pas de gestion d'équipe multi-rôles (Admin vs Collaborateur)
+						</li>
+						<li class="flex items-center gap-2 text-stone-400">
+							<span class="shrink-0 text-stone-300">✗</span> Pas de modération ni bannissement des clients abusifs (no-shows)
+						</li>
+						<li class="flex items-center gap-2 text-stone-400">
+							<span class="shrink-0 text-stone-300">✗</span> Pas de moteur de recherche unifié multi-critères
+						</li>
+						<li class="flex items-center gap-2 text-stone-400">
+							<span class="shrink-0 text-stone-300">✗</span> Pas de double synchronisation d'agenda externe
+						</li>
+					</ul>
+				</div>
+
+				<div class="mt-8 pt-4 border-t border-stone-100 flex flex-col gap-3">
+					<a href="/demo-premium/" class="block w-full rounded-xl bg-rose-600 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-rose-700 transition-colors shadow-sm">
+						Voir la Démo Premium
+					</a>
+					<a href="/galerie/premium" class="text-center text-xs font-bold uppercase tracking-wider text-rose-600 hover:text-rose-700 transition-colors py-1">
+						Détail de l'offre Premium →
+					</a>
+				</div>
 			</div>
 
 			<!-- Diamant -->
-			<div class="flex flex-col rounded-3xl border border-stone-200 bg-white p-8 shadow-sm hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="200">
+			<div class="flex flex-col rounded-3xl border border-stone-200 bg-white p-8 shadow-sm hover:shadow-md transition-all" data-aos="fade-up" data-aos-delay="200">
 				<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
 					<Gem size={24} />
 				</div>
 				<h3 class="text-2xl font-bold text-stone-900">Formule Diamant</h3>
-				<p class="mt-4 flex-1 text-sm text-stone-600">
-					Le sur-mesure absolu. Nous définissons ensemble chaque fonctionnalité pour créer une plateforme unique qui répond à 100% à vos besoins métiers.
+				<p class="mt-2 text-xs font-semibold uppercase tracking-wider text-violet-600">Sur-Mesure Haute Couture</p>
+				<p class="mt-4 text-sm text-stone-600 leading-relaxed">
+					L'écosystème d'exception pour les établissements de prestige. Suite logicielle intégrale avec gestion d'équipe, modération des abus et personnalisation absolue.
 				</p>
-				<ul class="mt-8 space-y-3 text-sm text-stone-600">
-					<li class="flex items-center gap-3 font-medium text-violet-700">Tout de Premium, plus :</li>
-					<li class="flex items-center gap-3">✓ Design exclusif personnalisé</li>
-					<li class="flex items-center gap-3">✓ Fonctionnalités avancées métiers</li>
-					<li class="flex items-center gap-3">✓ Intégrations spécifiques</li>
-				</ul>
-				<a href="/demo-diamant/" class="mt-8 block w-full rounded-xl bg-violet-600 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-violet-700 transition-colors">
-					Voir la Démo Diamant
-				</a>
+
+				<div class="mt-6 border-t border-stone-100 pt-6">
+					<p class="text-xs font-bold uppercase tracking-wider text-violet-700 mb-3">Forces & Inclus :</p>
+					<ul class="space-y-2.5 text-xs text-stone-700 font-medium">
+						<li class="flex items-start gap-2.5">
+							<span class="text-violet-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Tout de Premium</strong> avec architecture sur-mesure</span>
+						</li>
+						<li class="flex items-start gap-2.5">
+							<span class="text-violet-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Gestion d'Équipe & Rôles (RBAC)</strong> : Admin, Collaborateur, Démo</span>
+						</li>
+						<li class="flex items-start gap-2.5">
+							<span class="text-violet-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Protection Anti-No-Show</strong> : Bannissement avec motif officiel</span>
+						</li>
+						<li class="flex items-start gap-2.5">
+							<span class="text-violet-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Moteur de Recherche unifié</strong> instantané multi-critères</span>
+						</li>
+						<li class="flex items-start gap-2.5">
+							<span class="text-violet-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Messagerie instantanée salon</strong> avec accusés de lecture</span>
+						</li>
+						<li class="flex items-start gap-2.5">
+							<span class="text-violet-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Fidélité VIP 4 Paliers</strong> (Cristal à Diamant) & Badges exclusifs</span>
+						</li>
+						<li class="flex items-start gap-2.5">
+							<span class="text-violet-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Double synchronisation</strong> : PostgreSQL + Google Calendar</span>
+						</li>
+						<li class="flex items-start gap-2.5">
+							<span class="text-violet-600 font-bold shrink-0 mt-0.5">✓</span>
+							<span><strong>Design signature exclusif</strong> & Logo 3D vectoriel animé</span>
+						</li>
+					</ul>
+				</div>
+
+				<div class="mt-6 border-t border-stone-100 pt-4">
+					<p class="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">Spécificités :</p>
+					<ul class="space-y-1.5 text-xs text-stone-500">
+						<li class="flex items-center gap-2 text-stone-400">
+							<span class="shrink-0 text-stone-300">✗</span> Conception sur cahier des charges préalable
+						</li>
+						<li class="flex items-center gap-2 text-stone-400">
+							<span class="shrink-0 text-stone-300">✗</span> Investissement initial plus élevé (dès 3000 €)
+						</li>
+					</ul>
+				</div>
+
+				<div class="mt-8 pt-4 border-t border-stone-100 flex flex-col gap-3">
+					<a href="/demo-diamant/" class="block w-full rounded-xl bg-violet-600 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-violet-700 transition-colors shadow-sm">
+						Voir la Démo Diamant
+					</a>
+					<a href="/galerie/diamant" class="text-center text-xs font-bold uppercase tracking-wider text-violet-600 hover:text-violet-700 transition-colors py-1">
+						Détail de l'offre Diamant →
+					</a>
+				</div>
 			</div>
 
 		</div>
