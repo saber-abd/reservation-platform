@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { getServerEnv } from '@/lib/server/env';
 
 /**
- * Envoi d'emails transactionnels via Resend.
+ * Envoi d'emails transactionnels via l'API REST d'EmailJS (appelée côté serveur).
  *
  * L'endpoint n'accepte plus de `to` / `subject` / `html` libres (relais ouvert) :
  * le client envoie un `type` et des données, le serveur construit le mail
@@ -14,6 +14,10 @@ import { getServerEnv } from '@/lib/server/env';
  * - `new_message` : session Supabase obligatoire (header `Authorization: Bearer <access_token>`),
  *   l'expéditeur doit faire partie de la conversation ; le destinataire est résolu côté serveur.
  */
+
+// Identifiants publics déjà utilisés par les formulaires de contact (src/pages/demo-*/contact.astro).
+const DEFAULT_EMAILJS_SERVICE_ID = 'service_7pvm3br';
+const DEFAULT_EMAILJS_PUBLIC_KEY = '5Jjd71i9EWOeYyzsG';
 
 const MAX_FIELD = 200;
 const MAX_MESSAGE = 2000;
@@ -232,44 +236,49 @@ export const POST: APIRoute = async ({ request }) => {
 			return json({ error: 'Requête invalide' }, 400);
 		}
 
-		const RESEND_API_KEY = getServerEnv('RESEND_API_KEY');
-		const RESEND_VERIFIED_EMAIL = getServerEnv('RESEND_VERIFIED_EMAIL');
+		const serviceId = getServerEnv('EMAILJS_SERVICE_ID') || DEFAULT_EMAILJS_SERVICE_ID;
+		const publicKey = getServerEnv('EMAILJS_PUBLIC_KEY') || DEFAULT_EMAILJS_PUBLIC_KEY;
+		const templateId = getServerEnv('EMAILJS_TEMPLATE_ID');
+		const privateKey = getServerEnv('EMAILJS_PRIVATE_KEY');
 
-		if (!RESEND_API_KEY) {
-			console.error("RESEND_API_KEY absente de l'environnement serveur");
-			return json({ error: 'Resend API key is not configured' }, 500);
+		if (!templateId || !privateKey) {
+			console.error("EMAILJS_TEMPLATE_ID ou EMAILJS_PRIVATE_KEY absente de l'environnement serveur");
+			return json({ error: 'EmailJS is not configured' }, 500);
 		}
 
 		const email = await buildEmail(payload, request);
 
-		// Pour contourner le blocage du mode gratuit de Resend, on force l'envoi
-		// vers l'adresse email vérifiée si elle est configurée en variable d'environnement.
-		const finalTo = RESEND_VERIFIED_EMAIL ? [RESEND_VERIFIED_EMAIL] : email.to;
+		// Optionnel : force tous les envois vers une seule adresse (tests).
+		const overrideTo = getServerEnv('EMAIL_OVERRIDE_TO');
+		const recipients = overrideTo ? [overrideTo] : email.to;
 
-		const resendResponse = await fetch('https://api.resend.com/emails', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${RESEND_API_KEY}`,
-			},
-			body: JSON.stringify({
-				from: getServerEnv('RESEND_FROM_EMAIL') || 'Plateforme <onboarding@resend.dev>',
-				to: finalTo,
-				subject: email.subject,
-				html: email.html,
-			}),
-		});
+		// Un envoi par destinataire : le modèle EmailJS utilise {{to_email}} comme destinataire.
+		for (const to of recipients) {
+			const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					service_id: serviceId,
+					template_id: templateId,
+					user_id: publicKey,
+					accessToken: privateKey,
+					template_params: {
+						to_email: to,
+						subject: email.subject,
+						html: email.html,
+					},
+				}),
+			});
 
-		const result = await resendResponse.json();
-
-		if (!resendResponse.ok) {
-			// Cause la plus fréquente en mode "sandbox" Resend (pas de domaine vérifié) :
-			// l'API refuse d'envoyer à toute adresse autre que celle du compte Resend lui-même.
-			console.error('Erreur Resend:', resendResponse.status, result);
-			return json({ error: 'Envoi refusé par le fournisseur email' }, 502);
+			if (!response.ok) {
+				// Cause fréquente : "API calls are disabled for non-browser applications"
+				// → activer l'option dans EmailJS > Account > Security.
+				console.error('Erreur EmailJS:', response.status, await response.text());
+				return json({ error: 'Envoi refusé par le fournisseur email' }, 502);
+			}
 		}
 
-		return json({ success: true, id: result.id }, 200);
+		return json({ success: true }, 200);
 	} catch (error: any) {
 		if (error instanceof HttpError) {
 			return json({ error: error.message }, error.status);
