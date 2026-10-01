@@ -103,12 +103,11 @@ export default function StandardReservationForm() {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					to: [values.clientEmail],
-					subject: `Demande d'intervention reçue - ${selectedService.name}`,
-					html: `<p>Bonjour ${values.clientName},</p>
-						   <p>Votre demande d'intervention pour <strong>${selectedService.name}</strong> a bien été enregistrée dans notre agenda.</p>
-						   <p><strong>Date :</strong> ${formatSlot(selectedSlot)}</p>
-						   <p>Notre technicien vous contactera prochainement.</p>`
+					type: 'intervention_request',
+					clientName: values.clientName,
+					clientEmail: values.clientEmail,
+					serviceName: selectedService.name,
+					dateLabel: formatSlot(selectedSlot),
 				})
 			}).catch(err => console.error("Erreur d'envoi d'email de confirmation:", err));
 

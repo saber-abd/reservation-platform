@@ -154,22 +154,18 @@ export default function ReservationForm() {
 				end_time: selectedSlot.end.toISOString(),
 			});
 
-			// Envoi email de demande de réservation (en attente de validation par le professionnel)
-			const recipients = [values.clientEmail];
-			if (professional.email && professional.email !== values.clientEmail) {
-				recipients.push(professional.email);
-			}
-
+			// Envoi email de demande de réservation (en attente de validation par le professionnel).
+			// Le serveur construit le mail et ajoute lui-même l'email du professionnel.
 			fetch('/api/send-email', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					to: recipients,
-					subject: `Demande de réservation reçue - ${selectedService.name}`,
-					html: `<p>Bonjour ${values.clientName},</p>
-						   <p>Votre demande de réservation pour <strong>${selectedService.name}</strong> a bien été reçue.</p>
-						   <p><strong>Date :</strong> ${formatSlot(selectedSlot)}</p>
-						   <p>Elle sera confirmée prochainement par le professionnel.</p>`
+					type: 'reservation_request',
+					professionalId: professional.id,
+					clientName: values.clientName,
+					clientEmail: values.clientEmail,
+					serviceName: selectedService.name,
+					dateLabel: formatSlot(selectedSlot),
 				})
 			}).catch(err => console.error("Erreur d'envoi d'email de confirmation:", err));
 

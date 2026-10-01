@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { getAppointmentsForClient, getMessages, getProfessionalById, sendMessage, type Message } from '@/lib/queries';
+import { getMessages, sendMessage, type Message } from '@/lib/queries';
+import { getSession } from '@/lib/auth';
 
 interface Props {
 	professionalId: string;
@@ -62,16 +63,6 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 		bottomRef.current?.scrollIntoView({ block: 'nearest' });
 	}, [messages]);
 
-	/** Retrouve l'email réel du destinataire (le client n'a pas d'email en base, on le déduit de ses réservations). */
-	async function resolveRecipientEmail(): Promise<string | null> {
-		if (role === 'client') {
-			const professional = await getProfessionalById(professionalId);
-			return professional?.email ?? null;
-		}
-		const appointments = await getAppointmentsForClient(clientId);
-		return appointments.find((a) => a.professional_id === professionalId)?.client_email ?? null;
-	}
-
 	async function handleSend(e: React.FormEvent) {
 		e.preventDefault();
 		if (!body.trim()) return;
@@ -106,18 +97,18 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 				}));
 			}
 
-			// Notification Email (en asynchrone)
-			resolveRecipientEmail()
-				.then((recipient) => {
-					if (!recipient) return;
+			// Notification Email (en asynchrone) : le serveur vérifie la session,
+			// retrouve le destinataire et construit le mail lui-même.
+			getSession()
+				.then((session) => {
+					if (!session) return;
 					return fetch('/api/send-email', {
 						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({
-							to: recipient,
-							subject: `Nouveau message reçu`,
-							html: `<p>Vous avez reçu un nouveau message :</p><p><em>"${text}"</em></p><p>Connectez-vous pour répondre.</p>`,
-						}),
+						headers: {
+							'Content-Type': 'application/json',
+							Authorization: `Bearer ${session.access_token}`,
+						},
+						body: JSON.stringify({ type: 'new_message', professionalId, clientId, text }),
 					});
 				})
 				.catch(console.error);
