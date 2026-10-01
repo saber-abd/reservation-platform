@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
 	getActiveProRole, 
 	setActiveProRole, 
@@ -52,6 +52,50 @@ import {
 import { MAX_NAME_LENGTH } from '@/lib/limits';
 import { supabase } from '@/lib/supabase';
 
+const ROLE_OPTIONS: { role: ProRole; label: string }[] = [
+	{ role: 'admin', label: 'Administrateur' },
+	{ role: 'employee', label: 'Employé' },
+	{ role: 'demo', label: 'Démo' },
+];
+
+type Access = 'full' | 'read' | 'none';
+
+const PERMISSION_ROWS: { label: string; icon: typeof Calendar; admin: string; employee: string; employeeAccess: Access; reason: string }[] = [
+	{ label: 'Planning & RDV', icon: Calendar, admin: 'Lecture et modification', employee: 'Prise et modification des RDV', employeeAccess: 'full', reason: "Nécessaire à l'activité quotidienne du salon" },
+	{ label: 'Clientèle', icon: User, admin: 'Accès complet', employee: 'Accès complet', employeeAccess: 'full', reason: "Historique et notes techniques des clients" },
+	{ label: 'Messagerie', icon: MessageSquare, admin: 'Accès complet', employee: 'Accès complet', employeeAccess: 'full', reason: 'Échanges directs avec la clientèle' },
+	{ label: 'Recherche', icon: Search, admin: 'Accès complet', employee: 'Accès complet', employeeAccess: 'full', reason: 'Retrouver rapidement un RDV ou un client' },
+	{ label: 'Profil Maison', icon: Settings, admin: 'Modification', employee: 'Masqué', employeeAccess: 'none', reason: "Les informations de l'établissement restent au gérant" },
+	{ label: 'Gestion des prestations', icon: Scissors, admin: 'Ajout, modification, prix', employee: 'Masqué', employeeAccess: 'none', reason: 'Tarifs fixés par le propriétaire' },
+	{ label: 'Statistiques', icon: BarChart3, admin: "Chiffre d'affaires et bilans", employee: 'Masqué', employeeAccess: 'none', reason: 'Données financières confidentielles' },
+	{ label: 'Gestion des droits', icon: ShieldCheck, admin: 'Gestion complète', employee: 'Masqué', employeeAccess: 'none', reason: "Réservé à l'administrateur" },
+];
+
+function AccessCell({ access, label }: { access: Access; label: string }) {
+	if (access === 'full') {
+		return (
+			<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+				<Check size={14} className="shrink-0" />
+				<span>{label}</span>
+			</span>
+		);
+	}
+	if (access === 'read') {
+		return (
+			<span className="inline-flex items-center gap-1 text-stone-600 font-bold">
+				<Eye size={14} className="shrink-0" />
+				<span>{label}</span>
+			</span>
+		);
+	}
+	return (
+		<span className="inline-flex items-center gap-1 text-rose-700 font-bold">
+			<X size={14} className="shrink-0" />
+			<span>{label}</span>
+		</span>
+	);
+}
+
 export default function DiamantRightsPanel() {
 	const [activeRole, setActiveRole] = useState<ProRole>('admin');
 	const [activeTab, setActiveTab] = useState<'team' | 'clients' | 'matrix'>('team');
@@ -103,16 +147,39 @@ export default function DiamantRightsPanel() {
 	// Notification message
 	const [toast, setToast] = useState<string | null>(null);
 
+	const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
 	function showToast(msg: string) {
 		setToast(msg);
-		setTimeout(() => setToast(null), 3500);
+		if (toastTimer.current) clearTimeout(toastTimer.current);
+		toastTimer.current = setTimeout(() => setToast(null), 3500);
 	}
+
+	// Échap ferme la fenêtre ouverte
+	useEffect(() => {
+		function onKey(e: KeyboardEvent) {
+			if (e.key !== 'Escape') return;
+			setShowCreateChooser(false);
+			setShowAddModal(false);
+			setEditMemberModal(null);
+			setBanModalClient(null);
+			setDeleteConfirm(null);
+			setEditClientModal(null);
+		}
+		window.addEventListener('keydown', onKey);
+		return () => {
+			window.removeEventListener('keydown', onKey);
+			if (toastTimer.current) clearTimeout(toastTimer.current);
+		};
+	}, []);
 
 	useEffect(() => {
 		const currentRole = getActiveProRole();
 		setActiveRole(currentRole);
 
 		async function init() {
+			// Comptes locaux affichés tout de suite, sans attendre la réponse de Supabase
+			setMembers(getTeamMembers('eff1f7ef-33ee-49a2-9e4f-52ab675a4dc7'));
 			const tag = getDemoTag();
 			const pro = await getPrimaryProfessional(tag).catch(() => null);
 			const effectiveId = pro?.id || 'eff1f7ef-33ee-49a2-9e4f-52ab675a4dc7';
@@ -180,7 +247,7 @@ export default function DiamantRightsPanel() {
 
 	function checkReadOnly(): boolean {
 		if (isRoleReadOnly(activeRole)) {
-			showToast("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			showToast("Mode démo : les modifications sont désactivées.");
 			return true;
 		}
 		return false;
@@ -203,6 +270,11 @@ export default function DiamantRightsPanel() {
 		if (!editMemberModal) return;
 		if (!editMemberName.trim() || !editMemberEmail.trim()) {
 			showToast("Veuillez renseigner le nom et l'adresse email.");
+			return;
+		}
+		const editedEmail = editMemberEmail.trim().toLowerCase();
+		if (members.some(m => m.id !== editMemberModal.id && m.email.toLowerCase() === editedEmail)) {
+			showToast('Un compte utilise déjà cette adresse email.');
 			return;
 		}
 		if (editMemberPassword && editMemberPassword.length < 6) {
@@ -234,7 +306,7 @@ export default function DiamantRightsPanel() {
 			}
 
 			setEditMemberModal(null);
-			showToast(`Compte ${editMemberName.trim()} mis à jour avec succès.`);
+			showToast(`Compte de ${editMemberName.trim()} mis à jour.`);
 		} catch (err) {
 			console.error(err);
 			showToast("Erreur lors de l'enregistrement des modifications.");
@@ -278,11 +350,11 @@ export default function DiamantRightsPanel() {
 		setActiveProRole(role);
 		setActiveRole(role);
 		if (role === 'employee') {
-			showToast("Vue passée en mode 'Employé' : Accès restreint au Planning, Clientèle, Messagerie et Recherche.");
+			showToast("Vue employé : planning, clientèle, messagerie et recherche uniquement.");
 		} else if (role === 'demo') {
-			showToast("Vue passée en mode 'Démo' : Présentation commerciale en lecture seule (tous les onglets accessibles, modifications bloquées).");
+			showToast("Vue démo : tous les onglets en lecture seule.");
 		} else {
-			showToast("Vue passée en mode 'Administrateur' : Accès total et droits de modification rétablis.");
+			showToast("Vue administrateur : accès complet.");
 		}
 	}
 
@@ -314,6 +386,10 @@ export default function DiamantRightsPanel() {
 		e.preventDefault();
 		if (checkReadOnly()) return;
 		if (!newMemberName.trim() || !newMemberEmail.trim()) return;
+		if (members.some(m => m.email.toLowerCase() === newMemberEmail.trim().toLowerCase())) {
+			showToast('Un compte utilise déjà cette adresse email.');
+			return;
+		}
 		if (!newMemberPassword || newMemberPassword.length < 6) {
 			showToast("Le mot de passe doit comporter au moins 6 caractères.");
 			return;
@@ -336,10 +412,10 @@ export default function DiamantRightsPanel() {
 		setShowNewPassword(false);
 		showToast(
 			created.role === 'admin'
-				? `Compte Administrateur créé pour ${created.name} ! Vous pouvez vous connecter avec ${created.email}.`
+				? `Compte administrateur créé pour ${created.name}. Connexion avec ${created.email}.`
 				: created.role === 'demo'
-				? `Compte Démo Commercial créé pour ${created.name} (Lecture seule). Vous pouvez vous connecter avec ${created.email}.`
-				: `Compte Employé créé pour ${created.name}. Vous pouvez vous connecter avec ${created.email}.`
+				? `Compte démo créé pour ${created.name}. Connexion avec ${created.email}.`
+				: `Compte employé créé pour ${created.name}. Connexion avec ${created.email}.`
 		);
 	}
 
@@ -393,7 +469,7 @@ export default function DiamantRightsPanel() {
 
 		setBanModalClient(null);
 		setCustomBanReason('');
-		showToast(`Client ${banModalClient.full_name || ''} banni avec succès en base de données.`);
+		showToast(`Client ${banModalClient.full_name || ''} banni.`);
 	}
 
 	async function handleUnban(client: Client) {
@@ -415,7 +491,7 @@ export default function DiamantRightsPanel() {
 			return next;
 		});
 
-		showToast(`Le bannissement de ${client.full_name || 'ce client'} a été levé en base de données.`);
+		showToast(`Le bannissement de ${client.full_name || 'ce client'} a été levé.`);
 	}
 
 	async function confirmDelete() {
@@ -438,7 +514,7 @@ export default function DiamantRightsPanel() {
 				delete next[deleteConfirm.id];
 				return next;
 			});
-			showToast(`Compte client ${deleteConfirm.name} supprimé définitivement en base de données.`);
+			showToast(`Compte client ${deleteConfirm.name} supprimé définitivement.`);
 		}
 		setDeleteConfirm(null);
 	}
@@ -474,10 +550,14 @@ export default function DiamantRightsPanel() {
 		}
 	}
 
+	// Un client est banni s'il l'est en local ou en base
+	const isClientBannedInList = (c: Client) => !!bannedClients[c.id] || c.is_banned === true || c.ban === 'oui';
+	const bannedCount = useMemo(() => clients.filter(isClientBannedInList).length, [clients, bannedClients]);
+
 	// Filtrage des clients
 	const filteredClients = useMemo(() => {
 		return clients.filter(c => {
-			const isBanned = !!bannedClients[c.id] || c.is_banned === true || c.ban === 'oui';
+			const isBanned = isClientBannedInList(c);
 			if (clientFilter === 'active' && isBanned) return false;
 			if (clientFilter === 'banned' && !isBanned) return false;
 
@@ -497,127 +577,86 @@ export default function DiamantRightsPanel() {
 		<div className="space-y-8">
 			{/* Toast notification */}
 			{toast && (
-				<div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-stone-900 text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-bold border border-stone-800 animate-in fade-in slide-in-from-bottom-4">
-					<Sparkles size={16} className="text-amber-400" />
+				<div role="status" className="fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-50 flex items-center gap-2 bg-stone-900 text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-bold border border-stone-800 animate-in fade-in slide-in-from-bottom-4">
+					<Sparkles size={16} className="text-jasmine-400 shrink-0" />
 					<span>{toast}</span>
 				</div>
 			)}
 
-			{/* Simulateur de Rôle Actif */}
-			<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
-				<div className="flex items-start gap-4">
-					<div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-						activeRole === 'admin' 
-							? 'bg-amber-50 text-amber-700 border border-amber-200' 
-							: activeRole === 'demo'
-							? 'bg-purple-50 text-purple-700 border border-purple-200'
-							: 'bg-deep-teal-50 text-deep-teal-700 border border-deep-teal-200'
-					}`}>
-						{activeRole === 'admin' ? <ShieldCheck size={24} /> : activeRole === 'demo' ? <Eye size={24} /> : <UserCheck size={24} />}
-					</div>
-					<div>
-						<div className="flex items-center gap-2.5">
-							<h2 className="text-lg font-black text-stone-900 tracking-tight">Gestion des Droits & Rôles</h2>
-							<span className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
-								activeRole === 'admin' 
-									? 'bg-amber-100 text-amber-800 border border-amber-200' 
-									: activeRole === 'demo'
-									? 'bg-purple-100 text-purple-800 border border-purple-300'
-									: 'bg-deep-teal-100 text-deep-teal-800 border border-deep-teal-300'
-							}`}>
-								{activeRole === 'admin' ? 'Mode Administrateur' : activeRole === 'demo' ? 'Mode Démo (Lecture Seule)' : 'Mode Employé'}
-							</span>
-						</div>
-						<p className="text-xs text-stone-500 mt-1 max-w-xl leading-relaxed">
-							Définissez vos comptes employés et administrateurs, configurez le mode démo commercial en lecture seule, et testez les permissions en direct.
-						</p>
-					</div>
+			{/* En-tête : titre de la page et aperçu de l'espace selon le rôle */}
+			<header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+				<div className="min-w-0">
+					<h1 className="text-3xl font-black text-stone-900 tracking-tight">Gestion des droits</h1>
+					<p className="text-stone-500 mt-1 max-w-xl">
+						Comptes de l'équipe, modération des clients et règles d'accès à l'espace pro.
+					</p>
 				</div>
 
-				{/* Boutons de bascule rapide de rôle */}
-				<div className="flex flex-wrap items-center gap-2 bg-stone-100 p-1.5 rounded-2xl border border-stone-200 self-start md:self-center">
-					<button
-						type="button"
-						onClick={() => handleSwitchRole('admin')}
-						className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-							activeRole === 'admin' 
-								? 'bg-white text-stone-900 shadow-xs ring-1 ring-stone-200' 
-								: 'text-stone-500 hover:text-stone-900'
-						}`}
-					>
-						<ShieldCheck size={14} className={activeRole === 'admin' ? 'text-amber-600' : 'text-stone-400'} />
-						<span>Administrateur</span>
-					</button>
-					<button
-						type="button"
-						onClick={() => handleSwitchRole('employee')}
-						className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-							activeRole === 'employee' 
-								? 'bg-deep-teal-600 text-white shadow-xs' 
-								: 'text-stone-500 hover:text-stone-900'
-						}`}
-					>
-						<UserCheck size={14} className={activeRole === 'employee' ? 'text-white' : 'text-stone-400'} />
-						<span>Tester en tant qu'Employé</span>
-					</button>
-					<button
-						type="button"
-						onClick={() => handleSwitchRole('demo')}
-						className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-							activeRole === 'demo' 
-								? 'bg-purple-600 text-white shadow-xs' 
-								: 'text-stone-500 hover:text-stone-900'
-						}`}
-					>
-						<Eye size={14} className={activeRole === 'demo' ? 'text-white' : 'text-stone-400'} />
-						<span>Mode Démo (Lecture seule)</span>
-					</button>
+				<div className="shrink-0">
+					<p id="diamant-role-preview" className="text-xs font-bold text-stone-500 mb-1.5">Voir l'espace en tant que</p>
+					<div role="radiogroup" aria-labelledby="diamant-role-preview" className="inline-flex rounded-xl border border-border bg-white p-1 shadow-2xs">
+						{ROLE_OPTIONS.map((option) => {
+							const selected = activeRole === option.role;
+							return (
+								<button
+									key={option.role}
+									type="button"
+									role="radio"
+									aria-checked={selected}
+									onClick={() => handleSwitchRole(option.role)}
+									className={`px-3.5 py-1.5 rounded-lg text-sm font-bold transition-colors cursor-pointer ${
+										selected
+											? 'bg-secondary text-secondary-foreground'
+											: 'text-stone-500 hover:text-stone-900'
+									}`}
+								>
+									{option.label}
+								</button>
+							);
+						})}
+					</div>
+					<p className="text-xs text-stone-500 mt-1.5">
+						{activeRole === 'demo'
+							? 'Lecture seule : les modifications sont bloquées.'
+							: 'Accès complet, modifications autorisées.'}
+					</p>
 				</div>
-			</div>
+			</header>
 
 			{/* Navigation interne des onglets */}
-			<div className="flex items-center gap-3 border-b border-stone-200 pb-3">
-				<button
-					type="button"
-					onClick={() => setActiveTab('team')}
-					className={`px-4 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
-						activeTab === 'team'
-							? 'bg-deep-teal-50 text-deep-teal-700 border border-deep-teal-200 shadow-2xs'
-							: 'text-stone-500 hover:text-stone-900'
-					}`}
-				>
-					<UserCheck size={16} />
-					<span>Comptes Pro Employés ({members.length})</span>
-				</button>
-				<button
-					type="button"
-					onClick={() => setActiveTab('clients')}
-					className={`px-4 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
-						activeTab === 'clients'
-							? 'bg-deep-teal-50 text-deep-teal-700 border border-deep-teal-200 shadow-2xs'
-							: 'text-stone-500 hover:text-stone-900'
-					}`}
-				>
-					<UserX size={16} />
-					<span>Modération & Clients ({clients.length})</span>
-					{Object.keys(bannedClients).length > 0 && (
-						<span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-rose-600 text-white">
-							{Object.keys(bannedClients).length} banni(s)
-						</span>
-					)}
-				</button>
-				<button
-					type="button"
-					onClick={() => setActiveTab('matrix')}
-					className={`px-4 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
-						activeTab === 'matrix'
-							? 'bg-deep-teal-50 text-deep-teal-700 border border-deep-teal-200 shadow-2xs'
-							: 'text-stone-500 hover:text-stone-900'
-					}`}
-				>
-					<ShieldCheck size={16} />
-					<span>Matrice des Permissions</span>
-				</button>
+			<div role="tablist" aria-label="Sections de la gestion des droits" className="flex gap-1 overflow-x-auto border-b border-border">
+				{([
+					{ key: 'team', label: 'Équipe', count: members.length, icon: <UserCheck size={16} /> },
+					{ key: 'clients', label: 'Clients & modération', count: clients.length, icon: <UserX size={16} /> },
+					{ key: 'matrix', label: 'Permissions', count: null, icon: <ShieldCheck size={16} /> },
+				] as const).map((tab) => {
+					const selected = activeTab === tab.key;
+					return (
+						<button
+							key={tab.key}
+							type="button"
+							role="tab"
+							aria-selected={selected}
+							onClick={() => setActiveTab(tab.key)}
+							className={`-mb-px shrink-0 px-4 py-2.5 border-b-2 text-sm font-bold transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+								selected
+									? 'border-primary text-stone-900'
+									: 'border-transparent text-stone-500 hover:text-stone-900'
+							}`}
+						>
+							<span className={selected ? 'text-primary' : 'text-stone-400'}>{tab.icon}</span>
+							<span>{tab.label}</span>
+							{tab.count !== null && (
+								<span className="text-xs font-bold text-stone-400">{tab.count}</span>
+							)}
+							{tab.key === 'clients' && bannedCount > 0 && (
+								<span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-rose-100 text-rose-700">
+									{bannedCount} {bannedCount > 1 ? 'bannis' : 'banni'}
+								</span>
+							)}
+						</button>
+					);
+				})}
 			</div>
 
 			{/* ONGLET 1 : ÉQUIPE & COMPTES EMPLOYÉS */}
@@ -625,15 +664,15 @@ export default function DiamantRightsPanel() {
 				<div className="space-y-6">
 					<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 						<div>
-							<h3 className="text-xl font-bold text-stone-900 tracking-tight">Comptes Professionnels & Employés</h3>
+							<h3 className="text-xl font-bold text-stone-900 tracking-tight">Comptes de l'équipe</h3>
 							<p className="text-xs text-stone-500 mt-1">
-								Les employés accèdent uniquement aux 4 onglets opérationnels (Planning, Clientèle, Messagerie, Recherche). Le Profil Maison et les finances leur sont inaccessibles.
+								Les employés n'ont accès qu'au planning, à la clientèle, à la messagerie et à la recherche.
 							</p>
 						</div>
 						<button
 							type="button"
 							onClick={openCreateChooser}
-							className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-all shadow-xs cursor-pointer shrink-0 self-start sm:self-auto"
+							className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 transition-all shadow-xs cursor-pointer shrink-0 self-start sm:self-auto"
 						>
 							<Plus size={15} />
 							<span>Créer un compte</span>
@@ -641,12 +680,12 @@ export default function DiamantRightsPanel() {
 					</div>
 
 					{/* Liste des employés */}
-					<div className="rounded-2xl border border-stone-200 bg-white overflow-hidden shadow-xs">
-						<table className="w-full text-left text-sm">
+					<div className="rounded-2xl border border-stone-200 bg-white overflow-x-auto shadow-xs">
+						<table className={`w-full text-left text-sm ${members.length ? 'min-w-[44rem]' : ''}`}>
 							<thead className="bg-stone-50 text-xs uppercase font-bold text-stone-400 border-b border-stone-100">
 								<tr>
-									<th className="px-5 py-3.5">Employé / Admin</th>
-									<th className="px-5 py-3.5">Rôle & Permissions</th>
+									<th className="px-5 py-3.5">Membre</th>
+									<th className="px-5 py-3.5">Rôle</th>
 									<th className="px-5 py-3.5">Statut</th>
 									<th className="px-5 py-3.5 text-right">Actions</th>
 								</tr>
@@ -660,7 +699,7 @@ export default function DiamantRightsPanel() {
 												<button
 													type="button"
 													onClick={openCreateChooser}
-													className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-all cursor-pointer shadow-xs"
+													className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 transition-all cursor-pointer shadow-xs"
 												>
 													<Plus size={14} />
 													<span>Créer un compte</span>
@@ -676,18 +715,18 @@ export default function DiamantRightsPanel() {
 											<tr key={member.id} className="hover:bg-stone-50/50 transition-colors">
 												<td className="px-5 py-4">
 													<div className="flex items-center gap-3">
-														<div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+														<div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${
 															isAdmin 
 																? 'bg-amber-100 text-amber-800 border border-amber-200 shadow-2xs' 
 																: isDemo
 																? 'bg-purple-100 text-purple-800 border border-purple-200 shadow-2xs'
-																: 'bg-deep-teal-100 text-deep-teal-800 border border-deep-teal-200'
+																: 'bg-secondary text-secondary-foreground border border-border'
 														}`}>
 															{member.name.charAt(0).toUpperCase()}
 														</div>
-														<div>
-															<div className="flex items-center gap-2">
-																<p className="font-bold text-stone-900">{member.name}</p>
+														<div className="min-w-0 max-w-[18rem]">
+															<div className="flex flex-wrap items-center gap-2">
+																<p className="font-bold text-stone-900 break-words">{member.name}</p>
 																{isAdmin && (
 																	<span className="text-[10px] bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-bold">
 																		Gérant
@@ -699,7 +738,7 @@ export default function DiamantRightsPanel() {
 																	</span>
 																)}
 															</div>
-															<p className="text-xs text-stone-500 mt-0.5">{member.specialty} • {member.email}</p>
+															<p className="text-xs text-stone-500 mt-0.5 break-all">{[member.specialty, member.email].filter(Boolean).join(' · ')}</p>
 														</div>
 													</div>
 												</td>
@@ -708,23 +747,23 @@ export default function DiamantRightsPanel() {
 														<div>
 															<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
 																<ShieldCheck size={13} className="text-amber-700" />
-																<span>Administrateur (Accès Total)</span>
+																<span>Administrateur</span>
 															</span>
-															<p className="text-[11px] text-stone-400 mt-1">Tous les onglets & modifications autorisées</p>
+															<p className="text-[11px] text-stone-400 mt-1">Tous les onglets, modifications autorisées</p>
 														</div>
 													) : isDemo ? (
 														<div>
 															<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-800 border border-purple-200">
 																<Eye size={13} className="text-purple-700" />
-																<span>Mode Démo (Lecture seule)</span>
+																<span>Démo</span>
 															</span>
-															<p className="text-[11px] text-purple-600/80 mt-1 font-medium">Présentation commerciale, modifications bloquées</p>
+															<p className="text-[11px] text-purple-600/80 mt-1 font-medium">Présentation commerciale en lecture seule</p>
 														</div>
 													) : (
 														<div>
-															<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-deep-teal-50 text-deep-teal-800 border border-deep-teal-200">
-																<UserCheck size={13} className="text-deep-teal-700" />
-																<span>Employé (Accès restreint)</span>
+															<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-secondary text-secondary-foreground border border-border">
+																<UserCheck size={13} className="text-secondary-foreground" />
+																<span>Employé</span>
 															</span>
 															<div className="flex flex-wrap gap-1 mt-1.5">
 																<span className="text-[10px] font-semibold bg-stone-100 text-stone-600 px-2 py-0.5 rounded">Planning</span>
@@ -752,6 +791,7 @@ export default function DiamantRightsPanel() {
 														onClick={() => handleOpenEditMember(member)}
 														className="p-1.5 rounded-lg border border-stone-200 text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors"
 														title="Modifier les informations ou le mot de passe"
+														aria-label={`Modifier le compte de ${member.name}`}
 													>
 														<Pencil size={15} />
 													</button>
@@ -760,18 +800,20 @@ export default function DiamantRightsPanel() {
 														onClick={() => handleToggleMemberStatus(member)}
 														className="p-1.5 rounded-lg border border-stone-200 text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors"
 														title={member.status === 'active' ? 'Suspendre cet accès' : 'Réactiver cet accès'}
+														aria-label={`${member.status === 'active' ? 'Suspendre' : 'Réactiver'} l'accès de ${member.name}`}
 													>
 														{member.status === 'active' ? <Lock size={15} /> : <Unlock size={15} />}
 													</button>
 													<button
 														type="button"
-														onClick={() => setDeleteConfirm({ 
-															type: 'member', 
-															id: member.id, 
-															name: `${member.name} (${isAdmin ? 'Administrateur' : isDemo ? 'Compte Démo' : 'Employé'})` 
-														})}
+														onClick={() => { if (!checkReadOnly()) setDeleteConfirm({
+															type: 'member',
+															id: member.id,
+															name: `${member.name} (${isAdmin ? 'administrateur' : isDemo ? 'compte démo' : 'employé'})`
+														}); }}
 														className="p-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors"
 														title={isAdmin ? 'Supprimer ce compte administrateur' : 'Supprimer ce compte'}
+														aria-label={`Supprimer le compte de ${member.name}`}
 													>
 														<Trash2 size={15} />
 													</button>
@@ -792,9 +834,9 @@ export default function DiamantRightsPanel() {
 				<div className="space-y-6">
 					<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 						<div>
-							<h3 className="text-xl font-bold text-stone-900 tracking-tight">Modération & Gestion des Comptes Clients</h3>
+							<h3 className="text-xl font-bold text-stone-900 tracking-tight">Comptes clients et modération</h3>
 							<p className="text-xs text-stone-500 mt-1">
-								Bannissez les clients en cas d'absences répétées ou d'impayés, empêchant toute nouvelle réservation, ou supprimez définitivement un compte.
+								Un client banni ne peut plus réserver en ligne. La suppression d'un compte est définitive.
 							</p>
 						</div>
 
@@ -803,11 +845,11 @@ export default function DiamantRightsPanel() {
 								type="button"
 								onClick={handleRefreshClients}
 								disabled={isSyncing}
-								className="px-3.5 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-700 hover:text-deep-teal-700 hover:border-deep-teal-300 hover:bg-deep-teal-50 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+								className="px-3.5 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-700 hover:text-stone-900 hover:border-stone-300 hover:bg-stone-50 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
 								title="Recharger la liste des clients inscrits pour la démo Diamant"
 							>
-								<RefreshCw size={13} className={isSyncing ? 'animate-spin text-deep-teal-600' : 'text-stone-500'} />
-								<span>{isSyncing ? 'Synchronisation...' : 'Actualiser'}</span>
+								<RefreshCw size={13} className={isSyncing ? 'animate-spin text-primary' : 'text-stone-500'} />
+								<span>{isSyncing ? 'Synchronisation…' : 'Actualiser'}</span>
 							</button>
 
 							{/* Filtres de statut */}
@@ -815,6 +857,7 @@ export default function DiamantRightsPanel() {
 								<button
 									type="button"
 									onClick={() => setClientFilter('all')}
+									aria-pressed={clientFilter === 'all'}
 									className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
 										clientFilter === 'all' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-500'
 									}`}
@@ -824,20 +867,22 @@ export default function DiamantRightsPanel() {
 								<button
 									type="button"
 									onClick={() => setClientFilter('active')}
+									aria-pressed={clientFilter === 'active'}
 									className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
 										clientFilter === 'active' ? 'bg-white text-emerald-700 shadow-xs' : 'text-stone-500'
 									}`}
 								>
-									Actifs ({clients.length - Object.keys(bannedClients).length})
+									Actifs ({clients.length - bannedCount})
 								</button>
 								<button
 									type="button"
 									onClick={() => setClientFilter('banned')}
+									aria-pressed={clientFilter === 'banned'}
 									className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
 										clientFilter === 'banned' ? 'bg-white text-rose-700 shadow-xs' : 'text-stone-500'
 									}`}
 								>
-									Bannis ({Object.keys(bannedClients).length})
+									Bannis ({bannedCount})
 								</button>
 							</div>
 						</div>
@@ -850,19 +895,20 @@ export default function DiamantRightsPanel() {
 							type="text"
 							value={clientSearch}
 							onChange={e => setClientSearch(e.target.value)}
-							placeholder="Rechercher par nom, téléphone, email..."
-							className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-stone-200 focus:border-deep-teal-500 focus:ring-2 focus:ring-deep-teal-500/20 focus:outline-none text-sm transition-all shadow-xs"
+							placeholder="Rechercher par nom, téléphone, email…"
+							aria-label="Rechercher un client"
+							className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-stone-200 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none text-sm transition-all shadow-xs"
 						/>
 					</div>
 
 					{/* Liste des clients */}
-					<div className="rounded-2xl border border-stone-200 bg-white overflow-hidden shadow-xs">
-						<table className="w-full text-left text-sm">
+					<div className="rounded-2xl border border-stone-200 bg-white overflow-x-auto shadow-xs">
+						<table className={`w-full text-left text-sm ${filteredClients.length ? 'min-w-[44rem]' : ''}`}>
 							<thead className="bg-stone-50 text-xs uppercase font-bold text-stone-400 border-b border-stone-100">
 								<tr>
 									<th className="px-5 py-3.5">Client</th>
 									<th className="px-5 py-3.5">Coordonnées</th>
-									<th className="px-5 py-3.5">Statut du Compte</th>
+									<th className="px-5 py-3.5">Statut</th>
 									<th className="px-5 py-3.5 text-right">Actions</th>
 								</tr>
 							</thead>
@@ -912,7 +958,7 @@ export default function DiamantRightsPanel() {
 														<div>
 															<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
 																<XCircle size={13} />
-																<span>Banni / Bloqué</span>
+																<span>Banni</span>
 															</span>
 															<p className="text-[11px] text-rose-600 font-medium mt-1">
 																Motif : {banInfo.reason}
@@ -921,7 +967,7 @@ export default function DiamantRightsPanel() {
 													) : (
 														<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
 															<CheckCircle2 size={13} />
-															<span>Compte Actif</span>
+															<span>Actif</span>
 														</span>
 													)}
 												</td>
@@ -930,7 +976,7 @@ export default function DiamantRightsPanel() {
 														<button
 															type="button"
 															onClick={() => handleOpenEditClient(client)}
-															className="px-2.5 py-1.5 rounded-lg border border-stone-200 text-stone-700 hover:text-deep-teal-700 hover:border-deep-teal-300 hover:bg-deep-teal-50 text-xs font-bold transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
+															className="px-2.5 py-1.5 rounded-lg border border-stone-200 text-stone-700 hover:text-stone-900 hover:border-stone-300 hover:bg-stone-50 text-xs font-bold transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
 															title="Modifier les coordonnées du client"
 														>
 															<Pencil size={13} />
@@ -948,7 +994,7 @@ export default function DiamantRightsPanel() {
 														) : (
 															<button
 																type="button"
-																onClick={() => setBanModalClient(client)}
+																onClick={() => { if (!checkReadOnly()) setBanModalClient(client); }}
 																className="px-3 py-1.5 rounded-lg border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-bold transition-all cursor-pointer shadow-2xs"
 															>
 																Bannir
@@ -957,9 +1003,10 @@ export default function DiamantRightsPanel() {
 
 														<button
 															type="button"
-															onClick={() => setDeleteConfirm({ type: 'client', id: client.id, name: client.full_name || 'Client' })}
+															onClick={() => { if (!checkReadOnly()) setDeleteConfirm({ type: 'client', id: client.id, name: client.full_name || 'Client' }); }}
 															className="p-1.5 rounded-lg border border-stone-200 text-stone-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-colors cursor-pointer"
 															title="Supprimer définitivement ce compte client"
+															aria-label={`Supprimer le compte de ${client.full_name || 'ce client'}`}
 														>
 															<Trash2 size={15} />
 														</button>
@@ -979,175 +1026,38 @@ export default function DiamantRightsPanel() {
 			{activeTab === 'matrix' && (
 				<div className="space-y-6">
 					<div>
-						<h3 className="text-xl font-bold text-stone-900 tracking-tight">Matrice des Permissions & Rôles (RBAC)</h3>
+						<h3 className="text-xl font-bold text-stone-900 tracking-tight">Permissions par rôle</h3>
 						<p className="text-xs text-stone-500 mt-1">
-							Tableau comparatif des droits d'accès stricts configurés pour la plateforme.
+							Ce que chaque rôle peut voir et modifier dans l'espace pro.
 						</p>
 					</div>
 
-					<div className="rounded-2xl border border-stone-200 bg-white overflow-hidden shadow-xs">
-						<table className="w-full text-left text-sm">
+					<div className="rounded-2xl border border-stone-200 bg-white overflow-x-auto shadow-xs">
+						<table className="w-full min-w-[48rem] text-left text-sm">
 							<thead className="bg-stone-50 text-xs uppercase font-bold text-stone-400 border-b border-stone-100">
 								<tr>
-									<th className="px-5 py-3.5">Module / Onglet</th>
-									<th className="px-5 py-3.5">Administrateur (Gérant)</th>
-									<th className="px-5 py-3.5">Employé</th>
-									<th className="px-5 py-3.5">Règle de Sécurité</th>
+									<th scope="col" className="px-5 py-3.5">Onglet</th>
+									<th scope="col" className="px-5 py-3.5">Administrateur</th>
+									<th scope="col" className="px-5 py-3.5">Employé</th>
+									<th scope="col" className="px-5 py-3.5">Démo</th>
+									<th scope="col" className="px-5 py-3.5">Pourquoi</th>
 								</tr>
 							</thead>
 							<tbody className="divide-y divide-stone-100 text-xs">
-								<tr>
-									<td className="px-5 py-3.5 font-bold text-stone-900 flex items-center gap-2">
-										<Calendar size={15} className="text-deep-teal-600" />
-										<span>Planning & Rendez-vous</span>
-									</td>
-									<td className="px-5 py-3.5">
-										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
-											<Check size={14} />
-											<span>Accès total (Lecture / Écriture)</span>
-										</span>
-									</td>
-									<td className="px-5 py-3.5">
-										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
-											<Check size={14} />
-											<span>Accès total (Prise & modif RDV)</span>
-										</span>
-									</td>
-									<td className="px-5 py-3.5 text-stone-500">Nécessaire à l'activité quotidienne du salon</td>
-								</tr>
-								<tr>
-									<td className="px-5 py-3.5 font-bold text-stone-900 flex items-center gap-2">
-										<User size={15} className="text-deep-teal-600" />
-										<span>Fiches Clientèle & Notes</span>
-									</td>
-									<td className="px-5 py-3.5">
-										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
-											<Check size={14} />
-											<span>Accès total</span>
-										</span>
-									</td>
-									<td className="px-5 py-3.5">
-										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
-											<Check size={14} />
-											<span>Accès total</span>
-										</span>
-									</td>
-									<td className="px-5 py-3.5 text-stone-500">Pour consulter l'historique et notes techniques</td>
-								</tr>
-								<tr>
-									<td className="px-5 py-3.5 font-bold text-stone-900 flex items-center gap-2">
-										<MessageSquare size={15} className="text-deep-teal-600" />
-										<span>Messagerie Directe</span>
-									</td>
-									<td className="px-5 py-3.5">
-										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
-											<Check size={14} />
-											<span>Accès total</span>
-										</span>
-									</td>
-									<td className="px-5 py-3.5">
-										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
-											<Check size={14} />
-											<span>Accès total</span>
-										</span>
-									</td>
-									<td className="px-5 py-3.5 text-stone-500">Pour échanger en direct avec la clientèle</td>
-								</tr>
-								<tr>
-									<td className="px-5 py-3.5 font-bold text-stone-900 flex items-center gap-2">
-										<Search size={15} className="text-deep-teal-600" />
-										<span>Moteur de Recherche</span>
-									</td>
-									<td className="px-5 py-3.5">
-										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
-											<Check size={14} />
-											<span>Accès total</span>
-										</span>
-									</td>
-									<td className="px-5 py-3.5">
-										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
-											<Check size={14} />
-											<span>Accès total</span>
-										</span>
-									</td>
-									<td className="px-5 py-3.5 text-stone-500">Recherche rapide de réservations et clients</td>
-								</tr>
-								<tr className="bg-stone-50/40">
-									<td className="px-5 py-3.5 font-bold text-stone-900 flex items-center gap-2">
-										<Settings size={15} className="text-amber-600" />
-										<span>Profil Maison (Coordonnées/Infos)</span>
-									</td>
-									<td className="px-5 py-3.5">
-										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
-											<Check size={14} />
-											<span>Modification autorisée</span>
-										</span>
-									</td>
-									<td className="px-5 py-3.5">
-										<span className="inline-flex items-center gap-1 text-amber-700 font-bold">
-											<Lock size={14} />
-											<span>Lecture seule verrouillée</span>
-										</span>
-									</td>
-									<td className="px-5 py-3.5 text-amber-800 font-medium">L'employé ne peut pas modifier les données de l'établissement</td>
-								</tr>
-								<tr className="bg-stone-50/40">
-									<td className="px-5 py-3.5 font-bold text-stone-900 flex items-center gap-2">
-										<Scissors size={15} className="text-rose-600" />
-										<span>Gestion des Prestations & Prix</span>
-									</td>
-									<td className="px-5 py-3.5">
-										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
-											<Check size={14} />
-											<span>Ajout / Modif / Prix</span>
-										</span>
-									</td>
-									<td className="px-5 py-3.5">
-										<span className="inline-flex items-center gap-1 text-rose-700 font-bold">
-											<X size={14} />
-											<span>Masqué & Accès refusé</span>
-										</span>
-									</td>
-									<td className="px-5 py-3.5 text-stone-500">Tarification réservée au propriétaire</td>
-								</tr>
-								<tr className="bg-stone-50/40">
-									<td className="px-5 py-3.5 font-bold text-stone-900 flex items-center gap-2">
-										<BarChart3 size={15} className="text-rose-600" />
-										<span>Performances & Statistiques (CA)</span>
-									</td>
-									<td className="px-5 py-3.5">
-										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
-											<Check size={14} />
-											<span>Chiffre d'affaires & bilans</span>
-										</span>
-									</td>
-									<td className="px-5 py-3.5">
-										<span className="inline-flex items-center gap-1 text-rose-700 font-bold">
-											<X size={14} />
-											<span>Masqué & Accès refusé</span>
-										</span>
-									</td>
-									<td className="px-5 py-3.5 text-stone-500">Données financières confidentielles</td>
-								</tr>
-								<tr className="bg-stone-50/40">
-									<td className="px-5 py-3.5 font-bold text-stone-900 flex items-center gap-2">
-										<ShieldCheck size={15} className="text-rose-600" />
-										<span>Gestion des Droits & Comptes</span>
-									</td>
-									<td className="px-5 py-3.5">
-										<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
-											<Check size={14} />
-											<span>Gestion totale</span>
-										</span>
-									</td>
-									<td className="px-5 py-3.5">
-										<span className="inline-flex items-center gap-1 text-rose-700 font-bold">
-											<X size={14} />
-											<span>Masqué & Accès refusé</span>
-										</span>
-									</td>
-									<td className="px-5 py-3.5 text-stone-500">Réservé exclusivement à l'administrateur</td>
-								</tr>
+								{PERMISSION_ROWS.map((row) => (
+									<tr key={row.label}>
+										<th scope="row" className="px-5 py-3.5 font-bold text-stone-900">
+											<span className="flex items-center gap-2">
+												<row.icon size={15} className="text-primary shrink-0" />
+												<span>{row.label}</span>
+											</span>
+										</th>
+										<td className="px-5 py-3.5"><AccessCell access="full" label={row.admin} /></td>
+										<td className="px-5 py-3.5"><AccessCell access={row.employeeAccess} label={row.employee} /></td>
+										<td className="px-5 py-3.5 whitespace-nowrap"><AccessCell access="read" label="Lecture seule" /></td>
+										<td className="px-5 py-3.5 text-stone-500">{row.reason}</td>
+									</tr>
+								))}
 							</tbody>
 						</table>
 					</div>
@@ -1157,7 +1067,7 @@ export default function DiamantRightsPanel() {
 			{/* CHOIX DU TYPE DE COMPTE */}
 			{showCreateChooser && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4" onClick={() => setShowCreateChooser(false)}>
-					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
 						<div className="flex items-center justify-between pb-4 border-b border-stone-100">
 							<div>
 								<h4 className="font-bold text-stone-900 text-base">Créer un compte</h4>
@@ -1189,7 +1099,7 @@ export default function DiamantRightsPanel() {
 									<button
 										type="button"
 										onClick={goToClientSignup}
-										className="px-4 py-2 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-colors cursor-pointer"
+										className="px-4 py-2 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 transition-colors cursor-pointer"
 									>
 										Continuer vers l'inscription
 									</button>
@@ -1199,15 +1109,15 @@ export default function DiamantRightsPanel() {
 							<div className="pt-4 grid gap-2">
 								{([
 									{ key: 'client', label: 'Compte utilisateur', desc: 'Client du salon : réservations, fidélité, messagerie', icon: <User size={18} />, tone: 'bg-stone-100 text-stone-700' },
-									{ key: 'employee', label: 'Compte employé', desc: 'Accès limité aux 4 onglets opérationnels', icon: <UserPlus size={18} />, tone: 'bg-deep-teal-100 text-deep-teal-700' },
-									{ key: 'admin', label: 'Compte administrateur', desc: 'Accès intégral à tous les onglets et à la gestion', icon: <ShieldCheck size={18} />, tone: 'bg-amber-100 text-amber-700' },
+									{ key: 'employee', label: 'Compte employé', desc: 'Planning, clientèle, messagerie et recherche', icon: <UserPlus size={18} />, tone: 'bg-secondary text-secondary-foreground' },
+									{ key: 'admin', label: 'Compte administrateur', desc: 'Accès à tous les onglets et à la gestion', icon: <ShieldCheck size={18} />, tone: 'bg-amber-100 text-amber-700' },
 									{ key: 'demo', label: 'Compte démo', desc: 'Présentation commerciale en lecture seule', icon: <Eye size={18} />, tone: 'bg-purple-100 text-purple-700' },
 								] as const).map((option) => (
 									<button
 										key={option.key}
 										type="button"
 										onClick={() => (option.key === 'client' ? setConfirmClientSignup(true) : chooseAccountType(option.key))}
-										className="flex items-center gap-3 w-full rounded-xl border border-stone-200 p-3 text-left hover:border-deep-teal-300 hover:bg-stone-50 transition-colors cursor-pointer"
+										className="flex items-center gap-3 w-full rounded-xl border border-stone-200 p-3 text-left hover:border-stone-300 hover:bg-stone-50 transition-colors cursor-pointer"
 									>
 										<span className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center ${option.tone}`}>{option.icon}</span>
 										<span>
@@ -1225,7 +1135,7 @@ export default function DiamantRightsPanel() {
 			{/* MODAL AJOUT EMPLOYÉ / ADMIN / DÉMO */}
 			{showAddModal && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95">
+					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95" role="dialog" aria-modal="true">
 						<div className="flex items-center justify-between pb-4 border-b border-stone-100">
 							<div className="flex items-center gap-2.5">
 								<div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
@@ -1233,24 +1143,24 @@ export default function DiamantRightsPanel() {
 										? 'bg-amber-100 text-amber-700' 
 										: newMemberRole === 'demo'
 										? 'bg-purple-100 text-purple-700'
-										: 'bg-deep-teal-100 text-deep-teal-700'
+										: 'bg-secondary text-secondary-foreground'
 								}`}>
 									{newMemberRole === 'admin' ? <ShieldCheck size={18} /> : newMemberRole === 'demo' ? <Eye size={18} /> : <UserPlus size={18} />}
 								</div>
 								<div>
 									<h4 className="font-bold text-stone-900 text-base">
 										{newMemberRole === 'admin' 
-											? 'Nouveau Compte Administrateur' 
+											? 'Nouveau compte administrateur' 
 											: newMemberRole === 'demo' 
-											? 'Nouveau Compte Démo Commercial' 
-											: 'Nouveau Compte Employé'}
+											? 'Nouveau compte démo' 
+											: 'Nouveau compte employé'}
 									</h4>
 									<p className="text-xs text-stone-400">
 										{newMemberRole === 'admin' 
-											? 'Accès intégral à tous les onglets et gestion' 
+											? 'Accès à tous les onglets et à la gestion' 
 											: newMemberRole === 'demo'
-											? 'Présentation commerciale : vue totale sans modification'
-											: 'Accès limité aux 4 onglets opérationnels'}
+											? 'Présentation commerciale en lecture seule'
+											: 'Planning, clientèle, messagerie et recherche'}
 									</p>
 								</div>
 							</div>
@@ -1258,6 +1168,7 @@ export default function DiamantRightsPanel() {
 								type="button"
 								onClick={() => setShowAddModal(false)}
 								className="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg cursor-pointer"
+								aria-label="Fermer"
 							>
 								<X size={18} />
 							</button>
@@ -1265,78 +1176,80 @@ export default function DiamantRightsPanel() {
 
 						<form onSubmit={handleCreateMember} className="mt-4 space-y-4">
 							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+								<label htmlFor="rights-field-1" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
 									Nom complet *
 								</label>
-								<input
+								<input id="rights-field-1"
 									type="text"
 									required
 									value={newMemberName}
+									maxLength={MAX_NAME_LENGTH}
 									onChange={e => setNewMemberName(e.target.value)}
 									placeholder="Ex : Sarah Bernard"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
 								/>
 							</div>
 
 							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+								<label htmlFor="rights-field-2" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
 									Adresse email (identifiant de connexion) *
 								</label>
-								<input
+								<input id="rights-field-2"
 									type="email"
 									required
 									value={newMemberEmail}
 									onChange={e => setNewMemberEmail(e.target.value)}
 									placeholder="Ex : sarah@diamant-prestige.fr"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
 								/>
 							</div>
 
 							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+								<label htmlFor="rights-field-3" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
 									Mot de passe initial *
 								</label>
 								<div className="relative">
-									<input
+									<input id="rights-field-3"
 										type={showNewPassword ? 'text' : 'password'}
 										required
 										minLength={6}
 										value={newMemberPassword}
 										onChange={e => setNewMemberPassword(e.target.value)}
 										placeholder="Minimum 6 caractères"
-										className="w-full rounded-xl border border-stone-200 bg-stone-50 pl-3.5 pr-11 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+										className="w-full rounded-xl border border-stone-200 bg-stone-50 pl-3.5 pr-11 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
 									/>
 									<button
 										type="button"
 										onClick={() => setShowNewPassword(!showNewPassword)}
 										className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 p-1 rounded-md transition-colors cursor-pointer"
 										title={showNewPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+										aria-label={showNewPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
 									>
 										{showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
 									</button>
 								</div>
 								<p className="text-[11px] text-stone-400 mt-1">
-									Permettra de se connecter immédiatement sur la page de connexion.
+									Utilisable tout de suite sur la page de connexion.
 								</p>
 							</div>
 
 							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+								<label htmlFor="rights-field-4" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
 									Spécialité / Fonction
 								</label>
-								<input
+								<input id="rights-field-4"
 									type="text"
 									value={newMemberSpecialty}
 									onChange={e => setNewMemberSpecialty(e.target.value)}
 									placeholder={newMemberRole === 'admin' ? "Ex : Co-gérant / Responsable" : newMemberRole === 'demo' ? "Ex : Compte Découverte Visiteur" : "Ex : Experte Soins & Brushing"}
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
 								/>
 							</div>
 
 							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+								<p className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
 									Rôle assigné
-								</label>
+								</p>
 								<div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
 									<button
 										type="button"
@@ -1358,12 +1271,12 @@ export default function DiamantRightsPanel() {
 										onClick={() => setNewMemberRole('employee')}
 										className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
 											newMemberRole === 'employee' 
-												? 'border-deep-teal-500 bg-deep-teal-50/80 ring-1 ring-deep-teal-300' 
+												? 'border-primary bg-secondary/60 ring-1 ring-primary/40' 
 												: 'border-stone-200 hover:border-stone-300'
 										}`}
 									>
 										<div className="flex items-center gap-1.5 font-bold text-xs text-stone-900">
-											<UserCheck size={14} className="text-deep-teal-600" />
+											<UserCheck size={14} className="text-primary" />
 											<span>Employé</span>
 										</div>
 										<p className="text-[10px] text-stone-500 mt-0.5">4 onglets</p>
@@ -1401,14 +1314,14 @@ export default function DiamantRightsPanel() {
 											? 'bg-amber-600 hover:bg-amber-700' 
 											: newMemberRole === 'demo'
 											? 'bg-purple-600 hover:bg-purple-700'
-											: 'bg-deep-teal-600 hover:bg-deep-teal-700'
+											: 'bg-stone-900 hover:bg-stone-800'
 									}`}
 								>
 									{newMemberRole === 'admin' 
-										? 'Créer le compte Administrateur' 
+										? 'Créer le compte administrateur' 
 										: newMemberRole === 'demo'
-										? 'Créer le compte Démo (Lecture seule)'
-										: 'Créer le compte Employé'}
+										? 'Créer le compte démo'
+										: 'Créer le compte employé'}
 								</button>
 							</div>
 						</form>
@@ -1419,7 +1332,7 @@ export default function DiamantRightsPanel() {
 			{/* MODAL MODIFIER COMPTE (ADMIN / EMPLOYÉ / DÉMO) */}
 			{editMemberModal && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95">
+					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95" role="dialog" aria-modal="true">
 						<div className="flex items-center justify-between pb-4 border-b border-stone-100">
 							<div className="flex items-center gap-2.5">
 								<div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
@@ -1427,7 +1340,7 @@ export default function DiamantRightsPanel() {
 										? 'bg-amber-100 text-amber-700' 
 										: editMemberRole === 'demo'
 										? 'bg-purple-100 text-purple-700'
-										: 'bg-deep-teal-100 text-deep-teal-700'
+										: 'bg-secondary text-secondary-foreground'
 								}`}>
 									<Pencil size={18} />
 								</div>
@@ -1444,6 +1357,7 @@ export default function DiamantRightsPanel() {
 								type="button"
 								onClick={() => setEditMemberModal(null)}
 								className="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg cursor-pointer"
+								aria-label="Fermer"
 							>
 								<X size={18} />
 							</button>
@@ -1451,77 +1365,79 @@ export default function DiamantRightsPanel() {
 
 						<form onSubmit={handleSaveMemberSubmit} className="mt-4 space-y-4">
 							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+								<label htmlFor="rights-field-5" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
 									Nom complet *
 								</label>
-								<input
+								<input id="rights-field-5"
 									type="text"
 									required
 									value={editMemberName}
+									maxLength={MAX_NAME_LENGTH}
 									onChange={e => setEditMemberName(e.target.value)}
 									placeholder="Ex : Sarah Bernard"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
 								/>
 							</div>
 
 							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+								<label htmlFor="rights-field-6" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
 									Adresse email (identifiant de connexion) *
 								</label>
-								<input
+								<input id="rights-field-6"
 									type="email"
 									required
 									value={editMemberEmail}
 									onChange={e => setEditMemberEmail(e.target.value)}
 									placeholder="Ex : sarah@diamant-prestige.fr"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
 								/>
 							</div>
 
 							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+								<label htmlFor="rights-field-7" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
 									Nouveau mot de passe (optionnel)
 								</label>
 								<div className="relative">
-									<input
+									<input id="rights-field-7"
 										type={showEditPassword ? 'text' : 'password'}
 										minLength={6}
 										value={editMemberPassword}
 										onChange={e => setEditMemberPassword(e.target.value)}
 										placeholder="Laisser vide pour ne pas modifier"
-										className="w-full rounded-xl border border-stone-200 bg-stone-50 pl-3.5 pr-11 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+										className="w-full rounded-xl border border-stone-200 bg-stone-50 pl-3.5 pr-11 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
 									/>
 									<button
 										type="button"
 										onClick={() => setShowEditPassword(!showEditPassword)}
 										className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 p-1 rounded-md transition-colors cursor-pointer"
-										title={showEditPassword ? 'Masquer' : 'Afficher'}
+										title={showEditPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+										aria-label={showEditPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
 									>
 										{showEditPassword ? <EyeOff size={16} /> : <Eye size={16} />}
 									</button>
 								</div>
 								<p className="text-[11px] text-stone-400 mt-1">
-									Modifie le mot de passe de connexion utilisé sur la page /connexion.
+									Mot de passe utilisé sur la page de connexion.
 								</p>
 							</div>
 
 							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+								<label htmlFor="rights-field-8" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
 									Spécialité / Fonction
 								</label>
-								<input
+								<input id="rights-field-8"
 									type="text"
 									value={editMemberSpecialty}
 									onChange={e => setEditMemberSpecialty(e.target.value)}
 									placeholder="Ex : Co-gérant / Responsable"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
 								/>
 							</div>
 
 							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+								<p className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
 									Rôle assigné
-								</label>
+								</p>
 								<div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
 									<button
 										type="button"
@@ -1543,12 +1459,12 @@ export default function DiamantRightsPanel() {
 										onClick={() => setEditMemberRole('employee')}
 										className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
 											editMemberRole === 'employee' 
-												? 'border-deep-teal-500 bg-deep-teal-50/80 ring-1 ring-deep-teal-300' 
+												? 'border-primary bg-secondary/60 ring-1 ring-primary/40' 
 												: 'border-stone-200 hover:border-stone-300'
 										}`}
 									>
 										<div className="flex items-center gap-1.5 font-bold text-xs text-stone-900">
-											<UserCheck size={14} className="text-deep-teal-600" />
+											<UserCheck size={14} className="text-primary" />
 											<span>Employé</span>
 										</div>
 										<p className="text-[10px] text-stone-500 mt-0.5">4 onglets</p>
@@ -1582,10 +1498,10 @@ export default function DiamantRightsPanel() {
 								<button
 									type="submit"
 									disabled={isSavingMember}
-									className="px-5 py-2.5 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+									className="px-5 py-2.5 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
 								>
 									{isSavingMember ? (
-										<span>Enregistrement...</span>
+										<span>Enregistrement…</span>
 									) : (
 										<>
 											<Check size={14} />
@@ -1602,7 +1518,7 @@ export default function DiamantRightsPanel() {
 			{/* MODAL BANNIR CLIENT */}
 			{banModalClient && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95">
+					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95" role="dialog" aria-modal="true">
 						<div className="flex items-center gap-3 pb-4 border-b border-stone-100">
 							<div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center">
 								<AlertTriangle size={20} />
@@ -1619,13 +1535,13 @@ export default function DiamantRightsPanel() {
 							</p>
 
 							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+								<label htmlFor="rights-field-9" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
 									Motif de la sanction
 								</label>
-								<select
+								<select id="rights-field-9"
 									value={banReason}
 									onChange={e => setBanReason(e.target.value)}
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-xs focus:border-deep-teal-500 focus:outline-none"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-xs focus:border-primary focus:outline-none"
 								>
 									<option value="No-shows répétés (absences non prévenues)">No-shows répétés (absences non prévenues)</option>
 									<option value="Comportement inapproprié ou irrespectueux">Comportement inapproprié ou irrespectueux</option>
@@ -1641,8 +1557,9 @@ export default function DiamantRightsPanel() {
 										rows={2}
 										value={customBanReason}
 										onChange={e => setCustomBanReason(e.target.value)}
-										placeholder="Précisez la raison du bannissement..."
-										className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs focus:border-deep-teal-500 focus:outline-none"
+										placeholder="Précisez la raison du bannissement…"
+										aria-label="Motif personnalisé"
+										className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs focus:border-primary focus:outline-none"
 									/>
 								</div>
 							)}
@@ -1671,7 +1588,7 @@ export default function DiamantRightsPanel() {
 			{/* MODAL DE CONFIRMATION DE SUPPRESSION */}
 			{deleteConfirm && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-					<div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95">
+					<div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95" role="dialog" aria-modal="true">
 						<div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center mx-auto mb-3">
 							<Trash2 size={24} />
 						</div>
@@ -1703,10 +1620,10 @@ export default function DiamantRightsPanel() {
 			{/* MODAL MODIFICATION CLIENT */}
 			{editClientModal && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95">
+					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95" role="dialog" aria-modal="true">
 						<div className="flex items-center justify-between pb-4 border-b border-stone-100">
 							<div className="flex items-center gap-2.5">
-								<div className="w-9 h-9 rounded-xl bg-deep-teal-100 text-deep-teal-700 flex items-center justify-center">
+								<div className="w-9 h-9 rounded-xl bg-secondary text-secondary-foreground flex items-center justify-center">
 									<Pencil size={18} />
 								</div>
 								<div>
@@ -1718,6 +1635,7 @@ export default function DiamantRightsPanel() {
 								type="button"
 								onClick={() => setEditClientModal(null)}
 								className="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg cursor-pointer"
+								aria-label="Fermer"
 							>
 								<X size={18} />
 							</button>
@@ -1725,43 +1643,43 @@ export default function DiamantRightsPanel() {
 
 						<form onSubmit={handleSaveClientSubmit} className="mt-4 space-y-4">
 							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+								<label htmlFor="rights-field-10" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
 									Nom complet *
 								</label>
-								<input
+								<input id="rights-field-10"
 									type="text"
 									required
 									value={editFullName}
 									maxLength={MAX_NAME_LENGTH}
 									onChange={e => setEditFullName(e.target.value)}
 									placeholder="Ex : Sophie Martin"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
 								/>
 							</div>
 
 							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Numéro de téléphone
+								<label htmlFor="rights-field-11" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+									Téléphone
 								</label>
-								<input
+								<input id="rights-field-11"
 									type="tel"
 									value={editPhone}
 									onChange={e => setEditPhone(e.target.value)}
 									placeholder="Ex : 06 12 34 56 78"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
 								/>
 							</div>
 
 							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Adresse Email
+								<label htmlFor="rights-field-12" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
+									Adresse email
 								</label>
-								<input
+								<input id="rights-field-12"
 									type="email"
 									value={editEmail}
 									onChange={e => setEditEmail(e.target.value)}
 									placeholder="Ex : sophie.martin@email.com"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
 								/>
 							</div>
 
@@ -1776,10 +1694,10 @@ export default function DiamantRightsPanel() {
 								<button
 									type="submit"
 									disabled={isSavingClient}
-									className="px-5 py-2.5 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+									className="px-5 py-2.5 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
 								>
 									{isSavingClient ? (
-										<span>Enregistrement...</span>
+										<span>Enregistrement…</span>
 									) : (
 										<>
 											<Check size={14} />

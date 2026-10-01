@@ -20,12 +20,15 @@ interface DiamantDashboardNavProps {
 }
 
 export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavProps) {
-	const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+	// Lus après le montage : le rendu serveur n'a ni l'URL du client ni le localStorage
+	const [currentPath, setCurrentPath] = React.useState('');
 	const [unreadCount, setUnreadCount] = React.useState(0);
 	const [role, setRole] = React.useState<ProRole>('admin');
-	const [proUser, setProUser] = React.useState(getProSession());
+	const [proUser, setProUser] = React.useState<ReturnType<typeof getProSession>>(null);
 
 	React.useEffect(() => {
+		setCurrentPath(window.location.pathname);
+		setProUser(getProSession());
 		setRole(getActiveProRole());
 
 		async function checkUnread() {
@@ -70,7 +73,7 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 
 		// Si l'utilisateur est sur une page interdite à l'employé, on le redirige vers le planning
 		if (newRole === 'employee') {
-			const forbidden = ['/dashboard/services', '/dashboard/statistiques', '/dashboard/droits', `${basePath}/dashboard`];
+			const forbidden = ['/dashboard/services', '/dashboard/statistiques', '/dashboard/droits', '/dashboard'].map(p => `${basePath}${p}`);
 			const isForbidden = forbidden.some(p => currentPath === p || currentPath === `${p}/`);
 			if (isForbidden) {
 				window.location.href = `${basePath}/dashboard/disponibilites`;
@@ -122,7 +125,7 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 							? 'bg-amber-100 text-amber-800 border-amber-200' 
 							: role === 'demo'
 							? 'bg-purple-100 text-purple-800 border-purple-200'
-							: 'bg-deep-teal-100 text-deep-teal-800 border-deep-teal-200'
+							: 'bg-secondary text-secondary-foreground border-border'
 					}`}>
 						{role === 'admin' ? 'Gérant' : role === 'demo' ? 'Mode Démo' : 'Employé'}
 					</span>
@@ -145,7 +148,7 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 						onClick={() => handleSwitchRole('employee')}
 						className={`py-1 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
 							role === 'employee' 
-								? 'bg-deep-teal-600 text-white shadow-2xs' 
+								? 'bg-white text-stone-900 shadow-2xs'
 								: 'text-stone-500 hover:text-stone-900'
 						}`}
 						title="Accès Employé opérationnel"
@@ -190,16 +193,17 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 					<a
 						key={link.href}
 						href={link.href}
+						aria-current={isActive ? 'page' : undefined}
 						className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
 							isActive
-								? 'bg-deep-teal-50 text-deep-teal-700 border border-deep-teal-200 shadow-2xs'
+								? 'bg-secondary text-secondary-foreground border border-border shadow-2xs'
 								: 'text-stone-600 hover:bg-stone-50 hover:text-stone-900 border border-transparent'
 						}`}
 					>
-						<Icon size={17} className={isActive ? 'text-deep-teal-500' : 'text-stone-400'} />
+						<Icon size={17} className={isActive ? 'text-primary' : 'text-stone-400'} />
 						<span className="flex-1">{link.label}</span>
 						{link.badge && link.badge > 0 ? (
-							<span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-deep-teal-600 text-white shadow-2xs animate-pulse">
+							<span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-stone-900 text-white shadow-2xs">
 								{link.badge}
 							</span>
 						) : null}
