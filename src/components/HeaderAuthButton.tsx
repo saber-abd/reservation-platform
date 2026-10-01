@@ -1,5 +1,6 @@
 /**
- * HeaderAuthButton — composant React client:load.
+ * HeaderAuthButton — composant React hydraté en client:visible : seule l'instance
+ * réellement affichée (header desktop ou menu mobile) s'hydrate et ouvre une session Supabase.
  * Affiche soit :
  * - L'avatar + prénom de l'utilisateur connecté (avec menu déconnexion)
  * - Un bouton "Connexion / Inscription" si non connecté

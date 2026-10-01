@@ -43,7 +43,7 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 					</a>
 				)}
 				<div class="theme-auto">
-					<HeaderAuthButton client:load basePath={basePath} />
+					<HeaderAuthButton client:visible basePath={basePath} />
 				</div>
 			</div>
 
@@ -78,7 +78,7 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 					</a>
 				)}
 				<div class="theme-auto">
-					<HeaderAuthButton client:load basePath={basePath} />
+					<HeaderAuthButton client:visible basePath={basePath} />
 				</div>
 			</div>
 		</nav>

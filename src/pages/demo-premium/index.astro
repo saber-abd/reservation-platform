@@ -15,9 +15,9 @@ const basePath = Astro.url.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '';
 >
 	<AutoHero basePath={basePath} client:load />
 	
-	<AutoStats client:load />
+	<AutoStats client:visible />
 
-	<AutoServicesGrid basePath={basePath} client:load />
+	<AutoServicesGrid basePath={basePath} client:visible />
 
 	{/* Section d'Appel à l'Action finale */}
 	<section class="relative py-24 bg-stone-950 border-t border-stone-800 overflow-hidden">

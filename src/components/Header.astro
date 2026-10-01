@@ -43,7 +43,7 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 						← Retour
 					</a>
 				)}
-				<HeaderAuthButton client:load basePath={basePath} />
+				<HeaderAuthButton client:visible basePath={basePath} />
 			</div>
 
 			<!-- Mobile Menu Toggle -->
@@ -76,7 +76,7 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 						← Retour au Portfolio
 					</a>
 				)}
-				<HeaderAuthButton client:load basePath={basePath} />
+				<HeaderAuthButton client:visible basePath={basePath} />
 			</div>
 		</nav>
 	</div>
