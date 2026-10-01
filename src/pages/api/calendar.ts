@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { SignJWT, importPKCS8 } from 'jose';
+import { getServerEnv } from '@/lib/server/env';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
 	try {
@@ -50,12 +51,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 		const body = await request.json();
 		const { title, description, start_time, end_time } = body;
 
-		const clientEmail = import.meta.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-		const rawPrivateKey = import.meta.env.GOOGLE_PRIVATE_KEY;
-		const calendarId = import.meta.env.GOOGLE_CALENDAR_ID;
+		const clientEmail = getServerEnv('GOOGLE_SERVICE_ACCOUNT_EMAIL');
+		const rawPrivateKey = getServerEnv('GOOGLE_PRIVATE_KEY');
+		const calendarId = getServerEnv('GOOGLE_CALENDAR_ID');
 
 		if (!clientEmail || !rawPrivateKey || !calendarId) {
-			return new Response(JSON.stringify({ error: 'Google Calendar credentials are not configured in .env' }), {
+			return new Response(JSON.stringify({ error: 'Google Calendar credentials are not configured on the server' }), {
 				status: 500,
 				headers: { 'Content-Type': 'application/json' },
 			});
