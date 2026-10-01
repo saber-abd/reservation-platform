@@ -246,7 +246,7 @@ export default function DiamantClientProfile() {
 					</button>
 				</div>
 				
-				<h2 className="text-2xl font-bold text-stone-900 mb-1">{displayName}</h2>
+				<h2 className="text-2xl font-bold text-stone-900 mb-1 break-words">{displayName}</h2>
 				<p className="text-deep-teal-600 text-xs font-bold uppercase tracking-widest mb-6">
 					{memberSince ? `Membre depuis ${memberSince}` : 'Compte Client'}
 				</p>

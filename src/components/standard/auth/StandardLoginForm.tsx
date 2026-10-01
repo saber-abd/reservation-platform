@@ -80,8 +80,8 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 						}
 						if (ban) {
 							await supabase.auth.signOut();
-							localStorage.removeItem('diamant_client_avatar');
-							localStorage.removeItem('diamant_client_email');
+							localStorage.removeItem('standard_client_avatar');
+							localStorage.removeItem('standard_client_email');
 							setError(`Connexion refusée : votre compte est suspendu par l'établissement. Motif : « ${ban.reason} ». L'accès à votre espace client et aux réservations est bloqué.`);
 							return;
 						}
@@ -101,11 +101,11 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 
 		// Save user email to cache & map for consistent ban and pro lookup
 		if (typeof window !== 'undefined' && user.email) {
-			localStorage.setItem('diamant_client_email', user.email);
+			localStorage.setItem('standard_client_email', user.email);
 			try {
-				const map = JSON.parse(localStorage.getItem('diamant_client_emails') || '{}');
+				const map = JSON.parse(localStorage.getItem('standard_client_emails') || '{}');
 				map[user.id] = user.email;
-				localStorage.setItem('diamant_client_emails', JSON.stringify(map));
+				localStorage.setItem('standard_client_emails', JSON.stringify(map));
 			} catch (e) {}
 		}
 
@@ -135,8 +135,8 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 		}
 		if (ban) {
 			await supabase.auth.signOut();
-			localStorage.removeItem('diamant_client_avatar');
-			localStorage.removeItem('diamant_client_email');
+			localStorage.removeItem('standard_client_avatar');
+			localStorage.removeItem('standard_client_email');
 			setError(`Connexion refusée : votre compte a été suspendu par l'établissement. Motif : « ${ban.reason} ». L'accès à votre espace client et aux réservations est bloqué.`);
 			return;
 		}

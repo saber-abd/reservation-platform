@@ -26,6 +26,8 @@ const DEFAULT_TEAM_MEMBERS: TeamMember[] = [];
 
 export function getActiveProRole(): ProRole {
 	if (typeof window === 'undefined') return 'admin';
+	// Les rôles (admin / employé / démo) n'existent que dans la démo Diamant : les autres démos restent en admin.
+	if (!window.location.pathname.startsWith('/demo-diamant')) return 'admin';
 	const saved = localStorage.getItem('pro_active_role');
 	if (saved === 'employee' || saved === 'admin' || saved === 'demo') return saved;
 	return 'admin';

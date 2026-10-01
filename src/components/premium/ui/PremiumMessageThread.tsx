@@ -16,7 +16,7 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 	const bottomRef = useRef<HTMLDivElement>(null);
 
 	function getStorageKey(pid: string, cid: string) {
-		return `diamant_messages_${pid}_${cid}`;
+		return `premium_messages_${pid}_${cid}`;
 	}
 
 	useEffect(() => {
@@ -53,9 +53,9 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 			}
 		};
 
-		window.addEventListener('diamant:new-message', handleNewMsg);
+		window.addEventListener('premium:new-message', handleNewMsg);
 		return () => {
-			window.removeEventListener('diamant:new-message', handleNewMsg);
+			window.removeEventListener('premium:new-message', handleNewMsg);
 		};
 	}, [professionalId, clientId]);
 
@@ -79,7 +79,7 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 				localStorage.setItem(storageKey, JSON.stringify(next));
 
 				try {
-					const metaRaw = localStorage.getItem('diamant_conversations_meta');
+					const metaRaw = localStorage.getItem('premium_conversations_meta');
 					const meta = metaRaw ? JSON.parse(metaRaw) : {};
 					if (!meta[clientId]) meta[clientId] = { id: clientId, full_name: 'Client' };
 					meta[clientId].last_message = text;
@@ -89,10 +89,10 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 					} else {
 						meta[clientId].unread_by_pro = 0;
 					}
-					localStorage.setItem('diamant_conversations_meta', JSON.stringify(meta));
+					localStorage.setItem('premium_conversations_meta', JSON.stringify(meta));
 				} catch (e) {}
 
-				window.dispatchEvent(new CustomEvent('diamant:new-message', {
+				window.dispatchEvent(new CustomEvent('premium:new-message', {
 					detail: { professionalId, clientId, message: created }
 				}));
 			}

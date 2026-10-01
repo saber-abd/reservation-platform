@@ -602,9 +602,9 @@ export default function DiamantMessenger({ isPro }: Props) {
 								<div className="w-10 h-10 rounded-full bg-deep-teal-100 flex items-center justify-center border border-deep-teal-200 text-deep-teal-700 group-hover:border-deep-teal-400 group-hover:scale-105 transition-all">
 									<User size={20} />
 								</div>
-								<div>
-									<div className="flex items-center gap-2">
-										<h2 className="text-stone-900 font-bold text-base group-hover:text-deep-teal-600 transition-colors">
+								<div className="min-w-0">
+									<div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+										<h2 className="text-stone-900 font-bold text-base break-words group-hover:text-deep-teal-600 transition-colors">
 											{activeClient?.full_name || 'Client'}
 										</h2>
 										<span className="text-[10px] bg-stone-100 text-stone-600 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider group-hover:bg-deep-teal-50 group-hover:text-deep-teal-700 transition-colors">

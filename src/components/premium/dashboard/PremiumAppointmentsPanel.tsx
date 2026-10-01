@@ -67,8 +67,8 @@ function AppointmentDetailModal({
 				<dl className="mt-4 space-y-3 text-sm">
 					<div>
 						<dt className="text-xs font-bold tracking-wider uppercase text-stone-400">Client</dt>
-						<dd className="font-medium text-stone-900">{appointment.client_name}</dd>
-						<dd className="text-stone-500">{appointment.client_email}</dd>
+						<dd className="font-medium text-stone-900 break-words">{appointment.client_name}</dd>
+						<dd className="text-stone-500 break-all">{appointment.client_email}</dd>
 						{appointment.client_phone && <dd className="text-stone-500">{appointment.client_phone}</dd>}
 					</div>
 					<div>
@@ -254,9 +254,9 @@ export default function AppointmentsPanel() {
 								onClick={() => setSelectedAppointment(appointment)}
 								className="cursor-pointer hover:bg-stone-50 transition-colors"
 							>
-								<td className="px-6 py-4">
-									<p className="font-bold text-stone-900">{appointment.client_name}</p>
-									<p className="text-xs text-stone-500 mt-1">{appointment.client_email}</p>
+								<td className="px-6 py-4 max-w-[16rem] sm:max-w-xs">
+									<p className="font-bold text-stone-900 break-words">{appointment.client_name}</p>
+									<p className="text-xs text-stone-500 mt-1 break-all">{appointment.client_email}</p>
 								</td>
 								<td className="px-6 py-4 text-stone-600 font-medium">{formatDate(appointment.start_time)}</td>
 								<td className="px-6 py-4">

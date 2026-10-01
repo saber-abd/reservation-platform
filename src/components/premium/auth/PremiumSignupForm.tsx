@@ -7,9 +7,10 @@ import { createClient, getDemoTag } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { getBannedClientRecord, checkIsClientBannedInDb } from '@/lib/permissions';
 import CompleteProfileForm from '@/components/premium/auth/PremiumCompleteProfileForm';
+import { MAX_NAME_LENGTH } from '@/lib/limits';
 
 const baseSchema = z.object({
-	fullName: z.string().min(2, 'Nom obligatoire'),
+	fullName: z.string().min(2, 'Nom obligatoire').max(MAX_NAME_LENGTH, `Nom trop long (${MAX_NAME_LENGTH} caractères maximum)`),
 });
 
 const fullSchema = baseSchema.extend({
@@ -77,8 +78,8 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 						}
 						if (ban) {
 							await supabase.auth.signOut();
-							localStorage.removeItem('diamant_client_avatar');
-							localStorage.removeItem('diamant_client_email');
+							localStorage.removeItem('premium_client_avatar');
+							localStorage.removeItem('premium_client_email');
 							setError(`Inscription ou accès impossible : ce compte est suspendu par l'établissement. Motif : « ${ban.reason} »`);
 							return;
 						}
@@ -144,8 +145,8 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 			}
 			if (ban) {
 				await supabase.auth.signOut();
-				localStorage.removeItem('diamant_client_avatar');
-				localStorage.removeItem('diamant_client_email');
+				localStorage.removeItem('premium_client_avatar');
+				localStorage.removeItem('premium_client_email');
 				setError(`Inscription refusée : compte suspendu par l'établissement. Motif : « ${ban.reason} »`);
 				return;
 			}
@@ -347,6 +348,7 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 					id="fullName"
 					className="mt-1 w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-rose-600 transition-colors"
 					{...register('fullName')}
+					maxLength={MAX_NAME_LENGTH}
 				/>
 				{errors.fullName && <p className="mt-1 text-xs text-destructive">{errors.fullName.message}</p>}
 			</div>

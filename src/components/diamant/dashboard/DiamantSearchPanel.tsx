@@ -146,8 +146,8 @@ export default function DiamantSearchPanel() {
 									className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-deep-teal-200 hover:shadow-md transition-all card-hover"
 								>
 									<div className="flex items-start justify-between gap-4 mb-4">
-										<div>
-											<p className="font-bold text-stone-900 text-base">{rdv.client_name}</p>
+										<div className="min-w-0">
+											<p className="font-bold text-stone-900 text-base break-words">{rdv.client_name}</p>
 											{rdv.services && (
 												<p className="text-deep-teal-600 text-sm font-medium mt-0.5">{rdv.services.name}</p>
 											)}

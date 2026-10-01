@@ -14,10 +14,10 @@ import {
 	type Appointment, 
 	type Professional 
 } from '@/lib/queries';
-import { DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
 import { isRoleReadOnly } from '@/lib/permissions';
 import MessageThread from '@/components/standard/ui/StandardMessageThread';
-import { User, Phone, Mail, Calendar, MessageSquare, Search, ExternalLink, ShieldCheck, Clock, FileText, Pencil, X, Check, Sparkles } from 'lucide-react';
+import { User, Phone, Mail, Calendar, MessageSquare, Search, ShieldCheck, Clock, FileText, Pencil, X, Check, Sparkles } from 'lucide-react';
+import { MAX_NAME_LENGTH } from '@/lib/limits';
 
 function ClientNoteCard({ professionalId, client }: { professionalId: string; client: Client }) {
 	const [note, setNote] = useState('');
@@ -55,7 +55,7 @@ function ClientNoteCard({ professionalId, client }: { professionalId: string; cl
 	return (
 		<div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-xs">
 			<div className="flex items-center gap-2 mb-1">
-				<FileText size={16} className="text-deep-teal-600" />
+				<FileText size={16} className="text-rose-600" />
 				<p className="text-sm font-bold text-stone-900">Note privée & Fiche technique</p>
 			</div>
 			<p className="text-xs text-stone-500">
@@ -67,14 +67,14 @@ function ClientNoteCard({ professionalId, client }: { professionalId: string; cl
 				disabled={loading}
 				onChange={(e) => setNote(e.target.value)}
 				placeholder="Ex : coloration 7.1 + 20vol, préfère le thé vert, allergie au latex..."
-				className="mt-3 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-deep-teal-500/20 transition-all placeholder:text-stone-400"
+				className="mt-3 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm focus:border-rose-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition-all placeholder:text-stone-400"
 			/>
 			<div className="mt-3 flex items-center justify-between">
 				<button
 					type="button"
 					onClick={handleSave}
 					disabled={saving || loading}
-					className="rounded-xl bg-deep-teal-600 px-4 py-2 text-xs font-bold text-white transition-all hover:bg-deep-teal-700 disabled:opacity-50 cursor-pointer shadow-2xs"
+					className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white transition-all hover:bg-rose-700 disabled:opacity-50 cursor-pointer shadow-2xs"
 				>
 					{saving ? 'Enregistrement...' : 'Enregistrer la note'}
 				</button>
@@ -237,8 +237,7 @@ export default function ClientsPanel() {
 				const effectiveProId = pro?.id || 'eff1f7ef-33ee-49a2-9e4f-52ab675a4dc7';
 
 				// 2. Charger l'ensemble complet des clients (BDD + RDV + messages + démo)
-				const extra = tag === 'diamant' ? DEMO_DIAMANT_CLIENTS : [];
-				const allClients = await getAllClients(effectiveProId, tag, extra);
+				const allClients = await getAllClients(effectiveProId, tag);
 
 				if (isMounted) {
 					setClients(allClients);
@@ -266,19 +265,9 @@ export default function ClientsPanel() {
 
 		loadData();
 
-		const onClientUpdated = (e: any) => {
-			const upd = e.detail?.client;
-			if (upd && isMounted) {
-				setClients(prev => prev.map(c => c.id === upd.id ? { ...c, ...upd } : c));
-				setSelectedClient(prev => prev && prev.id === upd.id ? { ...prev, ...upd } : prev);
-			}
-		};
-
-		window.addEventListener('diamant:client-updated', onClientUpdated);
 
 		return () => { 
 			isMounted = false;
-			window.removeEventListener('diamant:client-updated', onClientUpdated);
 		};
 	}, []);
 
@@ -292,8 +281,6 @@ export default function ClientsPanel() {
 			(c.email && c.email.toLowerCase().includes(q))
 		);
 	}, [clients, searchQuery]);
-
-	const basePath = typeof window !== 'undefined' ? (window.location.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '/demo-diamant') : '/demo-diamant';
 
 	if (loading) {
 		return (
@@ -324,7 +311,7 @@ export default function ClientsPanel() {
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
 							placeholder="Rechercher par nom, tél, email..."
-							className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-stone-50 border border-stone-200 focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all placeholder:text-stone-400"
+							className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-stone-50 border border-stone-200 focus:border-rose-500 focus:bg-white focus:outline-none transition-all placeholder:text-stone-400"
 						/>
 					</div>
 
@@ -346,13 +333,13 @@ export default function ClientsPanel() {
 									onClick={() => setSelectedClient(client)}
 									className={`w-full text-left p-3 rounded-xl flex items-center gap-3 transition-all cursor-pointer ${
 										isSelected
-											? 'border-deep-teal-500 bg-deep-teal-50/80 text-deep-teal-950 font-medium ring-1 ring-deep-teal-200 shadow-xs'
+											? 'border-rose-500 bg-rose-50/80 text-rose-950 font-medium ring-1 ring-rose-200 shadow-xs'
 											: 'border-stone-100 hover:border-stone-200 bg-stone-50/50 hover:bg-white text-stone-700'
 									} border`}
 								>
 									<div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-bold text-xs ${
 										isSelected 
-											? 'bg-deep-teal-600 text-white shadow-2xs' 
+											? 'bg-rose-600 text-white shadow-2xs' 
 											: 'bg-stone-200 text-stone-600'
 									}`}>
 										{client.avatar_url && client.avatar_url.startsWith('http') ? (
@@ -364,7 +351,7 @@ export default function ClientsPanel() {
 										)}
 									</div>
 									<div className="flex-1 min-w-0">
-										<p className={`font-bold text-sm truncate ${isSelected ? 'text-deep-teal-950' : 'text-stone-900'}`}>
+										<p className={`font-bold text-sm truncate ${isSelected ? 'text-rose-950' : 'text-stone-900'}`}>
 											{client.full_name || 'Client'}
 										</p>
 										<p className="text-xs text-stone-500 truncate mt-0.5">
@@ -384,8 +371,8 @@ export default function ClientsPanel() {
 							{/* Dossier client */}
 							<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-xs">
 								<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-stone-100">
-									<div className="flex items-center gap-4">
-										<div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-deep-teal-500 to-deep-teal-700 text-white flex items-center justify-center font-bold text-2xl shadow-sm overflow-hidden">
+									<div className="flex items-center gap-4 min-w-0">
+										<div className="w-16 h-16 shrink-0 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-700 text-white flex items-center justify-center font-bold text-2xl shadow-sm overflow-hidden">
 											{selectedClient.avatar_url && selectedClient.avatar_url.startsWith('http') ? (
 												<img src={selectedClient.avatar_url} alt="" className="w-full h-full object-cover" />
 											) : selectedClient.full_name ? (
@@ -394,12 +381,12 @@ export default function ClientsPanel() {
 												<User size={28} />
 											)}
 										</div>
-										<div>
-											<div className="flex items-center gap-2">
-												<h2 className="text-xl font-black text-stone-900 tracking-tight">
+										<div className="min-w-0">
+											<div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+												<h2 className="text-xl font-black text-stone-900 tracking-tight break-words">
 													{selectedClient.full_name || 'Client'}
 												</h2>
-												<span className="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-deep-teal-50 text-deep-teal-700 border border-deep-teal-200 uppercase tracking-wider">
+												<span className="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-200 uppercase tracking-wider">
 													Client Privilégié
 												</span>
 											</div>
@@ -419,33 +406,25 @@ export default function ClientsPanel() {
 										<button
 											type="button"
 											onClick={() => handleOpenEdit(selectedClient)}
-											className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-700 text-xs font-bold hover:bg-deep-teal-50 hover:border-deep-teal-300 hover:text-deep-teal-700 transition-all shadow-2xs cursor-pointer"
+											className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-700 text-xs font-bold hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700 transition-all shadow-2xs cursor-pointer"
 											title="Modifier les coordonnées du client"
 										>
 											<Pencil size={14} />
 											<span>Modifier la fiche</span>
 										</button>
-										<a
-											href={`${basePath}/dashboard/messages?clientId=${encodeURIComponent(selectedClient.id)}`}
-											className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-all shadow-xs"
-										>
-											<MessageSquare size={15} />
-											<span>Ouvrir dans la messagerie</span>
-											<ExternalLink size={13} />
-										</a>
 									</div>
 								</div>
 
 								{/* Grille des coordonnées */}
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
 									<div className="p-4 rounded-xl bg-stone-50 border border-stone-100 flex items-center gap-3">
-										<div className="w-10 h-10 rounded-xl bg-white border border-stone-200 flex items-center justify-center text-deep-teal-600 shrink-0">
+										<div className="w-10 h-10 rounded-xl bg-white border border-stone-200 flex items-center justify-center text-rose-600 shrink-0">
 											<Phone size={18} />
 										</div>
 										<div className="min-w-0">
 											<p className="text-xs font-medium text-stone-400 uppercase tracking-wider">Téléphone</p>
 											{selectedClient.phone ? (
-												<a href={`tel:${selectedClient.phone}`} className="text-sm font-bold text-stone-900 hover:text-deep-teal-600 transition-colors truncate block">
+												<a href={`tel:${selectedClient.phone}`} className="text-sm font-bold text-stone-900 hover:text-rose-600 transition-colors truncate block">
 													{selectedClient.phone}
 												</a>
 											) : (
@@ -455,13 +434,13 @@ export default function ClientsPanel() {
 									</div>
 
 									<div className="p-4 rounded-xl bg-stone-50 border border-stone-100 flex items-center gap-3">
-										<div className="w-10 h-10 rounded-xl bg-white border border-stone-200 flex items-center justify-center text-deep-teal-600 shrink-0">
+										<div className="w-10 h-10 rounded-xl bg-white border border-stone-200 flex items-center justify-center text-rose-600 shrink-0">
 											<Mail size={18} />
 										</div>
 										<div className="min-w-0">
 											<p className="text-xs font-medium text-stone-400 uppercase tracking-wider">Email</p>
 											{selectedClient.email ? (
-												<a href={`mailto:${selectedClient.email}`} className="text-sm font-bold text-stone-900 hover:text-deep-teal-600 transition-colors truncate block">
+												<a href={`mailto:${selectedClient.email}`} className="text-sm font-bold text-stone-900 hover:text-rose-600 transition-colors truncate block">
 													{selectedClient.email}
 												</a>
 											) : (
@@ -478,7 +457,7 @@ export default function ClientsPanel() {
 							{/* Historique des rendez-vous */}
 							<div>
 								<h3 className="text-base font-bold text-stone-900 mb-3 flex items-center gap-2">
-									<Clock size={18} className="text-deep-teal-600" />
+									<Clock size={18} className="text-rose-600" />
 									<span>Historique des réservations</span>
 								</h3>
 								<ClientAppointments clientId={selectedClient.id} />
@@ -488,16 +467,9 @@ export default function ClientsPanel() {
 							<div>
 								<div className="flex items-center justify-between mb-3">
 									<h3 className="text-base font-bold text-stone-900 flex items-center gap-2">
-										<MessageSquare size={18} className="text-deep-teal-600" />
+										<MessageSquare size={18} className="text-rose-600" />
 										<span>Fil de discussion direct</span>
 									</h3>
-									<a 
-										href={`${basePath}/dashboard/messages?clientId=${encodeURIComponent(selectedClient.id)}`}
-										className="text-xs font-bold text-deep-teal-600 hover:underline flex items-center gap-1"
-									>
-										<span>Mode plein écran</span>
-										<ExternalLink size={12} />
-									</a>
 								</div>
 								<MessageThread professionalId={professional.id} clientId={selectedClient.id} role="professional" />
 							</div>
@@ -530,7 +502,7 @@ export default function ClientsPanel() {
 					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95">
 						<div className="flex items-center justify-between pb-4 border-b border-stone-100">
 							<div className="flex items-center gap-2.5">
-								<div className="w-9 h-9 rounded-xl bg-deep-teal-100 text-deep-teal-700 flex items-center justify-center">
+								<div className="w-9 h-9 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center">
 									<Pencil size={18} />
 								</div>
 								<div>
@@ -556,9 +528,10 @@ export default function ClientsPanel() {
 									type="text"
 									required
 									value={editFullName}
+									maxLength={MAX_NAME_LENGTH}
 									onChange={e => setEditFullName(e.target.value)}
 									placeholder="Ex : Sophie Martin"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-rose-500 focus:bg-white focus:outline-none transition-all"
 								/>
 							</div>
 
@@ -571,7 +544,7 @@ export default function ClientsPanel() {
 									value={editPhone}
 									onChange={e => setEditPhone(e.target.value)}
 									placeholder="Ex : 06 12 34 56 78"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-rose-500 focus:bg-white focus:outline-none transition-all"
 								/>
 							</div>
 
@@ -584,7 +557,7 @@ export default function ClientsPanel() {
 									value={editEmail}
 									onChange={e => setEditEmail(e.target.value)}
 									placeholder="Ex : sophie.martin@email.com"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
+									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-rose-500 focus:bg-white focus:outline-none transition-all"
 								/>
 							</div>
 
@@ -599,7 +572,7 @@ export default function ClientsPanel() {
 								<button
 									type="submit"
 									disabled={isSavingClient}
-									className="px-5 py-2.5 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+									className="px-5 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
 								>
 									{isSavingClient ? (
 										<span>Enregistrement...</span>

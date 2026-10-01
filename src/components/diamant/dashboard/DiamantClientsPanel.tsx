@@ -18,6 +18,7 @@ import { DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
 import { isRoleReadOnly } from '@/lib/permissions';
 import MessageThread from '@/components/diamant/ui/DiamantMessageThread';
 import { User, Phone, Mail, Calendar, MessageSquare, Search, ExternalLink, ShieldCheck, Clock, FileText, Pencil, X, Check, Sparkles } from 'lucide-react';
+import { MAX_NAME_LENGTH } from '@/lib/limits';
 
 function ClientNoteCard({ professionalId, client }: { professionalId: string; client: Client }) {
 	const [note, setNote] = useState('');
@@ -384,8 +385,8 @@ export default function ClientsPanel() {
 							{/* Dossier client */}
 							<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-xs">
 								<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-stone-100">
-									<div className="flex items-center gap-4">
-										<div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-deep-teal-500 to-deep-teal-700 text-white flex items-center justify-center font-bold text-2xl shadow-sm overflow-hidden">
+									<div className="flex items-center gap-4 min-w-0">
+										<div className="w-16 h-16 shrink-0 rounded-2xl bg-gradient-to-br from-deep-teal-500 to-deep-teal-700 text-white flex items-center justify-center font-bold text-2xl shadow-sm overflow-hidden">
 											{selectedClient.avatar_url && selectedClient.avatar_url.startsWith('http') ? (
 												<img src={selectedClient.avatar_url} alt="" className="w-full h-full object-cover" />
 											) : selectedClient.full_name ? (
@@ -394,9 +395,9 @@ export default function ClientsPanel() {
 												<User size={28} />
 											)}
 										</div>
-										<div>
-											<div className="flex items-center gap-2">
-												<h2 className="text-xl font-black text-stone-900 tracking-tight">
+										<div className="min-w-0">
+											<div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+												<h2 className="text-xl font-black text-stone-900 tracking-tight break-words">
 													{selectedClient.full_name || 'Client'}
 												</h2>
 												<span className="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-deep-teal-50 text-deep-teal-700 border border-deep-teal-200 uppercase tracking-wider">
@@ -556,6 +557,7 @@ export default function ClientsPanel() {
 									type="text"
 									required
 									value={editFullName}
+									maxLength={MAX_NAME_LENGTH}
 									onChange={e => setEditFullName(e.target.value)}
 									placeholder="Ex : Sophie Martin"
 									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"

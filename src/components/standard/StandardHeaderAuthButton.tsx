@@ -83,7 +83,7 @@ export default function HeaderAuthButton({ basePath = '' }: { basePath?: string 
 				}
 
 				if (!avatarKey && typeof window !== 'undefined') {
-					const cached = localStorage.getItem('diamant_client_avatar');
+					const cached = localStorage.getItem('standard_client_avatar');
 					if (cached) avatarKey = cached;
 				}
 
@@ -119,18 +119,18 @@ export default function HeaderAuthButton({ basePath = '' }: { basePath?: string 
 				setUser((prev) => (prev ? { ...prev, avatarKey: newAvatar } : null));
 			}
 		}
-		window.addEventListener('diamant:avatar-changed', handleAvatarUpdate);
+		window.addEventListener('standard:avatar-changed', handleAvatarUpdate);
 
 		return () => {
 			cancelled = true;
 			subscription.unsubscribe();
-			window.removeEventListener('diamant:avatar-changed', handleAvatarUpdate);
+			window.removeEventListener('standard:avatar-changed', handleAvatarUpdate);
 		};
 	}, []);
 
 	async function handleSignOut() {
 		try {
-			localStorage.removeItem('diamant_client_avatar');
+			localStorage.removeItem('standard_client_avatar');
 			await signOut();
 		} catch (e) {
 			console.error(e);

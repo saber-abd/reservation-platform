@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuthedClient } from '@/lib/useAuthedClient';
 import { updateClient } from '@/lib/queries';
 import AvatarPicker, { type AvatarKey } from '@/components/premium/ui/PremiumAvatarPicker';
+import { MAX_NAME_LENGTH } from '@/lib/limits';
 
 export default function ClientProfilePanel() {
 	const { loading, client, email, error } = useAuthedClient();
@@ -56,6 +57,7 @@ export default function ClientProfilePanel() {
 					<input
 						type="text"
 						value={fullName}
+						maxLength={MAX_NAME_LENGTH}
 						onChange={(e) => setFullName(e.target.value)}
 						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
 					/>

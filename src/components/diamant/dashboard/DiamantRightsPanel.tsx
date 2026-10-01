@@ -49,6 +49,7 @@ import {
 	Phone,
 	RefreshCw
 } from 'lucide-react';
+import { MAX_NAME_LENGTH } from '@/lib/limits';
 
 export default function DiamantRightsPanel() {
 	const [activeRole, setActiveRole] = useState<ProRole>('admin');
@@ -919,8 +920,8 @@ export default function DiamantRightsPanel() {
 														}`}>
 															{client.full_name ? client.full_name.charAt(0).toUpperCase() : <User size={16} />}
 														</div>
-														<div>
-															<p className="font-bold text-stone-900">{client.full_name || 'Client'}</p>
+														<div className="min-w-0 max-w-[18rem]">
+															<p className="font-bold text-stone-900 break-words">{client.full_name || 'Client'}</p>
 															<p className="text-[11px] text-stone-400 mt-0.5">
 																Inscrit le {new Date(client.created_at).toLocaleDateString('fr-FR')}
 															</p>
@@ -1688,6 +1689,7 @@ export default function DiamantRightsPanel() {
 									type="text"
 									required
 									value={editFullName}
+									maxLength={MAX_NAME_LENGTH}
 									onChange={e => setEditFullName(e.target.value)}
 									placeholder="Ex : Sophie Martin"
 									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"

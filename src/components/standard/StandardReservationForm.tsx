@@ -3,9 +3,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { itRepairConfig } from '@/config/site';
+import { MAX_NAME_LENGTH } from '@/lib/limits';
 
 const clientSchema = z.object({
-	clientName: z.string().min(2, 'Nom trop court'),
+	clientName: z.string().min(2, 'Nom trop court').max(MAX_NAME_LENGTH, `Nom trop long (${MAX_NAME_LENGTH} caractères maximum)`),
 	clientEmail: z.string().email('Email invalide'),
 	clientPhone: z.string().optional(),
 });
@@ -221,6 +222,7 @@ export default function StandardReservationForm() {
 							id="clientName"
 							className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 transition-colors"
 							{...register('clientName')}
+							maxLength={MAX_NAME_LENGTH}
 						/>
 						{errors.clientName && <p className="mt-1 text-xs text-red-600">{errors.clientName.message}</p>}
 					</div>

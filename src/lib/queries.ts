@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { clampName } from './limits';
 
 /** Helper pour extraire le tag de la démo depuis l'URL côté client ou via paramètre. */
 export function getDemoTag(path?: string): string {
@@ -281,7 +282,11 @@ export async function createAppointment(appointment: {
 	if (new Date(appointment.start_time) <= new Date()) {
 		throw new Error("Impossible de réserver un créneau déjà passé.");
 	}
-	const { data, error } = await supabase.from('appointments').insert({ ...appointment, tag_bd: tag }).select().single();
+	const { data, error } = await supabase
+		.from('appointments')
+		.insert({ ...appointment, client_name: clampName(appointment.client_name), tag_bd: tag })
+		.select()
+		.single();
 	if (error) throw error;
 	return data as Appointment;
 }
@@ -733,7 +738,7 @@ export async function enrollClientInDemo(
 	}
 
 	const mergedTag = addDemoTag(existing?.tag_bd, tag);
-	const fullName = metadata?.full_name || existing?.full_name || 'Client';
+	const fullName = clampName(metadata?.full_name || existing?.full_name || 'Client');
 	const email = metadata?.email || existing?.email || null;
 	const avatarUrl = metadata?.avatar_url || existing?.avatar_url || null;
 	const phone = metadata?.phone || existing?.phone || null;
@@ -839,6 +844,7 @@ export function saveClientOverride(clientId: string, changes: Partial<Client>): 
 }
 
 export async function updateClient(id: string, changes: Partial<Client>, tag = getDemoTag()): Promise<Client> {
+	if (typeof changes.full_name === 'string') changes = { ...changes, full_name: clampName(changes.full_name) };
 	// 1. Sauvegarder immédiatement les surcharges locales pour persistance instantanée
 	saveClientOverride(id, changes);
 

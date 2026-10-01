@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { enrollClientInDemo, getDemoTag } from '@/lib/queries';
 import { Sparkles, ArrowRight, Phone, User, Mail, Scissors } from 'lucide-react';
+import { MAX_NAME_LENGTH } from '@/lib/limits';
 
 interface CompleteProfileFormProps {
 	user: any;
@@ -51,7 +52,7 @@ export default function CompleteProfileForm({ user, targetDemo, onCompleted }: C
 			// Enregistrer les préférences en BDD ou cache local
 			if (preferences.trim()) {
 				try {
-					localStorage.setItem(`diamant_pref_${user.id}`, preferences.trim());
+					localStorage.setItem(`standard_pref_${user.id}`, preferences.trim());
 					await supabase
 						.from('clients')
 						.update({ preferences: preferences.trim() })
@@ -61,8 +62,8 @@ export default function CompleteProfileForm({ user, targetDemo, onCompleted }: C
 
 			// Mettre à jour les métadonnées de session locale
 			if (typeof window !== 'undefined') {
-				if (initialEmail) localStorage.setItem('diamant_client_email', initialEmail);
-				if (avatarUrl) localStorage.setItem('diamant_client_avatar', avatarUrl);
+				if (initialEmail) localStorage.setItem('standard_client_email', initialEmail);
+				if (avatarUrl) localStorage.setItem('standard_client_avatar', avatarUrl);
 			}
 
 			if (onCompleted) {
@@ -113,6 +114,7 @@ export default function CompleteProfileForm({ user, targetDemo, onCompleted }: C
 							type="text" 
 							required
 							value={fullName}
+							maxLength={MAX_NAME_LENGTH}
 							onChange={e => setFullName(e.target.value)}
 							placeholder="Ex : Sarah Bernard"
 							className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-sm text-stone-900 focus:bg-white focus:border-deep-teal-500 focus:outline-none transition-all"
