@@ -5,7 +5,6 @@
 import '../styles/global.css';
 import { Scissors, ArrowLeft } from 'lucide-react';
 import { getSiteConfig } from '@/config/site';
-import SmoothScroll from '@/components/SmoothScroll.astro';
 const siteConfig = await getSiteConfig(Astro.url.pathname);
 
 interface Props {
@@ -50,6 +49,5 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 		<main class="mx-auto max-w-5xl px-6 py-12">
 			<slot />
 		</main>
-		<SmoothScroll />
 	</body>
 </html>

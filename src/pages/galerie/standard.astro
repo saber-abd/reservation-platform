@@ -9,9 +9,9 @@ import { Calendar, Zap, LayoutDashboard, Database, Server, Smartphone, CheckCirc
 	<section class="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-prussian-blue-900">
 		<div class="absolute inset-0 z-0">
 			<!-- Abstract dynamic background (optimized) -->
-			<div class="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-prussian-blue-500 rounded-full blur-[80px] opacity-20 will-change-transform transform-gpu pointer-events-none"></div>
-			<div class="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-prussian-blue-400 rounded-full blur-[80px] opacity-10 will-change-transform transform-gpu pointer-events-none"></div>
-			<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1080&auto=format&fit=crop&q=60')] opacity-5 bg-cover bg-fixed bg-center pointer-events-none"></div>
+			<div class="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-[radial-gradient(closest-side,var(--color-prussian-blue-500)_25%,transparent)] opacity-20 pointer-events-none"></div>
+			<div class="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-[radial-gradient(closest-side,var(--color-prussian-blue-400)_15%,transparent)] opacity-10 pointer-events-none"></div>
+			<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1080&auto=format&fit=crop&q=60')] opacity-5 bg-cover bg-center pointer-events-none"></div>
 		</div>
 		
 		<div class="relative z-10 mx-auto max-w-5xl px-6 text-center pt-20 pb-32 md:pb-24">
@@ -117,7 +117,7 @@ import { Calendar, Zap, LayoutDashboard, Database, Server, Smartphone, CheckCirc
 	<!-- Section Technologies -->
 	<section id="technologies" class="py-24 bg-stone-50 text-stone-900 relative overflow-hidden">
 		<!-- Interactive Mouse Background Script -->
-		<div id="cursor-glow" class="absolute w-[600px] h-[600px] bg-prussian-blue-200/50 rounded-full blur-[100px] pointer-events-none transform -translate-x-1/2 -translate-y-1/2 transition-all duration-500 ease-out"></div>
+		<div id="cursor-glow" class="absolute top-0 left-0 -ml-[300px] -mt-[300px] w-[600px] h-[600px] bg-[radial-gradient(closest-side,var(--color-prussian-blue-200)_20%,transparent)] opacity-50 pointer-events-none will-change-transform transition-transform duration-500 ease-out motion-reduce:transition-none"></div>
 		
 		<div class="relative z-10 mx-auto max-w-6xl px-6">
 			<div class="text-center mb-16" data-aos="fade-up">
@@ -203,13 +203,20 @@ import { Calendar, Zap, LayoutDashboard, Database, Server, Smartphone, CheckCirc
 		const techSection = document.getElementById('technologies');
 
 		if (cursorGlow && techSection) {
+			// translate3d (composité, pas de reflow) + au plus une mise à jour par frame
+			let frame = 0;
+			let x = 0;
+			let y = 0;
 			techSection.addEventListener('mousemove', (e) => {
-				const rect = techSection.getBoundingClientRect();
-				const x = e.clientX - rect.left;
-				const y = e.clientY - rect.top;
-				cursorGlow.style.left = `${x}px`;
-				cursorGlow.style.top = `${y}px`;
-			});
+				x = e.clientX;
+				y = e.clientY;
+				if (frame) return;
+				frame = requestAnimationFrame(() => {
+					frame = 0;
+					const rect = techSection.getBoundingClientRect();
+					cursorGlow.style.transform = `translate3d(${x - rect.left}px, ${y - rect.top}px, 0)`;
+				});
+			}, { passive: true });
 		}
 	</script>
 </CommercialLayout>

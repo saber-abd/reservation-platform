@@ -1,32 +1,53 @@
 ---
 // SmoothScroll.astro
+// Lenis n'avance que pendant un défilement : la boucle requestAnimationFrame
+// s'arrête dès que l'animation est terminée (aucun travail page immobile).
+// Désactivé si l'utilisateur préfère réduire les animations.
 ---
 
 <script>
   import Lenis from 'lenis';
 
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   // Prevent multiple initializations if Astro re-evaluates scripts
-  if (!window.lenis) {
+  if (!window.lenis && !reduceMotion) {
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // https://www.desmos.com/calculator/brs54l4xou
-      direction: 'vertical',
-      gestureDirection: 'vertical',
-      smooth: true,
-      mouseMultiplier: 1,
-      smoothTouch: false,
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      wheelMultiplier: 1,
       touchMultiplier: 2,
       infinite: false,
+      anchors: true,
     });
 
     window.lenis = lenis;
 
+    let rafId = 0;
+
     function raf(time) {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      if (lenis.animate.isRunning) {
+        rafId = requestAnimationFrame(raf);
+      } else {
+        rafId = 0;
+        lenis.time = 0; // évite un saut au prochain démarrage
+      }
     }
 
-    requestAnimationFrame(raf);
+    function wake() {
+      if (!rafId) rafId = requestAnimationFrame(raf);
+    }
+
+    // Toute entrée (molette, tactile) ou scrollTo programmatique relance la boucle.
+    lenis.on('virtual-scroll', wake);
+    const scrollTo = lenis.scrollTo.bind(lenis);
+    lenis.scrollTo = (...args) => {
+      scrollTo(...args);
+      wake();
+    };
   }
 </script>
 
