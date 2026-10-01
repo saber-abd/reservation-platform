@@ -21,7 +21,7 @@ export default function AutoHero({ basePath }: { basePath: string }) {
 				{/* Darker overlay instead of bright white */}
 				<div className="absolute inset-0 bg-stone-950/70 z-10" />
 				<img 
-					src="https://images.unsplash.com/photo-1611016186353-9af58c69a533?q=80&w=2071&auto=format&fit=crop" 
+					src="https://images.unsplash.com/photo-1611016186353-9af58c69a533?q=75&w=1600&auto=format&fit=crop" 
 					alt="Premium Garage" 
 					className="w-full h-full object-cover object-center grayscale-[0.2]"
 				/>

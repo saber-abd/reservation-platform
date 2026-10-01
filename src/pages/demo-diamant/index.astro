@@ -65,7 +65,7 @@ const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 			<div class="grid items-center gap-16 md:grid-cols-2">
 				<div class="relative section-fade" data-aos="fade-right" data-aos-duration="800">
 					<div class="overflow-hidden rounded-2xl border border-stone-100 aspect-[4/5] shadow-md">
-						<img src="/images/about_salon.jpg" alt="Ambiance salon" class="h-full w-full object-cover hover:scale-105 transition-transform duration-700" />
+						<img src="/images/about_salon.jpg" loading="lazy" decoding="async" alt="Ambiance salon" class="h-full w-full object-cover hover:scale-105 transition-transform duration-700" />
 					</div>
 					<!-- Badge overlay -->
 					<div class="absolute -bottom-4 -right-4 bg-white border border-stone-200 rounded-2xl p-4 shadow-lg" data-aos="zoom-in" data-aos-delay="300">
