@@ -1,0 +1,86 @@
+@import "./base.css";
+
+/* Démo Standard : palette bleu/rouge et thème .theme-standard. */
+
+@theme inline {
+    --font-sans: ui-sans-serif, system-ui, sans-serif;
+    --font-heading: var(--font-sans);
+
+    /* Custom Palette (Standard Demo) */
+    --color-punch-red: #e63946;
+    --color-punch-red-100: #33060a;
+    --color-punch-red-200: #660d14;
+    --color-punch-red-300: #99131e;
+    --color-punch-red-400: #cb1928;
+    --color-punch-red-500: #e63946;
+    --color-punch-red-600: #eb5f6b;
+    --color-punch-red-700: #f08790;
+    --color-punch-red-800: #f5afb5;
+    --color-punch-red-900: #fad7da;
+
+    --color-honeydew: #f1faee;
+    --color-honeydew-100: #234c16;
+    --color-honeydew-200: #47982c;
+    --color-honeydew-300: #75ce57;
+    --color-honeydew-400: #b4e4a3;
+    --color-honeydew-500: #f1faee;
+    --color-honeydew-600: #f5fbf2;
+    --color-honeydew-700: #f7fcf6;
+    --color-honeydew-800: #fafdf9;
+    --color-honeydew-900: #fcfefc;
+
+    --color-frosted-blue: #a8dadc;
+    --color-frosted-blue-100: #163637;
+    --color-frosted-blue-200: #2c6d6f;
+    --color-frosted-blue-300: #42a3a6;
+    --color-frosted-blue-400: #70c3c6;
+    --color-frosted-blue-500: #a8dadc;
+    --color-frosted-blue-600: #b9e2e3;
+    --color-frosted-blue-700: #cae9ea;
+    --color-frosted-blue-800: #dcf0f1;
+    --color-frosted-blue-900: #edf8f8;
+
+    --color-cerulean: #457b9d;
+    --color-cerulean-100: #0e181f;
+    --color-cerulean-200: #1b313e;
+    --color-cerulean-300: #29495e;
+    --color-cerulean-400: #37627d;
+    --color-cerulean-500: #457b9d;
+    --color-cerulean-600: #6097b9;
+    --color-cerulean-700: #88b1cb;
+    --color-cerulean-800: #b0cbdc;
+    --color-cerulean-900: #d7e5ee;
+
+    --color-oxford-navy: #1d3557;
+    --color-oxford-navy-100: #060b12;
+    --color-oxford-navy-200: #0c1623;
+    --color-oxford-navy-300: #122035;
+    --color-oxford-navy-400: #172b46;
+    --color-oxford-navy-500: #1d3557;
+    --color-oxford-navy-600: #315a93;
+    --color-oxford-navy-700: #4e7fc4;
+    --color-oxford-navy-800: #89aad8;
+    --color-oxford-navy-900: #c4d4eb;
+}
+
+.theme-standard {
+    --background: #f1faee; /* Honeydew */
+    --foreground: #1d3557; /* Oxford Navy */
+    --card: #ffffff;
+    --card-foreground: #1d3557;
+    --popover: #ffffff;
+    --popover-foreground: #1d3557;
+    --primary: #457b9d; /* Cerulean */
+    --primary-foreground: #ffffff;
+    --secondary: #a8dadc; /* Frosted Blue */
+    --secondary-foreground: #1d3557;
+    --muted: #edf8f8;
+    --muted-foreground: #37627d;
+    --accent: #e63946; /* Punch Red */
+    --accent-foreground: #ffffff;
+    --destructive: #e63946;
+    --border: #cae9ea;
+    --input: #ffffff;
+    --font-heading: ui-sans-serif, system-ui, sans-serif;
+    --font-sans: ui-sans-serif, system-ui, sans-serif;
+}

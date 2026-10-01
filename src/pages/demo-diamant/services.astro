@@ -1,6 +1,6 @@
 ---
-import DiamantLayout from '@/layouts/DiamantLayout.astro';
-import ServicesList from '@/components/ServicesList';
+import DiamantLayout from '@/layouts/diamant/DiamantLayout.astro';
+import ServicesList from '@/components/diamant/DiamantServicesList';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);

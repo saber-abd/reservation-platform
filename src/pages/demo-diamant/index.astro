@@ -1,9 +1,9 @@
 ---
-import DiamantLayout from '@/layouts/DiamantLayout.astro';
+import DiamantLayout from '@/layouts/diamant/DiamantLayout.astro';
 import Diamant3DLogo from '@/components/diamant/Diamant3DLogo';
-import Map from '@/components/Map.astro';
-import ServicesCarousel from '@/components/ServicesCarousel';
-import TestimonialsCarousel from '@/components/TestimonialsCarousel';
+import Map from '@/components/diamant/DiamantMap.astro';
+import ServicesCarousel from '@/components/diamant/DiamantServicesCarousel';
+import TestimonialsCarousel from '@/components/diamant/DiamantTestimonialsCarousel';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);

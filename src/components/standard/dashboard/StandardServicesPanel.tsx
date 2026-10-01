@@ -1,0 +1,327 @@
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
+import { isRoleReadOnly } from '@/lib/permissions';
+import { createService, deleteService, getAllServices, updateService, uploadServiceImage, type Service } from '@/lib/queries';
+import { getServiceImageFallback } from '@/lib/serviceImages';
+import ImageCropper from '@/components/standard/ui/StandardImageCropper';
+
+const schema = z.object({
+	name: z.string().min(2, 'Nom trop court'),
+	category: z.enum(['Femmes', 'Hommes', 'Enfants']),
+	description: z.string().optional(),
+	durationMinutes: z.coerce.number().int().positive('Doit être positif'),
+	price: z.coerce.number().nonnegative('Doit être positif ou nul'),
+});
+
+type FormValues = z.infer<typeof schema>;
+
+export default function ServicesPanel() {
+	const { loading, professional, error } = useAuthedProfessional();
+	const [services, setServices] = useState<Service[]>([]);
+	const [formError, setFormError] = useState<string | null>(null);
+	const [imageFile, setImageFile] = useState<File | null>(null);
+	const [croppingImageSrc, setCroppingImageSrc] = useState<string | null>(null);
+	const [uploading, setUploading] = useState(false);
+	const [editingId, setEditingId] = useState<string | null>(null);
+
+	const {
+		register,
+		handleSubmit,
+		reset,
+		formState: { errors },
+	} = useForm<FormValues>({ resolver: zodResolver(schema) });
+
+	useEffect(() => {
+		if (!professional) return;
+		getAllServices(professional.id).then(setServices);
+	}, [professional]);
+
+	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0];
+		if (!file) return;
+		const reader = new FileReader();
+		reader.onload = () => {
+			setCroppingImageSrc(reader.result as string);
+		};
+		reader.readAsDataURL(file);
+		e.target.value = '';
+	}
+
+	function handleEdit(service: Service) {
+		setEditingId(service.id);
+		setImageFile(null);
+		setFormError(null);
+		reset({
+			name: service.name,
+			category: (service.category as 'Femmes' | 'Hommes' | 'Enfants') || 'Femmes',
+			description: service.description ?? '',
+			durationMinutes: service.duration_minutes,
+			price: service.price,
+		});
+		window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+	}
+
+	function handleCancelEdit() {
+		setEditingId(null);
+		setImageFile(null);
+		reset({ name: '', category: 'Femmes', description: '', durationMinutes: undefined, price: undefined });
+	}
+
+	async function onSubmit(values: FormValues) {
+		if (isRoleReadOnly()) {
+			setFormError("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			return;
+		}
+		if (!professional) return;
+		setFormError(null);
+		try {
+			let imageUrl: string | null | undefined = undefined;
+			if (imageFile) {
+				setUploading(true);
+				imageUrl = await uploadServiceImage(professional.id, imageFile);
+			}
+
+			if (editingId) {
+				const updated = await updateService(editingId, {
+					name: values.name,
+					category: values.category,
+					description: values.description ?? null,
+					duration_minutes: values.durationMinutes,
+					price: values.price,
+					...(imageUrl !== undefined ? { image_url: imageUrl } : {}),
+				});
+				setServices((prev) => prev.map((s) => (s.id === editingId ? updated : s)));
+				setEditingId(null);
+			} else {
+				const created = await createService({
+					professional_id: professional.id,
+					name: values.name,
+					category: values.category,
+					description: values.description ?? null,
+					duration_minutes: values.durationMinutes,
+					price: values.price,
+					image_url: imageUrl ?? null,
+				});
+				setServices((prev) => [...prev, created]);
+			}
+			reset();
+			setImageFile(null);
+		} catch (err: any) {
+			console.error(err);
+			setFormError(err?.message || "Erreur lors de l'enregistrement.");
+		} finally {
+			setUploading(false);
+		}
+	}
+
+	async function handleToggleActive(service: Service) {
+		if (isRoleReadOnly()) {
+			alert("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			return;
+		}
+		const updated = await updateService(service.id, { is_active: !service.is_active });
+		setServices((prev) => prev.map((s) => (s.id === service.id ? updated : s)));
+	}
+
+	async function handleDelete(id: string) {
+		if (isRoleReadOnly()) {
+			alert("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			return;
+		}
+		await deleteService(id);
+		setServices((prev) => prev.filter((s) => s.id !== id));
+	}
+
+	if (loading) return <p className="text-sm text-muted-foreground">Chargement...</p>;
+	if (error) return <p className="text-sm text-red-600">{error}</p>;
+
+	return (
+		<div>
+			<h1 className="text-2xl font-bold text-foreground">Mes prestations</h1>
+
+			<div className="mt-6 overflow-hidden rounded-xl border border-border">
+				<table className="w-full text-left text-sm">
+					<thead className="bg-stone-50 text-xs uppercase text-muted-foreground">
+						<tr>
+							<th className="px-4 py-3" />
+							<th className="px-4 py-3">Nom</th>
+							<th className="px-4 py-3">Catégorie</th>
+							<th className="px-4 py-3">Durée</th>
+							<th className="px-4 py-3">Prix</th>
+							<th className="px-4 py-3">Statut</th>
+							<th className="px-4 py-3" />
+						</tr>
+					</thead>
+					<tbody>
+						{services.length === 0 && (
+							<tr>
+								<td className="px-4 py-4 text-muted-foreground" colSpan={6}>
+									Aucune prestation pour le moment.
+								</td>
+							</tr>
+						)}
+						{services.map((service) => (
+							<tr key={service.id} className="border-t border-border">
+								<td className="px-4 py-3">
+									<img 
+										src={service.image_url || getServiceImageFallback(service.name)} 
+										alt={service.name} 
+										className="h-10 w-10 rounded-lg object-cover" 
+									/>
+								</td>
+								<td className="px-4 py-3 font-medium text-foreground">{service.name}</td>
+								<td className="px-4 py-3 text-muted-foreground">{service.category || 'Femmes'}</td>
+								<td className="px-4 py-3 text-muted-foreground">{service.duration_minutes} min</td>
+								<td className="px-4 py-3 text-muted-foreground">{service.price} €</td>
+								<td className="px-4 py-3">
+									<button
+										onClick={() => handleToggleActive(service)}
+										className={`rounded-full px-2 py-1 text-xs font-medium ${
+											service.is_active ? 'bg-green-50 text-green-700' : 'bg-stone-100 text-muted-foreground'
+										}`}
+									>
+										{service.is_active ? 'Active' : 'Masquée'}
+									</button>
+								</td>
+								<td className="px-4 py-3 text-right">
+									<button
+										onClick={() => handleEdit(service)}
+										className="mr-3 text-xs font-medium text-rose-600 hover:underline"
+									>
+										Modifier
+									</button>
+									<button
+										onClick={() => handleDelete(service.id)}
+										className="text-xs font-medium text-red-600 hover:underline"
+									>
+										Supprimer
+									</button>
+								</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
+
+			<form onSubmit={handleSubmit(onSubmit)} className="mt-8 grid gap-4 rounded-xl border border-border p-6 sm:grid-cols-2">
+				<p className="col-span-full text-sm font-semibold text-foreground">
+					{editingId ? 'Modifier la prestation' : 'Ajouter une prestation'}
+				</p>
+				<div>
+					<label className="text-sm text-stone-700" htmlFor="name">
+						Nom
+					</label>
+					<input
+						id="name"
+						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						{...register('name')}
+					/>
+					{errors.name && <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
+				</div>
+				<div>
+					<label className="text-sm text-stone-700" htmlFor="category">
+						Catégorie
+					</label>
+					<select
+						id="category"
+						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						{...register('category')}
+					>
+						<option value="Femmes">Femmes</option>
+						<option value="Hommes">Hommes</option>
+						<option value="Enfants">Enfants</option>
+					</select>
+					{errors.category && <p className="mt-1 text-xs text-red-600">{errors.category.message}</p>}
+				</div>
+				<div>
+					<label className="text-sm text-stone-700" htmlFor="durationMinutes">
+						Durée (minutes)
+					</label>
+					<input
+						id="durationMinutes"
+						type="number"
+						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						{...register('durationMinutes')}
+					/>
+					{errors.durationMinutes && (
+						<p className="mt-1 text-xs text-red-600">{errors.durationMinutes.message}</p>
+					)}
+				</div>
+				<div>
+					<label className="text-sm text-stone-700" htmlFor="price">
+						Prix (€)
+					</label>
+					<input
+						id="price"
+						type="number"
+						step="0.01"
+						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						{...register('price')}
+					/>
+					{errors.price && <p className="mt-1 text-xs text-red-600">{errors.price.message}</p>}
+				</div>
+				<div className="sm:col-span-2">
+					<label className="text-sm text-stone-700" htmlFor="description">
+						Description
+					</label>
+					<textarea
+						id="description"
+						rows={2}
+						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+						{...register('description')}
+					/>
+				</div>
+				<div className="sm:col-span-2">
+					<label className="text-sm text-stone-700" htmlFor="image">
+						Photo (optionnelle)
+					</label>
+					<input
+						id="image"
+						type="file"
+						accept="image/*"
+						onChange={handleFileChange}
+						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+					/>
+					{imageFile && (
+						<div className="mt-3 flex items-center gap-4">
+							<img src={URL.createObjectURL(imageFile)} alt="Preview" className="h-20 w-20 rounded-xl object-cover shadow-sm" />
+							<button type="button" onClick={() => setImageFile(null)} className="text-sm font-medium text-red-600 hover:underline">
+								Retirer la photo
+							</button>
+						</div>
+					)}
+				</div>
+				{formError && <p className="col-span-full text-sm text-red-600">{formError}</p>}
+				<div className="col-span-full flex items-center gap-4">
+					<button
+						type="submit"
+						disabled={uploading}
+						className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700 disabled:opacity-50"
+					>
+						{uploading ? 'Envoi de la photo...' : editingId ? 'Enregistrer les modifications' : 'Ajouter'}
+					</button>
+					{editingId && (
+						<button type="button" onClick={handleCancelEdit} className="text-sm font-medium text-muted-foreground hover:text-stone-700">
+							Annuler la modification
+						</button>
+					)}
+				</div>
+			</form>
+
+			{croppingImageSrc && (
+				<ImageCropper
+					imageSrc={croppingImageSrc}
+					onCancel={() => setCroppingImageSrc(null)}
+					onCropComplete={(blob) => {
+						const croppedFile = new File([blob], 'cropped.jpg', { type: 'image/jpeg' });
+						setImageFile(croppedFile);
+						setCroppingImageSrc(null);
+					}}
+				/>
+			)}
+		</div>
+	);
+}

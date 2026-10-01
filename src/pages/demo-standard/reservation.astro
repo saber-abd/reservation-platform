@@ -1,8 +1,8 @@
 ---
-import StandardLayout from '@/layouts/StandardLayout.astro';
+import StandardLayout from '@/layouts/standard/StandardLayout.astro';
 import { getSiteConfig } from '@/config/site';
 const siteConfig = await getSiteConfig(Astro.url.pathname);
-import StandardReservationForm from '@/components/reservation/StandardReservationForm';
+import StandardReservationForm from '@/components/standard/StandardReservationForm';
 ---
 
 <StandardLayout title="Réservation" description={`Réservez votre intervention avec ${siteConfig.business.name}.`}>

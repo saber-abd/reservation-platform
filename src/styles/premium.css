@@ -1,0 +1,56 @@
+@import "./base.css";
+
+/* Démo Premium (garage) : thème .theme-premium + variante dashboard. */
+
+@font-face {
+    font-family: 'Coolvetica';
+    src: url('/fonts/Coolvetica-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@theme inline {
+    --font-sans: 'Coolvetica', sans-serif;
+    --font-heading: 'Coolvetica', sans-serif;
+}
+
+.theme-premium {
+    --background: oklch(0.92 0 0); /* Gris clair pour faire ressortir les cartes blanches */
+    --foreground: oklch(0.15 0.02 240);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.15 0.02 240);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.15 0.02 240);
+    --primary: oklch(0.6 0.25 25); /* Rouge course */
+    --primary-foreground: oklch(0.98 0 0);
+    --secondary: oklch(0.90 0.02 240);
+    --secondary-foreground: oklch(0.15 0.02 240);
+    --muted: oklch(0.90 0.02 240);
+    --muted-foreground: oklch(0.40 0.02 240);
+    --accent: oklch(0.90 0.02 240);
+    --accent-foreground: oklch(0.15 0.02 240);
+    --destructive: oklch(0.5 0.2 25);
+    --border: oklch(0.85 0.02 240);
+    --input: oklch(1 0 0);
+    --font-heading: 'Coolvetica', sans-serif;
+    --font-sans: 'Coolvetica', sans-serif;
+    font-family: 'Coolvetica', sans-serif !important;
+}
+
+.theme-premium h1, .theme-premium h2, .theme-premium h3,
+.theme-premium h4, .theme-premium h5, .theme-premium h6,
+.theme-premium .font-black {
+    font-family: 'Coolvetica', sans-serif !important;
+}
+
+.theme-premium input:not([type="checkbox"]):not([type="radio"]),
+.theme-premium textarea,
+.theme-premium select {
+    background-color: white !important;
+    color: black !important;
+}
+
+.font-coolvetica {
+    font-family: 'Coolvetica', sans-serif !important;
+}

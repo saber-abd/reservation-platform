@@ -2,7 +2,7 @@
 import { Wrench, Menu, X } from 'lucide-react';
 import { getSiteConfig } from '@/config/site';
 const siteConfig = await getSiteConfig(Astro.url.pathname);
-import HeaderAuthButton from '@/components/HeaderAuthButton';
+import HeaderAuthButton from '@/components/premium/PremiumHeaderAuthButton';
 
 const currentPath = Astro.url.pathname;
 const basePathMatch = currentPath.match(/^\/(demo-[^/]+)/);
@@ -42,7 +42,7 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 						← Portfolio
 					</a>
 				)}
-				<div class="theme-auto">
+				<div class="theme-premium">
 					<HeaderAuthButton client:visible basePath={basePath} />
 				</div>
 			</div>
@@ -77,7 +77,7 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 						← Retour au Portfolio
 					</a>
 				)}
-				<div class="theme-auto">
+				<div class="theme-premium">
 					<HeaderAuthButton client:visible basePath={basePath} />
 				</div>
 			</div>

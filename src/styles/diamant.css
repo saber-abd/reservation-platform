@@ -1,0 +1,140 @@
+@import "./base.css";
+
+/*
+ * Démo Diamant : site public (.theme-diamant) et espace pro / client
+ * (.theme-diamant.dashboard-diamant).
+ */
+
+@font-face {
+    font-family: 'Coolvetica';
+    src: url('/fonts/Coolvetica-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Monimer Serif';
+    src: url('/fonts/MonimerSerif_PERSONAL_USE_ONLY.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0000-002F, U+003A-FFFF;
+}
+
+@theme inline {
+    --font-sans: 'Lato', sans-serif;
+    --font-heading: 'Monimer Serif', serif;
+
+    --color-deep-teal: #f8ad9d;
+    --color-deep-teal-100: #4b1205;
+    --color-deep-teal-200: #97240a;
+    --color-deep-teal-300: #e23610;
+    --color-deep-teal-400: #f36d50;
+    --color-deep-teal-500: #f8ad9d;
+    --color-deep-teal-600: #f9bdaf;
+    --color-deep-teal-700: #fbcdc3;
+    --color-deep-teal-800: #fcded7;
+    --color-deep-teal-900: #feeeeb;
+    --color-jasmine: #ffdab9;
+    --color-jasmine-100: #582900;
+    --color-jasmine-200: #af5200;
+    --color-jasmine-300: #ff7b08;
+    --color-jasmine-400: #ffaa60;
+    --color-jasmine-500: #ffdab9;
+    --color-jasmine-600: #ffe1c6;
+    --color-jasmine-700: #ffe8d4;
+    --color-jasmine-800: #fff0e2;
+    --color-jasmine-900: #fff7f1;
+}
+
+.theme-diamant {
+    --background: #fff7f1;
+    --foreground: #1c1917;
+    --card: #ffffff;
+    --card-foreground: #1c1917;
+    --popover: #ffffff;
+    --popover-foreground: #1c1917;
+    --primary: #f08080;
+    --primary-foreground: #ffffff;
+    --secondary: #fce5e5;
+    --secondary-foreground: #420808;
+    --muted: #fef3ee;
+    --muted-foreground: #78716c;
+    --accent: #fbc4ab;
+    --accent-foreground: #1c1917;
+    --destructive: #e63946;
+    --border: #fddccd;
+    --input: #ffffff;
+    --ring: #f08080;
+    --font-heading: 'Monimer Serif', serif;
+    --font-sans: 'Lato', sans-serif;
+    font-family: 'Lato', sans-serif;
+}
+
+.theme-diamant:not(.dashboard-diamant) h1,
+.theme-diamant:not(.dashboard-diamant) h2,
+.theme-diamant:not(.dashboard-diamant) h3,
+.theme-diamant:not(.dashboard-diamant) h4,
+.theme-diamant:not(.dashboard-diamant) h5,
+.theme-diamant:not(.dashboard-diamant) h6 {
+    font-family: 'Monimer Serif', 'Lato', serif;
+}
+
+/* Espace pro / client : police Coolvetica partout */
+.dashboard-diamant,
+.dashboard-diamant body {
+    --font-heading: 'Coolvetica', sans-serif;
+    --font-sans: 'Coolvetica', sans-serif;
+    font-family: 'Coolvetica', sans-serif !important;
+}
+
+.dashboard-diamant h1, .dashboard-diamant h2, .dashboard-diamant h3,
+.dashboard-diamant h4, .dashboard-diamant h5, .dashboard-diamant h6,
+.dashboard-diamant .font-black, .dashboard-diamant .font-bold {
+    font-family: 'Coolvetica', sans-serif !important;
+}
+
+.font-coolvetica {
+    font-family: 'Coolvetica', sans-serif !important;
+}
+
+/* Animations du site public */
+.theme-diamant:not(.dashboard-diamant) .section-fade {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.theme-diamant:not(.dashboard-diamant) .section-fade.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Survol des cartes (priorité sur AOS) */
+.theme-diamant:not(.dashboard-diamant) .card-hover {
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease !important;
+    will-change: transform;
+}
+.theme-diamant:not(.dashboard-diamant) .card-hover:hover,
+.theme-diamant:not(.dashboard-diamant) [data-aos].card-hover:hover,
+.theme-diamant:not(.dashboard-diamant) [data-aos].aos-animate.card-hover:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 14px 34px -8px rgba(0, 0, 0, 0.12) !important;
+}
+.theme-diamant:not(.dashboard-diamant) li.card-hover:hover {
+    border-color: #5eead4 !important;
+}
+
+/* Survol des cartes de l'espace pro */
+.dashboard-diamant .card-hover {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.dashboard-diamant .card-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+}
+
+/* Protection anti-flicker si le client est banni */
+html.diamant-client-banned #dashboard-content > *:not([data-ban-guard]) {
+    display: none !important;
+}

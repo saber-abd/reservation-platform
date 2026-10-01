@@ -1,7 +1,7 @@
 ---
-import StandardLayout from '@/layouts/StandardLayout.astro';
-import Map from '@/components/Map.astro';
-import TestimonialsCarousel from '@/components/TestimonialsCarousel';
+import StandardLayout from '@/layouts/standard/StandardLayout.astro';
+import Map from '@/components/standard/StandardMap.astro';
+import TestimonialsCarousel from '@/components/standard/StandardTestimonialsCarousel';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname);

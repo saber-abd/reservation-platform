@@ -1,0 +1,343 @@
+import { useEffect, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import {
+	createAppointment,
+	getAppointmentsForDate,
+	getAvailabilityRules,
+	getClientById,
+	getPrimaryProfessional,
+	getServices,
+	type Professional,
+	type Service,
+} from '@/lib/queries';
+import { generateSlotsForDate, type GeneratedSlot } from '@/lib/slots';
+import { getSession } from '@/lib/auth';
+import { getServiceImageFallback } from '@/lib/serviceImages';
+import { getBannedClientRecord, checkIsClientBannedInDb } from '@/lib/permissions';
+
+const clientSchema = z.object({
+	clientName: z.string().min(2, 'Nom trop court'),
+	clientEmail: z.string().email('Email invalide'),
+	clientPhone: z.string().optional(),
+});
+
+type ClientFormValues = z.infer<typeof clientSchema>;
+
+function formatSlot(slot: GeneratedSlot) {
+	return slot.start.toLocaleString('fr-FR', {
+		weekday: 'short',
+		hour: '2-digit',
+		minute: '2-digit',
+	});
+}
+
+function todayISO() {
+	return new Date().toISOString().slice(0, 10);
+}
+
+export default function ReservationForm() {
+	const [professional, setProfessional] = useState<Professional | null>(null);
+	const [services, setServices] = useState<Service[]>([]);
+	const [selectedServiceId, setSelectedServiceId] = useState<string>('');
+	const [selectedDate, setSelectedDate] = useState<string>(todayISO());
+	const [slots, setSlots] = useState<GeneratedSlot[] | null>(null);
+	const [slotsLoading, setSlotsLoading] = useState(false);
+	const [selectedSlot, setSelectedSlot] = useState<GeneratedSlot | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [submitting, setSubmitting] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [success, setSuccess] = useState(false);
+
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+		reset,
+	} = useForm<ClientFormValues>({ resolver: zodResolver(clientSchema) });
+
+	useEffect(() => {
+		async function load() {
+			try {
+				const pro = await getPrimaryProfessional();
+				setProfessional(pro);
+				if (pro) {
+					const servicesData = await getServices(pro.id);
+					setServices(servicesData);
+					const preselectedId = new URLSearchParams(window.location.search).get('service');
+					if (preselectedId && servicesData.some((s) => s.id === preselectedId)) {
+						setSelectedServiceId(preselectedId);
+					}
+				}
+			} catch (err) {
+				setError(err instanceof Error ? err.message : 'Erreur de chargement.');
+			} finally {
+				setLoading(false);
+			}
+		}
+		load();
+	}, []);
+
+	// Préremplit les coordonnées si le visiteur est déjà connecté en tant que client.
+	useEffect(() => {
+		async function prefillFromSession() {
+			const session = await getSession();
+			if (!session?.user) return;
+			const client = await getClientById(session.user.id);
+			reset({
+				clientName: client?.full_name ?? '',
+				clientEmail: session.user.email ?? '',
+				clientPhone: client?.phone ?? '',
+			});
+		}
+		prefillFromSession();
+	}, [reset]);
+
+	const selectedService = useMemo(
+		() => services.find((s) => s.id === selectedServiceId) ?? null,
+		[services, selectedServiceId],
+	);
+
+	async function handleShowAvailabilities() {
+		if (!professional) return;
+		setSlotsLoading(true);
+		setSlots(null);
+		setSelectedSlot(null);
+		try {
+			const [rules, appointments] = await Promise.all([
+				getAvailabilityRules(professional.id),
+				getAppointmentsForDate(professional.id, selectedDate),
+			]);
+			setSlots(generateSlotsForDate(rules, selectedDate, appointments));
+		} catch (err) {
+			setError(err instanceof Error ? err.message : 'Erreur lors du chargement des disponibilités.');
+		} finally {
+			setSlotsLoading(false);
+		}
+	}
+
+	async function onSubmit(values: ClientFormValues) {
+		if (!professional || !selectedService || !selectedSlot) return;
+		setSubmitting(true);
+		setError(null);
+		try {
+			const session = await getSession();
+			const clientId = session?.user.id || '';
+			let ban = getBannedClientRecord(clientId, values.clientEmail, values.clientName);
+			if (!ban) {
+				const dbBan = await checkIsClientBannedInDb(clientId || null, values.clientEmail);
+				if (dbBan) {
+					ban = {
+						clientId: clientId || 'unknown',
+						clientName: values.clientName,
+						clientEmail: values.clientEmail,
+						reason: dbBan.reason || 'Compte suspendu par l’établissement',
+						bannedAt: new Date().toISOString()
+					};
+				}
+			}
+			if (ban) {
+				setError(`Votre compte est actuellement suspendu par l'établissement. Motif : « ${ban.reason} ». Vous ne pouvez pas effectuer de nouvelle réservation.`);
+				setSubmitting(false);
+				return;
+			}
+
+			await createAppointment({
+				professional_id: professional.id,
+				service_id: selectedService.id,
+				client_id: session?.user.id,
+				client_name: values.clientName,
+				client_email: values.clientEmail,
+				client_phone: values.clientPhone,
+				start_time: selectedSlot.start.toISOString(),
+				end_time: selectedSlot.end.toISOString(),
+			});
+
+			// Envoi email de demande de réservation (en attente de validation par le professionnel).
+			// Le serveur construit le mail et ajoute lui-même l'email du professionnel.
+			fetch('/api/send-email', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					type: 'reservation_request',
+					professionalId: professional.id,
+					clientName: values.clientName,
+					clientEmail: values.clientEmail,
+					serviceName: selectedService.name,
+					dateLabel: formatSlot(selectedSlot),
+				})
+			}).catch(err => console.error("Erreur d'envoi d'email de confirmation:", err));
+
+			setSuccess(true);
+			reset();
+		} catch (err) {
+			setError(
+				err instanceof Error
+					? err.message
+					: "Une erreur est survenue, ce créneau n'est peut-être plus disponible.",
+			);
+			// Recharge les créneaux au cas où celui choisi vient d'être pris entre-temps.
+			await handleShowAvailabilities();
+		} finally {
+			setSubmitting(false);
+		}
+	}
+
+	if (loading) {
+		return <p className="text-sm text-stone-500">Chargement des disponibilités...</p>;
+	}
+
+	if (!professional) {
+		return (
+			<p className="text-sm text-stone-500">
+				La réservation en ligne n'est pas encore disponible. Merci de nous contacter directement.
+			</p>
+		);
+	}
+
+	if (success) {
+		return (
+			<div className="rounded-xl border border-green-200 bg-green-50 p-6 text-green-800">
+				<p className="font-semibold">Demande de réservation envoyée !</p>
+				<p className="mt-1 text-sm">Elle est en attente de validation par le professionnel. Vous recevrez un email de confirmation.</p>
+			</div>
+		);
+	}
+
+	return (
+		<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
+			{/* Étape 1 : service */}
+			<div>
+				<p className="text-sm font-semibold text-stone-900">1. Choisissez une prestation</p>
+				<div className="mt-3">
+					<select
+						value={selectedServiceId}
+						onChange={(e) => setSelectedServiceId(e.target.value)}
+						className="w-full rounded-xl border border-border bg-stone-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600 transition-colors text-stone-900"
+					>
+						<option value="" disabled>Sélectionnez une prestation...</option>
+						{services.map((service) => (
+							<option key={service.id} value={service.id}>
+								{service.name} ({service.duration_minutes} min — {service.price} €)
+							</option>
+						))}
+					</select>
+					{services.length === 0 && (
+						<p className="mt-2 text-sm text-stone-500">Aucune prestation disponible pour le moment.</p>
+					)}
+				</div>
+			</div>
+
+			{/* Étape 2 : date + créneau */}
+			<div>
+				<p className="text-sm font-semibold text-stone-900">2. Choisissez un jour puis un créneau</p>
+				<div className="mt-3 flex flex-wrap items-end gap-3">
+					<div>
+						<label className="text-sm text-stone-700" htmlFor="date">
+							Date <span className="text-rose-600">*</span>
+						</label>
+						<input
+							id="date"
+							type="date"
+							min={todayISO()}
+							value={selectedDate}
+							onChange={(e) => {
+								setSelectedDate(e.target.value);
+								setSlots(null);
+								setSelectedSlot(null);
+							}}
+							className="mt-1 w-full rounded-lg border border-border bg-stone-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600 transition-colors"
+						/>
+					</div>
+					<button
+						type="button"
+						onClick={handleShowAvailabilities}
+						disabled={slotsLoading}
+						className="rounded-xl border border-rose-600 px-4 py-2 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-50 disabled:opacity-50"
+					>
+						{slotsLoading ? 'Chargement...' : 'Voir les disponibilités'}
+					</button>
+				</div>
+
+				{slots !== null && (
+					<div className="mt-4 grid gap-2 sm:grid-cols-3">
+						{slots.map((slot) => (
+							<button
+								type="button"
+								key={slot.start.toISOString()}
+								disabled={slot.isBooked}
+								onClick={() => setSelectedSlot(slot)}
+								className={`rounded-xl border p-3 text-center text-sm capitalize transition-colors ${
+									slot.isBooked
+										? 'cursor-not-allowed border-border bg-stone-100 text-stone-400 line-through'
+										: selectedSlot?.start.getTime() === slot.start.getTime()
+											? 'border-rose-600 bg-rose-600 text-white shadow-md'
+											: 'border-border bg-stone-50 hover:bg-stone-100 hover:border-rose-300'
+								}`}
+							>
+								{formatSlot(slot)}
+							</button>
+						))}
+						{slots.length === 0 && (
+							<p className="col-span-full text-sm text-stone-500">
+								Aucun créneau disponible ce jour-là. Essayez une autre date.
+							</p>
+						)}
+					</div>
+				)}
+			</div>
+
+			{/* Étape 3 : coordonnées */}
+			<div>
+				<p className="text-sm font-semibold text-stone-900">3. Vos coordonnées</p>
+				<div className="mt-3 flex flex-col gap-4">
+					<div>
+						<label className="text-sm text-stone-700" htmlFor="clientName">
+							Nom complet <span className="text-rose-600">*</span>
+						</label>
+						<input
+							id="clientName"
+							className="mt-1 w-full rounded-lg border border-border bg-stone-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600 transition-colors"
+							{...register('clientName')}
+						/>
+						{errors.clientName && <p className="mt-1 text-xs text-red-600">{errors.clientName.message}</p>}
+					</div>
+					<div>
+						<label className="text-sm text-stone-700" htmlFor="clientEmail">
+							Email <span className="text-rose-600">*</span>
+						</label>
+						<input
+							id="clientEmail"
+							type="email"
+							className="mt-1 w-full rounded-lg border border-border bg-stone-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600 transition-colors"
+							{...register('clientEmail')}
+						/>
+						{errors.clientEmail && <p className="mt-1 text-xs text-red-600">{errors.clientEmail.message}</p>}
+					</div>
+					<div>
+						<label className="text-sm text-stone-700" htmlFor="clientPhone">
+							Téléphone (optionnel)
+						</label>
+						<input
+							id="clientPhone"
+							className="mt-1 w-full rounded-lg border border-border bg-stone-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600 transition-colors"
+							{...register('clientPhone')}
+						/>
+					</div>
+				</div>
+			</div>
+
+			{error && <p className="text-sm text-red-600">{error}</p>}
+
+			<button
+				type="submit"
+				disabled={!selectedService || !selectedSlot || submitting}
+				className="rounded-xl bg-rose-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+			>
+				{submitting ? 'Confirmation en cours...' : 'Confirmer la réservation'}
+			</button>
+		</form>
+	);
+}
+
