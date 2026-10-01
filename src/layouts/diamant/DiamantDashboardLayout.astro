@@ -27,36 +27,6 @@ const isClientSpace = currentPath.includes('/espace-client');
 		<meta name="robots" content="noindex, nofollow" />
 		<title>{title} — Prestige Diamant</title>
 		<meta name="theme-color" content="#fff7f1" />
-		<!-- Google Fonts -->
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
-		<style is:global>
-			.dashboard-diamant,
-			.dashboard-diamant body,
-			.theme-diamant.dashboard-diamant body { 
-				font-family: 'Coolvetica', sans-serif !important; 
-			}
-			.dashboard-diamant h1, .dashboard-diamant h2, .dashboard-diamant h3,
-			.dashboard-diamant h4, .dashboard-diamant h5, .dashboard-diamant h6,
-			.dashboard-diamant .font-black, .dashboard-diamant .font-bold,
-			.theme-diamant.dashboard-diamant h1, .theme-diamant.dashboard-diamant h2, .theme-diamant.dashboard-diamant h3,
-			.theme-diamant.dashboard-diamant h4, .theme-diamant.dashboard-diamant h5, .theme-diamant.dashboard-diamant h6,
-			.theme-diamant.dashboard-diamant .font-black, .theme-diamant.dashboard-diamant .font-bold {
-				font-family: 'Coolvetica', sans-serif !important; 
-			}
-			.card-hover {
-				transition: transform 0.25s ease, box-shadow 0.25s ease;
-			}
-			.card-hover:hover {
-				transform: translateY(-3px);
-				box-shadow: 0 10px 28px rgba(0,0,0,0.08);
-			}
-			/* Protection anti-flicker si banni */
-			html.diamant-client-banned #dashboard-content > *:not([data-ban-guard]) {
-				display: none !important;
-			}
-		</style>
 		<script is:inline>
 			function syncDiamantBusinessName() {
 				try {

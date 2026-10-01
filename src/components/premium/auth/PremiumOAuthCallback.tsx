@@ -137,7 +137,7 @@ export default function OAuthCallback() {
 
 	return (
 		<div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center px-6">
-			<div className="h-10 w-10 animate-spin rounded-full border-4 border-stone-200 border-t-deep-teal-600"></div>
+			<div className="h-10 w-10 animate-spin rounded-full border-4 border-stone-200 border-t-primary"></div>
 			<p className="text-sm font-semibold text-stone-700">{status}</p>
 		</div>
 	);

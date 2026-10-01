@@ -1,9 +1,13 @@
 @import "./base.css";
 
+@source "../components/standard";
+@source "../layouts/standard";
+@source "../pages/demo-standard";
+
 /* Démo Standard : palette bleu/rouge et thème .theme-standard. */
 
 @theme inline {
-    --font-sans: ui-sans-serif, system-ui, sans-serif;
+    --font-sans: sans-serif;
     --font-heading: var(--font-sans);
 
     /* Custom Palette (Standard Demo) */
@@ -81,6 +85,6 @@
     --destructive: #e63946;
     --border: #cae9ea;
     --input: #ffffff;
-    --font-heading: ui-sans-serif, system-ui, sans-serif;
-    --font-sans: ui-sans-serif, system-ui, sans-serif;
+    --font-heading: sans-serif;
+    --font-sans: sans-serif;
 }

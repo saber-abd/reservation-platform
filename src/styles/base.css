@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -8,6 +8,11 @@
  * chaque démo (commercial, standard, premium, diamant) importe ce fichier puis
  * ajoute son propre style dans son fichier dédié.
  */
+
+/* Chaque démo déclare ses propres @source : un fichier de style ne génère que les classes de sa démo. */
+@source "../lib";
+@source "../config";
+@source "../components/shared";
 
 @custom-variant dark (&:is(.dark *));
 

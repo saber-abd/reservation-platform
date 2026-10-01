@@ -85,9 +85,9 @@ export default function CompleteProfileForm({ user, targetDemo, onCompleted }: C
 					<img 
 						src={avatarUrl} 
 						alt="Avatar" 
-						className="w-full h-full rounded-full object-cover border-2 border-deep-teal-500 shadow-md bg-white p-0.5" 
+						className="w-full h-full rounded-full object-cover border-2 border-primary shadow-md bg-white p-0.5" 
 					/>
-					<div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-deep-teal-600 text-white flex items-center justify-center text-xs shadow-sm">
+					<div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs shadow-sm">
 						<Sparkles size={12} />
 					</div>
 				</div>
@@ -117,7 +117,7 @@ export default function CompleteProfileForm({ user, targetDemo, onCompleted }: C
 							maxLength={MAX_NAME_LENGTH}
 							onChange={e => setFullName(e.target.value)}
 							placeholder="Ex : Sarah Bernard"
-							className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-sm text-stone-900 focus:bg-white focus:border-deep-teal-500 focus:outline-none transition-all"
+							className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-sm text-stone-900 focus:bg-white focus:border-primary focus:outline-none transition-all"
 						/>
 					</div>
 				</div>
@@ -149,7 +149,7 @@ export default function CompleteProfileForm({ user, targetDemo, onCompleted }: C
 							value={phone}
 							onChange={e => setPhone(e.target.value)}
 							placeholder="Ex : 06 12 34 56 78"
-							className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-sm text-stone-900 focus:bg-white focus:border-deep-teal-500 focus:outline-none transition-all"
+							className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-sm text-stone-900 focus:bg-white focus:border-primary focus:outline-none transition-all"
 						/>
 					</div>
 					<p className="text-[11px] text-stone-400 mt-1">Utilisé pour la confirmation et les rappels de vos rendez-vous.</p>
@@ -165,7 +165,7 @@ export default function CompleteProfileForm({ user, targetDemo, onCompleted }: C
 							value={preferences}
 							onChange={e => setPreferences(e.target.value)}
 							placeholder="Nature de vos cheveux, allergies, souhaits particuliers..."
-							className="w-full px-3.5 py-2 rounded-xl border border-stone-200 bg-stone-50 text-xs text-stone-900 focus:bg-white focus:border-deep-teal-500 focus:outline-none transition-all resize-none"
+							className="w-full px-3.5 py-2 rounded-xl border border-stone-200 bg-stone-50 text-xs text-stone-900 focus:bg-white focus:border-primary focus:outline-none transition-all resize-none"
 						/>
 					</div>
 				</div>
@@ -173,7 +173,7 @@ export default function CompleteProfileForm({ user, targetDemo, onCompleted }: C
 				<button
 					type="submit"
 					disabled={submitting}
-					className="w-full mt-2 py-3 px-5 rounded-xl bg-deep-teal-600 text-white font-bold text-xs uppercase tracking-widest hover:bg-deep-teal-700 active:scale-[0.99] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+					className="w-full mt-2 py-3 px-5 rounded-xl bg-primary text-white font-bold text-xs uppercase tracking-widest hover:bg-primary/90 active:scale-[0.99] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
 				>
 					{submitting ? (
 						<span>Enregistrement en cours...</span>

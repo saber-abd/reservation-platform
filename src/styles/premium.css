@@ -1,5 +1,9 @@
 @import "./base.css";
 
+@source "../components/premium";
+@source "../layouts/premium";
+@source "../pages/demo-premium";
+
 /* Démo Premium (garage) : thème .theme-premium + variante dashboard. */
 
 @font-face {

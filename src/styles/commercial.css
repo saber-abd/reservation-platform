@@ -1,5 +1,10 @@
 @import "./base.css";
 
+@source "../components/commercial";
+@source "../layouts/commercial";
+@source "../pages/galerie";
+@source "../pages/*.astro";
+
 /* Page commerciale + galerie : styles propres, sans lien avec les démos. */
 
 @font-face {
@@ -27,8 +32,8 @@
 }
 
 @theme inline {
-    --font-sans: 'Coolvetica', sans-serif;
-    --font-heading: 'Cocogoose', sans-serif;
+    --font-sans: sans-serif;
+    --font-heading: sans-serif;
 
     /* Commercial Galerie Palette */
     --color-prussian-blue: #001427;

@@ -1,5 +1,9 @@
 @import "./base.css";
 
+@source "../components/diamant";
+@source "../layouts/diamant";
+@source "../pages/demo-diamant";
+
 /*
  * Démo Diamant : site public (.theme-diamant) et espace pro / client
  * (.theme-diamant.dashboard-diamant).
