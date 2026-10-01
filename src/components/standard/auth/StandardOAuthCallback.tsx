@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getAccountType, enrollClientInDemo, createProfessional, getDemoTag } from '@/lib/queries';
 import { getBannedClientRecord, checkIsClientBannedInDb } from '@/lib/permissions';
+import { clearRejectedSession, consumeBanErrorFromUrl, fetchBanNotice, storeBanNotice } from '@/lib/ban';
 import CompleteProfileForm from '@/components/standard/auth/StandardCompleteProfileForm';
 
 export default function OAuthCallback() {
@@ -13,6 +14,15 @@ export default function OAuthCallback() {
 	useEffect(() => {
 		async function handleAuth() {
 			try {
+				// Compte banni : Supabase refuse la session et renvoie l'erreur dans l'URL (#error_code=user_banned).
+				if (consumeBanErrorFromUrl()) {
+					const bannedDemo = sessionStorage.getItem('oauth_demo_redirect') || localStorage.getItem('preferred_demo') || '/demo-standard';
+					await clearRejectedSession(bannedDemo.replace('/demo-', ''));
+					storeBanNotice(null);
+					window.location.replace(`${bannedDemo}/connexion?error=banned`);
+					return;
+				}
+
 				// Attendre un bref instant pour que supabase-js analyse le fragment d'URL #access_token=...
 				const { data: { session }, error } = await supabase.auth.getSession();
 				if (error) throw error;
@@ -55,13 +65,8 @@ export default function OAuthCallback() {
 					}
 
 					if (ban) {
-						await supabase.auth.signOut();
-						localStorage.removeItem('standard_client_avatar');
-						localStorage.removeItem('standard_client_email');
-						sessionStorage.setItem(
-							'ban_error_message',
-							`Connexion refusée : votre compte est suspendu par l'établissement. Motif : « ${ban.reason} ». L'accès à votre espace client et aux réservations est bloqué.`
-						);
+						await clearRejectedSession('standard');
+						storeBanNotice((await fetchBanNotice(user.email, user.id)) ?? { reason: ban.reason, bannedAt: null, bannedUntil: null });
 						window.location.replace(`${targetDemo}/connexion?error=banned`);
 						return;
 					}

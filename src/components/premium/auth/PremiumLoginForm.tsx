@@ -6,6 +6,8 @@ import { resendConfirmationEmail, signIn, getSession, getUser } from '@/lib/auth
 import { getAccountType, createProfessional, enrollClientInDemo, getDemoTag } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 import { getBannedClientRecord, checkIsClientBannedInDb, findProAccount, setProSession, setActiveProRole } from '@/lib/permissions';
+import { clearRejectedSession, consumeBanErrorFromUrl, fetchBanNotice, isBannedAuthError, takeStoredBanNotice, type BanNotice } from '@/lib/ban';
+import BanNoticePremium from '@/components/premium/auth/PremiumBanNotice';
 import CompleteProfileForm from '@/components/premium/auth/PremiumCompleteProfileForm';
 import { ShieldAlert } from 'lucide-react';
 
@@ -16,12 +18,19 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+const EMPTY_BAN: BanNotice = { reason: null, bannedAt: null, bannedUntil: null };
+
+function toNotice(ban: { reason: string; bannedAt: string }): BanNotice {
+	return { reason: ban.reason, bannedAt: ban.bannedAt, bannedUntil: null };
+}
+
 interface LoginFormProps {
 	basePath?: string;
 }
 
 export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {}) {
 	const [error, setError] = useState<string | null>(null);
+	const [ban, setBan] = useState<BanNotice | null>(null);
 	const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
 	const [resendStatus, setResendStatus] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
@@ -45,20 +54,31 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 	}
 
 	useEffect(() => {
-		// Check for ban error from OAuth redirect
-		if (typeof window !== 'undefined') {
-			const storedBanErr = sessionStorage.getItem('ban_error_message');
-			if (storedBanErr) {
-				setError(storedBanErr);
-				sessionStorage.removeItem('ban_error_message');
-			}
+		// Refus de connexion d'un compte banni : retour de l'écran OAuth (Supabase met l'erreur dans l'URL)
+		// ou redirection depuis la page de retour OAuth.
+		const storedBan = takeStoredBanNotice();
+		const bannedInUrl = consumeBanErrorFromUrl();
+		if (storedBan || bannedInUrl) {
+			setBan(storedBan ?? EMPTY_BAN);
+			clearRejectedSession('premium');
+			return;
 		}
 
 		async function checkExisting() {
 			try {
 				const session = await getSession();
 				if (session) {
-					const user = await getUser();
+					let user;
+					try {
+						user = await getUser();
+					} catch (e) {
+						// Session restée en cache alors que le compte a été banni depuis.
+						if (isBannedAuthError(e)) {
+							await clearRejectedSession('premium');
+							setBan((await fetchBanNotice(session.user.email, session.user.id)) ?? EMPTY_BAN);
+						}
+						return;
+					}
 					if (user) {
 						// Ban check (Local + BDD Supabase)
 						let ban = getBannedClientRecord(
@@ -79,10 +99,8 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 							}
 						}
 						if (ban) {
-							await supabase.auth.signOut();
-							localStorage.removeItem('premium_client_avatar');
-							localStorage.removeItem('premium_client_email');
-							setError(`Connexion refusée : votre compte est suspendu par l'établissement. Motif : « ${ban.reason} ». L'accès à votre espace client et aux réservations est bloqué.`);
+							await clearRejectedSession('premium');
+							setBan((await fetchBanNotice(user.email, user.id)) ?? toNotice(ban));
 							return;
 						}
 						await routeUser(user);
@@ -134,10 +152,8 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 			}
 		}
 		if (ban) {
-			await supabase.auth.signOut();
-			localStorage.removeItem('premium_client_avatar');
-			localStorage.removeItem('premium_client_email');
-			setError(`Connexion refusée : votre compte a été suspendu par l'établissement. Motif : « ${ban.reason} ». L'accès à votre espace client et aux réservations est bloqué.`);
+			await clearRejectedSession('premium');
+			setBan((await fetchBanNotice(user.email, user.id)) ?? toNotice(ban));
 			return;
 		}
 
@@ -179,6 +195,7 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 	async function onSubmit(values: FormValues) {
 		setSubmitting(true);
 		setError(null);
+		setBan(null);
 		setUnconfirmedEmail(null);
 
 		// Pre-check if client email is already banned (Local + BDD Supabase)
@@ -196,7 +213,7 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 			}
 		}
 		if (preBan) {
-			setError(`Connexion refusée : votre compte est suspendu par l'établissement. Motif : « ${preBan.reason} ». L'accès à votre espace client et aux réservations est bloqué.`);
+			setBan((await fetchBanNotice(values.email)) ?? toNotice(preBan));
 			setSubmitting(false);
 			return;
 		}
@@ -237,7 +254,11 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 			await routeUser(user);
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'Erreur de connexion.';
-			if (message.toLowerCase().includes('confirm')) {
+			if (isBannedAuthError(err)) {
+				// Compte verrouillé côté Supabase Auth (banned_until) : aucune session n'est ouverte.
+				await clearRejectedSession('premium');
+				setBan((await fetchBanNotice(values.email)) ?? EMPTY_BAN);
+			} else if (message.toLowerCase().includes('confirm')) {
 				setError("Votre adresse email n'a pas encore été confirmée. Vérifiez votre boîte mail (et vos spams).");
 				setUnconfirmedEmail(values.email);
 			} else {
@@ -301,6 +322,7 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 					Mot de passe oublié ?
 				</a>
 			</div>
+			{ban && <BanNoticePremium notice={ban} basePath={getEffectiveBasePath()} />}
 			{error && (
 				<div className="rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs md:text-sm text-rose-800 animate-in fade-in">
 					<div className="font-bold flex items-center gap-2 mb-1 text-rose-900">

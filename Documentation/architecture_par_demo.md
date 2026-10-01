@@ -35,6 +35,10 @@ Seul `src/components/shared/SmoothScroll.astro` (défilement Lenis, sans style) 
 
 La logique métier reste commune (`src/lib`, `src/config`) : requêtes Supabase, créneaux, fidélité, montants (`src/lib/money.ts` : `roundMoney` arrondit les sommes au centime, `formatEuros` les affiche en €). Les clés `localStorage` et événements `window` des composants Standard et Premium sont préfixés par leur démo (`standard_…`, `premium_…`). Les rôles Admin / Employé / Démo n'existent que dans la démo Diamant.
 
+## Compte banni à la connexion
+
+`src/lib/ban.ts` détecte le refus de Supabase Auth (`user_banned`, en réponse à l'email/mot de passe ou dans l'URL de retour Google), ferme la session locale et récupère motif et dates via la fonction `get_ban_status` (migration `supabase/migrations/0011_ban_status_lookup.sql`, à appliquer sur Supabase ; sans elle, repli sur la table `clients`). Chaque démo affiche le message avec son composant `<Démo>BanNotice` sur sa page de connexion.
+
 ## Longueur maximale des noms
 
 `MAX_NAME_LENGTH = 60` (`src/lib/limits.ts`) : `maxLength` sur les champs, validation zod (inscription, réservation), `clampName` dans les requêtes, et migration `supabase/migrations/0010_name_max_length.sql` qui tronque côté base. À appliquer sur Supabase.
