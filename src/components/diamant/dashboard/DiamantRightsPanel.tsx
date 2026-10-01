@@ -50,6 +50,7 @@ import {
 	RefreshCw
 } from 'lucide-react';
 import { MAX_NAME_LENGTH } from '@/lib/limits';
+import { supabase } from '@/lib/supabase';
 
 export default function DiamantRightsPanel() {
 	const [activeRole, setActiveRole] = useState<ProRole>('admin');
@@ -59,6 +60,8 @@ export default function DiamantRightsPanel() {
 	// Team Members State
 	const [members, setMembers] = useState<TeamMember[]>([]);
 	const [showAddModal, setShowAddModal] = useState(false);
+	const [showCreateChooser, setShowCreateChooser] = useState(false);
+	const [confirmClientSignup, setConfirmClientSignup] = useState(false);
 	const [newMemberName, setNewMemberName] = useState('');
 	const [newMemberEmail, setNewMemberEmail] = useState('');
 	const [newMemberSpecialty, setNewMemberSpecialty] = useState('');
@@ -283,6 +286,30 @@ export default function DiamantRightsPanel() {
 		}
 	}
 
+	function openCreateChooser() {
+		if (checkReadOnly()) return;
+		setConfirmClientSignup(false);
+		setShowCreateChooser(true);
+	}
+
+	function chooseAccountType(role: ProRole) {
+		setShowCreateChooser(false);
+		setNewMemberRole(role);
+		setShowAddModal(true);
+	}
+
+	// Un compte client s'inscrit lui-même : l'inscription ouvre une session client,
+	// on ferme donc d'abord la session pro pour ne pas transformer le compte pro en client.
+	async function goToClientSignup() {
+		try {
+			await supabase.auth.signOut();
+			clearProSession();
+		} catch (e) {
+			console.error('Erreur déconnexion:', e);
+		}
+		window.location.href = '/demo-diamant/inscription';
+	}
+
 	function handleCreateMember(e: React.FormEvent) {
 		e.preventDefault();
 		if (checkReadOnly()) return;
@@ -312,7 +339,7 @@ export default function DiamantRightsPanel() {
 				? `Compte Administrateur créé pour ${created.name} ! Vous pouvez vous connecter avec ${created.email}.`
 				: created.role === 'demo'
 				? `Compte Démo Commercial créé pour ${created.name} (Lecture seule). Vous pouvez vous connecter avec ${created.email}.`
-				: `Compte Collaborateur créé pour ${created.name} (Employé). Vous pouvez vous connecter avec ${created.email}.`
+				: `Compte Employé créé pour ${created.name}. Vous pouvez vous connecter avec ${created.email}.`
 		);
 	}
 
@@ -502,7 +529,7 @@ export default function DiamantRightsPanel() {
 							</span>
 						</div>
 						<p className="text-xs text-stone-500 mt-1 max-w-xl leading-relaxed">
-							Définissez vos comptes collaborateurs et administrateurs, configurez le mode démo commercial en lecture seule, et testez les permissions en direct.
+							Définissez vos comptes employés et administrateurs, configurez le mode démo commercial en lecture seule, et testez les permissions en direct.
 						</p>
 					</div>
 				</div>
@@ -598,54 +625,27 @@ export default function DiamantRightsPanel() {
 				<div className="space-y-6">
 					<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 						<div>
-							<h3 className="text-xl font-bold text-stone-900 tracking-tight">Comptes Professionnels & Collaborateurs</h3>
+							<h3 className="text-xl font-bold text-stone-900 tracking-tight">Comptes Professionnels & Employés</h3>
 							<p className="text-xs text-stone-500 mt-1">
 								Les employés accèdent uniquement aux 4 onglets opérationnels (Planning, Clientèle, Messagerie, Recherche). Le Profil Maison et les finances leur sont inaccessibles.
 							</p>
 						</div>
-						<div className="flex flex-wrap items-center gap-2 shrink-0 self-start sm:self-auto">
-							<button
-								type="button"
-								onClick={() => {
-									setNewMemberRole('admin');
-									setShowAddModal(true);
-								}}
-								className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-amber-600 text-white text-xs font-bold hover:bg-amber-700 transition-all shadow-xs cursor-pointer"
-							>
-								<ShieldCheck size={15} />
-								<span>Créer un compte Admin</span>
-							</button>
-							<button
-								type="button"
-								onClick={() => {
-									setNewMemberRole('employee');
-									setShowAddModal(true);
-								}}
-								className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-all shadow-xs cursor-pointer"
-							>
-								<UserPlus size={15} />
-								<span>Créer un compte Collaborateur</span>
-							</button>
-							<button
-								type="button"
-								onClick={() => {
-									setNewMemberRole('demo');
-									setShowAddModal(true);
-								}}
-								className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-purple-600 text-white text-xs font-bold hover:bg-purple-700 transition-all shadow-xs cursor-pointer"
-							>
-								<Eye size={15} />
-								<span>Créer un compte Démo</span>
-							</button>
-						</div>
+						<button
+							type="button"
+							onClick={openCreateChooser}
+							className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-all shadow-xs cursor-pointer shrink-0 self-start sm:self-auto"
+						>
+							<Plus size={15} />
+							<span>Créer un compte</span>
+						</button>
 					</div>
 
-					{/* Liste des collaborateurs */}
+					{/* Liste des employés */}
 					<div className="rounded-2xl border border-stone-200 bg-white overflow-hidden shadow-xs">
 						<table className="w-full text-left text-sm">
 							<thead className="bg-stone-50 text-xs uppercase font-bold text-stone-400 border-b border-stone-100">
 								<tr>
-									<th className="px-5 py-3.5">Collaborateur / Admin</th>
+									<th className="px-5 py-3.5">Employé / Admin</th>
 									<th className="px-5 py-3.5">Rôle & Permissions</th>
 									<th className="px-5 py-3.5">Statut</th>
 									<th className="px-5 py-3.5 text-right">Actions</th>
@@ -656,39 +656,14 @@ export default function DiamantRightsPanel() {
 									<tr>
 										<td colSpan={4} className="p-8 text-center text-xs text-stone-400">
 											Aucun compte configuré pour le moment.
-											<div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
+											<div className="mt-4 flex justify-center">
 												<button
 													type="button"
-													onClick={() => {
-														setNewMemberRole('admin');
-														setShowAddModal(true);
-													}}
-													className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold hover:bg-amber-700 transition-all cursor-pointer shadow-xs"
+													onClick={openCreateChooser}
+													className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-all cursor-pointer shadow-xs"
 												>
-													<ShieldCheck size={14} />
-													<span>Créer un compte Admin</span>
-												</button>
-												<button
-													type="button"
-													onClick={() => {
-														setNewMemberRole('employee');
-														setShowAddModal(true);
-													}}
-													className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-all cursor-pointer shadow-xs"
-												>
-													<UserPlus size={14} />
-													<span>Créer un compte Collaborateur</span>
-												</button>
-												<button
-													type="button"
-													onClick={() => {
-														setNewMemberRole('demo');
-														setShowAddModal(true);
-													}}
-													className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold hover:bg-purple-700 transition-all cursor-pointer shadow-xs"
-												>
-													<Eye size={14} />
-													<span>Créer un compte Démo</span>
+													<Plus size={14} />
+													<span>Créer un compte</span>
 												</button>
 											</div>
 										</td>
@@ -1016,7 +991,7 @@ export default function DiamantRightsPanel() {
 								<tr>
 									<th className="px-5 py-3.5">Module / Onglet</th>
 									<th className="px-5 py-3.5">Administrateur (Gérant)</th>
-									<th className="px-5 py-3.5">Employé (Collaborateur)</th>
+									<th className="px-5 py-3.5">Employé</th>
 									<th className="px-5 py-3.5">Règle de Sécurité</th>
 								</tr>
 							</thead>
@@ -1179,7 +1154,75 @@ export default function DiamantRightsPanel() {
 				</div>
 			)}
 
-			{/* MODAL AJOUT COLLABORATEUR / ADMIN / DÉMO */}
+			{/* CHOIX DU TYPE DE COMPTE */}
+			{showCreateChooser && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4" onClick={() => setShowCreateChooser(false)}>
+					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+						<div className="flex items-center justify-between pb-4 border-b border-stone-100">
+							<div>
+								<h4 className="font-bold text-stone-900 text-base">Créer un compte</h4>
+								<p className="text-xs text-stone-400">Choisissez le type de compte à créer</p>
+							</div>
+							<button
+								type="button"
+								onClick={() => setShowCreateChooser(false)}
+								className="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
+								aria-label="Fermer"
+							>
+								<X size={18} />
+							</button>
+						</div>
+
+						{confirmClientSignup ? (
+							<div className="pt-4 space-y-4">
+								<p className="text-sm text-stone-600">
+									Le compte client se crée depuis la page d'inscription du site. Vous allez être déconnecté de l'espace pro puis redirigé vers ce formulaire.
+								</p>
+								<div className="flex justify-end gap-2">
+									<button
+										type="button"
+										onClick={() => setConfirmClientSignup(false)}
+										className="px-4 py-2 rounded-xl border border-stone-200 text-xs font-bold text-stone-600 hover:bg-stone-50 transition-colors cursor-pointer"
+									>
+										Retour
+									</button>
+									<button
+										type="button"
+										onClick={goToClientSignup}
+										className="px-4 py-2 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-colors cursor-pointer"
+									>
+										Continuer vers l'inscription
+									</button>
+								</div>
+							</div>
+						) : (
+							<div className="pt-4 grid gap-2">
+								{([
+									{ key: 'client', label: 'Compte utilisateur', desc: 'Client du salon : réservations, fidélité, messagerie', icon: <User size={18} />, tone: 'bg-stone-100 text-stone-700' },
+									{ key: 'employee', label: 'Compte employé', desc: 'Accès limité aux 4 onglets opérationnels', icon: <UserPlus size={18} />, tone: 'bg-deep-teal-100 text-deep-teal-700' },
+									{ key: 'admin', label: 'Compte administrateur', desc: 'Accès intégral à tous les onglets et à la gestion', icon: <ShieldCheck size={18} />, tone: 'bg-amber-100 text-amber-700' },
+									{ key: 'demo', label: 'Compte démo', desc: 'Présentation commerciale en lecture seule', icon: <Eye size={18} />, tone: 'bg-purple-100 text-purple-700' },
+								] as const).map((option) => (
+									<button
+										key={option.key}
+										type="button"
+										onClick={() => (option.key === 'client' ? setConfirmClientSignup(true) : chooseAccountType(option.key))}
+										className="flex items-center gap-3 w-full rounded-xl border border-stone-200 p-3 text-left hover:border-deep-teal-300 hover:bg-stone-50 transition-colors cursor-pointer"
+									>
+										<span className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center ${option.tone}`}>{option.icon}</span>
+										<span>
+											<span className="block text-sm font-bold text-stone-900">{option.label}</span>
+											<span className="block text-xs text-stone-400">{option.desc}</span>
+										</span>
+									</button>
+								))}
+							</div>
+						)}
+					</div>
+				</div>
+			)}
+
+			{/* MODAL AJOUT EMPLOYÉ / ADMIN / DÉMO */}
 			{showAddModal && (
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
 					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95">
@@ -1200,7 +1243,7 @@ export default function DiamantRightsPanel() {
 											? 'Nouveau Compte Administrateur' 
 											: newMemberRole === 'demo' 
 											? 'Nouveau Compte Démo Commercial' 
-											: 'Nouveau Compte Collaborateur'}
+											: 'Nouveau Compte Employé'}
 									</h4>
 									<p className="text-xs text-stone-400">
 										{newMemberRole === 'admin' 
@@ -1365,7 +1408,7 @@ export default function DiamantRightsPanel() {
 										? 'Créer le compte Administrateur' 
 										: newMemberRole === 'demo'
 										? 'Créer le compte Démo (Lecture seule)'
-										: 'Créer le compte Collaborateur'}
+										: 'Créer le compte Employé'}
 								</button>
 							</div>
 						</form>

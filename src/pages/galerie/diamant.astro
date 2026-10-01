@@ -18,6 +18,53 @@ import {
 	LineChart,
 	CalendarCheck
 } from 'lucide-react';
+
+const code = (name: string) => `<code class="text-jasmine-400 text-xs">${name}</code>`;
+
+const features = [
+	{
+		icon: Users,
+		tag: 'RBAC avancé',
+		title: 'Équipe & Rôles Granulaires',
+		description: `Gestion complète des profils (Admin, Employé, Démo). Verrouillage physique des zones sensibles (${code('DiamantAdminOnlyGuard')}), assignation personnalisée des prestations et plannings dédiés par praticien.`,
+		benefit: 'Isolation stricte des permissions',
+	},
+	{
+		icon: ShieldAlert,
+		tag: 'Anti-no-show',
+		title: 'Modération & Bannissement',
+		description: `Protection active contre les abus : bannissement immédiat en 1 clic avec motif consigné, révocation instantanée des sessions (${code('banned_until')}) et blocage préventif au tunnel de réservation. Purge RGPD en cascade intégrée.`,
+		benefit: 'Sérénité & respect du planning',
+	},
+	{
+		icon: Search,
+		tag: 'Ultra-rapide',
+		title: 'Recherche Unifiée Instantanée',
+		description: "Moteur d'indexation instantané sur l'ensemble de votre base : retrouvez n'importe quel rendez-vous, historique ou fiche client en tapant son nom, son numéro de téléphone, son adresse e-mail ou sa prestation.",
+		benefit: 'Recherche globale sans latence',
+	},
+	{
+		icon: MessageSquare,
+		tag: 'Messagerie salon',
+		title: 'Fil de Discussion Dédié',
+		description: "Canal de communication direct et confidentiel pro ↔ client intégré à l'application. Compteur de messages non lus, accusés de lecture et centralisation des échanges préparatoires ou demandes sur-mesure.",
+		benefit: 'Relation client fluide et sans intermédiaire',
+	},
+	{
+		icon: Award,
+		tag: 'Fidélité prestige',
+		title: 'Programme VIP Gamifié',
+		description: "Parcours fidélité statutaire à 4 niveaux d'excellence : <em>Cristal</em>, <em>Argent</em>, <em>Or</em> et <em>Diamant</em>. Calcul automatique selon l'assiduité avec badge visible et déblocage de rituels et privilèges exclusifs.",
+		benefit: 'Rétention et engagement maximisés',
+	},
+	{
+		icon: LineChart,
+		tag: 'Pilotage & suivi',
+		title: 'Statistiques & Notes Privées',
+		description: `Graphiques d'activité interactifs (Recharts) analysant taux de réservation et tendances, couplés à un carnet technique confidentiel (${code('client_notes')}) consignant formules, colorimétrie et sensibilités.`,
+		benefit: 'Personnalisation extrême à chaque visite',
+	},
+];
 ---
 
 <CommercialLayout title="Formules - Démo Diamant" description="Découvrez la démo Diamant : Le sur-mesure absolu pour votre entreprise.">
@@ -122,7 +169,7 @@ import {
 		
 		<div class="mx-auto max-w-6xl px-6 relative z-10">
 			<div class="text-center mb-20" data-aos="fade-up">
-				<div class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-deep-teal-900/40 backdrop-blur-md border border-deep-teal-500/30 text-deep-teal-300 font-bold mb-6 text-sm">
+				<div class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/5 border border-white/10 text-stone-300 font-bold mb-6 text-sm">
 					<Sparkles size={16} class="text-jasmine-400" />
 					Nouvelles Capacités Métier
 				</div>
@@ -133,119 +180,19 @@ import {
 			</div>
 
 			<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-				<!-- Card 1: Équipe & Permissions RBAC -->
-				<div data-aos="fade-up" data-aos-delay="0" class="group h-full bg-white/[0.07] border border-white/10 p-8 rounded-3xl hover:bg-white/10 hover:border-deep-teal-500/40 transition-all duration-300 flex flex-col justify-between">
-					<div>
-						<div class="flex items-center justify-between mb-6">
-							<div class="p-3 bg-deep-teal-900/50 rounded-2xl border border-deep-teal-500/30 text-deep-teal-300 group-hover:scale-110 group-hover:text-jasmine-300 transition-all">
-								<Users className="w-8 h-8" />
-							</div>
-							<span class="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full bg-deep-teal-500/10 text-deep-teal-300 border border-deep-teal-500/20">RBAC Avancé</span>
+				{features.map((feature, i) => (
+					<div data-aos="fade-up" data-aos-delay={i * 100} class="group h-full bg-white/[0.07] border border-white/10 p-8 rounded-3xl hover:-translate-y-1 hover:bg-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between">
+						<div>
+							<feature.icon className="w-10 h-10 text-jasmine-400 mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:text-white" />
+							<h3 class="text-2xl font-bold text-white mb-3">{feature.title}</h3>
+							<p class="text-stone-300 leading-relaxed text-sm" set:html={feature.description} />
 						</div>
-						<h3 class="text-2xl font-bold text-white mb-3">Équipe & Rôles Granulaires</h3>
-						<p class="text-stone-300 leading-relaxed text-sm">
-							Gestion complète des profils (Admin, Collaborateur, Démo). Verrouillage physique des zones sensibles (<code class="text-deep-teal-300 text-xs">DiamantAdminOnlyGuard</code>), assignation personnalisée des prestations et plannings dédiés par praticien.
-						</p>
-					</div>
-					<div class="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs text-jasmine-300 font-semibold">
-						<span>✓ Isolation stricte des permissions</span>
-					</div>
-				</div>
-
-				<!-- Card 2: Protection Anti-No-Show & Modération -->
-				<div data-aos="fade-up" data-aos-delay="100" class="group h-full bg-white/[0.07] border border-white/10 p-8 rounded-3xl hover:bg-white/10 hover:border-deep-teal-500/40 transition-all duration-300 flex flex-col justify-between">
-					<div>
-						<div class="flex items-center justify-between mb-6">
-							<div class="p-3 bg-deep-teal-900/50 rounded-2xl border border-deep-teal-500/30 text-jasmine-400 group-hover:scale-110 group-hover:text-white transition-all">
-								<ShieldAlert className="w-8 h-8" />
-							</div>
-							<span class="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full bg-jasmine-500/10 text-jasmine-300 border border-jasmine-500/20">Anti-No-Show</span>
+						<div class="mt-6 pt-4 border-t border-white/10">
+							<p class="text-[11px] uppercase tracking-widest font-bold text-stone-500">{feature.tag}</p>
+							<p class="mt-1 text-sm text-stone-200 font-medium">{feature.benefit}</p>
 						</div>
-						<h3 class="text-2xl font-bold text-white mb-3">Modération & Bannissement</h3>
-						<p class="text-stone-300 leading-relaxed text-sm">
-							Protection active contre les abus : bannissement immédiat en 1 clic avec motif consigné, révocation instantanée des sessions (<code class="text-deep-teal-300 text-xs">banned_until</code>) et blocage préventif au tunnel de réservation. Purge RGPD en cascade intégrée.
-						</p>
 					</div>
-					<div class="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs text-jasmine-300 font-semibold">
-						<span>✓ Sérénité & Respect du planning</span>
-					</div>
-				</div>
-
-				<!-- Card 3: Recherche Multi-Critères Temps Réel -->
-				<div data-aos="fade-up" data-aos-delay="200" class="group h-full bg-white/[0.07] border border-white/10 p-8 rounded-3xl hover:bg-white/10 hover:border-deep-teal-500/40 transition-all duration-300 flex flex-col justify-between">
-					<div>
-						<div class="flex items-center justify-between mb-6">
-							<div class="p-3 bg-deep-teal-900/50 rounded-2xl border border-deep-teal-500/30 text-deep-teal-300 group-hover:scale-110 group-hover:text-jasmine-300 transition-all">
-								<Search className="w-8 h-8" />
-							</div>
-							<span class="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full bg-deep-teal-500/10 text-deep-teal-300 border border-deep-teal-500/20">Ultra-Rapide</span>
-						</div>
-						<h3 class="text-2xl font-bold text-white mb-3">Recherche Unifiée Instantanée</h3>
-						<p class="text-stone-300 leading-relaxed text-sm">
-							Moteur d'indexation instantané sur l'ensemble de votre base : retrouvez n'importe quel rendez-vous, historique ou fiche client en tapant son nom, son numéro de téléphone, son adresse e-mail ou sa prestation.
-						</p>
-					</div>
-					<div class="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs text-jasmine-300 font-semibold">
-						<span>✓ Recherche globale sans latence</span>
-					</div>
-				</div>
-
-				<!-- Card 4: Messagerie Instantanée Salon-Client -->
-				<div data-aos="fade-up" data-aos-delay="300" class="group h-full bg-white/[0.07] border border-white/10 p-8 rounded-3xl hover:bg-white/10 hover:border-deep-teal-500/40 transition-all duration-300 flex flex-col justify-between">
-					<div>
-						<div class="flex items-center justify-between mb-6">
-							<div class="p-3 bg-deep-teal-900/50 rounded-2xl border border-deep-teal-500/30 text-jasmine-400 group-hover:scale-110 group-hover:text-white transition-all">
-								<MessageSquare className="w-8 h-8" />
-							</div>
-							<span class="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full bg-jasmine-500/10 text-jasmine-300 border border-jasmine-500/20">Messagerie Salon</span>
-						</div>
-						<h3 class="text-2xl font-bold text-white mb-3">Fil de Discussion Dédié</h3>
-						<p class="text-stone-300 leading-relaxed text-sm">
-							Canal de communication direct et confidentiel pro ↔ client intégré à l'application. Compteur de messages non lus, accusés de lecture et centralisation des échanges préparatoires ou demandes sur-mesure.
-						</p>
-					</div>
-					<div class="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs text-jasmine-300 font-semibold">
-						<span>✓ Relation client fluide et sans intermédiaire</span>
-					</div>
-				</div>
-
-				<!-- Card 5: Programme VIP 4 Paliers -->
-				<div data-aos="fade-up" data-aos-delay="400" class="group h-full bg-white/[0.07] border border-white/10 p-8 rounded-3xl hover:bg-white/10 hover:border-deep-teal-500/40 transition-all duration-300 flex flex-col justify-between">
-					<div>
-						<div class="flex items-center justify-between mb-6">
-							<div class="p-3 bg-deep-teal-900/50 rounded-2xl border border-deep-teal-500/30 text-deep-teal-300 group-hover:scale-110 group-hover:text-jasmine-300 transition-all">
-								<Award className="w-8 h-8" />
-							</div>
-							<span class="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full bg-deep-teal-500/10 text-deep-teal-300 border border-deep-teal-500/20">Fidélité Prestige</span>
-						</div>
-						<h3 class="text-2xl font-bold text-white mb-3">Programme VIP Gamifié</h3>
-						<p class="text-stone-300 leading-relaxed text-sm">
-							Parcours fidélité statutaire à 4 niveaux d'excellence : <em>Cristal</em>, <em>Argent</em>, <em>Or</em> et <em>Diamant</em>. Calcul automatique selon l'assiduité avec badge visible et déblocage de rituels et privilèges exclusifs.
-						</p>
-					</div>
-					<div class="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs text-jasmine-300 font-semibold">
-						<span>✓ Rétention et engagement maximisés</span>
-					</div>
-				</div>
-
-				<!-- Card 6: Télémétrie Graphique & Notes Privées -->
-				<div data-aos="fade-up" data-aos-delay="500" class="group h-full bg-white/[0.07] border border-white/10 p-8 rounded-3xl hover:bg-white/10 hover:border-deep-teal-500/40 transition-all duration-300 flex flex-col justify-between">
-					<div>
-						<div class="flex items-center justify-between mb-6">
-							<div class="p-3 bg-deep-teal-900/50 rounded-2xl border border-deep-teal-500/30 text-jasmine-400 group-hover:scale-110 group-hover:text-white transition-all">
-								<LineChart className="w-8 h-8" />
-							</div>
-							<span class="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full bg-jasmine-500/10 text-jasmine-300 border border-jasmine-500/20">Pilotage & Suivi</span>
-						</div>
-						<h3 class="text-2xl font-bold text-white mb-3">Télémétrie & Notes Privées</h3>
-						<p class="text-stone-300 leading-relaxed text-sm">
-							Graphiques d'activité interactifs (Recharts) analysant taux de réservation et tendances, couplés à un carnet technique confidentiel (<code class="text-deep-teal-300 text-xs">client_notes</code>) consignant formules, colorimétrie et sensibilités.
-						</p>
-					</div>
-					<div class="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs text-jasmine-300 font-semibold">
-						<span>✓ Personnalisation extrême à chaque visite</span>
-					</div>
-				</div>
+				))}
 			</div>
 		</div>
 	</section>
@@ -296,7 +243,7 @@ import {
 							<KeySquare className="w-8 h-8 text-deep-teal-600 shrink-0 mt-1" />
 							<div>
 								<h4 class="font-bold text-xl text-stone-900">Sécurité & Permissions RBAC</h4>
-								<p class="text-stone-600 mt-2">Authentification sécurisée, Row Level Security (RLS) PostgreSQL, isolation des rôles collaborateur vs admin et conformité RGPD stricte.</p>
+								<p class="text-stone-600 mt-2">Authentification sécurisée, Row Level Security (RLS) PostgreSQL, isolation des rôles employé vs admin et conformité RGPD stricte.</p>
 							</div>
 						</div>
 						<div class="flex gap-4 items-start">

@@ -210,7 +210,7 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 				return;
 			}
 			if (proAccount.status === 'suspended') {
-				setError("Connexion refusée : votre compte collaborateur est actuellement suspendu par l'administrateur.");
+				setError("Connexion refusée : votre compte employé est actuellement suspendu par l'administrateur.");
 				setSubmitting(false);
 				return;
 			}

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
 import { getAppointmentsForProfessional, getAllServices, type Appointment, type Service } from '@/lib/queries';
+import { formatEuros, roundMoney } from '@/lib/money';
 
 type PeriodPreset = '7d' | '30d' | '365d' | 'custom';
 
@@ -108,7 +109,7 @@ export default function StatsPanel() {
 			const start = new Date(a.start_time);
 			return a.status === 'cancelled' && start >= rangeStart && start <= rangeEnd;
 		});
-		const revenueInRange = inRange.reduce((sum, a) => sum + (priceByService.get(a.service_id) ?? 0), 0);
+		const revenueInRange = roundMoney(inRange.reduce((sum, a) => sum + (priceByService.get(a.service_id) ?? 0), 0));
 
 		const countByService = new Map<string, number>();
 		for (const a of inRange) {
@@ -150,7 +151,7 @@ export default function StatsPanel() {
 		},
 		{
 			label: `Chiffre d'affaires estimé (${presetLabels[preset].toLowerCase()})`,
-			value: `${stats.revenueInRange} €`,
+			value: formatEuros(stats.revenueInRange),
 		},
 		{
 			label: `Annulations (${presetLabels[preset].toLowerCase()})`,

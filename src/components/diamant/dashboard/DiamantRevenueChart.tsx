@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import type { Appointment } from '@/lib/queries';
+import { formatEuros, roundMoney } from '@/lib/money';
 
 type AppointmentWithService = Appointment & {
 	services: { name: string; duration_minutes: number; price: number } | null;
@@ -17,7 +18,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 			<div className="bg-white border border-stone-200 p-4 rounded-xl shadow-lg">
 				<p className="text-stone-900 font-bold mb-2">{label}</p>
 				<p className="text-stone-700 text-sm">
-					Chiffre d'affaires : <span className="font-bold">{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(payload[0].value)}</span>
+					Chiffre d'affaires : <span className="font-bold">{formatEuros(payload[0].value)}</span>
 				</p>
 				<p className="text-stone-500 text-sm mt-1">
 					Rendez-vous : <span className="font-bold text-stone-600">{payload[1].value}</span>
@@ -53,7 +54,7 @@ export default function DiamantRevenueChart({ appointments = [], range = 'month'
 
 		return Object.entries(orderedGrouped).map(([name, values]) => ({
 			name,
-			ca: values.ca,
+			ca: roundMoney(values.ca),
 			rdv: values.rdv
 		}));
 	}, [appointments, range]);
@@ -93,7 +94,7 @@ export default function DiamantRevenueChart({ appointments = [], range = 'month'
 						tick={{ fill: '#78716c', fontSize: 12, fontWeight: 600 }}
 						axisLine={false}
 						tickLine={false}
-						tickFormatter={(value) => `${value}€`}
+						tickFormatter={(value) => formatEuros(value)}
 					/>
 					<Tooltip content={<CustomTooltip />} cursor={{ stroke: '#f0fdfa', strokeWidth: 2 }} />
 					<Area 

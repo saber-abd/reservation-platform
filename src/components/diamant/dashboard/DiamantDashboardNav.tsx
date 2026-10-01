@@ -85,7 +85,7 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 		{ href: `${basePath}/dashboard/clients`, label: 'Clientèle', icon: Users, roles: ['admin', 'employee', 'demo'] },
 		{ href: `${basePath}/dashboard/messages`, label: 'Messagerie', icon: MessageSquare, badge: unreadCount, roles: ['admin', 'employee', 'demo'] },
 		{ href: `${basePath}/dashboard/services`, label: 'Gestion des prestations', icon: Scissors, roles: ['admin', 'demo'] },
-		{ href: `${basePath}/dashboard/statistiques`, label: 'Performances', icon: BarChart3, roles: ['admin', 'demo'] },
+		{ href: `${basePath}/dashboard/statistiques`, label: 'Statistiques', icon: BarChart3, roles: ['admin', 'demo'] },
 		{ href: `${basePath}/dashboard/recherche`, label: 'Recherche', icon: Search, roles: ['admin', 'employee', 'demo'] },
 		{ href: `${basePath}/dashboard/profil`, label: 'Profil Maison', icon: Settings, roles: ['admin', 'demo'] },
 		{ href: `${basePath}/dashboard/droits`, label: 'Gestion des droits', icon: ShieldCheck, roles: ['admin', 'demo'] },
@@ -178,7 +178,7 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 
 			<div className="mb-2 px-2">
 				<p className="text-xs font-bold text-stone-400 uppercase tracking-widest">
-					{role === 'admin' ? 'Espace Administrateur' : role === 'demo' ? 'Espace Découverte Démo' : 'Espace Collaborateur'}
+					{role === 'admin' ? 'Espace Administrateur' : role === 'demo' ? 'Espace Découverte Démo' : 'Espace Employé'}
 				</p>
 			</div>
 

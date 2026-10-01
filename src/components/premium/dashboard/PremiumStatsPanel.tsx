@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
 import { getAppointmentsForProfessional, getAllServices, type Appointment, type Service } from '@/lib/queries';
+import { formatEuros, roundMoney } from '@/lib/money';
 
 const PremiumStatsCharts = lazy(() => import('./PremiumStatsCharts'));
 
@@ -48,7 +49,7 @@ export default function PremiumStatsPanel() {
 			return start >= rangeStart && start <= now;
 		});
 
-		const revenueInRange = inRange.reduce((sum, a) => sum + (priceByService.get(a.service_id) ?? 0), 0);
+		const revenueInRange = roundMoney(inRange.reduce((sum, a) => sum + (priceByService.get(a.service_id) ?? 0), 0));
 
 		// Group by day for the chart
 		const revByDay = new Map<string, number>();
@@ -65,7 +66,7 @@ export default function PremiumStatsPanel() {
 
 		const revenueChartData = Array.from(revByDay.entries()).map(([date, revenue]) => ({
 			date: formatDate(date),
-			revenue,
+			revenue: roundMoney(revenue),
 		}));
 
 		// Group by service
@@ -77,14 +78,14 @@ export default function PremiumStatsPanel() {
 		const serviceChartData = Array.from(countByService.entries()).map(([id, count]) => ({
 			name: nameByService.get(id) || 'Inconnu',
 			count,
-			revenue: count * (priceByService.get(id) ?? 0)
+			revenue: roundMoney(count * (priceByService.get(id) ?? 0))
 		})).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
 
 		return {
 			stats: {
 				appointmentsCount: inRange.length,
 				revenue: revenueInRange,
-				avgTicket: inRange.length ? Math.round(revenueInRange / inRange.length) : 0,
+				avgTicket: inRange.length ? roundMoney(revenueInRange / inRange.length) : 0,
 			},
 			revenueData: revenueChartData,
 			serviceData: serviceChartData
@@ -97,7 +98,7 @@ export default function PremiumStatsPanel() {
 	return (
 		<div className="space-y-8 animate-[fade-in_0.5s_ease-out]">
 			<div>
-				<h1 className="text-3xl font-black text-stone-900 uppercase tracking-widest font-[var(--font-heading)]">Télémétrie</h1>
+				<h1 className="text-3xl font-black text-stone-900 uppercase tracking-widest font-[var(--font-heading)]">Statistiques</h1>
 				<p className="mt-2 text-stone-500 font-medium">Analyse des performances et statistiques d'activité.</p>
 			</div>
 
@@ -122,7 +123,7 @@ export default function PremiumStatsPanel() {
 				<div className="bg-white border border-stone-200 rounded-3xl p-8 relative overflow-hidden group shadow-sm transition-all hover:shadow-md hover:border-primary/30">
 					<div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
 					<p className="text-stone-500 text-sm font-bold uppercase tracking-wider mb-2">Chiffre d'affaires</p>
-					<p className="text-4xl font-black text-stone-900 font-[var(--font-heading)]">{stats.revenue} €</p>
+					<p className="text-4xl font-black text-stone-900 font-[var(--font-heading)]">{formatEuros(stats.revenue)}</p>
 				</div>
 				<div className="bg-white border border-stone-200 rounded-3xl p-8 relative overflow-hidden group shadow-sm transition-all hover:shadow-md hover:border-primary/30">
 					<div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -132,7 +133,7 @@ export default function PremiumStatsPanel() {
 				<div className="bg-white border border-stone-200 rounded-3xl p-8 relative overflow-hidden group shadow-sm transition-all hover:shadow-md hover:border-primary/30">
 					<div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
 					<p className="text-stone-500 text-sm font-bold uppercase tracking-wider mb-2">Panier Moyen</p>
-					<p className="text-4xl font-black text-stone-900 font-[var(--font-heading)]">{stats.avgTicket} €</p>
+					<p className="text-4xl font-black text-stone-900 font-[var(--font-heading)]">{formatEuros(stats.avgTicket)}</p>
 				</div>
 			</div>
 

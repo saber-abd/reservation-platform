@@ -7,7 +7,7 @@ const links = [
 	{ label: 'Services', href: '/dashboard/services', icon: <Scissors size={16} /> },
 	{ label: 'Disponibilités', href: '/dashboard/disponibilites', icon: <Calendar size={16} /> },
 	{ label: 'Pilotes', href: '/dashboard/clients', icon: <Users size={16} /> },
-	{ label: 'Télémétrie', href: '/dashboard/statistiques', icon: <BarChart3 size={16} /> },
+	{ label: 'Statistiques', href: '/dashboard/statistiques', icon: <BarChart3 size={16} /> },
 	{ label: 'Mécanicien', href: '/dashboard/profil', icon: <UserCircle size={16} /> },
 ];
 

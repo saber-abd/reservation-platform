@@ -4,6 +4,7 @@ import { getPrimaryProfessional, getDemoTag, type Appointment } from '@/lib/quer
 import { generateDiamantDemoAppointments, DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
 import DiamantNewClientsModal, { type PeriodClientDetail } from './DiamantNewClientsModal';
 import { ArrowUpRight, Users, Calendar, TrendingUp, Clock, MapPin, ChevronDown } from 'lucide-react';
+import { formatEuros, roundMoney } from '@/lib/money';
 
 // recharts (~350 Ko) n'est chargé que lorsque le graphique est affiché.
 const DiamantRevenueChart = lazy(() => import('./DiamantRevenueChart'));
@@ -95,7 +96,7 @@ export default function DiamantDashboardOverview() {
 			// Fix : stocker les rendez-vous dans le state pour alimenter DiamantRevenueChart
 			setAppointments(completed);
 
-			const totalCa = completed.reduce((sum, r) => sum + (r.services?.price || 0), 0);
+			const totalCa = roundMoney(completed.reduce((sum, r) => sum + (r.services?.price || 0), 0));
 			const panierMoyen = completed.length > 0 ? totalCa / completed.length : 0;
 
 			// Détail des nouveaux clients
@@ -241,7 +242,7 @@ export default function DiamantDashboardOverview() {
 								<span className="text-xs font-bold text-stone-400 group-hover:text-deep-teal-500 transition-colors flex items-center gap-1">Détails <ArrowUpRight size={12}/></span>
 							</div>
 							<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Chiffre d'Affaires</p>
-							<p className="text-2xl font-black text-stone-800 font-coolvetica">{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(stats.ca)}</p>
+							<p className="text-2xl font-black text-stone-800 font-coolvetica">{formatEuros(stats.ca)}</p>
 						</a>
 
 						<a href="/demo-diamant/dashboard/disponibilites" className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-jasmine-200 hover:shadow-md transition-all card-hover group">
@@ -278,7 +279,7 @@ export default function DiamantDashboardOverview() {
 								<span className="text-xs font-bold text-stone-400 group-hover:text-jasmine-600 transition-colors flex items-center gap-1">Détails <ArrowUpRight size={12}/></span>
 							</div>
 							<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Panier Moyen</p>
-							<p className="text-2xl font-black text-stone-800 font-coolvetica">{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(stats.panier)}</p>
+							<p className="text-2xl font-black text-stone-800 font-coolvetica">{formatEuros(stats.panier)}</p>
 						</a>
 					</div>
 

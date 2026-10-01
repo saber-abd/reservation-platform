@@ -1,4 +1,5 @@
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { formatEuros } from '@/lib/money';
 
 // Graphiques séparés du panneau pour que recharts (~350 Ko) soit chargé à part (React.lazy).
 interface Props {
@@ -22,8 +23,9 @@ export default function PremiumStatsCharts({ revenueData, serviceData }: Props) 
 							</defs>
 							<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
 							<XAxis dataKey="date" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-							<YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}€`} />
+							<YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatEuros(value)} />
 							<Tooltip 
+								formatter={(value) => [formatEuros(Number(value)), 'CA']}
 								contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', color: '#0f172a', borderRadius: '8px' }}
 								itemStyle={{ color: '#e11d48' }}
 							/>
@@ -39,9 +41,10 @@ export default function PremiumStatsCharts({ revenueData, serviceData }: Props) 
 					<ResponsiveContainer width="100%" height="100%">
 						<BarChart data={serviceData} layout="vertical" margin={{ top: 0, right: 0, left: 40, bottom: 0 }}>
 							<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={true} vertical={false} />
-							<XAxis type="number" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+							<XAxis type="number" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => formatEuros(value)} />
 							<YAxis dataKey="name" type="category" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} width={100} />
 							<Tooltip 
+								formatter={(value) => [formatEuros(Number(value)), 'CA']}
 								contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', color: '#0f172a', borderRadius: '8px' }}
 								cursor={{ fill: '#f1f5f9' }}
 							/>

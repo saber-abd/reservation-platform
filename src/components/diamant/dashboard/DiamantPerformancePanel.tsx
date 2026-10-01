@@ -4,6 +4,7 @@ import { getPrimaryProfessional, getDemoTag, type Appointment } from '@/lib/quer
 import { generateDiamantDemoAppointments, DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
 import DiamantNewClientsModal, { type PeriodClientDetail } from './DiamantNewClientsModal';
 import { TrendingUp, Calendar, Users, ArrowUpRight, BarChart3, Scissors, Award, Clock } from 'lucide-react';
+import { formatEuros, roundMoney } from '@/lib/money';
 
 // recharts (~350 Ko) n'est chargé que lorsque le graphique est affiché.
 const DiamantRevenueChart = lazy(() => import('./DiamantRevenueChart'));
@@ -113,7 +114,7 @@ export default function DiamantPerformancePanel() {
 	}
 
 	// Calcul des KPIs
-	const totalCa = useMemo(() => appointments.reduce((sum, r) => sum + (r.services?.price || 0), 0), [appointments]);
+	const totalCa = useMemo(() => roundMoney(appointments.reduce((sum, r) => sum + (r.services?.price || 0), 0)), [appointments]);
 	const rdvCount = appointments.length;
 	const panierMoyen = rdvCount > 0 ? Math.round(totalCa / rdvCount) : 0;
 	const newClientsCount = periodClients.length;
@@ -135,7 +136,7 @@ export default function DiamantPerformancePanel() {
 			.map(([name, { count, ca }]) => ({
 				name,
 				count,
-				ca,
+				ca: roundMoney(ca),
 				percentage: Math.round((count / total) * 100)
 			}))
 			.sort((a, b) => b.count - a.count)
@@ -222,7 +223,7 @@ export default function DiamantPerformancePanel() {
 					</div>
 					<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Chiffre d'Affaires</p>
 					<p className="text-2xl font-black text-stone-800 font-coolvetica">
-						{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(totalCa)}
+						{formatEuros(totalCa)}
 					</p>
 				</div>
 
@@ -270,7 +271,7 @@ export default function DiamantPerformancePanel() {
 					</div>
 					<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Panier Moyen</p>
 					<p className="text-2xl font-black text-stone-800 font-coolvetica">
-						{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(panierMoyen)}
+						{formatEuros(panierMoyen)}
 					</p>
 				</div>
 			</div>
@@ -306,7 +307,7 @@ export default function DiamantPerformancePanel() {
 										<span className="text-stone-700 text-sm font-medium">{svc.name} ({svc.count}x)</span>
 										<div className="text-right">
 											<span className="text-deep-teal-600 font-bold text-sm font-coolvetica">{svc.percentage}%</span>
-											<span className="text-[11px] text-stone-400 ml-2 font-medium font-coolvetica">({svc.ca}€)</span>
+											<span className="text-[11px] text-stone-400 ml-2 font-medium font-coolvetica">({formatEuros(svc.ca)})</span>
 										</div>
 									</div>
 									<div className="w-full bg-stone-100 rounded-full h-2 overflow-hidden">
