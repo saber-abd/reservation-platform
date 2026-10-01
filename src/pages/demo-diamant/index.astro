@@ -48,7 +48,7 @@ const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 
 			<!-- Logo SVG animé -->
 			<div class="h-[420px] md:h-[520px] relative w-full section-fade" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
-				<Diamant3DLogo client:load />
+				<Diamant3DLogo client:idle />
 			</div>
 		</div>
 
@@ -65,7 +65,7 @@ const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 			<div class="grid items-center gap-16 md:grid-cols-2">
 				<div class="relative section-fade" data-aos="fade-right" data-aos-duration="800">
 					<div class="overflow-hidden rounded-2xl border border-stone-100 aspect-[4/5] shadow-md">
-						<img src="/images/about_salon.jpg" alt="Ambiance salon" class="h-full w-full object-cover hover:scale-105 transition-transform duration-700" />
+						<img src="/images/about_salon.jpg" loading="lazy" decoding="async" alt="Ambiance salon" class="h-full w-full object-cover hover:scale-105 transition-transform duration-700" />
 					</div>
 					<!-- Badge overlay -->
 					<div class="absolute -bottom-4 -right-4 bg-white border border-stone-200 rounded-2xl p-4 shadow-lg" data-aos="zoom-in" data-aos-delay="300">
@@ -124,7 +124,7 @@ const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 			</div>
 			
 			<div class="section-fade" data-aos="fade-up" data-aos-delay="150">
-				<ServicesCarousel client:load limit={6} basePath="/demo-diamant" />
+				<ServicesCarousel client:visible limit={6} basePath="/demo-diamant" />
 			</div>
 		</div>
 	</section>
@@ -137,7 +137,7 @@ const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 				<h2 class="text-3xl md:text-4xl font-bold text-stone-900">L'avis de notre clientèle</h2>
 			</div>
 			<div class="section-fade" data-aos="fade-up" data-aos-delay="150">
-				<TestimonialsCarousel client:load testimonials={siteConfig.testimonials} />
+				<TestimonialsCarousel client:visible testimonials={siteConfig.testimonials} />
 			</div>
 		</div>
 	</section>

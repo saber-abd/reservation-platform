@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getPrimaryProfessional, getDemoTag, type Appointment } from '@/lib/queries';
 import { generateDiamantDemoAppointments, DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
-import DiamantRevenueChart from './DiamantRevenueChart';
 import DiamantNewClientsModal, { type PeriodClientDetail } from './DiamantNewClientsModal';
 import { TrendingUp, Calendar, Users, ArrowUpRight, BarChart3, Scissors, Award, Clock } from 'lucide-react';
+
+// recharts (~350 Ko) n'est chargé que lorsque le graphique est affiché.
+const DiamantRevenueChart = lazy(() => import('./DiamantRevenueChart'));
 
 type AppointmentWithService = Appointment & {
 	services: { name: string; duration_minutes: number; price: number } | null;
@@ -284,7 +286,9 @@ export default function DiamantPerformancePanel() {
 						{appointments.length} prestation{appointments.length > 1 ? 's' : ''}
 					</span>
 				</div>
-				<DiamantRevenueChart appointments={appointments} range={range} />
+				<Suspense fallback={<div className="animate-pulse h-64 bg-stone-100 rounded-xl"></div>}>
+					<DiamantRevenueChart appointments={appointments} range={range} />
+				</Suspense>
 			</div>
 
 			{/* Top Prestations & Fidélité */}

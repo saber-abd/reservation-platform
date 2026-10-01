@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getPrimaryProfessional, getDemoTag, type Appointment } from '@/lib/queries';
 import { generateDiamantDemoAppointments, DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
 import DiamantNewClientsModal, { type PeriodClientDetail } from './DiamantNewClientsModal';
 import { ArrowUpRight, Users, Calendar, TrendingUp, Clock, MapPin, ChevronDown } from 'lucide-react';
-import DiamantRevenueChart from './DiamantRevenueChart';
+
+// recharts (~350 Ko) n'est chargé que lorsque le graphique est affiché.
+const DiamantRevenueChart = lazy(() => import('./DiamantRevenueChart'));
 
 type AppointmentWithService = Appointment & {
 	services: { name: string; duration_minutes: number; price: number } | null;
@@ -288,7 +290,9 @@ export default function DiamantDashboardOverview() {
 								<a href="/demo-diamant/dashboard/statistiques" className="text-xs font-bold uppercase tracking-widest text-deep-teal-500 hover:text-deep-teal-400">Rapport complet →</a>
 							</div>
 							{/* On utilise les données dynamiques */}
-							<DiamantRevenueChart appointments={appointments} range={range} />
+							<Suspense fallback={<div className="animate-pulse h-64 bg-stone-100 rounded-xl"></div>}>
+								<DiamantRevenueChart appointments={appointments} range={range} />
+							</Suspense>
 						</div>
 
 						{/* Prochains RDV / Derniers RDV */}

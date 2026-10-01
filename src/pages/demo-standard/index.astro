@@ -30,7 +30,7 @@ const servicesPreview = [
 	<section class="relative mx-auto flex min-h-[85vh] flex-col justify-center px-6 py-24 md:py-32 overflow-hidden">
 		<!-- Tech Background Image -->
 		<div class="absolute inset-0 z-[-2]">
-			<img src="https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?q=80&w=2560&auto=format&fit=crop" alt="Composants électroniques" class="h-full w-full object-cover object-center grayscale-[0.3]" />
+			<img src="https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?q=75&w=1600&auto=format&fit=crop" alt="Composants électroniques" class="h-full w-full object-cover object-center grayscale-[0.3]" />
 		</div>
 		<!-- Overlay Gradient -->
 		<div class="absolute inset-0 z-[-1] bg-gradient-to-r from-slate-900/95 via-slate-900/80 to-transparent"></div>
@@ -197,7 +197,7 @@ const servicesPreview = [
 			</div>
 			<div data-aos="fade-up" class="pb-10">
 				<!-- Using existing TestimonialsCarousel but wrapping to fit standard layout -->
-				<TestimonialsCarousel client:load testimonials={siteConfig.testimonials} />
+				<TestimonialsCarousel client:visible testimonials={siteConfig.testimonials} />
 			</div>
 		</div>
 	</section>
