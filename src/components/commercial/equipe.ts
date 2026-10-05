@@ -14,31 +14,53 @@ export interface Membre {
 	linkedin: string;
 }
 
-// TEXTES PROVISOIRES : à remplacer par les parcours validés par Saber et Nadir.
 export const membres: Membre[] = [
 	{
 		id: 'saber',
 		prenom: 'Saber',
 		initiales: 'SA',
-		role: 'Développeur full-stack & réseaux',
-		accroche: "Élève ingénieur en cursus orienté informatique, réseau et sécurité à l'Université Paul Sabatier.",
-		photo: '',
+		role: 'Réseaux, sécurité & développement',
+		accroche:
+			"Élève ingénieur en cursus orienté informatique, réseau et sécurité à l'Université Paul Sabatier, en alternance chez un grand opérateur télécom.",
+		photo: '/images/equipe/saber.webp',
 		parcours: [
-			"École d'ingénieur à Toulouse, cursus orienté informatique, réseau et sécurité.",
-			'[Provisoire] Expériences et projets à compléter depuis le parcours LinkedIn.',
+			"Licence d'informatique, puis école d'ingénieur à l'Université Paul Sabatier, cursus orienté informatique, réseau et sécurité.",
+			'Alternance au sein des équipes réseau d’un grand opérateur télécom : conception et analyse de liaisons radio.',
+			'Projets en administration système et réseau (conteneurs, annuaire, VPN, pare-feu) et en développement web et logiciel.',
 		],
-		competences: ['Astro & React', 'TypeScript', 'PostgreSQL / Supabase', 'Réseaux & télécoms', 'Sécurité applicative'],
+		competences: [
+			'Architecture réseau',
+			'Sécurité (VPN, pare-feu)',
+			'Développement web (React, Vue.js)',
+			'Administration système & Docker',
+			'Bases de données SQL',
+			'Python, Java, C',
+			'Gestion de projet',
+			'Anglais & italien',
+		],
 		linkedin: 'https://www.linkedin.com/in/saber-abbadi',
 	},
 	{
 		id: 'nadir',
 		prenom: 'Nadir',
 		initiales: 'NS',
-		role: '[Provisoire] Rôle à compléter',
-		accroche: '[Provisoire] Formation et domaine à compléter depuis le parcours LinkedIn.',
-		photo: '',
-		parcours: ['[Provisoire] Formation à compléter.', '[Provisoire] Expériences et projets à compléter.'],
-		competences: ['[Provisoire]', 'Compétences à compléter'],
+		role: 'Ingénierie d’affaires & relation client',
+		accroche:
+			"En master d'ingénierie d'affaires, technico-commercial dans l'industrie après une formation en génie industriel et maintenance.",
+		photo: '/images/equipe/nadir.webp',
+		parcours: [
+			'Diplôme universitaire de technologie en génie industriel et maintenance.',
+			"Technicien de maintenance dans l'industrie : maintenance préventive et corrective, mise en place d'une GMAO et intégration à l'ERP.",
+			"Technico-commercial chez un distributeur industriel (analyse des besoins, devis, suivi des commandes), en parallèle d'un master d'ingénierie d'affaires.",
+		],
+		competences: [
+			'Analyse du besoin client',
+			'Ingénierie d’affaires',
+			'Devis & suivi commercial',
+			'ERP & GMAO',
+			'Maintenance industrielle',
+			'Travail en équipe',
+		],
 		linkedin: 'https://www.linkedin.com/in/nadir-sana/',
 	},
 ];
