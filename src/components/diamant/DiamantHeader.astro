@@ -39,10 +39,9 @@ const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 				>
 					Retour Portfolio
 				</a>
-				<HeaderAuthButton 
-					client:load 
-					basePath="/demo-diamant"
-				/>
+				<div class="hidden sm:block">
+					<HeaderAuthButton client:load basePath="/demo-diamant" />
+				</div>
 				<a
 					href="/demo-diamant/reservation"
 					class="hidden md:inline-flex items-center justify-center px-5 py-2 rounded-full bg-deep-teal-500 text-white font-bold text-sm tracking-wide hover:bg-deep-teal-400 transition-colors"
@@ -50,22 +49,32 @@ const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 					Réserver
 				</a>
 				
-				<!-- Mobile Menu Button -->
-				<button class="md:hidden p-2 text-stone-600 hover:text-stone-900 transition-colors" id="mobile-menu-btn">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+				<!-- Bouton menu mobile : les trois barres se transforment en croix -->
+				<button type="button" class="burger md:hidden" id="mobile-menu-btn" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu">
+					<span></span><span></span><span></span>
 				</button>
 			</div>
 		</div>
 	</div>
 
 	<!-- Mobile Menu -->
-	<div class="md:hidden hidden bg-white border-t border-stone-200 px-6 py-4 space-y-3" id="mobile-menu">
-		<a href="/demo-diamant/" class="block text-sm font-medium text-stone-700 py-2 uppercase tracking-wide">Accueil</a>
-		<a href="/demo-diamant/services" class="block text-sm font-medium text-stone-700 py-2 uppercase tracking-wide">Services</a>
-		<a href="/demo-diamant/a-propos" class="block text-sm font-medium text-stone-700 py-2 uppercase tracking-wide">La Maison</a>
-		<a href="/demo-diamant/contact" class="block text-sm font-medium text-stone-700 py-2 uppercase tracking-wide">Contact</a>
-		<a href="/demo-diamant/reservation" class="block text-sm font-medium text-stone-700 py-2 uppercase tracking-wide">Réserver</a>
-		<a href="/" class="block text-sm font-bold text-stone-400 py-2 uppercase tracking-wide border-t border-stone-100 mt-2 pt-4">Retour Portfolio</a>
+	<div class="mobile-panel md:hidden" id="mobile-menu" data-open="false">
+		<div class="overflow-hidden">
+			<nav class="px-6 pb-6 pt-2" aria-label="Navigation mobile">
+			<a href="/demo-diamant/" class="mobile-item flex items-center justify-between border-b border-stone-100 py-3.5 text-sm font-semibold uppercase tracking-widest text-stone-700" style="--i:0">Accueil<span aria-hidden="true" class="text-stone-300">→</span></a>
+			<a href="/demo-diamant/services" class="mobile-item flex items-center justify-between border-b border-stone-100 py-3.5 text-sm font-semibold uppercase tracking-widest text-stone-700" style="--i:1">Services<span aria-hidden="true" class="text-stone-300">→</span></a>
+			<a href="/demo-diamant/a-propos" class="mobile-item flex items-center justify-between border-b border-stone-100 py-3.5 text-sm font-semibold uppercase tracking-widest text-stone-700" style="--i:2">La Maison<span aria-hidden="true" class="text-stone-300">→</span></a>
+			<a href="/demo-diamant/contact" class="mobile-item flex items-center justify-between border-b border-stone-100 py-3.5 text-sm font-semibold uppercase tracking-widest text-stone-700" style="--i:3">Contact<span aria-hidden="true" class="text-stone-300">→</span></a>
+			<a href="/demo-diamant/reservation" class="mobile-item flex items-center justify-between border-b border-stone-100 py-3.5 text-sm font-semibold uppercase tracking-widest text-stone-700" style="--i:4">Réserver<span aria-hidden="true" class="text-stone-300">→</span></a>
+			<div class="mobile-item mt-5 sm:hidden" style="--i:5">
+				<HeaderAuthButton client:visible basePath="/demo-diamant" />
+			</div>
+			<div class="mobile-item mt-4 grid grid-cols-2 gap-3" style="--i:6">
+				<a href="/demo-diamant/reservation" class="rounded-full bg-stone-900 py-3 text-center text-sm font-bold text-white">Réserver</a>
+				<a href="/" class="rounded-full border border-stone-200 py-3 text-center text-sm font-bold text-stone-500">Portfolio</a>
+			</div>
+			</nav>
+		</div>
 	</div>
 </header>
 
@@ -102,7 +111,15 @@ const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 	// Mobile menu toggle
 	const btn = document.getElementById('mobile-menu-btn');
 	const menu = document.getElementById('mobile-menu');
-	btn?.addEventListener('click', () => menu?.classList.toggle('hidden'));
+	function setMenuOpen(open) {
+		if (!btn || !menu) return;
+		menu.dataset.open = String(open);
+		btn.setAttribute('aria-expanded', String(open));
+		btn.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+	}
+	btn?.addEventListener('click', () => setMenuOpen(menu?.dataset.open !== 'true'));
+	menu?.addEventListener('click', (e) => { if (e.target.closest('a')) setMenuOpen(false); });
+	document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenuOpen(false); });
 
 	// Ombre légère au scroll
 	const header = document.getElementById('diamant-header');
@@ -116,3 +133,54 @@ const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 		}, { passive: true });
 	}
 </script>
+
+<style>
+	/* Burger -> croix */
+	.burger {
+		position: relative;
+		width: 44px;
+		height: 44px;
+		border-radius: 9999px;
+		color: var(--color-stone-700);
+		transition: background-color 0.2s ease;
+	}
+	.burger:hover { background: var(--color-stone-100); }
+	.burger span {
+		position: absolute;
+		left: 12px;
+		width: 20px;
+		height: 1.5px;
+		border-radius: 2px;
+		background: currentColor;
+		transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+	}
+	.burger span:nth-child(1) { top: 16px; }
+	.burger span:nth-child(2) { top: 21.5px; }
+	.burger span:nth-child(3) { top: 27px; }
+	.burger[aria-expanded='true'] span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+	.burger[aria-expanded='true'] span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+	.burger[aria-expanded='true'] span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+
+	/* Panneau qui se déplie (hauteur animée), liens en cascade */
+	.mobile-panel {
+		display: grid;
+		grid-template-rows: 0fr;
+		background: #fff;
+		border-top: 1px solid transparent;
+		transition: grid-template-rows 0.45s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
+	}
+	.mobile-panel[data-open='true'] { grid-template-rows: 1fr; border-top-color: var(--color-stone-200); }
+	.mobile-item {
+		opacity: 0;
+		transform: translateY(-6px);
+		transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	.mobile-panel[data-open='true'] .mobile-item {
+		opacity: 1;
+		transform: none;
+		transition-delay: calc(70ms + var(--i, 0) * 50ms);
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.burger span, .mobile-panel, .mobile-item { transition-duration: 0.01ms !important; transition-delay: 0ms !important; }
+	}
+</style>

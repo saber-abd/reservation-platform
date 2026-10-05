@@ -82,7 +82,7 @@ const isClientSpace = currentPath.includes('/espace-client');
 	<body class="bg-stone-50 text-stone-800 overflow-hidden font-coolvetica">
 		<div class="flex h-screen relative">
 			{/* Sidebar */}
-			<aside class="w-64 flex-shrink-0 border-r border-stone-200 bg-white flex flex-col hidden md:flex shadow-sm z-10 relative">
+			<aside id="dash-drawer" data-open="false" class="dash-drawer w-64 flex-shrink-0 border-r border-stone-200 bg-white flex flex-col shadow-sm z-10 relative" aria-label="Navigation de l’espace">
 				<div class="p-5 border-b border-stone-100 flex items-center gap-3">
 					<a href={`${basePath}/`} aria-label="Accueil" class="flex items-center gap-3 group">
 						<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-deep-teal-400 to-deep-teal-600 text-white transition-transform group-hover:scale-105">
@@ -112,6 +112,9 @@ const isClientSpace = currentPath.includes('/espace-client');
 						</span>
 						<span class="text-base font-bold tracking-widest text-stone-800 uppercase" data-diamant-business-name>{siteConfig.business.name}</span>
 					</a>
+					<button id="dash-menu-btn" type="button" class="dash-burger text-stone-800" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="dash-drawer">
+						<span></span><span></span><span></span>
+					</button>
 				</header>
 
 				<div class="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-10">
@@ -126,7 +129,78 @@ const isClientSpace = currentPath.includes('/espace-client');
 				</div>
 				</div>
 			</main>
+			<div id="dash-backdrop" class="dash-backdrop" data-open="false" aria-hidden="true"></div>
 		</div>
 
 	</body>
 </html>
+
+<style>
+	/* Tiroir de navigation sur mobile : la barre latérale glisse depuis la gauche. */
+	@media (max-width: 767px) {
+		.dash-drawer {
+			position: fixed;
+			inset-block: 0;
+			left: 0;
+			z-index: 60;
+			width: min(18rem, 85vw);
+			transform: translateX(-100%);
+			transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+		}
+		.dash-drawer[data-open='true'] { transform: none; }
+		.dash-backdrop {
+			position: fixed;
+			inset: 0;
+			z-index: 55;
+			background: rgb(12 10 9 / 0.5);
+			opacity: 0;
+			visibility: hidden;
+			transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+		}
+		.dash-backdrop[data-open='true'] { opacity: 1; visibility: visible; transition: opacity 0.3s ease, visibility 0s; }
+	}
+	@media (min-width: 768px) { .dash-backdrop { display: none; } }
+
+	.dash-burger { position: relative; width: 40px; height: 40px; border-radius: 10px; }
+	.dash-burger span {
+		position: absolute;
+		left: 10px;
+		width: 20px;
+		height: 2px;
+		border-radius: 2px;
+		background: currentColor;
+		transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+	}
+	.dash-burger span:nth-child(1) { top: 13px; }
+	.dash-burger span:nth-child(2) { top: 19px; }
+	.dash-burger span:nth-child(3) { top: 25px; }
+	.dash-burger[aria-expanded='true'] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+	.dash-burger[aria-expanded='true'] span:nth-child(2) { opacity: 0; }
+	.dash-burger[aria-expanded='true'] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+	@media (prefers-reduced-motion: reduce) {
+		.dash-drawer, .dash-backdrop, .dash-burger span { transition-duration: 0.01ms !important; }
+	}
+</style>
+
+<script>
+	const drawer = document.getElementById('dash-drawer');
+	const backdrop = document.getElementById('dash-backdrop');
+	const toggle = document.getElementById('dash-menu-btn');
+	if (drawer && backdrop && toggle) {
+		const setOpen = (open: boolean) => {
+			drawer.dataset.open = String(open);
+			backdrop.dataset.open = String(open);
+			toggle.setAttribute('aria-expanded', String(open));
+			toggle.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+		};
+		toggle.addEventListener('click', () => setOpen(drawer.dataset.open !== 'true'));
+		backdrop.addEventListener('click', () => setOpen(false));
+		drawer.addEventListener('click', (e) => {
+			if ((e.target as HTMLElement).closest('a')) setOpen(false);
+		});
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') setOpen(false);
+		});
+	}
+</script>

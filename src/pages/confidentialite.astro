@@ -1,0 +1,48 @@
+---
+import LegalPage from '@/components/commercial/LegalPage.astro';
+import { contact } from '@/components/commercial/contact';
+---
+
+<LegalPage title="Données personnelles" description="Comment nous collectons, utilisons et protégeons vos données, conformément au RGPD." updated="5 octobre 2026">
+	<h2>Responsable du traitement</h2>
+	<p><mark class="a-completer">À compléter : nom de l’éditeur (identique aux mentions légales)</mark>, joignable au <a href={contact.telephoneHref}>{contact.telephone}</a>{contact.email ? <> ou à <a href={`mailto:${contact.email}`}>{contact.email}</a></> : null}.</p>
+
+	<h2>Données collectées et finalités</h2>
+	<div class="table-wrap">
+		<table>
+			<thead>
+				<tr><th>Situation</th><th>Données</th><th>Finalité</th><th>Base légale</th><th>Durée de conservation</th></tr>
+			</thead>
+			<tbody>
+				<tr><td>Prise de contact (téléphone, WhatsApp, e-mail)</td><td>Nom, numéro, contenu des échanges</td><td>Répondre à votre demande, établir un devis</td><td>Mesures précontractuelles</td><td>3 ans après le dernier contact</td></tr>
+				<tr><td>Compte de démonstration</td><td>Nom, e-mail, téléphone, mot de passe chiffré, photo facultative</td><td>Accès aux démonstrations</td><td>Exécution des CGU</td><td>Jusqu’à suppression du compte, ou 1 an d’inactivité</td></tr>
+				<tr><td>Réservation ou message dans une démo</td><td>Créneau, prestation, messages</td><td>Faire fonctionner la démonstration</td><td>Exécution des CGU</td><td>Jusqu’à réinitialisation de la démo ou suppression du compte</td></tr>
+				<tr><td>Connexion « avec Google »</td><td>Nom, e-mail, photo de profil Google</td><td>Authentification simplifiée</td><td>Votre consentement</td><td>Comme le compte</td></tr>
+				<tr><td>Choix relatif aux cookies</td><td>Votre choix et sa date</td><td>Mémoriser votre consentement</td><td>Obligation légale</td><td>6 mois</td></tr>
+			</tbody>
+		</table>
+	</div>
+	<p>Nous ne vendons ni ne louons vos données, et nous n’effectuons aucun profilage publicitaire.</p>
+
+	<h2>Destinataires et sous-traitants</h2>
+	<p>Vos données sont accessibles uniquement à l’équipe SaberWeb.dev et aux prestataires techniques suivants, dans la limite de leur mission :</p>
+	<ul>
+		<li><strong>Cloudflare</strong> : hébergement et diffusion du site.</li>
+		<li><strong>Supabase</strong> : base de données et authentification.</li>
+		<li><strong>EmailJS</strong> : envoi des e-mails de confirmation dans les démonstrations.</li>
+		<li><strong>Google</strong> : connexion « avec Google » et synchronisation d’agenda dans les démonstrations.</li>
+		<li><strong>OpenStreetMap</strong> : affichage des cartes (votre adresse IP est transmise pour charger les fonds de carte).</li>
+	</ul>
+	<p>Certains de ces prestataires peuvent traiter des données hors de l’Union européenne, notamment aux États-Unis. Ces transferts sont encadrés par le Data Privacy Framework UE–États-Unis ou par les clauses contractuelles types de la Commission européenne.</p>
+
+	<h2>Sécurité</h2>
+	<p>Les accès à la base de données sont restreints ligne par ligne (Row Level Security) : chaque utilisateur ne voit que ses propres données. Les mots de passe sont chiffrés, les échanges passent par HTTPS et les sessions peuvent être révoquées à tout moment.</p>
+
+	<h2>Vos droits</h2>
+	<p>Vous disposez d’un droit d’accès, de rectification, d’effacement, de limitation, d’opposition et de portabilité de vos données, ainsi que du droit de retirer votre consentement à tout moment et de définir des directives sur le sort de vos données après votre décès.</p>
+	<p>Pour les exercer, contactez-nous au <a href={contact.telephoneHref}>{contact.telephone}</a>{contact.email ? <> ou à <a href={`mailto:${contact.email}`}>{contact.email}</a></> : <> ou à l’adresse e-mail <mark class="a-completer">À compléter</mark></>}. Nous répondons sous un mois.</p>
+	<p>Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL (<a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener noreferrer">cnil.fr</a>).</p>
+
+	<h2>Cookies</h2>
+	<p>Voir la page <a href="/cookies">Cookies</a>.</p>
+</LegalPage>

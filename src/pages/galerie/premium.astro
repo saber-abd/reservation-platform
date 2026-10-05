@@ -1,7 +1,7 @@
 ---
 import CommercialLayout from '@/layouts/commercial/CommercialLayout.astro';
 import FormulaGallery, { type GalleryShot } from '@/components/commercial/FormulaGallery.astro';
-import { Database, ShieldCheck, Users, LineChart, Euro, Gift, LayoutTemplate, Settings } from 'lucide-react';
+import { Database, ShieldCheck, Users, LineChart, Euro, Gift, LayoutTemplate, Settings, Smartphone } from 'lucide-react';
 
 const galleryShots: GalleryShot[] = [
 	{ file: 'site-vitrine', title: 'Site vitrine', caption: 'Une identité forte et immersive, pensée pour mettre en valeur votre savoir-faire.' },
@@ -147,6 +147,18 @@ const galleryShots: GalleryShot[] = [
 						<p class="text-brick-ember-50 text-sm leading-relaxed">
 							Composants UI développés avec Radix et Tailwind pour une accessibilité parfaite et un design moderne.
 						</p>
+					</div>
+				</div>
+				<!-- Feature 7 : mobile -->
+				<div class="md:col-span-2 lg:col-span-3" data-aos="fade-up" data-aos-delay="100">
+					<div class="group flex h-full flex-col gap-6 rounded-3xl border border-stone-200 bg-white p-8 shadow-sm transition-all duration-300 ease-out hover:-translate-y-2 hover:border-brick-ember-300 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] sm:flex-row sm:items-center">
+						<Smartphone className="w-10 h-10 shrink-0 text-brick-ember-600 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6" />
+						<div>
+							<h3 class="text-xl font-bold text-stone-900 mb-2">Version mobile soignée et animée</h3>
+							<p class="text-stone-600 text-sm leading-relaxed">
+								Chaque page s’adapte au téléphone : menu qui se déplie avec une animation fluide, tableau de bord accessible depuis un tiroir latéral, transitions légères qui restent rapides même sur un smartphone modeste.
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>

@@ -1,5 +1,5 @@
 ---
-import { Wrench, Menu, X } from 'lucide-react';
+import { Wrench } from 'lucide-react';
 import { getSiteConfig } from '@/config/site';
 const siteConfig = await getSiteConfig(Astro.url.pathname);
 import HeaderAuthButton from '@/components/premium/PremiumHeaderAuthButton';
@@ -26,7 +26,7 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 						href={`${basePath}${item.href}`}
 						class:list={[
 							'text-sm font-bold uppercase tracking-wider transition-colors hover:text-primary font-[var(--font-heading)]',
-							currentPath === item.href ? 'text-primary' : 'text-stone-300',
+							currentPath.replace(/\/$/, "") === `${basePath}${item.href}`.replace(/\/$/, "") ? 'text-primary' : 'text-stone-300',
 						]}
 					>
 						{item.label}
@@ -47,31 +47,31 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 				</div>
 			</div>
 
-			<!-- Mobile Menu Toggle -->
-			<button id="mobile-menu-btn" class="md:hidden text-stone-300 hover:text-primary focus:outline-none">
-				<span id="icon-menu"><Menu size={28} /></span>
-				<span id="icon-close" class="hidden"><X size={28} /></span>
+			<!-- Bouton menu mobile : les trois barres se transforment en croix -->
+			<button id="mobile-menu-btn" type="button" class="burger md:hidden" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-nav">
+				<span></span><span></span><span></span>
 			</button>
 		</div>
 	</div>
 
 	<!-- Mobile Nav -->
-	<div id="mobile-nav" class="hidden border-t border-stone-800 bg-stone-900 md:hidden absolute w-full h-screen">
+	<div id="mobile-nav" class="mobile-panel border-t border-stone-800 bg-stone-900 md:hidden" data-open="false">
 		<nav class="flex flex-col px-6 py-8 gap-6">
 			{
-				siteConfig.nav.map((item) => (
+				siteConfig.nav.map((item, i) => (
 					<a
 						href={`${basePath}${item.href}`}
+						style={`--i:${i}`}
 						class:list={[
-							'text-xl font-black uppercase tracking-widest transition-colors hover:text-primary',
-							currentPath === item.href ? 'text-primary' : 'text-stone-300',
+							'mobile-item text-xl font-black uppercase tracking-widest transition-colors hover:text-primary',
+							currentPath.replace(/\/$/, "") === `${basePath}${item.href}`.replace(/\/$/, "") ? 'text-primary' : 'text-stone-300',
 						]}
 					>
 						{item.label}
 					</a>
 				))
 			}
-			<div class="mt-8 pt-8 border-t border-stone-800 flex flex-col gap-4">
+			<div class="mobile-item mt-8 pt-8 border-t border-stone-800 flex flex-col gap-4" style={`--i:${siteConfig.nav.length}`}>
 				{basePath && (
 					<a href="/" class="block rounded-xl border border-stone-700 px-4 py-4 text-center text-sm font-bold uppercase tracking-wider text-stone-300 hover:bg-stone-800 hover:text-white">
 						← Retour au Portfolio
@@ -88,15 +88,81 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 <script>
 	const btn = document.getElementById('mobile-menu-btn');
 	const nav = document.getElementById('mobile-nav');
-	const iconMenu = document.getElementById('icon-menu');
-	const iconClose = document.getElementById('icon-close');
 
-	if (btn && nav && iconMenu && iconClose) {
-		btn.addEventListener('click', () => {
-			nav.classList.toggle('hidden');
-			iconMenu.classList.toggle('hidden');
-			iconClose.classList.toggle('hidden');
-			document.body.classList.toggle('overflow-hidden');
+	if (btn && nav) {
+		const setOpen = (open: boolean) => {
+			nav.dataset.open = String(open);
+			btn.setAttribute('aria-expanded', String(open));
+			btn.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+			document.body.classList.toggle('overflow-hidden', open);
+		};
+		btn.addEventListener('click', () => setOpen(nav.dataset.open !== 'true'));
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') setOpen(false);
+		});
+		window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => {
+			if (e.matches) setOpen(false);
 		});
 	}
 </script>
+
+<style>
+	/* Burger -> croix */
+	.burger {
+		position: relative;
+		width: 44px;
+		height: 44px;
+		border-radius: 12px;
+		color: var(--color-stone-300);
+		transition: color 0.2s ease, background-color 0.2s ease;
+	}
+	.burger:hover { color: var(--color-primary); background: rgb(255 255 255 / 0.05); }
+	.burger span {
+		position: absolute;
+		left: 11px;
+		width: 22px;
+		height: 2.5px;
+		border-radius: 2px;
+		background: currentColor;
+		transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease, width 0.35s ease;
+	}
+	.burger span:nth-child(1) { top: 14px; }
+	.burger span:nth-child(2) { top: 21px; width: 16px; }
+	.burger span:nth-child(3) { top: 28px; }
+	.burger[aria-expanded='true'] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+	.burger[aria-expanded='true'] span:nth-child(2) { opacity: 0; transform: translateX(10px); }
+	.burger[aria-expanded='true'] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+	/* Panneau plein écran qui glisse, liens en cascade */
+	.mobile-panel {
+		position: absolute;
+		inset-inline: 0;
+		top: 100%;
+		height: calc(100dvh - 100%);
+		overflow-y: auto;
+		opacity: 0;
+		visibility: hidden;
+		transform: translateY(-12px);
+		transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.4s;
+	}
+	.mobile-panel[data-open='true'] {
+		opacity: 1;
+		visibility: visible;
+		transform: none;
+		transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s;
+	}
+	.mobile-item {
+		opacity: 0;
+		transform: translateX(-16px);
+		transition: opacity 0.3s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	.mobile-panel[data-open='true'] .mobile-item {
+		opacity: 1;
+		transform: none;
+		transition-delay: calc(80ms + var(--i, 0) * 55ms);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.burger span, .mobile-panel, .mobile-item { transition-duration: 0.01ms !important; transition-delay: 0ms !important; }
+	}
+</style>

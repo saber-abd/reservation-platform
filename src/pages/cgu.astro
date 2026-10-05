@@ -1,0 +1,42 @@
+---
+import LegalPage from '@/components/commercial/LegalPage.astro';
+import { contact } from '@/components/commercial/contact';
+---
+
+<LegalPage title="Conditions générales d’utilisation" description="Règles d’utilisation du site SaberWeb.dev et de ses démonstrations." updated="5 octobre 2026">
+	<h2>1. Objet</h2>
+	<p>Les présentes conditions générales d’utilisation (CGU) encadrent l’accès et l’utilisation du site SaberWeb.dev, de ses pages de présentation et de ses trois démonstrations (Standard, Premium, Diamant). En naviguant sur le site, vous acceptez ces CGU.</p>
+
+	<h2>2. Accès au site</h2>
+	<p>Le site est accessible gratuitement à tout utilisateur disposant d’un accès à Internet. L’éditeur peut suspendre ou interrompre l’accès, notamment pour maintenance, sans préavis ni indemnité.</p>
+
+	<h2>3. Démonstrations et comptes</h2>
+	<ul>
+		<li>Les démonstrations servent à présenter nos formules. Les entreprises, prestations, avis et rendez-vous qui y figurent sont fictifs.</li>
+		<li>La création d’un compte de démonstration est facultative. Vous vous engagez à ne pas y saisir de données sensibles ni de données appartenant à des tiers.</li>
+		<li>Vous êtes responsable de la confidentialité de vos identifiants. Les données saisies dans les démonstrations peuvent être réinitialisées ou supprimées à tout moment.</li>
+		<li>Aucune réservation effectuée dans une démonstration ne crée d’engagement réel.</li>
+	</ul>
+
+	<h2>4. Comportements interdits</h2>
+	<p>Il est interdit d’utiliser le site de manière illicite, de tenter d’en compromettre la sécurité ou le fonctionnement, d’y publier des contenus injurieux ou illégaux, ou d’en extraire massivement les données. L’éditeur peut suspendre tout compte qui ne respecte pas ces règles.</p>
+
+	<h2>5. Propriété intellectuelle</h2>
+	<p>Le site et ses démonstrations sont protégés par le droit d’auteur (voir les <a href="/mentions-legales">mentions légales</a>). Les livrables réalisés pour un client font l’objet d’un contrat distinct.</p>
+
+	<h2>6. Prestations</h2>
+	<p>Les informations sur les formules et tarifs sont indicatives. Toute prestation fait l’objet d’un devis et de conditions particulières acceptés par le client avant le début des travaux.</p>
+	<p><mark class="a-completer">À compléter : conditions générales de vente (paiement, délais, rétractation, garanties) dès la première vente.</mark></p>
+
+	<h2>7. Responsabilité</h2>
+	<p>L’éditeur ne saurait être tenu responsable des dommages résultant d’une indisponibilité du site, d’une mauvaise utilisation par l’utilisateur ou d’un service tiers (Google, WhatsApp, LinkedIn).</p>
+
+	<h2>8. Données personnelles</h2>
+	<p>Voir la page <a href="/confidentialite">Données personnelles</a>.</p>
+
+	<h2>9. Modification et droit applicable</h2>
+	<p>Les CGU peuvent être modifiées à tout moment ; la version en ligne fait foi. Elles sont soumises au droit français. En cas de litige, une solution amiable sera recherchée avant toute action en justice.</p>
+
+	<h2>Contact</h2>
+	<p>Pour toute question : <a href={contact.telephoneHref}>{contact.telephone}</a> (appel ou <a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer">WhatsApp</a>).</p>
+</LegalPage>

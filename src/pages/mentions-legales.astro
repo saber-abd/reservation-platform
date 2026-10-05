@@ -1,0 +1,37 @@
+---
+import LegalPage from '@/components/commercial/LegalPage.astro';
+import { contact } from '@/components/commercial/contact';
+---
+
+<LegalPage title="Mentions légales" description="Informations sur l’éditeur et l’hébergeur du site (article 6 de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l’économie numérique)." updated="5 octobre 2026">
+	<h2>Éditeur du site</h2>
+	<p>Le site SaberWeb.dev est édité par :</p>
+	<ul>
+		<li><strong>Nom :</strong> <mark class="a-completer">À compléter : nom et prénom de l’éditeur, ou dénomination sociale</mark></li>
+		<li><strong>Statut :</strong> <mark class="a-completer">À compléter : statut juridique (ex. entrepreneur individuel, société et capital social)</mark></li>
+		<li><strong>SIRET :</strong> <mark class="a-completer">À compléter</mark></li>
+		<li><strong>Adresse :</strong> <mark class="a-completer">À compléter : adresse postale</mark></li>
+		<li><strong>Téléphone :</strong> <a href={contact.telephoneHref}>{contact.telephone}</a></li>
+		<li><strong>E-mail :</strong> {contact.email ? <a href={`mailto:${contact.email}`}>{contact.email}</a> : <mark class="a-completer">À compléter</mark>}</li>
+	</ul>
+	<p><strong>Directeur de la publication :</strong> <mark class="a-completer">À compléter : nom du responsable de la publication</mark></p>
+
+	<h2>Hébergement</h2>
+	<ul>
+		<li><strong>Site et serveur :</strong> Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, États-Unis (cloudflare.com).</li>
+		<li><strong>Base de données et authentification :</strong> Supabase, Inc. (supabase.com), région d’hébergement <mark class="a-completer">À compléter : région du projet Supabase</mark>.</li>
+	</ul>
+
+	<h2>Propriété intellectuelle</h2>
+	<p>L’ensemble des contenus du site (textes, maquettes, code, logos, captures d’écran) est protégé par le droit d’auteur. Toute reproduction ou réutilisation, totale ou partielle, sans autorisation écrite préalable de l’éditeur est interdite.</p>
+	<p>Les démonstrations (Standard, Premium, Diamant) mettent en scène des entreprises fictives. Les noms, adresses, avis et coordonnées qui y figurent sont des exemples.</p>
+
+	<h2>Responsabilité</h2>
+	<p>L’éditeur s’efforce de fournir des informations exactes et à jour, sans pouvoir garantir l’absence d’erreur. Les liens vers des sites tiers (LinkedIn, WhatsApp, etc.) sont fournis à titre pratique ; l’éditeur n’est pas responsable de leur contenu.</p>
+
+	<h2>Données personnelles et cookies</h2>
+	<p>Le traitement de vos données est décrit dans la page <a href="/confidentialite">Données personnelles</a>, et l’usage des cookies dans la page <a href="/cookies">Cookies</a>.</p>
+
+	<h2>Droit applicable</h2>
+	<p>Les présentes mentions sont soumises au droit français.</p>
+</LegalPage>

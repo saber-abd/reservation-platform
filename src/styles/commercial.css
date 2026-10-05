@@ -100,3 +100,140 @@
 .commercial-page h1, .commercial-page h2, .commercial-page h3, .commercial-page h4, .commercial-page h5, .commercial-page h6 {
   font-family: var(--font-heading);
 }
+
+/* ---------- Composants de la page commerciale ---------- */
+@layer components {
+  .nav-link {
+    position: relative;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-stone-600);
+    transition: color 0.2s ease;
+  }
+  .nav-link:hover { color: var(--color-stone-900); }
+  /* Soulignement qui se déploie au survol */
+  a.nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--color-rose-600);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  a.nav-link:hover::after { transform: scaleX(1); }
+
+  /* Boutons : vrais boutons (fond, bordure, état survol/clic/focus) */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    padding: 0.75rem 1.4rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.25rem;
+    white-space: nowrap;
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(0) scale(0.98); }
+  .btn:focus-visible { outline: 3px solid var(--color-rose-400); outline-offset: 3px; }
+  .btn .btn-arrow { transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
+  .btn:hover .btn-arrow { transform: translateX(3px); }
+  .btn-sm { padding: 0.6rem 1.15rem; }
+  .btn-lg { padding: 0.95rem 1.75rem; font-size: 1rem; }
+
+  .btn-dark { background: var(--color-stone-900); color: #fff; box-shadow: 0 6px 16px -8px rgb(28 25 23 / 0.6); }
+  .btn-dark:hover { background: var(--color-stone-800); box-shadow: 0 12px 24px -10px rgb(28 25 23 / 0.55); }
+  .btn-light { background: #fff; color: var(--color-stone-900); box-shadow: 0 6px 16px -8px rgb(0 0 0 / 0.4); }
+  .btn-light:hover { background: var(--color-stone-100); }
+  .btn-ghost-dark { border: 1px solid rgb(255 255 255 / 0.2); color: #fff; background: rgb(255 255 255 / 0.04); }
+  .btn-ghost-dark:hover { background: rgb(255 255 255 / 0.1); border-color: rgb(255 255 255 / 0.35); }
+  .btn-outline { border: 1.5px solid var(--color-stone-300); color: var(--color-stone-800); background: #fff; }
+  .btn-outline:hover { border-color: var(--color-stone-900); color: var(--color-stone-900); }
+  .btn-rose { background: var(--color-rose-600); color: #fff; box-shadow: 0 8px 20px -10px rgb(225 29 72 / 0.8); }
+  .btn-rose:hover { background: var(--color-rose-700); }
+  .btn-rose-outline { border: 1.5px solid var(--color-rose-200); color: var(--color-rose-700); background: var(--color-rose-50); }
+  .btn-rose-outline:hover { border-color: var(--color-rose-600); background: #fff; }
+  .btn-violet { background: var(--color-violet-600); color: #fff; box-shadow: 0 8px 20px -10px rgb(124 58 237 / 0.8); }
+  .btn-violet:hover { background: var(--color-violet-700); }
+  .btn-violet-outline { border: 1.5px solid var(--color-violet-200); color: var(--color-violet-700); background: var(--color-violet-50); }
+  .btn-violet-outline:hover { border-color: var(--color-violet-600); background: #fff; }
+  .btn-whatsapp { background: #25D366; color: #052e16; box-shadow: 0 8px 20px -10px rgb(37 211 102 / 0.9); }
+  .btn-whatsapp:hover { background: #1fbd5a; }
+
+  /* Bouton burger : trois barres qui deviennent une croix */
+  .burger {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    color: var(--color-stone-900);
+    transition: background-color 0.2s ease;
+  }
+  .burger:hover { background: var(--color-stone-100); }
+  .burger span {
+    position: absolute;
+    left: 12px;
+    width: 20px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+  }
+  .burger span:nth-child(1) { top: 15px; }
+  .burger span:nth-child(2) { top: 21px; }
+  .burger span:nth-child(3) { top: 27px; }
+  .burger[aria-expanded='true'] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .burger[aria-expanded='true'] span:nth-child(2) { opacity: 0; transform: scaleX(0.2); }
+  .burger[aria-expanded='true'] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+  /* Panneau mobile : hauteur animée (grid-rows) + liens qui arrivent en cascade */
+  .mobile-nav {
+    display: grid;
+    grid-template-rows: 0fr;
+    border-top: 1px solid transparent;
+    background: #fff;
+    transition: grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
+  }
+  .mobile-nav[data-open='true'] { grid-template-rows: 1fr; border-top-color: var(--color-stone-200); }
+  .mobile-nav-item {
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .mobile-nav[data-open='true'] .mobile-nav-item {
+    opacity: 1;
+    transform: none;
+    transition-delay: calc(60ms + var(--i, 0) * 45ms);
+  }
+
+  .footer-link { color: var(--color-stone-400); transition: color 0.2s ease; text-align: left; }
+  .footer-link:hover { color: #fff; }
+}
+
+/* ---------- Apparitions au défilement (remplace AOS) ---------- */
+@keyframes reveal-up { from { opacity: 0; translate: 0 28px; } }
+@keyframes reveal-down { from { opacity: 0; translate: 0 -28px; } }
+@keyframes reveal-left { from { opacity: 0; translate: 36px 0; } }
+@keyframes reveal-right { from { opacity: 0; translate: -36px 0; } }
+
+.js [data-aos]:not(.is-revealed) { opacity: 0; }
+.js [data-aos].is-revealed {
+  animation: reveal-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms) backwards;
+}
+.js [data-aos='fade-down'].is-revealed { animation-name: reveal-down; }
+.js [data-aos='fade-left'].is-revealed { animation-name: reveal-left; }
+.js [data-aos='fade-right'].is-revealed { animation-name: reveal-right; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-aos]:not(.is-revealed) { opacity: 1; }
+  .js [data-aos].is-revealed { animation: none; }
+  .btn, .btn:hover, .btn:active { transform: none; }
+  .mobile-nav, .mobile-nav-item, .burger span { transition-duration: 0.01ms !important; transition-delay: 0ms !important; }
+}

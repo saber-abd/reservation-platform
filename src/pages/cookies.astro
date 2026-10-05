@@ -1,0 +1,29 @@
+---
+import LegalPage from '@/components/commercial/LegalPage.astro';
+---
+
+<LegalPage title="Politique cookies" description="Les cookies et stockages utilisés sur le site, et comment modifier votre choix." updated="5 octobre 2026">
+	<h2>Qu’est-ce qu’un cookie ?</h2>
+	<p>Un cookie est un petit fichier enregistré par votre navigateur lors de la visite d’un site. Nous utilisons aussi le stockage local du navigateur (localStorage), soumis aux mêmes règles.</p>
+
+	<h2>Ce que nous utilisons</h2>
+	<div class="table-wrap">
+		<table>
+			<thead>
+				<tr><th>Catégorie</th><th>Exemples</th><th>Rôle</th><th>Consentement</th></tr>
+			</thead>
+			<tbody>
+				<tr><td>Nécessaires</td><td>Session de connexion (Supabase), <code>cookie_consent</code>, préférences des démonstrations</td><td>Vous connecter, sécuriser le site, mémoriser vos choix</td><td>Non requis (exemptés)</td></tr>
+				<tr><td>Mesure d’audience</td><td>Aucun outil actif à ce jour</td><td>Statistiques de visite anonymes</td><td>Requis, désactivé par défaut</td></tr>
+			</tbody>
+		</table>
+	</div>
+	<p>Nous n’utilisons <strong>aucun cookie publicitaire</strong> ni de réseau social. Les liens LinkedIn et WhatsApp sont de simples liens : aucun traceur de ces services n’est chargé tant que vous ne cliquez pas.</p>
+
+	<h2>Votre choix</h2>
+	<p>Lors de votre première visite, un bandeau vous permet d’accepter, de refuser ou de personnaliser les cookies optionnels. Refuser est aussi simple qu’accepter et n’empêche pas d’utiliser le site. Votre choix est conservé 6 mois, puis vous est redemandé.</p>
+	<p>
+		<button type="button" data-cookie-settings class="btn btn-dark">Modifier mes choix</button>
+	</p>
+	<p>Vous pouvez aussi supprimer les cookies depuis les réglages de votre navigateur.</p>
+</LegalPage>

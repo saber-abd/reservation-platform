@@ -1,289 +1,681 @@
 ---
 import CommercialLayout from '@/layouts/commercial/CommercialLayout.astro';
 import Avatar from '@/components/commercial/Avatar.astro';
+import BrandIcon from '@/components/commercial/BrandIcon.astro';
 import { membres } from '@/components/commercial/equipe';
-import { Mail, Phone, CalendarCheck, ShieldCheck, Gem, ArrowRight } from 'lucide-react';
+import { contact } from '@/components/commercial/contact';
+import {
+	Mail,
+	Phone,
+	CalendarCheck,
+	ShieldCheck,
+	Gem,
+	ArrowRight,
+	Check,
+	X,
+	Sparkles,
+	MessagesSquare,
+	PenTool,
+	Rocket,
+	Smartphone,
+	Zap,
+	Lock,
+	LineChart,
+	Users,
+	Gift,
+	Search,
+	ChevronDown,
+} from 'lucide-react';
+
+// Classes littérales par formule (Tailwind ne génère que ce qu'il lit dans les sources).
+const formules = [
+	{
+		id: 'standard',
+		nom: 'Standard',
+		icon: CalendarCheck,
+		accroche: 'Pack essentiel, sans base de données',
+		prix: 'Sur devis',
+		prixNote: 'Hébergement ~0 € / mois',
+		description:
+			"L'essentiel pour démarrer : un site vitrine ultra-rapide relié en direct à votre Google Agenda, sans base de données à administrer.",
+		forces: [
+			['Vitesse et référencement', 'score PageSpeed > 95'],
+			['Zéro base de données', 'hébergement ~0 € / mois'],
+			['Google Agenda en direct', 'les RDV arrivent dans votre agenda'],
+			['E-mails de confirmation', 'envoyés automatiquement'],
+			['Carte interactive', 'votre zone d’intervention'],
+		],
+		limites: [
+			'Pas d’espace client avec compte',
+			'Pas de suivi du chiffre d’affaires',
+			'Pas de fidélité ni de messagerie',
+		],
+		demo: '/demo-standard/',
+		detail: '/galerie/standard',
+		style: {
+			card: 'border border-stone-200 bg-white',
+			icon: 'bg-sky-100 text-sky-700',
+			accent: 'text-sky-700',
+			check: 'bg-sky-100 text-sky-700',
+			spot: '14 165 233',
+			primary: 'btn-dark',
+			secondary: 'btn-outline',
+		},
+	},
+	{
+		id: 'premium',
+		nom: 'Premium',
+		icon: ShieldCheck,
+		accroche: 'Le choix des pros',
+		prix: 'Sur devis',
+		prixNote: 'Infrastructure 0 à 25 € / mois',
+		description:
+			'Une plateforme complète avec base de données : idéale pour les ateliers, garages et PME qui veulent suivre leur clientèle et piloter leur activité.',
+		forces: [
+			['Base de données sécurisée', 'chaque client ne voit que ses données'],
+			['Espace client dédié', 'suivi et report des rendez-vous'],
+			['Statistiques', 'chiffre d’affaires et prestations phares'],
+			['Fiches clients et notes privées', 'par client ou véhicule'],
+			['Messagerie pro ↔ client', 'intégrée au site'],
+			['Programme de fidélité', 'points et avantages'],
+			['Version mobile soignée', 'menus et transitions animés'],
+		],
+		limites: [
+			'Pas de gestion d’équipe multi-rôles',
+			'Pas de modération des clients abusifs',
+			'Pas de recherche unifiée multi-critères',
+		],
+		demo: '/demo-premium/',
+		detail: '/galerie/premium',
+		highlight: true,
+		style: {
+			card: 'bg-white',
+			icon: 'bg-rose-100 text-rose-600',
+			accent: 'text-rose-600',
+			check: 'bg-rose-100 text-rose-600',
+			spot: '225 29 72',
+			primary: 'btn-rose',
+			secondary: 'btn-rose-outline',
+		},
+	},
+	{
+		id: 'diamant',
+		nom: 'Diamant',
+		icon: Gem,
+		accroche: 'Sur mesure haute couture',
+		prix: 'Dès 3 000 €',
+		prixNote: 'Sur cahier des charges',
+		description:
+			"L'écosystème complet pour les établissements exigeants : gestion d'équipe, modération des abus et design signature exclusif.",
+		forces: [
+			['Tout Premium', 'avec une architecture sur mesure'],
+			['Équipe et rôles', 'administrateur, employé, démo'],
+			['Protection anti-absences', 'bannissement avec motif'],
+			['Recherche unifiée', 'instantanée, multi-critères'],
+			['Fidélité VIP à 4 paliers', 'de Cristal à Diamant'],
+			['Double synchronisation', 'base de données + Google Agenda'],
+			['Version mobile soignée', 'menus et transitions animés'],
+			['Design signature', 'et logo 3D animé'],
+		],
+		limites: ['Conception sur cahier des charges préalable', 'Investissement initial plus élevé'],
+		demo: '/demo-diamant/',
+		detail: '/galerie/diamant',
+		style: {
+			card: 'border border-stone-200 bg-white',
+			icon: 'bg-violet-100 text-violet-600',
+			accent: 'text-violet-600',
+			check: 'bg-violet-100 text-violet-600',
+			spot: '124 58 237',
+			primary: 'btn-violet',
+			secondary: 'btn-violet-outline',
+		},
+	},
+];
+
+const mots = ['sur mesure.', 'rapide.', 'à votre image.', 'prête à réserver.'];
+
+const bandeau = [
+	{ icon: CalendarCheck, label: 'Réservation en ligne' },
+	{ icon: Zap, label: 'Pages ultra-rapides' },
+	{ icon: Smartphone, label: 'Pensé pour le mobile' },
+	{ icon: Lock, label: 'Données sécurisées' },
+	{ icon: LineChart, label: 'Statistiques claires' },
+	{ icon: Users, label: 'Espace client' },
+	{ icon: Gift, label: 'Fidélité intégrée' },
+	{ icon: Search, label: 'Bien référencé' },
+];
+
+const chiffres = [
+	{ valeur: 3, suffixe: '', label: 'formules, du vitrine à la suite complète' },
+	{ valeur: 95, suffixe: '+', label: 'score PageSpeed visé sur chaque page' },
+	{ valeur: 0, suffixe: ' €', label: 'd’hébergement mensuel en Standard' },
+	{ valeur: 100, suffixe: ' %', label: 'responsive, du téléphone au grand écran' },
+];
+
+const etapes = [
+	{ icon: MessagesSquare, titre: 'On échange', texte: 'Un appel pour comprendre votre métier, vos clients et vos contraintes. Gratuit et sans engagement.' },
+	{ icon: PenTool, titre: 'On conçoit', texte: 'Maquette, choix de la formule et devis détaillé. Vous validez chaque étape avant la suite.' },
+	{ icon: Rocket, titre: 'On lance', texte: 'Mise en ligne, prise en main accompagnée, puis suivi et évolutions selon vos besoins.' },
+];
+
+const faq = [
+	{ q: 'Combien de temps faut-il pour avoir mon site ?', r: 'Cela dépend de la formule et de vos contenus : quelques semaines pour un site Standard, davantage pour une plateforme Diamant sur cahier des charges. Le planning est fixé dans le devis.' },
+	{ q: 'Est-ce que je pourrai modifier mes prestations et horaires moi-même ?', r: 'Oui. Les formules Premium et Diamant incluent un tableau de bord pour gérer prestations, disponibilités et clients. En Standard, vos rendez-vous arrivent directement dans votre Google Agenda.' },
+	{ q: 'Le site fonctionne-t-il bien sur téléphone ?', r: 'Oui, toutes les pages sont pensées d’abord pour le mobile, avec des menus et des transitions animés qui restent légers même sur un téléphone modeste.' },
+	{ q: 'Quels sont les frais après la mise en ligne ?', r: 'L’hébergement est quasi gratuit en Standard, et de 0 à 25 € par mois en Premium selon le volume. Le nom de domaine coûte environ 15 € par an. Tout est détaillé dans les pages de chaque formule.' },
+];
+
+const vitrines = [
+	{ demo: 'diamant', alt: 'Aperçu du site vitrine de la démo Diamant' },
+	{ demo: 'premium', alt: 'Aperçu du site vitrine de la démo Premium' },
+	{ demo: 'standard', alt: 'Aperçu du site vitrine de la démo Standard' },
+];
 ---
 
-<CommercialLayout title="Création de Sites Web & Plateformes sur mesure" description="Duo technique et business proposant des solutions web allant du site vitrine à la plateforme SaaS sur mesure.">
-	<div id="presentation" class="relative overflow-hidden bg-stone-50 py-20 lg:py-32">
-		<div class="mx-auto max-w-6xl px-6">
-			<div class="mx-auto max-w-2xl text-center">
-				<h1 class="text-4xl font-extrabold tracking-tight text-stone-900 sm:text-6xl" data-aos="fade-up">
-					Votre solution digitale, <span class="text-rose-600">sur mesure.</span>
-				</h1>
-				<p class="mt-6 text-lg leading-8 text-stone-600" data-aos="fade-up" data-aos-delay="100">
-					Un élève ingénieur réseaux et un futur ingénieur d'affaires vous accompagnent dans la digitalisation de votre activité. Du simple site vitrine à la plateforme de réservation complète, découvrez nos 3 formules.
-				</p>
-			</div>
-		</div>
-	</div>
+<CommercialLayout title="Création de Sites Web & Plateformes sur mesure" description="Duo technique et business proposant des solutions web allant du site vitrine à la plateforme de réservation sur mesure.">
 
-	<section id="histoire" class="mx-auto max-w-5xl px-6 py-24">
-		<div class="text-center">
-			<h2 class="text-3xl font-bold text-stone-900" data-aos="fade-up">Qui sommes-nous ?</h2>
-			<p class="mx-auto mt-4 max-w-2xl text-lg text-stone-600" data-aos="fade-up" data-aos-delay="100">
-				Un profil technique et un profil business, un objectif commun : rendre des outils digitaux puissants et sur mesure accessibles aux petites et moyennes entreprises.
-			</p>
+	<!-- HERO -->
+	<section id="presentation" class="hero relative overflow-hidden bg-stone-950 text-white">
+		<div class="hero-aurora" aria-hidden="true">
+			<span class="blob blob-1"></span>
+			<span class="blob blob-2"></span>
+			<span class="blob blob-3"></span>
 		</div>
-		<div class="mt-12 grid gap-6 md:grid-cols-2">
-			{membres.map((m, i) => (
-				<div class="flex items-start gap-5 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm" data-aos="fade-up" data-aos-delay={i * 100}>
-					<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={72} class="shrink-0" />
-					<div>
-						<h3 class="text-xl font-bold text-stone-900">{m.prenom}</h3>
-						<p class="text-xs font-semibold uppercase tracking-wider text-rose-600">{m.role}</p>
-						<p class="mt-3 text-sm leading-relaxed text-stone-600">{m.accroche}</p>
-						<ul class="mt-4 flex flex-wrap gap-1.5">
-							{m.competences.slice(0, 3).map((c) => (
-								<li class="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-semibold text-stone-700">{c}</li>
-							))}
-						</ul>
-					</div>
+		<div class="hero-grid" aria-hidden="true"></div>
+
+		<div class="relative mx-auto grid max-w-6xl items-center gap-14 px-4 pb-20 pt-16 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:pb-28 lg:pt-24">
+			<div>
+				<p class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-stone-300" data-aos="fade-up">
+					<Sparkles size={14} class="text-rose-400" /> Sites & plateformes de réservation
+				</p>
+				<h1 class="mt-6 text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl" data-aos="fade-up" data-aos-delay="100">
+					Votre solution digitale,
+					<span class="word-rotator mt-1 block" aria-live="off">
+						<span class="sr-only">{mots[0]}</span>
+						<span class="word-track" aria-hidden="true">
+							{mots.map((m, i) => <span class:list={['word', { 'is-active': i === 0 }]}>{m}</span>)}
+						</span>
+					</span>
+				</h1>
+				<p class="mt-6 max-w-xl text-lg leading-8 text-stone-300" data-aos="fade-up" data-aos-delay="200">
+					Un profil technique et un profil business vous accompagnent dans la digitalisation de votre activité. Du site vitrine à la plateforme de réservation complète, choisissez parmi nos trois formules.
+				</p>
+				<div class="mt-9 flex flex-col gap-3 sm:flex-row" data-aos="fade-up" data-aos-delay="300">
+					<a href="#tarification" class="btn btn-rose btn-lg justify-center">
+						Voir les formules <ArrowRight size={18} class="btn-arrow" />
+					</a>
+					<a href="#contact" class="btn btn-ghost-dark btn-lg justify-center">
+						<Phone size={18} /> Contactez-nous
+					</a>
 				</div>
-			))}
-		</div>
-		<div class="mt-10 text-center" data-aos="fade-up">
-			<a href="/notre-histoire" class="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-rose-600 hover:text-rose-700 transition-colors">
-				Découvrir notre histoire <ArrowRight size={16} />
-			</a>
+				<div class="mt-10 flex items-center gap-4" data-aos="fade-up" data-aos-delay="400">
+					<div class="flex -space-x-3">
+						{membres.map((m) => (
+							<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={44} class="ring-2 ring-stone-950" />
+						))}
+					</div>
+					<p class="text-sm text-stone-400"><span class="font-semibold text-white">{membres.map((m) => m.prenom).join(' & ')}</span><br />deux interlocuteurs directs, de l’idée à la mise en ligne</p>
+				</div>
+			</div>
+
+			<!-- Éventail de captures des trois démos, légère inclinaison au pointeur (ordinateur uniquement) -->
+			<div class="fan-wrap" data-aos="fade-left" data-aos-delay="200">
+				<div class="fan" data-tilt>
+					{vitrines.map((v, i) => (
+						<a href={`/galerie/${v.demo}`} class={`fan-card fan-card-${i + 1}`} aria-label={`Voir la formule ${v.demo}`}>
+							<span class="fan-bar" aria-hidden="true"><i></i><i></i><i></i></span>
+							<picture>
+								<source type="image/avif" srcset={`/images/galerie/${v.demo}/site-vitrine-960.avif`} />
+								<img src={`/images/galerie/${v.demo}/site-vitrine-960.webp`} alt={v.alt} width="960" height="600" decoding="async" loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : 'low'} />
+							</picture>
+						</a>
+					))}
+				</div>
+			</div>
 		</div>
 	</section>
 
-	<div id="tarification" class="mx-auto max-w-6xl px-6 py-12">
-		<div class="text-center mb-16">
-			<h2 class="text-3xl font-bold text-stone-900" data-aos="fade-up">Tarification & Formules</h2>
-			<p class="mt-4 text-stone-600" data-aos="fade-up" data-aos-delay="100">Choisissez la solution qui s'adapte le mieux à l'évolution de votre activité.</p>
-		</div>
-		<div class="grid gap-8 lg:grid-cols-3 items-stretch">
-			
-			<!-- Standard -->
-			<div class="flex flex-col rounded-3xl border border-stone-200 bg-white p-8 shadow-sm hover:shadow-md transition-all" data-aos="fade-up">
-				<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-stone-100 text-stone-700">
-					<CalendarCheck size={24} />
-				</div>
-				<h3 class="text-2xl font-bold text-stone-900">Formule Standard</h3>
-				<p class="mt-2 text-xs font-semibold uppercase tracking-wider text-stone-500">Pack Essentiel & Zéro-DB</p>
-				<p class="mt-4 text-sm text-stone-600 leading-relaxed">
-					L'essentiel pour démarrer. Un site vitrine ultra-rapide couplé en direct à votre Google Calendar, sans base de données à administrer ni frais d'hébergement récurrents.
-				</p>
-
-				<div class="mt-6 border-t border-stone-100 pt-6">
-					<p class="text-xs font-bold uppercase tracking-wider text-emerald-700 mb-3">Forces & Inclus :</p>
-					<ul class="space-y-2.5 text-xs text-stone-700 font-medium">
-						<li class="flex items-start gap-2.5">
-							<span class="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Vitesse & SEO d'exception</strong> (PageSpeed > 95%)</span>
+	<!-- BANDEAU DÉFILANT -->
+	<div class="marquee border-y border-stone-200 bg-white py-5" aria-label="Ce que nous proposons">
+		<div class="marquee-track">
+			{[0, 1].map((copy) => (
+				<ul class="marquee-group" aria-hidden={copy === 1 ? 'true' : undefined}>
+					{bandeau.map((b) => (
+						<li class="flex items-center gap-2.5 whitespace-nowrap text-sm font-semibold text-stone-600">
+							<b.icon size={18} class="text-rose-600" /> {b.label}
 						</li>
-						<li class="flex items-start gap-2.5">
-							<span class="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Zéro base de données</strong> (coût hébergement ~0 €/mois)</span>
-						</li>
-						<li class="flex items-start gap-2.5">
-							<span class="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Google Calendar direct</strong> (RDV injectés sur votre agenda)</span>
-						</li>
-						<li class="flex items-start gap-2.5">
-							<span class="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>E-mails de confirmation</strong> automatiques au client</span>
-						</li>
-						<li class="flex items-start gap-2.5">
-							<span class="text-emerald-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Carte interactive Leaflet</strong> (zone d'intervention)</span>
-						</li>
-					</ul>
-				</div>
-
-				<div class="mt-6 border-t border-stone-100 pt-4">
-					<p class="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">Non inclus :</p>
-					<ul class="space-y-1.5 text-xs text-stone-500">
-						<li class="flex items-center gap-2 text-stone-400">
-							<span class="shrink-0 text-stone-300">✗</span> Pas de base de données relationnelle
-						</li>
-						<li class="flex items-center gap-2 text-stone-400">
-							<span class="shrink-0 text-stone-300">✗</span> Pas d'espace client personnel avec compte
-						</li>
-						<li class="flex items-center gap-2 text-stone-400">
-							<span class="shrink-0 text-stone-300">✗</span> Pas de suivi de CA ni télémétrie financière
-						</li>
-						<li class="flex items-center gap-2 text-stone-400">
-							<span class="shrink-0 text-stone-300">✗</span> Pas de système de fidélité ni messagerie
-						</li>
-					</ul>
-				</div>
-
-				<div class="mt-8 pt-4 border-t border-stone-100 flex flex-col gap-3">
-					<a href="/demo-standard/" class="block w-full rounded-xl bg-stone-900 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-stone-800 transition-colors">
-						Voir la Démo Standard
-					</a>
-					<a href="/galerie/standard" class="text-center text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 transition-colors py-1">
-						Détail de l'offre Standard →
-					</a>
-				</div>
-			</div>
-
-			<!-- Premium -->
-			<div class="relative flex flex-col rounded-3xl border-2 border-rose-600 bg-white p-8 shadow-md hover:shadow-lg transition-all" data-aos="fade-up" data-aos-delay="100">
-				<div class="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-rose-600 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-sm">
-					Recommandé
-				</div>
-				<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
-					<ShieldCheck size={24} />
-				</div>
-				<h3 class="text-2xl font-bold text-stone-900">Formule Premium</h3>
-				<p class="mt-2 text-xs font-semibold uppercase tracking-wider text-rose-600">Le Choix des Pros</p>
-				<p class="mt-4 text-sm text-stone-600 leading-relaxed">
-					Une plateforme complète propulsée par une base de données PostgreSQL. Idéal pour les ateliers, garages et PME souhaitant suivre leur clientèle et analyser leur activité.
-				</p>
-
-				<div class="mt-6 border-t border-stone-100 pt-6">
-					<p class="text-xs font-bold uppercase tracking-wider text-rose-700 mb-3">Forces & Inclus :</p>
-					<ul class="space-y-2.5 text-xs text-stone-700 font-medium">
-						<li class="flex items-start gap-2.5">
-							<span class="text-rose-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Base PostgreSQL (Supabase)</strong> sécurisée par RLS</span>
-						</li>
-						<li class="flex items-start gap-2.5">
-							<span class="text-rose-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Espace client dédié</strong> (suivi RDV & reprogrammation >24h)</span>
-						</li>
-						<li class="flex items-start gap-2.5">
-							<span class="text-rose-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Télémétrie financière Recharts</strong> (Graphiques CA & Top services)</span>
-						</li>
-						<li class="flex items-start gap-2.5">
-							<span class="text-rose-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Carnet d'atelier & Notes privées</strong> par client / véhicule</span>
-						</li>
-						<li class="flex items-start gap-2.5">
-							<span class="text-rose-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Messagerie bilatérale</strong> Pro ↔ Client intégrée</span>
-						</li>
-						<li class="flex items-start gap-2.5">
-							<span class="text-rose-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Programme de fidélité</strong> avec points et avantages</span>
-						</li>
-					</ul>
-				</div>
-
-				<div class="mt-6 border-t border-stone-100 pt-4">
-					<p class="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">Non inclus :</p>
-					<ul class="space-y-1.5 text-xs text-stone-500">
-						<li class="flex items-center gap-2 text-stone-400">
-							<span class="shrink-0 text-stone-300">✗</span> Pas de gestion d'équipe multi-rôles (Admin vs Employé)
-						</li>
-						<li class="flex items-center gap-2 text-stone-400">
-							<span class="shrink-0 text-stone-300">✗</span> Pas de modération ni bannissement des clients abusifs (no-shows)
-						</li>
-						<li class="flex items-center gap-2 text-stone-400">
-							<span class="shrink-0 text-stone-300">✗</span> Pas de moteur de recherche unifié multi-critères
-						</li>
-						<li class="flex items-center gap-2 text-stone-400">
-							<span class="shrink-0 text-stone-300">✗</span> Pas de double synchronisation d'agenda externe
-						</li>
-					</ul>
-				</div>
-
-				<div class="mt-8 pt-4 border-t border-stone-100 flex flex-col gap-3">
-					<a href="/demo-premium/" class="block w-full rounded-xl bg-rose-600 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-rose-700 transition-colors shadow-sm">
-						Voir la Démo Premium
-					</a>
-					<a href="/galerie/premium" class="text-center text-xs font-bold uppercase tracking-wider text-rose-600 hover:text-rose-700 transition-colors py-1">
-						Détail de l'offre Premium →
-					</a>
-				</div>
-			</div>
-
-			<!-- Diamant -->
-			<div class="flex flex-col rounded-3xl border border-stone-200 bg-white p-8 shadow-sm hover:shadow-md transition-all" data-aos="fade-up" data-aos-delay="200">
-				<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
-					<Gem size={24} />
-				</div>
-				<h3 class="text-2xl font-bold text-stone-900">Formule Diamant</h3>
-				<p class="mt-2 text-xs font-semibold uppercase tracking-wider text-violet-600">Sur-Mesure Haute Couture</p>
-				<p class="mt-4 text-sm text-stone-600 leading-relaxed">
-					L'écosystème d'exception pour les établissements de prestige. Suite logicielle intégrale avec gestion d'équipe, modération des abus et personnalisation absolue.
-				</p>
-
-				<div class="mt-6 border-t border-stone-100 pt-6">
-					<p class="text-xs font-bold uppercase tracking-wider text-violet-700 mb-3">Forces & Inclus :</p>
-					<ul class="space-y-2.5 text-xs text-stone-700 font-medium">
-						<li class="flex items-start gap-2.5">
-							<span class="text-violet-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Tout de Premium</strong> avec architecture sur-mesure</span>
-						</li>
-						<li class="flex items-start gap-2.5">
-							<span class="text-violet-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Gestion d'Équipe & Rôles (RBAC)</strong> : Admin, Employé, Démo</span>
-						</li>
-						<li class="flex items-start gap-2.5">
-							<span class="text-violet-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Protection Anti-No-Show</strong> : Bannissement avec motif officiel</span>
-						</li>
-						<li class="flex items-start gap-2.5">
-							<span class="text-violet-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Moteur de Recherche unifié</strong> instantané multi-critères</span>
-						</li>
-						<li class="flex items-start gap-2.5">
-							<span class="text-violet-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Messagerie instantanée salon</strong> avec accusés de lecture</span>
-						</li>
-						<li class="flex items-start gap-2.5">
-							<span class="text-violet-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Fidélité VIP 4 Paliers</strong> (Cristal à Diamant) & Badges exclusifs</span>
-						</li>
-						<li class="flex items-start gap-2.5">
-							<span class="text-violet-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Double synchronisation</strong> : PostgreSQL + Google Calendar</span>
-						</li>
-						<li class="flex items-start gap-2.5">
-							<span class="text-violet-600 font-bold shrink-0 mt-0.5">✓</span>
-							<span><strong>Design signature exclusif</strong> & Logo 3D vectoriel animé</span>
-						</li>
-					</ul>
-				</div>
-
-				<div class="mt-6 border-t border-stone-100 pt-4">
-					<p class="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">Spécificités :</p>
-					<ul class="space-y-1.5 text-xs text-stone-500">
-						<li class="flex items-center gap-2 text-stone-400">
-							<span class="shrink-0 text-stone-300">✗</span> Conception sur cahier des charges préalable
-						</li>
-						<li class="flex items-center gap-2 text-stone-400">
-							<span class="shrink-0 text-stone-300">✗</span> Investissement initial plus élevé (dès 3000 €)
-						</li>
-					</ul>
-				</div>
-
-				<div class="mt-8 pt-4 border-t border-stone-100 flex flex-col gap-3">
-					<a href="/demo-diamant/" class="block w-full rounded-xl bg-violet-600 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-violet-700 transition-colors shadow-sm">
-						Voir la Démo Diamant
-					</a>
-					<a href="/galerie/diamant" class="text-center text-xs font-bold uppercase tracking-wider text-violet-600 hover:text-violet-700 transition-colors py-1">
-						Détail de l'offre Diamant →
-					</a>
-				</div>
-			</div>
-
+					))}
+				</ul>
+			))}
 		</div>
 	</div>
 
-	<div id="contact" class="bg-stone-900 py-24 text-white">
-		<div class="mx-auto max-w-3xl text-center px-6">
-			<h2 class="text-3xl font-bold">Un projet en tête ? Discutons-en.</h2>
-			<p class="mt-4 text-stone-400">
-				Que vous ayez besoin d'un simple site vitrine ou d'une application complexe, nous mettons nos compétences au service de votre réussite.
-			</p>
-			<div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-6">
-				<a href="mailto:contact@votre-email.com" class="flex items-center gap-3 rounded-full bg-white px-6 py-3 text-sm font-semibold text-stone-900 transition-colors hover:bg-stone-200">
-					<Mail size={18} />
-					Nous contacter par mail
-				</a>
-				<a href="tel:+33600000000" class="flex items-center gap-3 rounded-full border border-stone-700 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-stone-800">
-					<Phone size={18} />
-					06 00 00 00 00
+	<!-- CHIFFRES -->
+	<section class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+		<dl class="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
+			{chiffres.map((c, i) => (
+				<div class="text-center lg:text-left" data-aos="fade-up" data-aos-delay={i * 100}>
+					<dt class="sr-only">{c.label}</dt>
+					<dd>
+						<span class="block text-4xl font-extrabold text-stone-900 sm:text-5xl"><span data-count={c.valeur}>{c.valeur}</span>{c.suffixe}</span>
+						<span class="mt-2 block text-sm text-stone-500">{c.label}</span>
+					</dd>
+				</div>
+			))}
+		</dl>
+	</section>
+
+	<!-- FORMULES -->
+	<section id="tarification" class="relative scroll-mt-20 bg-stone-100/70 py-24">
+		<div class="mx-auto max-w-6xl px-4 sm:px-6">
+			<div class="mx-auto max-w-2xl text-center">
+				<p class="text-sm font-bold uppercase tracking-widest text-rose-600" data-aos="fade-up">Tarification & formules</p>
+				<h2 class="mt-3 text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up" data-aos-delay="100">Une formule pour chaque étape de votre activité</h2>
+				<p class="mt-4 text-stone-600" data-aos="fade-up" data-aos-delay="200">Testez chaque démo en conditions réelles, puis comparez le détail des fonctionnalités et des coûts.</p>
+			</div>
+
+			<div class="mt-16 grid items-start gap-8 lg:grid-cols-3">
+				{formules.map((f, i) => (
+					<div data-aos="fade-up" data-aos-delay={i * 120} class={f.highlight ? 'lg:-mt-4' : ''}>
+						<article class={`plan group relative flex h-full flex-col rounded-3xl p-7 sm:p-8 ${f.style.card} ${f.highlight ? 'plan-highlight' : ''}`} style={`--spot:${f.style.spot}`} data-spotlight>
+							{f.highlight && (
+								<span class="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-rose-600 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-md">Recommandé</span>
+							)}
+							<div class="flex items-center justify-between">
+								<span class={`flex h-12 w-12 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6 ${f.style.icon}`}>
+									<f.icon size={24} />
+								</span>
+								<span class={`text-xs font-bold uppercase tracking-wider ${f.style.accent}`}>{f.accroche}</span>
+							</div>
+							<h3 class="mt-6 text-2xl font-bold text-stone-900">Formule {f.nom}</h3>
+							<p class="mt-2 text-sm leading-relaxed text-stone-600">{f.description}</p>
+
+							<div class="mt-6 flex items-end justify-between gap-3 rounded-2xl bg-stone-50 px-4 py-3">
+								<span class="whitespace-nowrap text-2xl font-extrabold text-stone-900">{f.prix}</span>
+								<span class="text-right text-xs text-stone-500">{f.prixNote}</span>
+							</div>
+
+							<ul class="mt-6 space-y-3 text-sm">
+								{f.forces.map(([titre, detail]) => (
+									<li class="flex items-start gap-3">
+										<span class={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${f.style.check}`}><Check size={13} strokeWidth={3} /></span>
+										<span class="text-stone-700"><strong class="font-semibold text-stone-900">{titre}</strong> <span class="text-stone-500">· {detail}</span></span>
+									</li>
+								))}
+							</ul>
+
+							<details class="plan-limits mt-5 rounded-2xl border border-stone-200">
+								<summary class="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-xs font-bold uppercase tracking-wider text-stone-500">
+									{f.id === 'diamant' ? 'Spécificités' : 'Non inclus'}
+									<ChevronDown size={16} class="plan-chevron transition-transform duration-300" />
+								</summary>
+								<ul class="space-y-2 px-4 pb-4 text-sm text-stone-500">
+									{f.limites.map((l) => (
+										<li class="flex items-start gap-2.5"><X size={15} class="mt-0.5 shrink-0 text-stone-300" />{l}</li>
+									))}
+								</ul>
+							</details>
+
+							<div class="mt-auto flex flex-col gap-3 pt-8">
+								<a href={f.demo} class={`btn ${f.style.primary} justify-center`}>
+									Voir la démo {f.nom} <ArrowRight size={16} class="btn-arrow" />
+								</a>
+								<a href={f.detail} class={`btn ${f.style.secondary} justify-center`}>
+									Détail de l’offre {f.nom}
+								</a>
+							</div>
+						</article>
+					</div>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<!-- MÉTHODE -->
+	<section class="mx-auto max-w-6xl px-4 py-24 sm:px-6">
+		<div class="mx-auto max-w-2xl text-center">
+			<p class="text-sm font-bold uppercase tracking-widest text-rose-600" data-aos="fade-up">Notre méthode</p>
+			<h2 class="mt-3 text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up" data-aos-delay="100">Trois étapes, zéro surprise</h2>
+		</div>
+		<ol class="steps relative mt-16 grid gap-10 md:grid-cols-3">
+			{etapes.map((e, i) => (
+				<li class="relative text-center" data-aos="fade-up" data-aos-delay={i * 150}>
+					<span class="relative z-10 mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-900 text-white shadow-lg">
+						<e.icon size={26} />
+						<span class="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-600 text-xs font-bold">{i + 1}</span>
+					</span>
+					<h3 class="mt-6 text-xl font-bold text-stone-900">{e.titre}</h3>
+					<p class="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-stone-600">{e.texte}</p>
+				</li>
+			))}
+		</ol>
+	</section>
+
+	<!-- QUI SOMMES-NOUS -->
+	<section id="histoire" class="bg-white py-24">
+		<div class="mx-auto max-w-5xl px-4 sm:px-6">
+			<div class="text-center">
+				<p class="text-sm font-bold uppercase tracking-widest text-rose-600" data-aos="fade-up">L’équipe</p>
+				<h2 class="mt-3 text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up" data-aos-delay="100">Qui sommes-nous ?</h2>
+				<p class="mx-auto mt-4 max-w-2xl text-lg text-stone-600" data-aos="fade-up" data-aos-delay="200">
+					Un profil technique et un profil business, un objectif commun : rendre des outils digitaux sur mesure accessibles aux petites et moyennes entreprises.
+				</p>
+			</div>
+			<div class="mt-12 grid gap-6 md:grid-cols-2">
+				{membres.map((m, i) => (
+					<div data-aos="fade-up" data-aos-delay={i * 120}>
+						<div class="flex h-full flex-col gap-5 rounded-3xl border border-stone-200 bg-stone-50 p-6 transition duration-300 hover:-translate-y-1 hover:border-stone-300 hover:shadow-xl sm:flex-row sm:items-start">
+							<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={80} class="shrink-0 ring-4 ring-white shadow-md" />
+							<div>
+								<div class="flex items-center gap-2">
+									<h3 class="text-xl font-bold text-stone-900">{m.prenom}</h3>
+									<a href={m.linkedin} target="_blank" rel="noopener noreferrer" class="text-[#0A66C2] transition-transform hover:scale-110" aria-label={`Profil LinkedIn de ${m.prenom}`}>
+										<BrandIcon name="linkedin" size={18} />
+									</a>
+								</div>
+								<p class="text-xs font-semibold uppercase tracking-wider text-rose-600">{m.role}</p>
+								<p class="mt-3 text-sm leading-relaxed text-stone-600">{m.accroche}</p>
+								<ul class="mt-4 flex flex-wrap gap-1.5">
+									{m.competences.slice(0, 4).map((c) => (
+										<li class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-stone-700 ring-1 ring-stone-200">{c}</li>
+									))}
+								</ul>
+							</div>
+						</div>
+					</div>
+				))}
+			</div>
+			<div class="mt-12 text-center" data-aos="fade-up">
+				<a href="/notre-histoire" class="btn btn-dark btn-lg">
+					Découvrir notre histoire <ArrowRight size={18} class="btn-arrow" />
 				</a>
 			</div>
 		</div>
-	</div>
+	</section>
+
+	<!-- FAQ -->
+	<section class="mx-auto max-w-3xl px-4 py-24 sm:px-6">
+		<h2 class="text-center text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up">Questions fréquentes</h2>
+		<div class="mt-12 space-y-3">
+			{faq.map((item, i) => (
+				<details class="faq group rounded-2xl border border-stone-200 bg-white px-5 transition-colors open:border-stone-300 open:shadow-sm" data-aos="fade-up" data-aos-delay={i * 80}>
+					<summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-semibold text-stone-900">
+						{item.q}
+						<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-stone-100 transition-transform duration-300 group-open:rotate-45">
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+						</span>
+					</summary>
+					<p class="pb-5 text-sm leading-relaxed text-stone-600">{item.r}</p>
+				</details>
+			))}
+		</div>
+	</section>
+
+	<!-- CONTACT -->
+	<section id="contact" class="scroll-mt-20 px-4 pb-24 sm:px-6">
+		<div class="contact-card relative mx-auto max-w-5xl overflow-hidden rounded-[2rem] bg-stone-950 px-6 py-16 text-center text-white sm:px-12" data-aos="fade-up">
+			<div class="hero-aurora opacity-70" aria-hidden="true">
+				<span class="blob blob-1"></span>
+				<span class="blob blob-3"></span>
+			</div>
+			<div class="relative">
+				<h2 class="text-3xl font-bold sm:text-4xl">Un projet en tête ? Discutons-en.</h2>
+				<p class="mx-auto mt-4 max-w-xl text-stone-300">
+					Site vitrine ou application complète : appelez-nous ou écrivez-nous sur WhatsApp, nous vous répondons rapidement.
+				</p>
+				<div class="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+					<a href={contact.telephoneHref} class="btn btn-light btn-lg justify-center">
+						<Phone size={18} /> Contactez-nous · {contact.telephone}
+					</a>
+					<a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg justify-center">
+						<BrandIcon name="whatsapp" size={20} /> Écrire sur WhatsApp
+					</a>
+					{contact.email && (
+						<a href={`mailto:${contact.email}`} class="btn btn-ghost-dark btn-lg justify-center">
+							<Mail size={18} /> Par e-mail
+						</a>
+					)}
+				</div>
+			</div>
+		</div>
+	</section>
 </CommercialLayout>
+
+<style>
+	/* ---------- Hero ---------- */
+	.hero-aurora {
+		position: absolute;
+		inset: 0;
+		overflow: hidden;
+		pointer-events: none;
+	}
+	/* Halos flous dessinés en dégradé radial (pas de filter: blur, coûteux en GPU) ;
+	   seule leur position bouge, via transform. */
+	.blob {
+		position: absolute;
+		width: 46rem;
+		height: 46rem;
+		border-radius: 9999px;
+		animation: derive 22s ease-in-out infinite alternate;
+	}
+	.blob-1 { top: -22rem; right: -14rem; background: radial-gradient(closest-side, rgb(225 29 72 / 0.35), transparent); }
+	.blob-2 { bottom: -26rem; left: -16rem; background: radial-gradient(closest-side, rgb(124 58 237 / 0.3), transparent); animation-duration: 26s; }
+	.blob-3 { top: 30%; left: 40%; width: 30rem; height: 30rem; background: radial-gradient(closest-side, rgb(14 165 233 / 0.18), transparent); animation-duration: 30s; }
+	@keyframes derive {
+		to { transform: translate3d(-6rem, 4rem, 0) scale(1.1); }
+	}
+	.hero-grid {
+		position: absolute;
+		inset: 0;
+		background-image: linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+		background-size: 48px 48px;
+		mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 75%);
+		pointer-events: none;
+	}
+	.is-offscreen .blob { animation-play-state: paused; }
+
+	/* Mot qui change dans le titre */
+	.word-rotator { height: 1.15em; overflow: hidden; }
+	.word-track { position: relative; display: block; height: 100%; }
+	.word {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(90deg, #fb7185, #f472b6 45%, #a78bfa);
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+		white-space: nowrap;
+		opacity: 0;
+		transform: translateY(100%);
+		transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+	}
+	.word.is-active { opacity: 1; transform: none; }
+	.word.is-leaving { opacity: 0; transform: translateY(-100%); }
+
+	/* Éventail des trois captures */
+	.fan-wrap { perspective: 1400px; }
+	.fan {
+		position: relative;
+		aspect-ratio: 16 / 13;
+		width: 100%;
+		max-width: 34rem;
+		margin-inline: auto;
+		transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+		transform-style: preserve-3d;
+		transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	.fan-card {
+		position: absolute;
+		width: 78%;
+		border-radius: 14px;
+		overflow: hidden;
+		background: #1c1917;
+		border: 1px solid rgb(255 255 255 / 0.12);
+		box-shadow: 0 30px 60px -25px rgb(0 0 0 / 0.8);
+		transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+	}
+	.fan-card img { display: block; width: 100%; height: auto; }
+	.fan-bar { display: flex; gap: 5px; padding: 8px 10px; background: #292524; }
+	.fan-bar i { width: 8px; height: 8px; border-radius: 9999px; background: rgb(255 255 255 / 0.25); }
+	.fan-card-1 { top: 0; left: 0; transform: rotate(-6deg); z-index: 1; }
+	.fan-card-2 { top: 18%; left: 11%; transform: rotate(1deg); z-index: 2; }
+	.fan-card-3 { top: 36%; left: 22%; transform: rotate(6deg); z-index: 3; }
+	.fan-card:hover, .fan-card:focus-visible { z-index: 4; box-shadow: 0 40px 80px -25px rgb(225 29 72 / 0.55); }
+	.fan-card-1:hover, .fan-card-1:focus-visible { transform: rotate(-6deg) translateY(-12px) scale(1.03); }
+	.fan-card-2:hover, .fan-card-2:focus-visible { transform: rotate(1deg) translateY(-12px) scale(1.03); }
+	.fan-card-3:hover, .fan-card-3:focus-visible { transform: rotate(6deg) translateY(-12px) scale(1.03); }
+
+	/* ---------- Bandeau défilant ---------- */
+	.marquee { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
+	.marquee-track { display: flex; width: max-content; animation: defiler 40s linear infinite; }
+	.marquee:hover .marquee-track, .marquee.is-offscreen .marquee-track { animation-play-state: paused; }
+	.marquee-group { display: flex; gap: 3rem; padding-right: 3rem; }
+	@keyframes defiler { to { transform: translateX(-50%); } }
+
+	/* ---------- Cartes formules ---------- */
+	.plan {
+		transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease;
+		box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+		isolation: isolate;
+	}
+	.plan:hover { transform: translateY(-6px); box-shadow: 0 30px 60px -30px rgb(var(--spot) / 0.45); }
+	/* Halo qui suit le pointeur (variables mises à jour en JS, aucun re-rendu) */
+	.plan::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		border-radius: inherit;
+		background: radial-gradient(420px circle at var(--mx, 50%) var(--my, -20%), rgb(var(--spot) / 0.1), transparent 45%);
+		opacity: 0;
+		transition: opacity 0.3s ease;
+	}
+	.plan:hover::before { opacity: 1; }
+	.plan-highlight {
+		border: 2px solid transparent;
+		background:
+			linear-gradient(#fff, #fff) padding-box,
+			linear-gradient(135deg, #e11d48, #f472b6 50%, #a78bfa) border-box;
+		box-shadow: 0 25px 50px -30px rgb(225 29 72 / 0.6);
+	}
+	.plan-limits[open] .plan-chevron { transform: rotate(180deg); }
+	.plan-limits summary::-webkit-details-marker, .faq summary::-webkit-details-marker { display: none; }
+
+	/* Ouverture animée des <details> (navigateurs récents ; ailleurs, ouverture instantanée) */
+	@supports (interpolate-size: allow-keywords) {
+		.plan-limits, .faq { interpolate-size: allow-keywords; }
+		.plan-limits::details-content, .faq::details-content {
+			height: 0;
+			overflow: clip;
+			transition: height 0.35s cubic-bezier(0.22, 1, 0.36, 1), content-visibility 0.35s allow-discrete;
+		}
+		.plan-limits[open]::details-content, .faq[open]::details-content { height: auto; }
+	}
+
+	/* ---------- Méthode : trait qui relie les étapes ---------- */
+	@media (min-width: 768px) {
+		.steps::before {
+			content: '';
+			position: absolute;
+			top: 2rem;
+			left: 16.66%;
+			right: 16.66%;
+			height: 2px;
+			background: repeating-linear-gradient(90deg, var(--color-stone-300) 0 8px, transparent 8px 16px);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.blob, .marquee-track { animation: none; }
+		.word, .fan, .fan-card, .plan { transition: none; }
+		.plan:hover { transform: none; }
+	}
+</style>
+
+<script>
+	const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	// Les animations continues (halos, bandeau) s'arrêtent hors de l'écran.
+	if ('IntersectionObserver' in window) {
+		const io = new IntersectionObserver((entries) => {
+			for (const e of entries) e.target.classList.toggle('is-offscreen', !e.isIntersecting);
+		});
+		document.querySelectorAll('.hero, .marquee, .contact-card').forEach((el) => io.observe(el));
+	}
+
+	// Mot changeant du titre
+	const words = Array.from(document.querySelectorAll<HTMLElement>('.word'));
+	const hero = document.querySelector('.hero');
+	if (words.length > 1 && !reduceMotion) {
+		let index = 0;
+		window.setInterval(() => {
+			if (document.hidden || hero?.classList.contains('is-offscreen')) return;
+			const current = words[index];
+			index = (index + 1) % words.length;
+			current.classList.remove('is-active');
+			current.classList.add('is-leaving');
+			words[index].classList.remove('is-leaving');
+			words[index].classList.add('is-active');
+			window.setTimeout(() => current.classList.remove('is-leaving'), 650);
+		}, 2600);
+	}
+
+	const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+	// Inclinaison 3D de l'éventail : une seule écriture de style par image (rAF).
+	const fan = document.querySelector<HTMLElement>('[data-tilt]');
+	if (fan && finePointer && !reduceMotion) {
+		let frame = 0;
+		fan.addEventListener('pointermove', (e) => {
+			if (frame) return;
+			frame = requestAnimationFrame(() => {
+				frame = 0;
+				const r = fan.getBoundingClientRect();
+				const x = (e.clientX - r.left) / r.width - 0.5;
+				const y = (e.clientY - r.top) / r.height - 0.5;
+				fan.style.setProperty('--ry', `${x * 10}deg`);
+				fan.style.setProperty('--rx', `${-y * 8}deg`);
+			});
+		});
+		fan.addEventListener('pointerleave', () => {
+			fan.style.setProperty('--ry', '0deg');
+			fan.style.setProperty('--rx', '0deg');
+		});
+	}
+
+	// Halo des cartes formules qui suit le pointeur
+	if (finePointer) {
+		document.querySelectorAll<HTMLElement>('[data-spotlight]').forEach((card) => {
+			card.addEventListener('pointermove', (e) => {
+				const r = card.getBoundingClientRect();
+				card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+				card.style.setProperty('--my', `${e.clientY - r.top}px`);
+			});
+		});
+	}
+
+	// Compteurs animés : Motion (déjà dans le projet) n'est chargé qu'à l'arrivée des chiffres à l'écran.
+	const counters = document.querySelectorAll<HTMLElement>('[data-count]');
+	if (counters.length && !reduceMotion && 'IntersectionObserver' in window) {
+		counters.forEach((el) => (el.textContent = '0'));
+		const io = new IntersectionObserver(
+			async (entries) => {
+				const visible = entries.filter((e) => e.isIntersecting);
+				if (!visible.length) return;
+				const { animate } = await import('framer-motion/dom');
+				for (const entry of visible) {
+					const el = entry.target as HTMLElement;
+					io.unobserve(el);
+					const target = Number(el.dataset.count);
+					animate(0, target, {
+						duration: 1.6,
+						ease: [0.22, 1, 0.36, 1],
+						onUpdate: (v) => (el.textContent = String(Math.round(v))),
+					});
+				}
+			},
+			{ threshold: 0.6 },
+		);
+		counters.forEach((el) => io.observe(el));
+	}
+</script>

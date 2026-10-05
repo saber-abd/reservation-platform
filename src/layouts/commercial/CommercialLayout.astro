@@ -1,8 +1,12 @@
 ---
 import '../../styles/commercial.css';
-import 'aos/dist/aos.css';
-import { Briefcase, Menu, X, Code2 } from 'lucide-react';
+import { Code2, ArrowRight } from 'lucide-react';
 import SmoothScroll from '@/components/shared/SmoothScroll.astro';
+import CookieBanner from '@/components/shared/CookieBanner.astro';
+import Avatar from '@/components/commercial/Avatar.astro';
+import BrandIcon from '@/components/commercial/BrandIcon.astro';
+import { membres } from '@/components/commercial/equipe';
+import { contact } from '@/components/commercial/contact';
 
 interface Props {
 	title: string;
@@ -12,10 +16,24 @@ interface Props {
 const { title, description } = Astro.props;
 const currentYear = new Date().getFullYear();
 
-const navLinks = [
+const mobileLinks = [
 	{ label: 'Présentation', href: '/#presentation' },
+	{ label: 'Formules', href: '/#tarification' },
 	{ label: 'Notre histoire', href: '/notre-histoire' },
 	{ label: 'Contact', href: '/#contact' },
+];
+
+const formules = [
+	{ label: 'Standard', href: '/galerie/standard', dot: 'bg-prussian-blue-600' },
+	{ label: 'Premium', href: '/galerie/premium', dot: 'bg-rose-600' },
+	{ label: 'Diamant', href: '/galerie/diamant', dot: 'bg-violet-600' },
+];
+
+const legal = [
+	{ label: 'Mentions légales', href: '/mentions-legales' },
+	{ label: 'Conditions générales d’utilisation', href: '/cgu' },
+	{ label: 'Données personnelles', href: '/confidentialite' },
+	{ label: 'Cookies', href: '/cookies' },
 ];
 ---
 
@@ -27,116 +45,105 @@ const navLinks = [
 		<meta name="description" content={description} />
 		<title>{title}</title>
 		<meta name="theme-color" content="#1c1917" />
+		<!-- Active les apparitions au défilement uniquement si le JS tourne (sinon tout reste visible). -->
+		<script is:inline>document.documentElement.classList.add('js');</script>
 	</head>
 	<body class="commercial-page flex min-h-screen flex-col bg-stone-50 selection:bg-stone-900 selection:text-white">
-		
+
 		<!-- HEADER COMMERCIAL -->
-		<header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200">
-			<div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+		<header class="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-stone-200">
+			<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
 				<a href="/" class="flex items-center gap-2 group">
-					<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-900 text-white transition-transform group-hover:scale-105">
+					<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-900 text-white transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-6">
 						<Code2 size={20} />
 					</div>
 					<span class="text-lg font-extrabold text-stone-900 tracking-tight">SaberWeb<span class="text-stone-400">.dev</span></span>
 				</a>
 
 				<!-- Desktop Nav -->
-				<nav class="hidden md:flex items-center gap-8">
-					<a href="/#presentation" class="text-sm font-semibold text-stone-600 hover:text-stone-900 transition-colors">
-						Présentation
-					</a>
-					<a href="/notre-histoire" class="text-sm font-semibold text-stone-600 hover:text-stone-900 transition-colors">
-						Notre histoire
-					</a>
-					
+				<nav class="hidden md:flex items-center gap-8" aria-label="Navigation principale">
+					<a href="/#presentation" class="nav-link">Présentation</a>
+					<a href="/notre-histoire" class="nav-link">Notre histoire</a>
+
 					<!-- Mega Menu Formules -->
 					<div class="relative group">
-						<button class="flex items-center gap-1 text-sm font-semibold text-stone-600 group-hover:text-stone-900 transition-colors pb-6 -mb-6">
+						<button type="button" class="nav-link flex items-center gap-1 pb-6 -mb-6" aria-haspopup="true">
 							Formules
-							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform group-hover:rotate-180"><path d="m6 9 6 6 6-6"/></svg>
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-300 group-hover:rotate-180 group-focus-within:rotate-180"><path d="m6 9 6 6 6-6"/></svg>
 						</button>
-						
+
 						<!-- Dropdown Panel -->
-						<div class="absolute top-full left-1/2 -translate-x-1/2 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 w-[700px] z-[100]">
+						<div class="absolute top-full left-1/2 -translate-x-1/2 pt-4 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 transition-all duration-300 w-[700px] z-[100]">
 							<div class="rounded-2xl border border-stone-200 bg-white p-8 shadow-2xl grid grid-cols-3 gap-8">
-								<!-- Colonne Standard -->
 								<div>
 									<a href="/galerie/standard" class="block mb-4">
-										<h4 class="font-bold text-prussian-blue-600 hover:text-prussian-blue-500 transition-colors flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-prussian-blue-500"></div> Démo Standard</h4>
+										<h4 class="font-bold text-prussian-blue-600 hover:text-prussian-blue-700 transition-colors flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-prussian-blue-600"></span> Démo Standard</h4>
 									</a>
 									<ul class="space-y-3 text-sm text-stone-500 font-medium ml-4">
-										<li><a href="/galerie/standard#fonctionnalites" class="hover:text-prussian-blue-500 transition-colors block">Fonctionnalités</a></li>
-										<li><a href="/galerie/standard#technologies" class="hover:text-prussian-blue-500 transition-colors block">Technologies</a></li>
-										<li><a href="/galerie/standard#couts" class="hover:text-prussian-blue-500 transition-colors block">Coûts détaillés</a></li>
+										<li><a href="/galerie/standard#fonctionnalites" class="hover:text-prussian-blue-600 transition-colors block">Fonctionnalités</a></li>
+										<li><a href="/galerie/standard#technologies" class="hover:text-prussian-blue-600 transition-colors block">Technologies</a></li>
+										<li><a href="/galerie/standard#couts" class="hover:text-prussian-blue-600 transition-colors block">Coûts détaillés</a></li>
 									</ul>
 								</div>
-								
-								<!-- Colonne Premium -->
 								<div class="border-l border-stone-100 pl-8">
 									<a href="/galerie/premium" class="block mb-4">
-										<h4 class="font-bold text-brick-ember-500 hover:text-brick-ember-400 transition-colors flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-brick-ember-500"></div> Démo Premium</h4>
+										<h4 class="font-bold text-rose-600 hover:text-rose-700 transition-colors flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-rose-600"></span> Démo Premium</h4>
 									</a>
 									<ul class="space-y-3 text-sm text-stone-500 font-medium ml-4">
-										<li><a href="/galerie/premium#fonctionnalites" class="hover:text-brick-ember-500 transition-colors block">Fonctionnalités</a></li>
-										<li><a href="/galerie/premium#technologies" class="hover:text-brick-ember-500 transition-colors block">Technologies</a></li>
-										<li><a href="/galerie/premium#couts" class="hover:text-brick-ember-500 transition-colors block">Coûts détaillés</a></li>
+										<li><a href="/galerie/premium#fonctionnalites" class="hover:text-rose-600 transition-colors block">Fonctionnalités</a></li>
+										<li><a href="/galerie/premium#technologies" class="hover:text-rose-600 transition-colors block">Technologies</a></li>
+										<li><a href="/galerie/premium#couts" class="hover:text-rose-600 transition-colors block">Coûts détaillés</a></li>
 									</ul>
 								</div>
-								
-								<!-- Colonne Diamant -->
 								<div class="border-l border-stone-100 pl-8">
 									<a href="/galerie/diamant" class="block mb-4">
-										<h4 class="font-bold text-deep-teal-600 hover:text-deep-teal-500 transition-colors flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-deep-teal-500"></div> Démo Diamant</h4>
+										<h4 class="font-bold text-violet-600 hover:text-violet-700 transition-colors flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-violet-600"></span> Démo Diamant</h4>
 									</a>
 									<ul class="space-y-3 text-sm text-stone-500 font-medium ml-4">
-										<li><a href="/galerie/diamant#fonctionnalites" class="hover:text-deep-teal-500 transition-colors block">Fonctionnalités</a></li>
-										<li><a href="/galerie/diamant#technologies" class="hover:text-deep-teal-500 transition-colors block">Technologies</a></li>
-										<li><a href="/galerie/diamant#couts" class="hover:text-deep-teal-500 transition-colors block">Coûts détaillés</a></li>
+										<li><a href="/galerie/diamant#fonctionnalites" class="hover:text-violet-600 transition-colors block">Fonctionnalités</a></li>
+										<li><a href="/galerie/diamant#technologies" class="hover:text-violet-600 transition-colors block">Technologies</a></li>
+										<li><a href="/galerie/diamant#couts" class="hover:text-violet-600 transition-colors block">Coûts détaillés</a></li>
 									</ul>
 								</div>
 							</div>
 						</div>
 					</div>
 
-					<a href="/#contact" class="text-sm font-semibold text-stone-600 hover:text-stone-900 transition-colors">
-						Contact
-					</a>
+					<a href="/#contact" class="nav-link">Contact</a>
 				</nav>
 
 				<div class="hidden md:block">
-					<a href="#contact" class="rounded-full bg-stone-900 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-stone-800">
-						Démarrer un projet
+					<a href="/#contact" class="btn btn-dark btn-sm">
+						Contactez-nous <ArrowRight size={16} class="btn-arrow" />
 					</a>
 				</div>
 
-				<!-- Mobile Menu Toggle -->
-				<button id="mobile-menu-btn" class="md:hidden text-stone-900 focus:outline-none">
-					<span id="icon-menu"><Menu size={24} /></span>
-					<span id="icon-close" class="hidden"><X size={24} /></span>
+				<!-- Bouton menu mobile : les trois barres se transforment en croix -->
+				<button id="mobile-menu-btn" type="button" class="burger md:hidden" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-nav">
+					<span></span><span></span><span></span>
 				</button>
 			</div>
 
 			<!-- Mobile Nav -->
-			<div id="mobile-nav" class="grid grid-rows-[0fr] border-t border-stone-200 bg-white md:hidden transition-[grid-template-rows] duration-300 ease-in-out">
+			<div id="mobile-nav" class="mobile-nav md:hidden" data-open="false">
 				<div class="overflow-hidden">
-					<nav class="flex flex-col px-6 py-4 gap-4">
-						<a href="/#presentation" class="text-lg font-semibold text-stone-700 hover:text-stone-900">Présentation</a>
-						<a href="/notre-histoire" class="text-lg font-semibold text-stone-700 hover:text-stone-900">Notre histoire</a>
-						
-						<div class="py-2 border-y border-stone-100">
-							<p class="text-sm font-bold text-stone-400 mb-3 uppercase tracking-wider">Formules</p>
-							<div class="flex flex-col gap-3 pl-4 border-l-2 border-stone-100">
-								<a href="/galerie/standard" class="text-lg font-semibold text-prussian-blue-600">Standard</a>
-								<a href="/galerie/premium" class="text-lg font-semibold text-brick-ember-600">Premium</a>
-								<a href="/galerie/diamant" class="text-lg font-semibold text-deep-teal-600">Diamant</a>
-							</div>
+					<nav class="flex flex-col gap-1 px-4 pb-6 pt-2 sm:px-6" aria-label="Navigation mobile">
+						{mobileLinks.map((l, i) => (
+							<a href={l.href} class="mobile-nav-item flex items-center justify-between rounded-xl px-3 py-3 text-lg font-semibold text-stone-800 hover:bg-stone-100" style={`--i:${i}`}>
+								{l.label} <ArrowRight size={18} class="text-stone-400" />
+							</a>
+						))}
+						<div class="mobile-nav-item mt-2 grid grid-cols-3 gap-2" style={`--i:${mobileLinks.length}`}>
+							{formules.map((f) => (
+								<a href={f.href} class="flex flex-col items-center gap-1.5 rounded-xl border border-stone-200 bg-white py-3 text-sm font-bold text-stone-800">
+									<span class={`h-2 w-2 rounded-full ${f.dot}`}></span>{f.label}
+								</a>
+							))}
 						</div>
-
-						<a href="/#contact" class="text-lg font-semibold text-stone-700 hover:text-stone-900">Contact</a>
-
-						<div class="mt-4 pt-4 border-t border-stone-100">
-							<a href="#contact" class="block text-center rounded-xl bg-stone-900 px-5 py-3 text-sm font-bold text-white">
-								Démarrer un projet
+						<div class="mobile-nav-item mt-4 grid grid-cols-2 gap-2" style={`--i:${mobileLinks.length + 1}`}>
+							<a href={contact.telephoneHref} class="btn btn-dark justify-center">Appeler</a>
+							<a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp justify-center">
+								<BrandIcon name="whatsapp" size={18} /> WhatsApp
 							</a>
 						</div>
 					</nav>
@@ -149,47 +156,104 @@ const navLinks = [
 		</main>
 
 		<!-- FOOTER COMMERCIAL -->
-		<footer class="bg-stone-900 text-stone-400 py-12">
-			<div class="mx-auto max-w-6xl px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-				<div class="flex items-center gap-2">
-					<Code2 size={20} class="text-white" />
-					<span class="text-lg font-bold text-white">SaberWeb.dev</span>
+		<footer class="bg-stone-950 text-stone-400">
+			<div class="mx-auto grid max-w-6xl gap-10 px-6 pt-16 pb-10 sm:grid-cols-2 lg:grid-cols-4">
+				<div class="sm:col-span-2 lg:col-span-1">
+					<a href="/" class="flex items-center gap-2">
+						<span class="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-stone-900"><Code2 size={18} /></span>
+						<span class="text-lg font-bold text-white">SaberWeb.dev</span>
+					</a>
+					<p class="mt-4 max-w-xs text-sm leading-relaxed">Sites vitrines et plateformes de réservation sur mesure pour les commerces et les petites entreprises.</p>
+					<a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" class="mt-5 inline-flex items-center gap-2 rounded-full bg-[#25D366]/10 px-4 py-2 text-sm font-semibold text-[#25D366] ring-1 ring-[#25D366]/30 transition-colors hover:bg-[#25D366] hover:text-stone-950" aria-label={`Nous écrire sur WhatsApp au ${contact.telephone}`}>
+						<BrandIcon name="whatsapp" size={18} /> {contact.telephone}
+					</a>
 				</div>
-				<p class="text-sm">© {currentYear} Tous droits réservés.</p>
-				<div class="flex gap-4">
-					<a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">LinkedIn</a>
-					<a href="https://github.com" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">GitHub</a>
+				<div>
+					<p class="text-xs font-bold uppercase tracking-widest text-stone-500">Navigation</p>
+					<ul class="mt-4 space-y-2.5 text-sm">
+						{mobileLinks.map((l) => <li><a href={l.href} class="footer-link">{l.label}</a></li>)}
+					</ul>
+				</div>
+				<div>
+					<p class="text-xs font-bold uppercase tracking-widest text-stone-500">Formules</p>
+					<ul class="mt-4 space-y-2.5 text-sm">
+						{formules.map((f) => <li><a href={f.href} class="footer-link">Formule {f.label}</a></li>)}
+					</ul>
+				</div>
+				<div>
+					<p class="text-xs font-bold uppercase tracking-widest text-stone-500">Informations légales</p>
+					<ul class="mt-4 space-y-2.5 text-sm">
+						{legal.map((l) => <li><a href={l.href} class="footer-link">{l.label}</a></li>)}
+						<li><button type="button" class="footer-link" data-cookie-settings>Gérer mes cookies</button></li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="border-t border-white/10">
+				<div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-6 py-8 md:flex-row">
+					<p class="text-sm">© {currentYear} SaberWeb.dev. Tous droits réservés.</p>
+					<ul class="flex items-center gap-6" aria-label="L’équipe sur LinkedIn">
+						{membres.map((m) => (
+							<li>
+								<a href={m.linkedin} target="_blank" rel="noopener noreferrer" class="team-link group flex items-center gap-2.5" aria-label={`Profil LinkedIn de ${m.prenom}`}>
+									<span class="relative">
+										<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={44} class="ring-2 ring-white/10 transition duration-300 group-hover:ring-[#0A66C2]" />
+									</span>
+									<span class="flex items-center gap-1.5 text-sm font-semibold text-stone-300 transition-colors group-hover:text-white">
+										{m.prenom}
+										<BrandIcon name="linkedin" size={16} class="text-[#0A66C2] transition-transform duration-300 group-hover:scale-110" />
+									</span>
+								</a>
+							</li>
+						))}
+					</ul>
 				</div>
 			</div>
 		</footer>
 
-		<script>
-			import AOS from 'aos';
-			AOS.init({
-				duration: 800,
-				easing: 'ease-out-cubic',
-				once: true,
-				offset: 50,
-			});
+		<CookieBanner policyHref="/cookies" />
 
+		<script>
+			// Apparitions au défilement : remplace AOS (~14 Ko) par ~0,5 Ko.
+			// L'animation CSS n'est pas conservée après sa fin (fill-mode: backwards),
+			// donc les effets de survol (translate, ombre) gardent leur propre transition.
+			const items = document.querySelectorAll<HTMLElement>('[data-aos]');
+			const show = (el: HTMLElement) => {
+				const delay = el.dataset.aosDelay;
+				if (delay) el.style.setProperty('--reveal-delay', `${delay}ms`);
+				el.classList.add('is-revealed');
+			};
+			if ('IntersectionObserver' in window) {
+				const io = new IntersectionObserver(
+					(entries) => {
+						for (const entry of entries) {
+							if (!entry.isIntersecting) continue;
+							show(entry.target as HTMLElement);
+							io.unobserve(entry.target);
+						}
+					},
+					{ rootMargin: '0px 0px -8% 0px' },
+				);
+				items.forEach((el) => io.observe(el));
+			} else {
+				items.forEach(show);
+			}
+
+			// Menu mobile animé
 			const btn = document.getElementById('mobile-menu-btn');
 			const nav = document.getElementById('mobile-nav');
-			const iconMenu = document.getElementById('icon-menu');
-			const iconClose = document.getElementById('icon-close');
-
-			if (btn && nav && iconMenu && iconClose) {
-				btn.addEventListener('click', () => {
-					// Toggle open state with grid rows animation
-					if (nav.classList.contains('grid-rows-[0fr]')) {
-						nav.classList.remove('grid-rows-[0fr]');
-						nav.classList.add('grid-rows-[1fr]');
-					} else {
-						nav.classList.remove('grid-rows-[1fr]');
-						nav.classList.add('grid-rows-[0fr]');
-					}
-					
-					iconMenu.classList.toggle('hidden');
-					iconClose.classList.toggle('hidden');
+			if (btn && nav) {
+				const setOpen = (open: boolean) => {
+					nav.dataset.open = String(open);
+					btn.setAttribute('aria-expanded', String(open));
+					btn.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+				};
+				btn.addEventListener('click', () => setOpen(nav.dataset.open !== 'true'));
+				nav.addEventListener('click', (e) => {
+					if ((e.target as HTMLElement).closest('a')) setOpen(false);
+				});
+				document.addEventListener('keydown', (e) => {
+					if (e.key === 'Escape') setOpen(false);
 				});
 			}
 		</script>

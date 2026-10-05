@@ -3,6 +3,7 @@ import '../../styles/premium.css';
 import 'aos/dist/aos.css';
 import PremiumHeader from '@/components/premium/PremiumHeader.astro';
 import PremiumFooter from '@/components/premium/PremiumFooter.astro';
+import CookieBanner from '@/components/shared/CookieBanner.astro';
 import SmoothScroll from '@/components/shared/SmoothScroll.astro';
 import { getSiteConfig } from '@/config/site';
 
@@ -53,5 +54,6 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 			});
 		</script>
 		<SmoothScroll />
+		<CookieBanner policyHref="/cookies" />
 	</body>
 </html>

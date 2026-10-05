@@ -45,7 +45,7 @@ export default function PremiumDashboardNav({ basePath = '' }: { basePath?: stri
 					);
 				})}
 			</div>
-			<div className="mt-auto pt-4 md:border-t md:border-border hidden md:block">
+			<div className="mt-auto pt-4 border-t border-stone-800">
 				<button
 					onClick={handleSignOut}
 					className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-stone-400 hover:bg-stone-900 hover:text-primary transition-colors"

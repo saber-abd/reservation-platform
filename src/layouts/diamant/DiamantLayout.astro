@@ -3,6 +3,7 @@ import '../../styles/diamant.css';
 import 'aos/dist/aos.css';
 import DiamantHeader from '@/components/diamant/DiamantHeader.astro';
 import DiamantFooter from '@/components/diamant/DiamantFooter.astro';
+import CookieBanner from '@/components/shared/CookieBanner.astro';
 import SmoothScroll from '@/components/shared/SmoothScroll.astro';
 import { getSiteConfig } from '@/config/site';
 
@@ -101,5 +102,6 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 			document.addEventListener('astro:page-load', initAnimations);
 		</script>
 		<SmoothScroll />
+		<CookieBanner policyHref="/cookies" />
 	</body>
 </html>

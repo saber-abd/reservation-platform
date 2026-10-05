@@ -3,6 +3,7 @@ import '../../styles/standard.css';
 import 'aos/dist/aos.css';
 import StandardHeader from '@/components/standard/StandardHeader.astro';
 import Footer from '@/components/standard/StandardFooter.astro';
+import CookieBanner from '@/components/shared/CookieBanner.astro';
 import SmoothScroll from '@/components/shared/SmoothScroll.astro';
 import { getSiteConfig } from '@/config/site';
 
@@ -53,5 +54,6 @@ const basePath = "/demo-standard";
 			});
 		</script>
 		<SmoothScroll />
+		<CookieBanner policyHref="/cookies" />
 	</body>
 </html>
