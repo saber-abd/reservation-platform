@@ -1,0 +1,267 @@
+---
+// Galerie des captures d'une formule (pages /galerie/*).
+// Une seule image chargée à la fois (les autres sont masquées et en loading="lazy"),
+// AVIF avec repli WebP, ~2 Ko de JS sans dépendance.
+// Clavier : ← / → (et Début / Fin) dans la galerie, Échap ferme l'agrandissement.
+
+export interface GalleryShot {
+	/** Nom de fichier sans suffixe dans /images/galerie/<demo>/ */
+	file: string;
+	title: string;
+	caption: string;
+}
+
+interface Props {
+	demo: 'standard' | 'premium' | 'diamant';
+	shots: GalleryShot[];
+	title: string;
+	intro: string;
+}
+
+const { demo, shots, title, intro } = Astro.props;
+const base = `/images/galerie/${demo}`;
+const galleryId = `galerie-${demo}`;
+
+// Classes littérales par démo (Tailwind ne génère que ce qu'il voit dans les sources).
+const themes = {
+	standard: {
+		section: 'bg-white',
+		heading: 'text-stone-900',
+		text: 'text-stone-600',
+		badge: 'bg-prussian-blue-900/40 text-prussian-blue-600 border-prussian-blue-800',
+		frame: 'bg-stone-100 border-stone-200',
+		button: 'bg-white/90 text-stone-900 border-stone-200 hover:bg-prussian-blue-600 hover:text-white hover:border-prussian-blue-600',
+		thumb: 'border-transparent opacity-60 hover:opacity-100 aria-[current=true]:border-prussian-blue-600 aria-[current=true]:opacity-100',
+		ring: 'focus-visible:ring-prussian-blue-600',
+		counter: 'text-prussian-blue-600',
+	},
+	premium: {
+		section: 'bg-white',
+		heading: 'text-stone-900',
+		text: 'text-stone-600',
+		badge: 'bg-brick-ember-900/40 text-brick-ember-500 border-brick-ember-800',
+		frame: 'bg-stone-900 border-stone-800',
+		button: 'bg-white/90 text-stone-900 border-stone-200 hover:bg-brick-ember-500 hover:text-white hover:border-brick-ember-500',
+		thumb: 'border-transparent opacity-60 hover:opacity-100 aria-[current=true]:border-brick-ember-500 aria-[current=true]:opacity-100',
+		ring: 'focus-visible:ring-brick-ember-500',
+		counter: 'text-brick-ember-500',
+	},
+	diamant: {
+		section: 'bg-stone-950 border-t border-white/5',
+		heading: 'text-white',
+		text: 'text-stone-400',
+		badge: 'bg-white/5 text-jasmine-400 border-white/10',
+		frame: 'bg-white/[0.04] border-white/10',
+		button: 'bg-stone-900/80 text-white border-white/15 hover:bg-jasmine-500 hover:text-stone-900 hover:border-jasmine-500',
+		thumb: 'border-transparent opacity-50 hover:opacity-100 aria-[current=true]:border-jasmine-400 aria-[current=true]:opacity-100',
+		ring: 'focus-visible:ring-jasmine-400',
+		counter: 'text-jasmine-400',
+	},
+} as const;
+const t = themes[demo];
+const sizes = '(min-width: 1152px) 1104px, calc(100vw - 48px)';
+const srcset = (file: string, ext: string) => `${base}/${file}-960.${ext} 960w, ${base}/${file}-1600.${ext} 1600w, ${base}/${file}-2160.${ext} 2160w`;
+---
+
+<section id="galerie" class={`py-24 ${t.section}`}>
+	<div class="mx-auto max-w-6xl px-6">
+		<div class="text-center mb-12" data-aos="fade-up">
+			<p class={`inline-block px-4 py-1.5 rounded-full border text-xs font-bold uppercase tracking-widest mb-5 ${t.badge}`}>En images</p>
+			<h2 class={`text-4xl font-bold mb-4 ${t.heading}`}>{title}</h2>
+			<p class={`text-lg max-w-2xl mx-auto ${t.text}`}>{intro}</p>
+		</div>
+
+		<div
+			class="formula-gallery"
+			data-gallery
+			role="region"
+			aria-roledescription="carrousel"
+			aria-label={`Captures d'écran : ${title}`}
+			id={galleryId}
+			tabindex="-1"
+		>
+			<div class={`relative rounded-3xl border overflow-hidden shadow-xl ${t.frame}`}>
+				<div class="relative aspect-[16/10]" data-viewport>
+					{shots.map((shot, i) => (
+						<figure
+							class="absolute inset-0 m-0"
+							data-slide
+							role="group"
+							aria-roledescription="diapositive"
+							aria-label={`${i + 1} sur ${shots.length} : ${shot.title}`}
+							hidden={i !== 0}
+						>
+							<button
+								type="button"
+								class={`block w-full h-full cursor-zoom-in focus:outline-none focus-visible:ring-4 focus-visible:ring-inset ${t.ring}`}
+								data-zoom
+								aria-label={`Agrandir : ${shot.title}`}
+							>
+								<picture>
+									<source type="image/avif" srcset={srcset(shot.file, 'avif')} sizes={sizes} />
+									<img
+										src={`${base}/${shot.file}-1600.webp`}
+										srcset={srcset(shot.file, 'webp')}
+										sizes={sizes}
+										width="2160"
+										height="1350"
+										alt={`${shot.title}. ${shot.caption}`}
+										loading="lazy"
+										decoding="async"
+										class="w-full h-full object-cover object-top"
+									/>
+								</picture>
+							</button>
+						</figure>
+					))}
+				</div>
+
+				<button type="button" data-prev aria-controls={galleryId} aria-label="Capture précédente" class={`absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 md:w-11 md:h-11 rounded-full border shadow-md flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-4 ${t.button} ${t.ring}`}>
+					<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+				</button>
+				<button type="button" data-next aria-controls={galleryId} aria-label="Capture suivante" class={`absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 md:w-11 md:h-11 rounded-full border shadow-md flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-4 ${t.button} ${t.ring}`}>
+					<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+				</button>
+				<button type="button" data-zoom-current aria-label="Agrandir la capture" class={`absolute right-3 top-3 z-10 w-9 h-9 md:w-11 md:h-11 rounded-full border shadow-md flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-4 ${t.button} ${t.ring}`}>
+					<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+				</button>
+			</div>
+
+			<div class="mt-6 flex flex-col md:flex-row md:items-start gap-2 md:gap-8">
+				<p class={`text-sm font-bold tabular-nums shrink-0 ${t.counter}`} aria-hidden="true">
+					<span data-index>1</span> / {shots.length}
+				</p>
+				<div aria-live="polite" class="min-h-[3.5rem]">
+					<h3 class={`text-xl font-bold ${t.heading}`} data-current-title>{shots[0].title}</h3>
+					<p class={`text-sm mt-1 ${t.text}`} data-current-caption>{shots[0].caption}</p>
+				</div>
+			</div>
+
+			<ul class="mt-6 flex gap-3 overflow-x-auto pb-2 snap-x" aria-label="Choisir une capture">
+				{shots.map((shot, i) => (
+					<li class="shrink-0 snap-start">
+						<button
+							type="button"
+							data-thumb={i}
+							aria-label={`Voir la capture ${i + 1} : ${shot.title}`}
+							aria-current={i === 0 ? 'true' : 'false'}
+							data-title={shot.title}
+							data-caption={shot.caption}
+							class={`block w-32 md:w-40 aspect-[16/10] rounded-xl overflow-hidden border-2 transition focus:outline-none focus-visible:ring-4 ${t.thumb} ${t.ring}`}
+						>
+							<picture>
+								<source type="image/avif" srcset={`${base}/${shot.file}-thumb.avif`} />
+								<img src={`${base}/${shot.file}-thumb.webp`} width="320" height="200" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover object-top" />
+							</picture>
+						</button>
+					</li>
+				))}
+			</ul>
+		</div>
+	</div>
+
+	<dialog data-lightbox data-lenis-prevent aria-label={`Capture agrandie : ${title}`} class="formula-lightbox m-auto max-w-none max-h-none w-screen h-[100dvh] p-0 bg-transparent backdrop:bg-black/90">
+		<div class="relative w-full h-full flex items-center justify-center p-4 md:p-12">
+			<picture class="block max-w-full max-h-full">
+				<source type="image/avif" data-lightbox-source />
+				<img data-lightbox-img alt="" class="max-w-full max-h-[calc(100dvh-8rem)] w-auto h-auto rounded-xl shadow-2xl" />
+			</picture>
+			<p class="absolute bottom-4 left-0 right-0 text-center text-sm text-white/80 px-16" data-lightbox-caption></p>
+			<button type="button" data-lightbox-prev aria-label="Capture précédente" class="absolute left-3 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 text-white hover:bg-white/25 flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-white">
+				<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+			</button>
+			<button type="button" data-lightbox-next aria-label="Capture suivante" class="absolute right-3 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 text-white hover:bg-white/25 flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-white">
+				<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+			</button>
+			<button type="button" data-lightbox-close aria-label="Fermer l'agrandissement" class="absolute right-3 top-3 w-12 h-12 rounded-full bg-white/10 text-white hover:bg-white/25 flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-white">
+				<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+			</button>
+		</div>
+	</dialog>
+</section>
+
+<script>
+	for (const root of document.querySelectorAll<HTMLElement>('[data-gallery]')) {
+		const section = root.closest('section')!;
+		const slides = [...root.querySelectorAll<HTMLElement>('[data-slide]')];
+		const thumbs = [...root.querySelectorAll<HTMLButtonElement>('[data-thumb]')];
+		const indexEl = root.querySelector('[data-index]')!;
+		const titleEl = root.querySelector("[data-current-title]")!;
+		const captionEl = root.querySelector("[data-current-caption]")!;
+		const dialog = section.querySelector<HTMLDialogElement>('[data-lightbox]')!;
+		const lbImg = dialog.querySelector<HTMLImageElement>('[data-lightbox-img]')!;
+		const lbSource = dialog.querySelector<HTMLSourceElement>('[data-lightbox-source]')!;
+		const lbCaption = dialog.querySelector('[data-lightbox-caption]')!;
+		let current = 0;
+
+		const show = (i: number) => {
+			current = (i + slides.length) % slides.length;
+			slides.forEach((s, k) => (s.hidden = k !== current));
+			thumbs.forEach((t, k) => t.setAttribute('aria-current', String(k === current)));
+			const thumb = thumbs[current];
+			indexEl.textContent = String(current + 1);
+			titleEl.textContent = thumb.dataset.title ?? '';
+			captionEl.textContent = thumb.dataset.caption ?? '';
+			// Précharge la suivante pendant que l'utilisateur regarde celle-ci.
+			const next = slides[(current + 1) % slides.length].querySelector('img');
+			if (next) next.loading = 'eager';
+			if (dialog.open) fillLightbox();
+		};
+
+		const fillLightbox = () => {
+			const img = slides[current].querySelector('img')!;
+			const src = img.currentSrc || img.src;
+			const large = src.replace(/-(960|1600)\.(avif|webp)$/, '-2160.$2');
+			lbSource.srcset = large.endsWith('.avif') ? large : '';
+			lbImg.src = large.replace(/\.avif$/, '.webp');
+			lbImg.alt = img.alt;
+			lbCaption.textContent = `${current + 1} / ${slides.length} · ${thumbs[current].dataset.title}`;
+		};
+
+		const openLightbox = () => {
+			fillLightbox();
+			dialog.showModal();
+		};
+
+		root.querySelector('[data-prev]')!.addEventListener('click', () => show(current - 1));
+		root.querySelector('[data-next]')!.addEventListener('click', () => show(current + 1));
+		root.querySelector('[data-zoom-current]')!.addEventListener('click', openLightbox);
+		root.querySelectorAll('[data-zoom]').forEach((b) => b.addEventListener('click', openLightbox));
+		thumbs.forEach((t, k) => t.addEventListener('click', () => show(k)));
+
+		const onKey = (e: KeyboardEvent) => {
+			const keys: Record<string, () => void> = {
+				ArrowLeft: () => show(current - 1),
+				ArrowRight: () => show(current + 1),
+				Home: () => show(0),
+				End: () => show(slides.length - 1),
+			};
+			const action = keys[e.key];
+			if (!action) return;
+			e.preventDefault();
+			action();
+			// Garde le focus sur la miniature active quand on navigue depuis la bande.
+			if (thumbs.includes(document.activeElement as HTMLButtonElement)) thumbs[current].focus();
+		};
+		root.addEventListener('keydown', onKey);
+		dialog.addEventListener('keydown', onKey);
+
+		dialog.querySelector('[data-lightbox-prev]')!.addEventListener('click', () => show(current - 1));
+		dialog.querySelector('[data-lightbox-next]')!.addEventListener('click', () => show(current + 1));
+		dialog.querySelector('[data-lightbox-close]')!.addEventListener('click', () => dialog.close());
+		// Clic sur le fond (hors image et boutons) : fermeture.
+		dialog.addEventListener('click', (e) => {
+			const target = e.target as HTMLElement;
+			if (!target.closest('img, button')) dialog.close();
+		});
+
+		// Balayage tactile sur l'image principale.
+		let startX = 0;
+		const viewport = root.querySelector<HTMLElement>('[data-viewport]')!;
+		viewport.addEventListener('touchstart', (e) => (startX = e.touches[0].clientX), { passive: true });
+		viewport.addEventListener('touchend', (e) => {
+			const dx = e.changedTouches[0].clientX - startX;
+			if (Math.abs(dx) > 40) show(current + (dx < 0 ? 1 : -1));
+		});
+	}
+</script>

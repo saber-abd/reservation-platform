@@ -1,6 +1,16 @@
 ---
 import CommercialLayout from '@/layouts/commercial/CommercialLayout.astro';
+import FormulaGallery, { type GalleryShot } from '@/components/commercial/FormulaGallery.astro';
 import { Calendar, Zap, LayoutDashboard, Database, Server, Smartphone, CheckCircle2, ChevronRight, Euro } from 'lucide-react';
+
+const galleryShots: GalleryShot[] = [
+	{ file: 'site-vitrine', title: 'Site vitrine', caption: 'Une page d’accueil claire et rapide qui présente votre activité et met la réservation en avant.' },
+	{ file: 'reservation', title: 'Réservation en ligne', caption: 'Vos clients choisissent une prestation, un jour et un créneau libre, sans créer de compte.' },
+	{ file: 'rendez-vous', title: 'Rendez-vous à valider', caption: 'Les demandes arrivent dans votre tableau de bord : confirmez ou refusez en un clic.' },
+	{ file: 'disponibilites', title: 'Horaires et disponibilités', caption: 'Définissez vos horaires récurrents, la durée des créneaux et vos exceptions (jours fériés, fermetures).' },
+	{ file: 'clients', title: 'Fiches clients', caption: 'Coordonnées, historique des interventions, note privée et fil de discussion pour chaque client.' },
+	{ file: 'statistiques', title: 'Statistiques', caption: 'Rendez-vous, annulations, chiffre d’affaires estimé et prestation la plus demandée, sur la période de votre choix.' },
+];
 ---
 
 <CommercialLayout title="Formules - Démo Standard" description="Découvrez en détail la démo Standard, idéale pour démarrer votre activité en ligne.">
@@ -113,6 +123,9 @@ import { Calendar, Zap, LayoutDashboard, Database, Server, Smartphone, CheckCirc
 			</div>
 		</div>
 	</section>
+
+	<!-- Galerie de captures -->
+	<FormulaGallery demo="standard" shots={galleryShots} title="Les écrans de la démo Standard" intro="Le site et son espace pro, tels que vos clients et vous les verrez." />
 
 	<!-- Section Technologies -->
 	<section id="technologies" class="py-24 bg-stone-50 text-stone-900 relative overflow-hidden">

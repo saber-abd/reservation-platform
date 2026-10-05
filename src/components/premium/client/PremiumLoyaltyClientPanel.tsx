@@ -75,7 +75,7 @@ export default function LoyaltyClientPanel() {
 
 				<div className="flex-1 text-center sm:text-left">
 					<h2 className="text-2xl font-bold text-foreground">
-						Grade actuel : <span className={`bg-gradient-to-r bg-clip-text text-transparent ${tierColors[data.tier].split(' ')[0]}`}>{data.tier}</span>
+						Grade actuel : <span className={`bg-gradient-to-r bg-clip-text text-transparent ${tierColors[data.tier].split(' ').slice(0, 2).join(' ')}`}>{data.tier}</span>
 					</h2>
 					<p className="mt-2 text-sm text-muted-foreground">
 						Vous avez cumulé <strong className="text-emerald-700">{data.passages} passages</strong>.

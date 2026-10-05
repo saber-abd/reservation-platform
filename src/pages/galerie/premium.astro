@@ -1,6 +1,16 @@
 ---
 import CommercialLayout from '@/layouts/commercial/CommercialLayout.astro';
+import FormulaGallery, { type GalleryShot } from '@/components/commercial/FormulaGallery.astro';
 import { Database, ShieldCheck, Users, LineChart, Euro, Gift, LayoutTemplate, Settings } from 'lucide-react';
+
+const galleryShots: GalleryShot[] = [
+	{ file: 'site-vitrine', title: 'Site vitrine', caption: 'Une identité forte et immersive, pensée pour mettre en valeur votre savoir-faire.' },
+	{ file: 'rendez-vous', title: 'Tableau de bord', caption: 'Toutes les demandes de rendez-vous au même endroit, à confirmer, refuser ou consulter dans l’historique.' },
+	{ file: 'statistiques', title: 'Statistiques', caption: 'Évolution du chiffre d’affaires, nombre d’interventions, panier moyen et prestations les plus rentables.' },
+	{ file: 'clientele', title: 'Fiches clients', caption: 'Historique complet, coordonnées, note privée (véhicule, préférences) et discussion directe avec chaque client.' },
+	{ file: 'espace-client', title: 'Espace client', caption: 'Vos clients retrouvent leurs réservations passées et à venir et peuvent annuler eux-mêmes.' },
+	{ file: 'fidelite', title: 'Fidélité et points', caption: 'Les points s’accumulent à chaque passage et débloquent automatiquement grades, badges et avantages.' },
+];
 ---
 
 <CommercialLayout title="Formules - Démo Premium" description="Découvrez la démo Premium : Plateforme complète avec espace client et base de données.">
@@ -142,6 +152,9 @@ import { Database, ShieldCheck, Users, LineChart, Euro, Gift, LayoutTemplate, Se
 			</div>
 		</div>
 	</section>
+
+	<!-- Galerie de captures -->
+	<FormulaGallery demo="premium" shots={galleryShots} title="Les écrans de la démo Premium" intro="L’espace client, le tableau de bord et la fidélité en situation réelle." />
 
 	<!-- Section Technologies -->
 	<section id="technologies" class="py-24 bg-stone-900 text-white">

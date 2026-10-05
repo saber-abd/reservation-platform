@@ -1,5 +1,6 @@
 ---
 import CommercialLayout from '@/layouts/commercial/CommercialLayout.astro';
+import FormulaGallery, { type GalleryShot } from '@/components/commercial/FormulaGallery.astro';
 import { 
 	Sparkles, 
 	Code2, 
@@ -64,6 +65,18 @@ const features = [
 		description: `Graphiques d'activité interactifs (Recharts) analysant taux de réservation et tendances, couplés à un carnet technique confidentiel (${code('client_notes')}) consignant formules, colorimétrie et sensibilités.`,
 		benefit: 'Personnalisation extrême à chaque visite',
 	},
+];
+
+const galleryShots: GalleryShot[] = [
+	{ file: 'tableau-de-bord', title: 'Tableau de bord', caption: 'Chiffre d’affaires, rendez-vous, nouveaux clients, panier moyen et prochains rendez-vous en un coup d’œil.' },
+	{ file: 'plage-personnalisee', title: 'Plage de données personnalisable', caption: 'Choisissez 7 jours, 30 jours, 1 an ou vos propres dates : tous les indicateurs et graphiques s’adaptent.' },
+	{ file: 'gestion-equipe', title: 'Gestion des utilisateurs', caption: 'Créez les comptes de votre équipe (administrateur, employé, démo), suspendez-les ou réinitialisez leur accès.' },
+	{ file: 'permissions', title: 'Gestion des droits', caption: 'Chaque rôle a ses accès : lecture, modification ou masqué, onglet par onglet.' },
+	{ file: 'moderation-clients', title: 'Modération des clients', caption: 'Recherchez, modifiez ou bannissez un client en un clic, avec le motif consigné.' },
+	{ file: 'messagerie', title: 'Messagerie intégrée', caption: 'Un fil de discussion par client, avec compteur de messages non lus et accusés de lecture.' },
+	{ file: 'recherche', title: 'Recherche unifiée', caption: 'Retrouvez n’importe quel rendez-vous par nom, e-mail, téléphone ou prestation.' },
+	{ file: 'fidelite-client', title: 'Programme VIP', caption: 'Côté client : quatre niveaux (Cristal, Argent, Or, Diamant), des points et des privilèges qui se débloquent.' },
+	{ file: 'site-vitrine', title: 'Site vitrine', caption: 'Un design exclusif, sans template, à l’image de votre maison.' },
 ];
 ---
 
@@ -196,6 +209,9 @@ const features = [
 			</div>
 		</div>
 	</section>
+
+	<!-- Galerie de captures -->
+	<FormulaGallery demo="diamant" shots={galleryShots} title="Les écrans de la démo Diamant" intro="Les outils de pilotage, de gestion d’équipe et d’expérience client de la démo Diamant." />
 
 	<!-- Section Technologies -->
 	<section id="technologies" class="py-32 bg-stone-50">
