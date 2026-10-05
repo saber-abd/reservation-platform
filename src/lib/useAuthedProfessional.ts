@@ -3,6 +3,14 @@ import { getSession } from '@/lib/auth';
 import { getClientById, getProfessionalByUserId, getPrimaryProfessional, getDemoTag, type Professional } from '@/lib/queries';
 import { getProSession, getActiveProRole } from '@/lib/permissions';
 
+// Identité de repli quand la base n'a pas encore de fiche pro pour la démo.
+const FALLBACK_IDENTITY: Record<string, { business_name: string; email: string }> = {
+	diamant: { business_name: 'Maison Prestige Diamant', email: 'contact@diamant-prestige.fr' },
+	premium: { business_name: 'Premium Auto', email: 'contact@premium-auto.fr' },
+	standard: { business_name: 'TechDom', email: 'contact@techdom-reparation.fr' },
+};
+const fallbackIdentity = (tag: string) => FALLBACK_IDENTITY[tag] ?? FALLBACK_IDENTITY.diamant;
+
 interface AuthedProfessionalState {
 	loading: boolean;
 	professional: Professional | null;
@@ -36,7 +44,7 @@ export function useAuthedProfessional(): AuthedProfessionalState {
 					const effectivePro: Professional = pro || {
 						id: 'eff1f7ef-33ee-49a2-9e4f-52ab675a4dc7',
 						user_id: proSession.id,
-						business_name: 'Maison Prestige Diamant',
+						business_name: fallbackIdentity(tag).business_name,
 						email: proSession.email,
 						tag_bd: tag,
 						created_at: new Date().toISOString()
@@ -52,8 +60,7 @@ export function useAuthedProfessional(): AuthedProfessionalState {
 					const effectivePro: Professional = pro || {
 						id: 'eff1f7ef-33ee-49a2-9e4f-52ab675a4dc7',
 						user_id: 'demo-pro-user',
-						business_name: 'Maison Prestige Diamant',
-						email: 'contact@diamant-prestige.fr',
+						...fallbackIdentity(tag),
 						tag_bd: tag,
 						created_at: new Date().toISOString()
 					};
@@ -69,8 +76,7 @@ export function useAuthedProfessional(): AuthedProfessionalState {
 						const fallbackPro: Professional = {
 							id: 'eff1f7ef-33ee-49a2-9e4f-52ab675a4dc7',
 							user_id: 'demo-pro-user',
-							business_name: 'Maison Prestige Diamant',
-							email: 'contact@diamant-prestige.fr',
+							...fallbackIdentity(tag),
 							tag_bd: tag,
 							created_at: new Date().toISOString()
 						};

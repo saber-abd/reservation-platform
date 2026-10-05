@@ -279,6 +279,28 @@ export const itRepairConfig = {
 	],
 };
 
+// Démo Premium (garage) : mêmes rubriques que siteConfig, identité propre.
+export const premiumAutoConfig = {
+	...siteConfig,
+	business: {
+		name: 'Premium Auto',
+		activity: 'Garage automobile',
+		tagline: 'Performances sans limite.',
+		description:
+			"Garage indépendant spécialisé dans le diagnostic, l'entretien, la mécanique et le detailing automobile. Nos techniciens certifiés prennent soin de votre véhicule avec un équipement de pointe et des tarifs annoncés avant toute intervention.",
+		address: '45 Avenue de la Performance, 75008 Paris',
+		lat: 48.8738,
+		lng: 2.2950,
+		phone: '01 45 67 89 10',
+		email: 'contact@premium-auto.fr',
+		openingHours: [
+			{ day: 'Lundi - Vendredi', hours: '8h00 - 19h00' },
+			{ day: 'Samedi', hours: '9h00 - 17h00' },
+			{ day: 'Dimanche', hours: 'Fermé' },
+		],
+	},
+};
+
 export async function getSiteConfig(currentPath?: string, cookies?: any) {
 	try {
 		const tag = currentPath ? (currentPath.match(/^\/demo-([^/]+)/)?.[1] || 'diamant') : 'diamant';
@@ -286,6 +308,8 @@ export async function getSiteConfig(currentPath?: string, cookies?: any) {
 		let baseConfig = siteConfig;
 		if (tag === 'standard') {
 			baseConfig = itRepairConfig;
+		} else if (tag === 'premium') {
+			baseConfig = premiumAutoConfig;
 		}
 
 		let overrideBusinessName: string | null = null;
@@ -328,5 +352,6 @@ export async function getSiteConfig(currentPath?: string, cookies?: any) {
 	}
 	
 	const tag = currentPath ? (currentPath.match(/^\/demo-([^/]+)/)?.[1] || 'diamant') : 'diamant';
-	return tag === 'standard' ? itRepairConfig : siteConfig;
+	if (tag === 'standard') return itRepairConfig;
+	return tag === 'premium' ? premiumAutoConfig : siteConfig;
 }

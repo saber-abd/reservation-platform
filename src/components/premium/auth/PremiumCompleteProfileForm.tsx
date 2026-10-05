@@ -157,14 +157,14 @@ export default function CompleteProfileForm({ user, targetDemo, onCompleted }: C
 
 				<div>
 					<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1">
-						Préférences Capillaires (Optionnel)
+						Votre véhicule (Optionnel)
 					</label>
 					<div className="relative">
 						<textarea 
 							rows={2}
 							value={preferences}
 							onChange={e => setPreferences(e.target.value)}
-							placeholder="Nature de vos cheveux, allergies, souhaits particuliers..."
+							placeholder="Marque, modèle, année, remarques particulières..."
 							className="w-full px-3.5 py-2 rounded-xl border border-stone-200 bg-stone-50 text-xs text-stone-900 focus:bg-white focus:border-primary focus:outline-none transition-all resize-none"
 						/>
 					</div>

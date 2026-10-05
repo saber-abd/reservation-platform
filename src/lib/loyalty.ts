@@ -19,7 +19,24 @@ export interface LoyaltyData {
 	perks: string[];
 }
 
-export async function getLoyaltyData(clientId: string): Promise<LoyaltyData> {
+/** Récompense propre à chaque démo (les textes métier restent dans les composants de la démo). */
+export interface LoyaltyReward {
+	/** Avantage permanent, ex. « Lavage extérieur offert tous les 3 passages » */
+	perk: string;
+	/** Complément de « Vous avez droit à … », ex. « un lavage extérieur offert » */
+	ready: string;
+	/** Complément de « Plus que N passage(s) avant … », ex. « votre lavage extérieur offert » */
+	next: string;
+}
+
+export interface LoyaltyRewards {
+	/** Grade Argent et Or : tous les 3 passages */
+	everyThird: LoyaltyReward;
+	/** Grade Or : tous les 2 passages */
+	everySecond: LoyaltyReward;
+}
+
+export async function getLoyaltyData(clientId: string, rewards: LoyaltyRewards): Promise<LoyaltyData> {
 	const appointments = await getAppointmentsForClient(clientId);
 
 	// On ne compte que les rendez-vous terminés
@@ -51,28 +68,28 @@ export async function getLoyaltyData(clientId: string): Promise<LoyaltyData> {
 	// Calcul des avantages permanents (Perks)
 	const perks: string[] = [];
 	if (tier === 'Argent' || tier === 'Or') {
-		perks.push('Masque cheveux bio offert tous les 3 passages');
+		perks.push(rewards.everyThird.perk);
 	}
 	if (tier === 'Or') {
-		perks.push('Shampoing offert tous les 2 passages');
+		perks.push(rewards.everySecond.perk);
 	}
 
 	// Calcul des bonus débloqués immédiatement pour le prochain RDV
 	const activeBonuses: string[] = [];
 	if (tier === 'Or' || tier === 'Argent') {
 		if (passages % 3 === 0 && passages > 0) {
-			activeBonuses.push('✨ Vous avez droit à 1 Masque cheveux bio OFFERT lors de votre prochain passage !');
+			activeBonuses.push(`✨ Vous avez droit à ${rewards.everyThird.ready} lors de votre prochain passage !`);
 		} else {
 			const left = 3 - (passages % 3);
-			activeBonuses.push(`Plus que ${left} passage(s) avant votre masque bio offert.`);
+			activeBonuses.push(`Plus que ${left} passage(s) avant ${rewards.everyThird.next}.`);
 		}
 	}
 	if (tier === 'Or') {
 		if (passages % 2 === 0 && passages > 0) {
-			activeBonuses.push('✨ Vous avez droit à 1 Shampoing OFFERT lors de votre prochain passage !');
+			activeBonuses.push(`✨ Vous avez droit à ${rewards.everySecond.ready} lors de votre prochain passage !`);
 		} else {
 			const left = 2 - (passages % 2);
-			activeBonuses.push(`Plus que ${left} passage(s) avant votre shampoing offert.`);
+			activeBonuses.push(`Plus que ${left} passage(s) avant ${rewards.everySecond.next}.`);
 		}
 	}
 

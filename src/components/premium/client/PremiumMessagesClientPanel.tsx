@@ -17,7 +17,7 @@ export default function MessagesClientPanel() {
 	return (
 		<div>
 			<h1 className="text-2xl font-bold text-foreground">Messagerie</h1>
-			<p className="mt-1 text-sm text-muted-foreground">Échangez directement avec le salon.</p>
+			<p className="mt-1 text-sm text-muted-foreground">Échangez directement avec le garage.</p>
 
 			<div className="mt-6">
 				{professional && client ? (

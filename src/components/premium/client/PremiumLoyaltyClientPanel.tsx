@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { getLoyaltyData, type LoyaltyData } from '@/lib/loyalty';
+import { getLoyaltyData, type LoyaltyData, type LoyaltyRewards } from '@/lib/loyalty';
+
+// Récompenses fidélité du garage.
+const LOYALTY_REWARDS: LoyaltyRewards = {
+	everyThird: { perk: 'Lavage extérieur offert tous les 3 passages', ready: 'un lavage extérieur offert', next: 'votre lavage extérieur offert' },
+	everySecond: { perk: 'Contrôle des niveaux et de la pression des pneus offert tous les 2 passages', ready: 'un contrôle des niveaux et des pneus offert', next: 'votre contrôle des niveaux offert' },
+};
 
 export default function LoyaltyClientPanel() {
 	const [data, setData] = useState<LoyaltyData | null>(null);
@@ -15,7 +21,7 @@ export default function LoyaltyClientPanel() {
 					setError('Non connecté');
 					return;
 				}
-				const loyalty = await getLoyaltyData(authData.user.id);
+				const loyalty = await getLoyaltyData(authData.user.id, LOYALTY_REWARDS);
 				setData(loyalty);
 			} catch (err) {
 				setError("Impossible de charger les données de fidélité.");

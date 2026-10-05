@@ -88,7 +88,7 @@ export default function ProfilePanel() {
 					</label>
 					<input
 						id="activity"
-						placeholder="Coiffeur, fleuriste, coach..."
+						placeholder="Garage, carrosserie, centre de lavage..."
 						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
 						{...register('activity')}
 					/>

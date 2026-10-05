@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { getLoyaltyData, type LoyaltyData } from '@/lib/loyalty';
+import { getLoyaltyData, type LoyaltyData, type LoyaltyRewards } from '@/lib/loyalty';
+
+// Récompenses fidélité du dépanneur informatique.
+const LOYALTY_REWARDS: LoyaltyRewards = {
+	everyThird: { perk: 'Nettoyage logiciel offert tous les 3 passages', ready: 'un nettoyage logiciel offert', next: 'votre nettoyage logiciel offert' },
+	everySecond: { perk: 'Diagnostic complet offert tous les 2 passages', ready: 'un diagnostic complet offert', next: 'votre diagnostic offert' },
+};
 
 export default function LoyaltyClientPanel() {
 	const [data, setData] = useState<LoyaltyData | null>(null);
@@ -15,7 +21,7 @@ export default function LoyaltyClientPanel() {
 					setError('Non connecté');
 					return;
 				}
-				const loyalty = await getLoyaltyData(authData.user.id);
+				const loyalty = await getLoyaltyData(authData.user.id, LOYALTY_REWARDS);
 				setData(loyalty);
 			} catch (err) {
 				setError("Impossible de charger les données de fidélité.");
