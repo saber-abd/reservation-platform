@@ -262,7 +262,7 @@ const vitrines = [
 	<section id="tarification" class="relative scroll-mt-20 bg-stone-100/70 py-24">
 		<div class="mx-auto max-w-6xl px-4 sm:px-6">
 			<div class="mx-auto max-w-2xl text-center">
-				<h2 class=text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up" data-aos-delay="100">Une formule pour chaque étape de votre activité</h2>
+				<h2 class="text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up" data-aos-delay="100">Une formule pour chaque étape de votre activité</h2>
 				<p class="mt-4 text-stone-600" data-aos="fade-up" data-aos-delay="200">Testez chaque démo en conditions réelles, puis comparez le détail des fonctionnalités et des coûts.</p>
 			</div>
 
@@ -315,6 +315,9 @@ const vitrines = [
 								<a href={f.detail} class={`btn ${f.style.secondary} justify-center`}>
 									Détail de l’offre {f.nom}
 								</a>
+								<a href={`/devis?formule=${f.id}`} class="self-center rounded text-sm font-semibold text-stone-600 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-900 hover:decoration-stone-900">
+									Simuler un devis
+								</a>
 							</div>
 						</article>
 					</div>
@@ -346,7 +349,7 @@ const vitrines = [
 	<section id="histoire" class="bg-white py-24">
 		<div class="mx-auto max-w-5xl px-4 sm:px-6">
 			<div class="text-center">
-				<h2 class=text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up" data-aos-delay="100">Qui sommes-nous ?</h2>
+				<h2 class="text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up" data-aos-delay="100">Qui sommes-nous ?</h2>
 				<p class="mx-auto mt-4 max-w-2xl text-lg text-stone-600" data-aos="fade-up" data-aos-delay="200">
 					Un profil technique et un profil business, un objectif commun : rendre des outils digitaux sur mesure accessibles aux petites et moyennes entreprises.
 				</p>

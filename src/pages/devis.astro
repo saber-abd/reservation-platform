@@ -1,0 +1,66 @@
+---
+import CommercialLayout from '@/layouts/commercial/CommercialLayout.astro';
+import DevisSimulateur from '@/components/commercial/DevisSimulateur';
+import devisJson from '@/data/devis.json';
+import { type DevisData, FORMULE_PAR_DEFAUT, estFormuleId, formatDate, formatEuros } from '@/lib/devis';
+
+const data = devisJson as DevisData;
+const { meta } = data;
+
+// Préselection depuis l'URL : /devis?formule=diamant&options=multilingue,maintenance
+const param = Astro.url.searchParams.get('formule');
+const formuleInitiale = estFormuleId(param, data) ? param : FORMULE_PAR_DEFAUT;
+const idsServices = new Set(data.services.map((s) => s.id));
+const optionsInitiales = (Astro.url.searchParams.get('options') ?? '')
+	.split(',')
+	.map((s) => s.trim())
+	.filter((s) => idsServices.has(s));
+---
+
+<CommercialLayout
+	footerCta={false}
+	title="Simuler un devis | SaberWeb.dev"
+	description="Estimez le coût de votre site : choisissez une formule, ajoutez des options et obtenez la main d'œuvre et les frais de fonctionnement mensuels."
+>
+	<div class="devis-page mx-auto max-w-6xl px-4 pb-32 pt-12 sm:px-6 lg:pb-24 lg:pt-16">
+		<header class="max-w-2xl">
+			<h1 class="text-3xl font-extrabold leading-tight text-stone-900 sm:text-4xl">Simuler un devis</h1>
+			<p class="mt-3 text-stone-600 print:hidden">
+				Choisissez une formule et les options qui vous intéressent. Le montant se met à jour au fur et à mesure.
+			</p>
+			<p class="devis-print-only mt-2 text-sm text-stone-500">Estimation indicative SaberWeb.dev, tarifs relevés au {formatDate(meta.dateTarifs)}.</p>
+		</header>
+
+		<div class="mt-10">
+			<DevisSimulateur client:load formuleInitiale={formuleInitiale} optionsInitiales={optionsInitiales} />
+		</div>
+
+		<section class="mt-12 max-w-3xl rounded-3xl border border-stone-200 bg-stone-100/70 p-5 text-sm leading-relaxed text-stone-700 sm:p-6" aria-labelledby="calcul-titre">
+			<h2 id="calcul-titre" class="text-base font-bold text-stone-900">Comment ce devis est calculé</h2>
+			<ul class="mt-3 list-disc space-y-1.5 pl-5">
+				<li>La main d’œuvre correspond au nombre de jours de travail estimé pour chaque prestation, multiplié par un taux journalier de {formatEuros(meta.tjm)} HT.</li>
+				<li>Les frais de fonctionnement (hébergement, nom de domaine, services tiers) sont payés directement par vous sur vos propres comptes, ou refacturés à l’identique, sans marge.</li>
+				<li>Les tarifs des services tiers ont été relevés le {formatDate(meta.dateTarifs)} et peuvent évoluer.</li>
+				<li>Ce montant est une estimation indicative. Le devis définitif est établi après un premier échange sur votre projet.</li>
+			</ul>
+			<p class="mt-3 text-xs text-stone-500">{meta.mentionTva}.</p>
+		</section>
+	</div>
+</CommercialLayout>
+
+<style is:global>
+	.devis-print-only { display: none; }
+
+	@media print {
+		@page { margin: 1.5cm; }
+		.commercial-page > header,
+		.commercial-page > footer,
+		#cookie-banner { display: none !important; }
+		.commercial-page { background: #fff !important; }
+		.devis-page { padding: 0 !important; max-width: none !important; }
+		.devis-print-only { display: block; }
+		.devis-page a[href]::after { content: none; }
+		#recapitulatif { break-inside: avoid; margin-bottom: 1rem; }
+		#recapitulatif { position: static !important; }
+	}
+</style>

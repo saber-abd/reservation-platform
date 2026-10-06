@@ -5,8 +5,15 @@ import BrandIcon from '@/components/commercial/BrandIcon.astro';
 import { membres } from '@/components/commercial/equipe';
 import { contact, emailjs } from '@/components/commercial/contact';
 import { Mail, Phone, Send, Clock } from 'lucide-react';
+import devis from '@/data/devis.json';
 
 const sujets = ['Formule Standard', 'Formule Premium', 'Formule Diamant', 'Je ne sais pas encore', 'Autre demande'];
+
+// Pour pré-remplir le formulaire depuis le simulateur (/contact?formule=premium&options=a,b).
+const devisPrefill = JSON.stringify({
+	formules: Object.fromEntries(devis.formules.map((f) => [f.id, f.nom])),
+	services: Object.fromEntries(devis.services.map((s) => [s.id, s.nom])),
+});
 ---
 
 <CommercialLayout footerCta={false} title="Contact | SaberWeb.dev" description="Contactez Saber et Nadir par téléphone, WhatsApp, e-mail ou via le formulaire pour parler de votre projet de site.">
@@ -77,6 +84,7 @@ const sujets = ['Formule Standard', 'Formule Premium', 'Formule Diamant', 'Je ne
 				data-service={emailjs.serviceId}
 				data-template={emailjs.templateId}
 				data-key={emailjs.publicKey}
+				data-devis={devisPrefill}
 				data-aos="fade-up"
 				data-aos-delay="150"
 				novalidate
@@ -190,6 +198,34 @@ const sujets = ['Formule Standard', 'Formule Premium', 'Formule Diamant', 'Je ne
 		status.textContent = text;
 		status.className = `mt-4 rounded-xl px-4 py-3 text-sm ${ok ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-800'}`;
 	};
+
+	// Pré-remplissage depuis le simulateur de devis : ?formule=<id>&options=<id1,id2>
+	if (form?.dataset.devis) {
+		const params = new URLSearchParams(window.location.search);
+		const formuleId = params.get('formule');
+		try {
+			const ref = JSON.parse(form.dataset.devis) as { formules: Record<string, string>; services: Record<string, string> };
+			const nom = formuleId ? ref.formules[formuleId] : undefined;
+			if (nom) {
+				const select = form.querySelector<HTMLSelectElement>('#cf-subject');
+				const sujet = `Formule ${nom}`;
+				if (select && [...select.options].some((o) => o.value === sujet)) select.value = sujet;
+
+				const options = (params.get('options') ?? '')
+					.split(',')
+					.map((id) => ref.services[id.trim()])
+					.filter(Boolean);
+				const textarea = form.querySelector<HTMLTextAreaElement>('#cf-message');
+				if (textarea && !textarea.value.trim()) {
+					textarea.value = options.length
+						? `Bonjour,\n\nJe souhaite recevoir un devis pour la formule ${nom} avec les options suivantes :\n${options.map((o) => `- ${o}`).join('\n')}\n\n`
+						: `Bonjour,\n\nJe souhaite recevoir un devis pour la formule ${nom}, sans option supplémentaire.\n\n`;
+				}
+			}
+		} catch {
+			// Données de pré-remplissage illisibles : le formulaire reste vide.
+		}
+	}
 
 	if (form && submit) {
 		form.addEventListener('submit', async (e) => {

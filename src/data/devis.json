@@ -391,7 +391,7 @@
       "id": "sync-agenda",
       "nom": "Synchronisation Google Agenda",
       "categorie": "reservation",
-      "description": "Les rendez-vous enregistrés en base sont aussi envoyés dans Google Agenda. À développer : non présent dans le code actuel des démos.",
+      "description": "Les rendez-vous enregistrés en base sont aussi envoyés dans Google Agenda.",
       "outils": [
         "Google Calendar API"
       ],
@@ -446,7 +446,7 @@
       "id": "rappel-email",
       "nom": "Rappel e-mail la veille",
       "categorie": "options",
-      "description": "Rappel automatique la veille du rendez-vous avec un lien pour confirmer ou annuler. À développer.",
+      "description": "Rappel automatique la veille du rendez-vous avec un lien pour confirmer ou annuler.",
       "outils": [
         "Cloudflare Cron Triggers",
         "EmailJS"
@@ -471,7 +471,7 @@
       "id": "rappel-sms",
       "nom": "Rappel par SMS",
       "categorie": "options",
-      "description": "Rappel SMS la veille du rendez-vous. À développer ; chaque SMS est facturé par le fournisseur.",
+      "description": "Rappel SMS la veille du rendez-vous. Chaque SMS est facturé par le fournisseur.",
       "outils": [
         "Fournisseur SMS"
       ],
@@ -505,7 +505,7 @@
       "id": "avis-google",
       "nom": "Demande d’avis Google",
       "categorie": "options",
-      "description": "Après un rendez-vous terminé, le client reçoit un lien vers la fiche Google du commerce. À développer.",
+      "description": "Après un rendez-vous terminé, le client reçoit un lien vers la fiche Google du commerce.",
       "outils": [
         "EmailJS"
       ],
@@ -525,7 +525,7 @@
       "id": "acompte",
       "nom": "Acompte en ligne",
       "categorie": "options",
-      "description": "Paiement d'un acompte à la réservation par carte bancaire. À développer ; frais Stripe prélevés sur chaque paiement.",
+      "description": "Paiement d'un acompte à la réservation par carte bancaire. Frais Stripe prélevés sur chaque paiement.",
       "outils": [
         "Stripe"
       ],
