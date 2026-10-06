@@ -371,7 +371,7 @@
       "id": "resa-base",
       "nom": "Moteur de réservation en base",
       "categorie": "reservation",
-      "description": "Créneaux calculés selon la durée de chaque prestation et les disponibilités, blocage des doubles réservations, statut à confirmer.",
+      "description": "Créneaux calculés selon les disponibilités du professionnel, blocage des doubles réservations, demandes à confirmer depuis le tableau de bord.",
       "outils": [
         "Supabase (PostgreSQL)"
       ],
@@ -620,7 +620,7 @@
       "id": "dashboard",
       "nom": "Tableau de bord professionnel",
       "categorie": "plateforme",
-      "description": "Rendez-vous à confirmer, gestion des prestations avec photos, disponibilités, fermetures et congés.",
+      "description": "Rendez-vous à confirmer ou refuser, gestion des prestations avec photos et prix, horaires de disponibilité.",
       "outils": [
         "React",
         "Supabase"
