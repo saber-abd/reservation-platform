@@ -2,7 +2,6 @@
 import CommercialLayout from '@/layouts/commercial/CommercialLayout.astro';
 import FormulaGallery, { type GalleryShot } from '@/components/commercial/FormulaGallery.astro';
 import { 
-	Sparkles, 
 	Code2, 
 	Paintbrush, 
 	Rocket, 
@@ -104,13 +103,9 @@ const galleryShots: GalleryShot[] = [
 		</div>
 		
 		<div class="relative z-10 mx-auto max-w-7xl px-6 flex flex-col items-center text-center pt-20 pb-40 md:pb-32">
-			<div class="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-deep-teal-900/50 backdrop-blur-md border border-deep-teal-500/30 text-deep-teal-300 font-bold mb-8" data-aos="fade-down">
-				<Sparkles size={18} class="text-jasmine-400" />
-				Le Sur-Mesure Absolu
-			</div>
 			
 			<h1 class="text-5xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-deep-teal-200 to-jasmine-200 tracking-tighter mb-8 leading-tight" data-aos="fade-up" data-aos-delay="100">
-				L'Excellence <br/> <span class="font-sans italic font-light text-white">sans compromis.</span>
+				Une plateforme <br/> <span class="font-sans italic font-light text-white">construite pour votre métier.</span>
 			</h1>
 			
 			<p class="text-xl md:text-2xl text-stone-300 max-w-3xl mx-auto leading-relaxed mb-12 font-light" data-aos="fade-up" data-aos-delay="200">
@@ -143,8 +138,8 @@ const galleryShots: GalleryShot[] = [
 		
 		<div class="mx-auto max-w-6xl px-6 relative z-10">
 			<div class="text-center mb-24" data-aos="fade-up">
-				<h2 class="text-4xl md:text-5xl font-bold text-white mb-6">La Philosophie Diamant</h2>
-				<p class="text-xl text-stone-400 max-w-2xl mx-auto font-light">Nous ne construisons pas un site web. Nous développons le moteur numérique de votre entreprise.</p>
+				<h2 class="text-4xl md:text-5xl font-bold text-white mb-6">L’approche Diamant</h2>
+				<p class="text-xl text-stone-400 max-w-2xl mx-auto font-light">Un outil conçu à partir de votre façon de travailler, pas d’un modèle générique.</p>
 			</div>
 
 			<div class="grid md:grid-cols-3 gap-8">
@@ -152,7 +147,7 @@ const galleryShots: GalleryShot[] = [
 				<div data-aos="fade-up" data-aos-delay="0" class="transform md:translate-y-12">
 					<div class="group h-full bg-white/[0.07] border border-white/10 p-10 rounded-3xl transform hover:-translate-y-2 hover:bg-white/10 transition-all duration-500 ease-out">
 						<Paintbrush className="w-12 h-12 text-jasmine-400 mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6 group-hover:text-white" />
-						<h3 class="text-2xl font-bold text-white mb-4">Design Exclusif</h3>
+						<h3 class="text-2xl font-bold text-white mb-4">Design sur mesure</h3>
 						<p class="text-stone-300 leading-relaxed">
 							Chaque pixel est pensé pour votre image de marque. Aucune utilisation de template préconçu. Une identité visuelle forte et mémorable.
 						</p>
@@ -162,7 +157,7 @@ const galleryShots: GalleryShot[] = [
 				<div data-aos="fade-up" data-aos-delay="100" class="z-10 relative">
 					<div class="group h-full bg-gradient-to-b from-deep-teal-900/50 to-deep-teal-950/50 border border-deep-teal-500/20 p-10 rounded-3xl shadow-[0_20px_40px_-12px_rgba(112,141,129,0.15)] transform hover:-translate-y-2 hover:border-deep-teal-400/50 transition-all duration-500 ease-out">
 						<Code2 className="w-12 h-12 text-deep-teal-300 mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:text-white" />
-						<h3 class="text-2xl font-bold text-white mb-4">Code Sur-Mesure</h3>
+						<h3 class="text-2xl font-bold text-white mb-4">Fonctionnalités sur mesure</h3>
 						<p class="text-stone-200 leading-relaxed">
 							Des algorithmes spécifiques à votre métier. Que vous ayez besoin d'un matchmaking complexe ou d'un moteur de réservation unique.
 						</p>
@@ -172,7 +167,7 @@ const galleryShots: GalleryShot[] = [
 				<div data-aos="fade-up" data-aos-delay="200" class="transform md:translate-y-12">
 					<div class="group h-full bg-white/[0.07] border border-white/10 p-10 rounded-3xl transform hover:-translate-y-2 hover:bg-white/10 transition-all duration-500 ease-out">
 						<Blocks className="w-12 h-12 text-jasmine-400 mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6 group-hover:text-white" />
-						<h3 class="text-2xl font-bold text-white mb-4">Intégrations Inédites</h3>
+						<h3 class="text-2xl font-bold text-white mb-4">Intégrations</h3>
 						<p class="text-stone-300 leading-relaxed">
 							Connexion à vos logiciels internes (ERP, CRM), envois SMS, ou intelligence artificielle.
 						</p>
@@ -190,11 +185,7 @@ const galleryShots: GalleryShot[] = [
 		
 		<div class="mx-auto max-w-6xl px-6 relative z-10">
 			<div class="text-center mb-20" data-aos="fade-up">
-				<div class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/5 border border-white/10 text-stone-300 font-bold mb-6 text-sm">
-					<Sparkles size={16} class="text-jasmine-400" />
-					Nouvelles Capacités Métier
-				</div>
-				<h2 class="text-4xl md:text-5xl font-bold text-white mb-6">L'Armada Fonctionnelle Diamant</h2>
+				<h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Ce que la formule Diamant ajoute</h2>
 				<p class="text-xl text-stone-400 max-w-3xl mx-auto font-light leading-relaxed">
 					Conçue comme une véritable plateforme applicative haut de gamme, la démo Diamant intègre nativement une panoplie complète d'outils opérationnels, de sécurité et d'expérience client.
 				</p>
@@ -250,7 +241,7 @@ const galleryShots: GalleryShot[] = [
 				</div>
 				
 				<div class="flex-1" data-aos="fade-left">
-					<h2 class="text-4xl font-bold text-stone-900 mb-6">Un arsenal technologique illimité</h2>
+					<h2 class="text-4xl font-bold text-stone-900 mb-6">Technologies adaptées au projet</h2>
 					<p class="text-lg text-stone-600 mb-8 leading-relaxed">
 						Dans la formule Diamant, aucune contrainte technique ne bride votre vision. Nous sélectionnons les meilleurs outils pour chaque besoin spécifique.
 					</p>
@@ -290,14 +281,14 @@ const galleryShots: GalleryShot[] = [
 		
 		<div class="mx-auto max-w-5xl px-6">
 			<div class="text-center mb-20" data-aos="fade-up">
-				<h2 class="text-4xl font-bold mb-4 text-stone-900">Investissement & Accompagnement</h2>
-				<p class="text-lg text-stone-600 font-light">Un partenariat technologique sur le long terme.</p>
+				<h2 class="text-4xl font-bold mb-4 text-stone-900">Coûts et accompagnement</h2>
+				<p class="text-lg text-stone-600 font-light">Un suivi dans la durée, après la mise en ligne.</p>
 			</div>
 
 			<div class="grid md:grid-cols-2 gap-12">
 				<div class="bg-white border border-stone-200 shadow-sm rounded-3xl p-10 hover:shadow-md transition-shadow" data-aos="fade-up">
 					<Euro className="w-10 h-10 text-deep-teal-600 mb-6" />
-					<h3 class="text-2xl font-bold mb-4 text-stone-900">Développement Initial</h3>
+					<h3 class="text-2xl font-bold mb-4 text-stone-900">Développement initial</h3>
 					<p class="text-stone-600 mb-8 leading-relaxed">
 						Chaque projet Diamant fait l'objet d'un cahier des charges rigoureux. Le coût dépend entièrement de la complexité des algorithmes et des intégrations requises.
 					</p>
@@ -307,7 +298,7 @@ const galleryShots: GalleryShot[] = [
 
 				<div class="bg-white border border-stone-200 shadow-sm rounded-3xl p-10 hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="100">
 					<HeartHandshake className="w-10 h-10 text-deep-teal-600 mb-6" />
-					<h3 class="text-2xl font-bold mb-4 text-stone-900">Maintenance Évolutive</h3>
+					<h3 class="text-2xl font-bold mb-4 text-stone-900">Maintenance et évolutions</h3>
 					<p class="text-stone-600 mb-8 leading-relaxed">
 						L'infrastructure (Cloudflare, Supabase) est calculée selon l'usage réel. Nous proposons un contrat de maintenance pour garantir les mises à jour de sécurité et l'ajout de nouvelles fonctionnalités.
 					</p>
@@ -320,7 +311,7 @@ const galleryShots: GalleryShot[] = [
 			</div>
 			
 			<div class="mt-16 text-center" data-aos="fade-up">
-				<a href="/#contact" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-deep-teal-600 text-white rounded-full font-bold text-lg hover:bg-deep-teal-700 transition-colors shadow-lg hover:shadow-xl">
+				<a href="/contact" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-deep-teal-600 text-white rounded-full font-bold text-lg hover:bg-deep-teal-700 transition-colors shadow-lg hover:shadow-xl">
 					Discuter de votre projet
 				</a>
 			</div>

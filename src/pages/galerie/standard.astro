@@ -4,12 +4,11 @@ import FormulaGallery, { type GalleryShot } from '@/components/commercial/Formul
 import { Calendar, Zap, LayoutDashboard, Database, Server, Smartphone, CheckCircle2, ChevronRight, Euro } from 'lucide-react';
 
 const galleryShots: GalleryShot[] = [
-	{ file: 'site-vitrine', title: 'Site vitrine', caption: 'Une page d’accueil claire et rapide qui présente votre activité et met la réservation en avant.' },
-	{ file: 'reservation', title: 'Réservation en ligne', caption: 'Vos clients choisissent une prestation, un jour et un créneau libre, sans créer de compte.' },
-	{ file: 'rendez-vous', title: 'Rendez-vous à valider', caption: 'Les demandes arrivent dans votre tableau de bord : confirmez ou refusez en un clic.' },
-	{ file: 'disponibilites', title: 'Horaires et disponibilités', caption: 'Définissez vos horaires récurrents, la durée des créneaux et vos exceptions (jours fériés, fermetures).' },
-	{ file: 'clients', title: 'Fiches clients', caption: 'Coordonnées, historique des interventions, note privée et fil de discussion pour chaque client.' },
-	{ file: 'statistiques', title: 'Statistiques', caption: 'Rendez-vous, annulations, chiffre d’affaires estimé et prestation la plus demandée, sur la période de votre choix.' },
+	{ file: 'site-vitrine', title: 'Accueil', caption: 'Une page d’accueil claire et rapide qui présente votre activité et met la réservation en avant.' },
+	{ file: 'services', title: 'Services et tarifs', caption: 'Vos prestations avec leur prix et leur durée, chacune avec un lien direct vers la réservation.' },
+	{ file: 'reservation', title: 'Réservation en ligne', caption: 'Vos clients choisissent une prestation, un jour et un créneau libre, sans créer de compte. Le rendez-vous arrive dans votre Google Agenda.' },
+	{ file: 'a-propos', title: 'À propos', caption: 'Votre histoire, vos engagements et vos photos, pour donner confiance avant le premier rendez-vous.' },
+	{ file: 'contact', title: 'Contact', caption: 'Coordonnées, carte de votre zone d’intervention et formulaire de contact envoyé directement dans votre boîte mail.' },
 ];
 ---
 
@@ -25,12 +24,8 @@ const galleryShots: GalleryShot[] = [
 		</div>
 		
 		<div class="relative z-10 mx-auto max-w-5xl px-6 text-center pt-20 pb-32 md:pb-24">
-			<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-prussian-blue-100 font-semibold mb-6" data-aos="fade-down">
-				<span class="w-2 h-2 rounded-full bg-prussian-blue-400 animate-ping"></span>
-				Formule Standard
-			</div>
 			<h1 class="text-5xl md:text-7xl font-black text-white tracking-tight mb-6" data-aos="fade-up" data-aos-delay="100">
-				La Simplicité au service de <span class="text-prussian-blue-300">l'Efficacité.</span>
+				Un site rapide, des rendez-vous <span class="text-prussian-blue-300">dans votre agenda.</span>
 			</h1>
 			<p class="text-xl text-prussian-blue-100 max-w-2xl mx-auto leading-relaxed" data-aos="fade-up" data-aos-delay="200">
 				Un site vitrine ultra-rapide couplé à une prise de rendez-vous intelligente synchronisée directement sur votre calendrier.
@@ -51,7 +46,7 @@ const galleryShots: GalleryShot[] = [
 	<section id="fonctionnalites" class="py-24 bg-stone-50">
 		<div class="mx-auto max-w-6xl px-6">
 			<div class="text-center mb-20" data-aos="fade-up">
-				<h2 class="text-4xl font-bold text-stone-900 mb-4">Fonctionnalités Clés</h2>
+				<h2 class="text-4xl font-bold text-stone-900 mb-4">Ce que comprend la formule</h2>
 				<p class="text-lg text-stone-600 max-w-2xl mx-auto">Conçu pour les professionnels qui souhaitent une présence en ligne sans gestion complexe.</p>
 			</div>
 
@@ -65,7 +60,7 @@ const galleryShots: GalleryShot[] = [
 								<div class="w-14 h-14 bg-prussian-blue-100 text-prussian-blue-600 rounded-2xl flex items-center justify-center mb-6">
 									<Calendar size={28} />
 								</div>
-								<h3 class="text-2xl font-bold text-stone-900 mb-4">Prise de RDV Intégrée</h3>
+								<h3 class="text-2xl font-bold text-stone-900 mb-4">Prise de rendez-vous intégrée</h3>
 								<p class="text-stone-600 leading-relaxed mb-6">
 									Fini les appels pendant vos prestations. Vos clients réservent en ligne et le rendez-vous s'ajoute automatiquement sur votre <strong>Google Calendar</strong> ou Outlook.
 								</p>
@@ -92,7 +87,7 @@ const galleryShots: GalleryShot[] = [
 								<div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
 									<Zap size={28} />
 								</div>
-								<h3 class="text-2xl font-bold text-stone-900 mb-4">Vitesse & Référencement (SEO)</h3>
+								<h3 class="text-2xl font-bold text-stone-900 mb-4">Vitesse et référencement</h3>
 								<p class="text-stone-600 leading-relaxed mb-6">
 									Contrairement aux sites WordPress classiques, ce site est généré statiquement. Résultat : un chargement instantané qui ravit vos visiteurs et Google.
 								</p>
@@ -125,7 +120,7 @@ const galleryShots: GalleryShot[] = [
 	</section>
 
 	<!-- Galerie de captures -->
-	<FormulaGallery demo="standard" shots={galleryShots} title="Les écrans de la démo Standard" intro="Le site et son espace pro, tels que vos clients et vous les verrez." />
+	<FormulaGallery demo="standard" shots={galleryShots} title="Les écrans de la démo Standard" intro="Les pages du site, telles que vos clients les verront." />
 
 	<!-- Section Technologies -->
 	<section id="technologies" class="py-24 bg-stone-50 text-stone-900 relative overflow-hidden">
@@ -134,8 +129,8 @@ const galleryShots: GalleryShot[] = [
 		
 		<div class="relative z-10 mx-auto max-w-6xl px-6">
 			<div class="text-center mb-16" data-aos="fade-up">
-				<h2 class="text-4xl font-bold mb-4 text-stone-900">Sous le capot</h2>
-				<p class="text-lg text-stone-600">Des technologies modernes pour un résultat sans compromis.</p>
+				<h2 class="text-4xl font-bold mb-4 text-stone-900">Technologies utilisées</h2>
+				<p class="text-lg text-stone-600">Les outils sur lesquels repose le site.</p>
 			</div>
 
 			<div class="grid md:grid-cols-3 gap-8">
@@ -148,14 +143,14 @@ const galleryShots: GalleryShot[] = [
 				</div>
 				<div class="bg-white border border-stone-200 shadow-sm p-8 rounded-3xl hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="100">
 					<Database className="w-12 h-12 text-prussian-blue-600 mb-6" />
-					<h3 class="text-xl font-bold mb-3 text-stone-900">Zéro Base de données</h3>
+					<h3 class="text-xl font-bold mb-3 text-stone-900">Pas de base de données</h3>
 					<p class="text-stone-600 text-sm leading-relaxed">
 						Aucune base de données complexe à maintenir. Les informations sont stockées dans des fichiers de configuration sécurisés et directement dans votre agenda.
 					</p>
 				</div>
 				<div class="bg-white border border-stone-200 shadow-sm p-8 rounded-3xl hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="200">
 					<Server class="w-12 h-12 text-prussian-blue-600 mb-6" />
-					<h3 class="text-xl font-bold mb-3 text-stone-900">Hébergement Edge</h3>
+					<h3 class="text-xl font-bold mb-3 text-stone-900">Hébergement Cloudflare</h3>
 					<p class="text-stone-600 text-sm leading-relaxed">
 						Déployé sur Cloudflare Workers. Votre site est distribué sur des centaines de serveurs dans le monde entier pour un accès immédiat.
 					</p>
@@ -168,7 +163,7 @@ const galleryShots: GalleryShot[] = [
 	<section id="couts" class="py-24 bg-white">
 		<div class="mx-auto max-w-4xl px-6">
 			<div class="text-center mb-16" data-aos="fade-up">
-				<h2 class="text-4xl font-bold text-stone-900 mb-4">Investissement & Coûts d'infrastructure</h2>
+				<h2 class="text-4xl font-bold text-stone-900 mb-4">Coûts</h2>
 				<p class="text-lg text-stone-600">La formule la plus économique sur le long terme.</p>
 			</div>
 

@@ -13,7 +13,6 @@ import {
 	ArrowRight,
 	Check,
 	X,
-	Sparkles,
 	MessagesSquare,
 	PenTool,
 	Rocket,
@@ -33,7 +32,7 @@ const formules = [
 		id: 'standard',
 		nom: 'Standard',
 		icon: CalendarCheck,
-		accroche: 'Pack essentiel, sans base de données',
+		accroche: 'Sans base de données',
 		prix: 'Sur devis',
 		prixNote: 'Hébergement ~0 € / mois',
 		description:
@@ -55,7 +54,6 @@ const formules = [
 		style: {
 			card: 'border border-stone-200 bg-white',
 			icon: 'bg-sky-100 text-sky-700',
-			accent: 'text-sky-700',
 			check: 'bg-sky-100 text-sky-700',
 			spot: '14 165 233',
 			primary: 'btn-dark',
@@ -66,7 +64,7 @@ const formules = [
 		id: 'premium',
 		nom: 'Premium',
 		icon: ShieldCheck,
-		accroche: 'Le choix des pros',
+		accroche: 'Avec espace client',
 		prix: 'Sur devis',
 		prixNote: 'Infrastructure 0 à 25 € / mois',
 		description:
@@ -91,7 +89,6 @@ const formules = [
 		style: {
 			card: 'bg-white',
 			icon: 'bg-rose-100 text-rose-600',
-			accent: 'text-rose-600',
 			check: 'bg-rose-100 text-rose-600',
 			spot: '225 29 72',
 			primary: 'btn-rose',
@@ -102,7 +99,7 @@ const formules = [
 		id: 'diamant',
 		nom: 'Diamant',
 		icon: Gem,
-		accroche: 'Sur mesure haute couture',
+		accroche: 'Sur cahier des charges',
 		prix: 'Dès 3 000 €',
 		prixNote: 'Sur cahier des charges',
 		description:
@@ -123,7 +120,6 @@ const formules = [
 		style: {
 			card: 'border border-stone-200 bg-white',
 			icon: 'bg-violet-100 text-violet-600',
-			accent: 'text-violet-600',
 			check: 'bg-violet-100 text-violet-600',
 			spot: '124 58 237',
 			primary: 'btn-violet',
@@ -172,7 +168,7 @@ const vitrines = [
 ];
 ---
 
-<CommercialLayout title="Création de Sites Web & Plateformes sur mesure" description="Duo technique et business proposant des solutions web allant du site vitrine à la plateforme de réservation sur mesure.">
+<CommercialLayout footerCta={false} title="Création de Sites Web & Plateformes sur mesure" description="Duo technique et business proposant des solutions web allant du site vitrine à la plateforme de réservation sur mesure.">
 
 	<!-- HERO -->
 	<section id="presentation" class="hero relative overflow-hidden bg-stone-950 text-white">
@@ -185,10 +181,7 @@ const vitrines = [
 
 		<div class="relative mx-auto grid max-w-6xl items-center gap-14 px-4 pb-20 pt-16 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:pb-28 lg:pt-24">
 			<div>
-				<p class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-stone-300" data-aos="fade-up">
-					<Sparkles size={14} class="text-rose-400" /> Sites & plateformes de réservation
-				</p>
-				<h1 class="mt-6 text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl" data-aos="fade-up" data-aos-delay="100">
+				<h1 class=text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl" data-aos="fade-up" data-aos-delay="100">
 					Votre solution digitale,
 					<span class="word-rotator mt-1 block" aria-live="off">
 						<span class="sr-only">{mots[0]}</span>
@@ -204,7 +197,7 @@ const vitrines = [
 					<a href="#tarification" class="btn btn-rose btn-lg justify-center">
 						Voir les formules <ArrowRight size={18} class="btn-arrow" />
 					</a>
-					<a href="#contact" class="btn btn-ghost-dark btn-lg justify-center">
+					<a href="/contact" class="btn btn-ghost-dark btn-lg justify-center">
 						<Phone size={18} /> Contactez-nous
 					</a>
 				</div>
@@ -269,8 +262,7 @@ const vitrines = [
 	<section id="tarification" class="relative scroll-mt-20 bg-stone-100/70 py-24">
 		<div class="mx-auto max-w-6xl px-4 sm:px-6">
 			<div class="mx-auto max-w-2xl text-center">
-				<p class="text-sm font-bold uppercase tracking-widest text-rose-600" data-aos="fade-up">Tarification & formules</p>
-				<h2 class="mt-3 text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up" data-aos-delay="100">Une formule pour chaque étape de votre activité</h2>
+				<h2 class=text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up" data-aos-delay="100">Une formule pour chaque étape de votre activité</h2>
 				<p class="mt-4 text-stone-600" data-aos="fade-up" data-aos-delay="200">Testez chaque démo en conditions réelles, puis comparez le détail des fonctionnalités et des coûts.</p>
 			</div>
 
@@ -285,7 +277,7 @@ const vitrines = [
 								<span class={`flex h-12 w-12 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6 ${f.style.icon}`}>
 									<f.icon size={24} />
 								</span>
-								<span class={`text-xs font-bold uppercase tracking-wider ${f.style.accent}`}>{f.accroche}</span>
+								<span class="text-sm text-stone-500">{f.accroche}</span>
 							</div>
 							<h3 class="mt-6 text-2xl font-bold text-stone-900">Formule {f.nom}</h3>
 							<p class="mt-2 text-sm leading-relaxed text-stone-600">{f.description}</p>
@@ -334,8 +326,7 @@ const vitrines = [
 	<!-- MÉTHODE -->
 	<section class="mx-auto max-w-6xl px-4 py-24 sm:px-6">
 		<div class="mx-auto max-w-2xl text-center">
-			<p class="text-sm font-bold uppercase tracking-widest text-rose-600" data-aos="fade-up">Notre méthode</p>
-			<h2 class="mt-3 text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up" data-aos-delay="100">Trois étapes, zéro surprise</h2>
+			<h2 class="text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up">Comment nous travaillons</h2>
 		</div>
 		<ol class="steps relative mt-16 grid gap-10 md:grid-cols-3">
 			{etapes.map((e, i) => (
@@ -355,8 +346,7 @@ const vitrines = [
 	<section id="histoire" class="bg-white py-24">
 		<div class="mx-auto max-w-5xl px-4 sm:px-6">
 			<div class="text-center">
-				<p class="text-sm font-bold uppercase tracking-widest text-rose-600" data-aos="fade-up">L’équipe</p>
-				<h2 class="mt-3 text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up" data-aos-delay="100">Qui sommes-nous ?</h2>
+				<h2 class=text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up" data-aos-delay="100">Qui sommes-nous ?</h2>
 				<p class="mx-auto mt-4 max-w-2xl text-lg text-stone-600" data-aos="fade-up" data-aos-delay="200">
 					Un profil technique et un profil business, un objectif commun : rendre des outils digitaux sur mesure accessibles aux petites et moyennes entreprises.
 				</p>
@@ -421,11 +411,14 @@ const vitrines = [
 			<div class="relative">
 				<h2 class="text-3xl font-bold sm:text-4xl">Un projet en tête ? Discutons-en.</h2>
 				<p class="mx-auto mt-4 max-w-xl text-stone-300">
-					Site vitrine ou application complète : appelez-nous ou écrivez-nous sur WhatsApp, nous vous répondons rapidement.
+					Site vitrine ou application complète : appelez-nous, écrivez-nous sur WhatsApp ou laissez-nous un message, nous vous répondons rapidement.
 				</p>
-				<div class="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-					<a href={contact.telephoneHref} class="btn btn-light btn-lg justify-center">
-						<Phone size={18} /> Contactez-nous · {contact.telephone}
+				<div class="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+					<a href="/contact" class="btn btn-light btn-lg justify-center">
+						<MessagesSquare size={18} /> Nous écrire
+					</a>
+					<a href={contact.telephoneHref} class="btn btn-ghost-dark btn-lg justify-center">
+						<Phone size={18} /> {contact.telephone}
 					</a>
 					<a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg justify-center">
 						<BrandIcon name="whatsapp" size={20} /> Écrire sur WhatsApp
@@ -492,7 +485,10 @@ const vitrines = [
 	.word.is-active { opacity: 1; transform: none; }
 	.word.is-leaving { opacity: 0; transform: translateY(-100%); }
 
-	/* Éventail des trois captures */
+	/* Éventail des trois captures.
+	   Anti-clignotement : la zone survolée (.fan-card) ne bouge jamais au survol, seul
+	   son contenu (.fan-inner) se soulève ; l'inclinaison est pilotée depuis .fan-wrap,
+	   qui reste fixe ; pas de preserve-3d (cartes coplanaires = z-fighting). */
 	.fan-wrap { perspective: 1400px; }
 	.fan {
 		position: relative;
@@ -501,18 +497,22 @@ const vitrines = [
 		max-width: 34rem;
 		margin-inline: auto;
 		transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-		transform-style: preserve-3d;
-		transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+		transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 	}
 	.fan-card {
 		position: absolute;
+		display: block;
 		width: 78%;
 		border-radius: 14px;
+	}
+	.fan-inner {
+		display: block;
+		border-radius: inherit;
 		overflow: hidden;
 		background: #1c1917;
 		border: 1px solid rgb(255 255 255 / 0.12);
 		box-shadow: 0 30px 60px -25px rgb(0 0 0 / 0.8);
-		transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+		transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
 	}
 	.fan-card img { display: block; width: 100%; height: auto; }
 	.fan-bar { display: flex; gap: 5px; padding: 8px 10px; background: #292524; }
@@ -520,10 +520,11 @@ const vitrines = [
 	.fan-card-1 { top: 0; left: 0; transform: rotate(-6deg); z-index: 1; }
 	.fan-card-2 { top: 18%; left: 11%; transform: rotate(1deg); z-index: 2; }
 	.fan-card-3 { top: 36%; left: 22%; transform: rotate(6deg); z-index: 3; }
-	.fan-card:hover, .fan-card:focus-visible { z-index: 4; box-shadow: 0 40px 80px -25px rgb(225 29 72 / 0.55); }
-	.fan-card-1:hover, .fan-card-1:focus-visible { transform: rotate(-6deg) translateY(-12px) scale(1.03); }
-	.fan-card-2:hover, .fan-card-2:focus-visible { transform: rotate(1deg) translateY(-12px) scale(1.03); }
-	.fan-card-3:hover, .fan-card-3:focus-visible { transform: rotate(6deg) translateY(-12px) scale(1.03); }
+	.fan-card:hover, .fan-card:focus-visible { z-index: 4; }
+	.fan-card:hover .fan-inner, .fan-card:focus-visible .fan-inner {
+		transform: translateY(-12px) scale(1.03);
+		box-shadow: 0 40px 80px -25px rgb(225 29 72 / 0.55);
+	}
 
 	/* ---------- Bandeau défilant ---------- */
 	.marquee { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
@@ -587,7 +588,7 @@ const vitrines = [
 
 	@media (prefers-reduced-motion: reduce) {
 		.blob, .marquee-track { animation: none; }
-		.word, .fan, .fan-card, .plan { transition: none; }
+		.word, .fan, .fan-inner, .plan { transition: none; }
 		.plan:hover { transform: none; }
 	}
 </style>
@@ -622,22 +623,30 @@ const vitrines = [
 
 	const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-	// Inclinaison 3D de l'éventail : une seule écriture de style par image (rAF).
-	const fan = document.querySelector<HTMLElement>('[data-tilt]');
-	if (fan && finePointer && !reduceMotion) {
+	// Inclinaison 3D de l'éventail : on écoute le conteneur fixe (.fan-wrap), jamais
+	// l'élément incliné, sinon sa zone de survol bouge sous la souris et l'effet clignote.
+	const fanWrap = document.querySelector<HTMLElement>('.fan-wrap');
+	const fan = fanWrap?.querySelector<HTMLElement>('[data-tilt]');
+	if (fanWrap && fan && finePointer && !reduceMotion) {
 		let frame = 0;
-		fan.addEventListener('pointermove', (e) => {
+		let px = 0;
+		let py = 0;
+		fanWrap.addEventListener('pointermove', (e) => {
+			px = e.clientX;
+			py = e.clientY;
 			if (frame) return;
 			frame = requestAnimationFrame(() => {
 				frame = 0;
-				const r = fan.getBoundingClientRect();
-				const x = (e.clientX - r.left) / r.width - 0.5;
-				const y = (e.clientY - r.top) / r.height - 0.5;
-				fan.style.setProperty('--ry', `${x * 10}deg`);
-				fan.style.setProperty('--rx', `${-y * 8}deg`);
+				const r = fanWrap.getBoundingClientRect();
+				const x = Math.max(-0.5, Math.min(0.5, (px - r.left) / r.width - 0.5));
+				const y = Math.max(-0.5, Math.min(0.5, (py - r.top) / r.height - 0.5));
+				fan.style.setProperty('--ry', `${(x * 8).toFixed(2)}deg`);
+				fan.style.setProperty('--rx', `${(-y * 6).toFixed(2)}deg`);
 			});
-		});
-		fan.addEventListener('pointerleave', () => {
+		}, { passive: true });
+		fanWrap.addEventListener('pointerleave', () => {
+			if (frame) cancelAnimationFrame(frame);
+			frame = 0;
 			fan.style.setProperty('--ry', '0deg');
 			fan.style.setProperty('--rx', '0deg');
 		});

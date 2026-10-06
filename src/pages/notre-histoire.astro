@@ -3,7 +3,7 @@ import CommercialLayout from '@/layouts/commercial/CommercialLayout.astro';
 import Avatar from '@/components/commercial/Avatar.astro';
 import BrandIcon from '@/components/commercial/BrandIcon.astro';
 import { membres, projets, valeurs } from '@/components/commercial/equipe';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 const chapitres = [
 	{
@@ -33,10 +33,7 @@ const chapitres = [
 		<div class="hero-glow" aria-hidden="true"></div>
 		<div class="relative mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:py-28">
 			<div>
-				<p class="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-stone-300" data-aos="fade-up">
-					<Sparkles size={14} /> Notre histoire
-				</p>
-				<h1 class="mt-6 text-4xl font-extrabold leading-tight sm:text-5xl" data-aos="fade-up" data-aos-delay="100">
+				<h1 class=text-4xl font-extrabold leading-tight sm:text-5xl" data-aos="fade-up" data-aos-delay="100">
 					Deux parcours,<br /><span class="text-rose-400">un même projet.</span>
 				</h1>
 				<p class="mt-6 max-w-lg text-lg text-stone-300" data-aos="fade-up" data-aos-delay="200">
@@ -151,7 +148,7 @@ const chapitres = [
 		<h2 class="text-3xl font-bold text-stone-900" data-aos="fade-up">Écrivons la suite ensemble.</h2>
 		<p class="mt-4 text-stone-600" data-aos="fade-up" data-aos-delay="100">Parlez-nous de votre activité, nous vous proposerons la formule adaptée.</p>
 		<div class="mt-8" data-aos="fade-up" data-aos-delay="200">
-			<a href="/#contact" class="btn btn-dark btn-lg">
+			<a href="/contact" class="btn btn-dark btn-lg">
 				Nous contacter <ArrowRight size={18} class="btn-arrow" />
 			</a>
 		</div>

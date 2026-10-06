@@ -21,12 +21,12 @@ export const membres: Membre[] = [
 		initiales: 'SA',
 		role: 'Réseaux, sécurité & développement',
 		accroche:
-			"Élève ingénieur en cursus orienté informatique, réseau et sécurité à l'Université Paul Sabatier, en alternance chez un grand opérateur télécom.",
+			"Profil technique formé à l'informatique, aux réseaux et à la sécurité, au sein des équipes réseau d'un grand opérateur télécom.",
 		photo: '/images/equipe/saber.webp',
 		parcours: [
-			"Licence d'informatique, puis école d'ingénieur à l'Université Paul Sabatier, cursus orienté informatique, réseau et sécurité.",
-			'Alternance au sein des équipes réseau d’un grand opérateur télécom : conception et analyse de liaisons radio.',
-			'Projets universitaires en administration système et réseau, et en développement web et logiciel.',
+			'Formation en informatique, orientée réseaux et sécurité.',
+			'Équipes réseau d’un grand opérateur télécom : conception et analyse de liaisons radio.',
+			'Projets en administration système et réseau, et en développement web et logiciel.',
 		],
 		// Niveau « bases » volontairement : grandes lignes maîtrisées, pas d'expertise revendiquée.
 		competences: [
@@ -48,12 +48,12 @@ export const membres: Membre[] = [
 		initiales: 'NS',
 		role: 'Ingénierie d’affaires & relation client',
 		accroche:
-			"En master d'ingénierie d'affaires, technico-commercial dans l'industrie après une formation en génie industriel et maintenance.",
+			"Technico-commercial dans l'industrie, avec un parcours en génie industriel, en maintenance et en ingénierie d'affaires.",
 		photo: '/images/equipe/nadir.webp',
 		parcours: [
-			'Diplôme universitaire de technologie en génie industriel et maintenance.',
+			"Formation en génie industriel et maintenance, puis en ingénierie d'affaires.",
 			"Technicien de maintenance dans l'industrie : maintenance préventive et corrective, mise en place d'une GMAO et intégration à l'ERP.",
-			"Technico-commercial chez un distributeur industriel (analyse des besoins, devis, suivi des commandes), en parallèle d'un master d'ingénierie d'affaires.",
+			'Technico-commercial chez un distributeur industriel : analyse des besoins, devis et suivi des commandes.',
 		],
 		competences: [
 			'Analyse du besoin client',

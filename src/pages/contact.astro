@@ -1,0 +1,259 @@
+---
+import CommercialLayout from '@/layouts/commercial/CommercialLayout.astro';
+import Avatar from '@/components/commercial/Avatar.astro';
+import BrandIcon from '@/components/commercial/BrandIcon.astro';
+import { membres } from '@/components/commercial/equipe';
+import { contact, emailjs } from '@/components/commercial/contact';
+import { Mail, Phone, Send, Clock } from 'lucide-react';
+
+const sujets = ['Formule Standard', 'Formule Premium', 'Formule Diamant', 'Je ne sais pas encore', 'Autre demande'];
+---
+
+<CommercialLayout footerCta={false} title="Contact | SaberWeb.dev" description="Contactez Saber et Nadir par téléphone, WhatsApp, e-mail ou via le formulaire pour parler de votre projet de site.">
+	<section class="relative overflow-hidden bg-stone-950 text-white">
+		<div class="contact-glow" aria-hidden="true"></div>
+		<div class="relative mx-auto max-w-6xl px-4 pb-28 pt-16 sm:px-6 lg:pt-20">
+			<h1 class="max-w-2xl text-4xl font-extrabold leading-tight sm:text-5xl" data-aos="fade-up">Parlons de votre projet</h1>
+			<p class="mt-5 max-w-xl text-lg text-stone-300" data-aos="fade-up" data-aos-delay="100">
+				Un appel, un message ou quelques lignes dans le formulaire : nous revenons vers vous rapidement, sans engagement.
+			</p>
+		</div>
+	</section>
+
+	<section class="relative mx-auto -mt-16 max-w-6xl px-4 pb-24 sm:px-6">
+		<div class="grid gap-6 lg:grid-cols-[1fr_1.35fr]">
+			<!-- Coordonnées -->
+			<div class="flex flex-col gap-6">
+				<div class="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" data-aos="fade-up">
+					<h2 class="text-lg font-bold text-stone-900">Nous joindre directement</h2>
+					<ul class="mt-5 space-y-3">
+						<li>
+							<a href={contact.telephoneHref} class="channel group">
+								<span class="channel-icon bg-stone-900 text-white"><Phone size={18} /></span>
+								<span><span class="block text-xs text-stone-500">Téléphone</span><span class="font-semibold text-stone-900">{contact.telephone}</span></span>
+							</a>
+						</li>
+						<li>
+							<a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" class="channel group">
+								<span class="channel-icon bg-[#25D366] text-[#052e16]"><BrandIcon name="whatsapp" size={18} /></span>
+								<span><span class="block text-xs text-stone-500">WhatsApp</span><span class="font-semibold text-stone-900">Écrire un message</span></span>
+							</a>
+						</li>
+						{contact.email && (
+							<li>
+								<a href={`mailto:${contact.email}`} class="channel group">
+									<span class="channel-icon bg-rose-600 text-white"><Mail size={18} /></span>
+									<span><span class="block text-xs text-stone-500">E-mail</span><span class="font-semibold text-stone-900 break-all">{contact.email}</span></span>
+								</a>
+							</li>
+						)}
+					</ul>
+					<p class="mt-6 flex items-center gap-2 text-sm text-stone-500"><Clock size={16} /> Réponse en général sous 24 h ouvrées.</p>
+				</div>
+
+				<div class="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" data-aos="fade-up" data-aos-delay="100">
+					<h2 class="text-lg font-bold text-stone-900">Vos interlocuteurs</h2>
+					<ul class="mt-5 space-y-4">
+						{membres.map((m) => (
+							<li class="flex items-center gap-4">
+								<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={52} class="shrink-0 ring-2 ring-stone-100" />
+								<div class="min-w-0 flex-1">
+									<p class="font-semibold text-stone-900">{m.prenom}</p>
+									<p class="truncate text-sm text-stone-500">{m.role}</p>
+								</div>
+								<a href={m.linkedin} target="_blank" rel="noopener noreferrer" class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-stone-200 px-3 py-1.5 text-sm font-semibold text-stone-700 transition-colors hover:border-[#0A66C2] hover:text-[#0A66C2]" aria-label={`Profil LinkedIn de ${m.prenom}`}>
+									<BrandIcon name="linkedin" size={15} class="text-[#0A66C2]" /> LinkedIn
+								</a>
+							</li>
+						))}
+					</ul>
+				</div>
+			</div>
+
+			<!-- Formulaire -->
+			<form
+				id="contact-form"
+				class="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8"
+				data-service={emailjs.serviceId}
+				data-template={emailjs.templateId}
+				data-key={emailjs.publicKey}
+				data-aos="fade-up"
+				data-aos-delay="150"
+				novalidate
+			>
+				<h2 class="text-lg font-bold text-stone-900">Envoyer un message</h2>
+				<p class="mt-1 text-sm text-stone-500">Les champs marqués d’un astérisque sont obligatoires.</p>
+
+				<div class="mt-6 grid gap-5 sm:grid-cols-2">
+					<div>
+						<label for="cf-name" class="field-label">Nom et prénom *</label>
+						<input id="cf-name" name="name" type="text" required autocomplete="name" class="field" />
+					</div>
+					<div>
+						<label for="cf-company" class="field-label">Entreprise</label>
+						<input id="cf-company" name="company" type="text" autocomplete="organization" class="field" />
+					</div>
+					<div>
+						<label for="cf-email" class="field-label">E-mail *</label>
+						<input id="cf-email" name="email" type="email" required autocomplete="email" class="field" />
+					</div>
+					<div>
+						<label for="cf-phone" class="field-label">Téléphone</label>
+						<input id="cf-phone" name="phone" type="tel" autocomplete="tel" class="field" />
+					</div>
+					<div class="sm:col-span-2">
+						<label for="cf-subject" class="field-label">Votre demande concerne</label>
+						<select id="cf-subject" name="subject" class="field">
+							{sujets.map((s) => <option value={s}>{s}</option>)}
+						</select>
+					</div>
+					<div class="sm:col-span-2">
+						<label for="cf-message" class="field-label">Message *</label>
+						<textarea id="cf-message" name="message" rows="6" required minlength="10" class="field resize-y" placeholder="Votre activité, ce que vous aimeriez sur votre site, vos délais..."></textarea>
+					</div>
+					<!-- Piège à robots : invisible pour les visiteurs -->
+					<div class="hidden" aria-hidden="true">
+						<label for="cf-website">Site web</label>
+						<input id="cf-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+					</div>
+				</div>
+
+				<p class="mt-5 text-xs leading-relaxed text-stone-500">
+					Vos coordonnées servent uniquement à répondre à votre demande. Voir notre <a href="/confidentialite" class="underline hover:text-stone-900">politique de confidentialité</a>.
+				</p>
+
+				<p id="cf-status" class="mt-4 hidden rounded-xl px-4 py-3 text-sm" role="status" aria-live="polite"></p>
+
+				<button id="cf-submit" type="submit" class="btn btn-rose btn-lg mt-6 w-full justify-center sm:w-auto">
+					<Send size={18} /> <span>Envoyer le message</span>
+				</button>
+			</form>
+		</div>
+	</section>
+</CommercialLayout>
+
+<style>
+	.contact-glow {
+		position: absolute;
+		inset: 0;
+		background:
+			radial-gradient(40rem 24rem at 85% -10%, rgb(225 29 72 / 0.3), transparent 70%),
+			radial-gradient(36rem 22rem at 0% 110%, rgb(124 58 237 / 0.25), transparent 70%);
+		pointer-events: none;
+	}
+	.channel {
+		display: flex;
+		align-items: center;
+		gap: 0.9rem;
+		border-radius: 1rem;
+		border: 1px solid var(--color-stone-200);
+		padding: 0.75rem 1rem;
+		transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+	.channel:hover { border-color: var(--color-stone-400); background: var(--color-stone-50); transform: translateX(3px); }
+	.channel-icon {
+		display: flex;
+		height: 2.5rem;
+		width: 2.5rem;
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: center;
+		border-radius: 0.75rem;
+	}
+	.field-label { display: block; font-size: 0.875rem; font-weight: 600; color: var(--color-stone-800); }
+	.field {
+		margin-top: 0.4rem;
+		width: 100%;
+		border-radius: 0.75rem;
+		border: 1px solid var(--color-stone-200);
+		background: var(--color-stone-50);
+		padding: 0.7rem 0.9rem;
+		font-size: 0.95rem;
+		color: var(--color-stone-900);
+		transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+	}
+	.field:focus { outline: none; background: #fff; border-color: var(--color-rose-500); box-shadow: 0 0 0 3px rgb(244 63 94 / 0.15); }
+	.field[aria-invalid='true'] { border-color: var(--color-red-500); }
+	@media (prefers-reduced-motion: reduce) {
+		.channel { transition: none; }
+		.channel:hover { transform: none; }
+	}
+</style>
+
+<script>
+	const form = document.getElementById('contact-form') as HTMLFormElement | null;
+	const status = document.getElementById('cf-status');
+	const submit = document.getElementById('cf-submit') as HTMLButtonElement | null;
+
+	const showStatus = (ok: boolean, text: string) => {
+		if (!status) return;
+		status.textContent = text;
+		status.className = `mt-4 rounded-xl px-4 py-3 text-sm ${ok ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-800'}`;
+	};
+
+	if (form && submit) {
+		form.addEventListener('submit', async (e) => {
+			e.preventDefault();
+
+			// Validation native, avec mise en évidence des champs à corriger.
+			let valid = true;
+			form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[required]').forEach((field) => {
+				const ok = field.checkValidity();
+				field.setAttribute('aria-invalid', String(!ok));
+				if (!ok && valid) field.focus();
+				valid &&= ok;
+			});
+			if (!valid) {
+				showStatus(false, 'Merci de renseigner votre nom, un e-mail valide et un message (10 caractères minimum).');
+				return;
+			}
+
+			const data = new FormData(form);
+			if (data.get('website')) return; // robot
+
+			const name = String(data.get('name') ?? '').trim();
+			const email = String(data.get('email') ?? '').trim();
+			const company = String(data.get('company') ?? '').trim();
+			const phone = String(data.get('phone') ?? '').trim();
+			const subject = String(data.get('subject') ?? '');
+			const details = [`Demande : ${subject}`, company && `Entreprise : ${company}`, phone && `Téléphone : ${phone}`]
+				.filter(Boolean)
+				.join('\n');
+			const message = `${details}\n\n${String(data.get('message') ?? '').trim()}`;
+
+			const label = submit.querySelector('span');
+			submit.disabled = true;
+			if (label) label.textContent = 'Envoi en cours...';
+
+			try {
+				const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						service_id: form.dataset.service,
+						template_id: form.dataset.template,
+						user_id: form.dataset.key,
+						template_params: {
+							from_name: name,
+							to_name: 'SaberWeb.dev',
+							name,
+							email,
+							reply_to: email,
+							title: subject,
+							message,
+						},
+					}),
+				});
+				if (!res.ok) throw new Error(await res.text());
+				showStatus(true, 'Merci, votre message est bien parti. Nous vous répondons rapidement.');
+				form.reset();
+				form.querySelectorAll('[aria-invalid]').forEach((f) => f.removeAttribute('aria-invalid'));
+			} catch {
+				showStatus(false, 'L’envoi n’a pas abouti. Réessayez dans un instant, ou contactez-nous par téléphone ou WhatsApp.');
+			} finally {
+				submit.disabled = false;
+				if (label) label.textContent = 'Envoyer le message';
+			}
+		});
+	}
+</script>

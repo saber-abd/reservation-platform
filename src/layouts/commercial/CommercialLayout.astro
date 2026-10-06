@@ -1,6 +1,6 @@
 ---
 import '../../styles/commercial.css';
-import { Code2, ArrowRight } from 'lucide-react';
+import { Code2, ArrowRight, Phone, Mail } from 'lucide-react';
 import SmoothScroll from '@/components/shared/SmoothScroll.astro';
 import CookieBanner from '@/components/shared/CookieBanner.astro';
 import Avatar from '@/components/commercial/Avatar.astro';
@@ -11,16 +11,18 @@ import { contact } from '@/components/commercial/contact';
 interface Props {
 	title: string;
 	description: string;
+	/** Bandeau « Un projet de site en tête ? » du pied de page (masqué là où la page a déjà son appel à l'action). */
+	footerCta?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, footerCta = true } = Astro.props;
 const currentYear = new Date().getFullYear();
 
 const mobileLinks = [
 	{ label: 'Présentation', href: '/#presentation' },
 	{ label: 'Formules', href: '/#tarification' },
 	{ label: 'Notre histoire', href: '/notre-histoire' },
-	{ label: 'Contact', href: '/#contact' },
+	{ label: 'Contact', href: '/contact' },
 ];
 
 const formules = [
@@ -31,7 +33,7 @@ const formules = [
 
 const legal = [
 	{ label: 'Mentions légales', href: '/mentions-legales' },
-	{ label: 'Conditions générales d’utilisation', href: '/cgu' },
+	{ label: 'CGU', href: '/cgu' },
 	{ label: 'Données personnelles', href: '/confidentialite' },
 	{ label: 'Cookies', href: '/cookies' },
 ];
@@ -109,11 +111,11 @@ const legal = [
 						</div>
 					</div>
 
-					<a href="/#contact" class="nav-link">Contact</a>
+					<a href="/contact" class="nav-link">Contact</a>
 				</nav>
 
 				<div class="hidden md:block">
-					<a href="/#contact" class="btn btn-dark btn-sm">
+					<a href="/contact" class="btn btn-dark btn-sm">
 						Contactez-nous <ArrowRight size={16} class="btn-arrow" />
 					</a>
 				</div>
@@ -156,56 +158,94 @@ const legal = [
 		</main>
 
 		<!-- FOOTER COMMERCIAL -->
-		<footer class="bg-stone-950 text-stone-400">
-			<div class="mx-auto grid max-w-6xl gap-10 px-6 pt-16 pb-10 sm:grid-cols-2 lg:grid-cols-4">
-				<div class="sm:col-span-2 lg:col-span-1">
-					<a href="/" class="flex items-center gap-2">
-						<span class="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-stone-900"><Code2 size={18} /></span>
-						<span class="text-lg font-bold text-white">SaberWeb.dev</span>
-					</a>
-					<p class="mt-4 max-w-xs text-sm leading-relaxed">Sites vitrines et plateformes de réservation sur mesure pour les commerces et les petites entreprises.</p>
-					<a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" class="mt-5 inline-flex items-center gap-2 rounded-full bg-[#25D366]/10 px-4 py-2 text-sm font-semibold text-[#25D366] ring-1 ring-[#25D366]/30 transition-colors hover:bg-[#25D366] hover:text-stone-950" aria-label={`Nous écrire sur WhatsApp au ${contact.telephone}`}>
-						<BrandIcon name="whatsapp" size={18} /> {contact.telephone}
-					</a>
-				</div>
-				<div>
-					<p class="text-xs font-bold uppercase tracking-widest text-stone-500">Navigation</p>
-					<ul class="mt-4 space-y-2.5 text-sm">
-						{mobileLinks.map((l) => <li><a href={l.href} class="footer-link">{l.label}</a></li>)}
-					</ul>
-				</div>
-				<div>
-					<p class="text-xs font-bold uppercase tracking-widest text-stone-500">Formules</p>
-					<ul class="mt-4 space-y-2.5 text-sm">
-						{formules.map((f) => <li><a href={f.href} class="footer-link">Formule {f.label}</a></li>)}
-					</ul>
-				</div>
-				<div>
-					<p class="text-xs font-bold uppercase tracking-widest text-stone-500">Informations légales</p>
-					<ul class="mt-4 space-y-2.5 text-sm">
-						{legal.map((l) => <li><a href={l.href} class="footer-link">{l.label}</a></li>)}
-						<li><button type="button" class="footer-link" data-cookie-settings>Gérer mes cookies</button></li>
-					</ul>
-				</div>
-			</div>
+		<footer class="site-footer relative overflow-hidden bg-stone-950 text-stone-400">
+			<div class="footer-glow" aria-hidden="true"></div>
 
-			<div class="border-t border-white/10">
-				<div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-6 py-8 md:flex-row">
-					<p class="text-sm">© {currentYear} SaberWeb.dev. Tous droits réservés.</p>
-					<ul class="flex items-center gap-6" aria-label="L’équipe sur LinkedIn">
-						{membres.map((m) => (
+			<div class="relative mx-auto max-w-6xl px-6">
+				<!-- Bandeau d'appel -->
+				{footerCta && (
+				<div class="flex flex-col items-start justify-between gap-6 border-b border-white/10 py-12 md:flex-row md:items-center">
+					<div>
+						<p class="text-2xl font-bold text-white sm:text-3xl">Un projet de site en tête ?</p>
+						<p class="mt-2 text-stone-400">Échangeons quelques minutes, c’est sans engagement.</p>
+					</div>
+					<div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+						<a href="/contact" class="btn btn-light justify-center">
+							Nous écrire <ArrowRight size={16} class="btn-arrow" />
+						</a>
+						<a href={contact.telephoneHref} class="btn btn-ghost-dark justify-center">
+							<Phone size={16} /> {contact.telephone}
+						</a>
+					</div>
+				</div>
+				)}
+
+				<div class="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
+					<div class="sm:col-span-2 lg:col-span-1">
+						<a href="/" class="group inline-flex items-center gap-2">
+							<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-stone-900 transition-transform duration-300 group-hover:-rotate-6"><Code2 size={20} /></span>
+							<span class="text-lg font-extrabold tracking-tight text-white">SaberWeb<span class="text-stone-500">.dev</span></span>
+						</a>
+						<p class="mt-4 max-w-xs text-sm leading-relaxed">Sites vitrines et plateformes de réservation sur mesure pour les commerces et les petites entreprises.</p>
+						<ul class="mt-6 flex items-center gap-2" aria-label="Nous suivre et nous écrire">
 							<li>
-								<a href={m.linkedin} target="_blank" rel="noopener noreferrer" class="team-link group flex items-center gap-2.5" aria-label={`Profil LinkedIn de ${m.prenom}`}>
-									<span class="relative">
-										<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={44} class="ring-2 ring-white/10 transition duration-300 group-hover:ring-[#0A66C2]" />
-									</span>
-									<span class="flex items-center gap-1.5 text-sm font-semibold text-stone-300 transition-colors group-hover:text-white">
-										{m.prenom}
-										<BrandIcon name="linkedin" size={16} class="text-[#0A66C2] transition-transform duration-300 group-hover:scale-110" />
-									</span>
+								<a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" class="social" aria-label="Nous écrire sur WhatsApp">
+									<BrandIcon name="whatsapp" size={18} />
 								</a>
 							</li>
-						))}
+							{membres.map((m) => (
+								<li>
+									<a href={m.linkedin} target="_blank" rel="noopener noreferrer" class="social" aria-label={`Profil LinkedIn de ${m.prenom}`} title={`LinkedIn de ${m.prenom}`}>
+										<BrandIcon name="linkedin" size={17} />
+									</a>
+								</li>
+							))}
+							{contact.email && (
+								<li>
+									<a href={`mailto:${contact.email}`} class="social" aria-label="Nous écrire par e-mail"><Mail size={18} /></a>
+								</li>
+							)}
+						</ul>
+					</div>
+					<div>
+						<p class="footer-title">Navigation</p>
+						<ul class="mt-4 space-y-2.5 text-sm">
+							{mobileLinks.map((l) => <li><a href={l.href} class="footer-link">{l.label}</a></li>)}
+						</ul>
+					</div>
+					<div>
+						<p class="footer-title">Formules</p>
+						<ul class="mt-4 space-y-2.5 text-sm">
+							{formules.map((f) => (
+								<li>
+									<a href={f.href} class="footer-link inline-flex items-center gap-2"><span class={`h-1.5 w-1.5 rounded-full ${f.dot}`}></span>{f.label}</a>
+								</li>
+							))}
+						</ul>
+					</div>
+					<div>
+						<p class="footer-title">L’équipe</p>
+						<ul class="mt-4 space-y-3">
+							{membres.map((m) => (
+								<li>
+									<a href={m.linkedin} target="_blank" rel="noopener noreferrer" class="group flex items-center gap-3" aria-label={`Profil LinkedIn de ${m.prenom}`}>
+										<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={40} class="ring-2 ring-white/10 transition duration-300 group-hover:ring-[#0A66C2]" />
+										<span class="min-w-0">
+											<span class="block text-sm font-semibold text-stone-200 transition-colors group-hover:text-white">{m.prenom}</span>
+											<span class="block truncate text-xs text-stone-500">{m.role}</span>
+										</span>
+									</a>
+								</li>
+							))}
+						</ul>
+					</div>
+				</div>
+
+				<div class="flex flex-col items-center justify-between gap-4 border-t border-white/10 py-7 text-sm md:flex-row">
+					<p>© {currentYear} SaberWeb.dev</p>
+					<ul class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+						{legal.map((l) => <li><a href={l.href} class="footer-link">{l.label}</a></li>)}
+						<li><button type="button" class="footer-link" data-cookie-settings>Gérer mes cookies</button></li>
 					</ul>
 				</div>
 			</div>

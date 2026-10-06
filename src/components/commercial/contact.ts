@@ -9,3 +9,11 @@ export const contact = {
 	// À compléter : adresse e-mail de contact. Tant qu'elle est vide, le bouton e-mail est masqué.
 	email: '',
 };
+
+// Formulaire de /contact : même compte EmailJS que les formulaires de contact des démos
+// (clé publique, faite pour être utilisée côté navigateur).
+export const emailjs = {
+	serviceId: 'service_7pvm3br',
+	templateId: 'template_3j75n8o',
+	publicKey: '5Jjd71i9EWOeYyzsG',
+};
