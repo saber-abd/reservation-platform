@@ -5,7 +5,9 @@
     "devise": "EUR",
     "mentionTva": "TVA non applicable, art. 293 B du CGI",
     "noteTjm": "Taux journalier de main d'œuvre utilisé pour chiffrer les jours de travail. À ajuster dans ce fichier : tous les montants du devis en dépendent.",
-    "noteFrais": "Frais de fonctionnement : abonnements des services tiers, payés directement par le client sur ses propres comptes ou refacturés à l'euro près."
+    "noteFrais": "Frais de fonctionnement : abonnements des services tiers, payés directement par le client sur ses propres comptes ou refacturés à l'euro près.",
+    "tauxUsdEur": 1.1204,
+    "noteChange": "Prix en dollars convertis au taux BCE du 5 octobre 2026 (1 € = 1,1204 $), hors taxes."
   },
   "formules": [
     {
@@ -224,7 +226,12 @@
       "formules": {
         "standard": {
           "statut": "inclus",
-          "jours": 0.25
+          "jours": 0.25,
+          "mensuel": {
+            "min": 0,
+            "max": 8.03
+          },
+          "note": "EmailJS : 200 e-mails par mois gratuits, puis 9 $/mois pour 2 000 e-mails (partagé avec les e-mails de confirmation)."
         },
         "premium": {
           "statut": "inclus",
@@ -249,15 +256,30 @@
       "formules": {
         "standard": {
           "statut": "inclus",
-          "jours": 0.25
+          "jours": 0.25,
+          "mensuel": {
+            "min": 0,
+            "max": 17.85
+          },
+          "note": "Tuiles OpenStreetMap gratuites mais sans garantie de service ; fournisseur payant (Stadia Maps, 20 $/mois) si une disponibilité garantie est demandée."
         },
         "premium": {
           "statut": "inclus",
-          "jours": 0.25
+          "jours": 0.25,
+          "mensuel": {
+            "min": 0,
+            "max": 17.85
+          },
+          "note": "Tuiles OpenStreetMap gratuites mais sans garantie de service ; fournisseur payant (Stadia Maps, 20 $/mois) si une disponibilité garantie est demandée."
         },
         "diamant": {
           "statut": "inclus",
-          "jours": 0.25
+          "jours": 0.25,
+          "mensuel": {
+            "min": 0,
+            "max": 17.85
+          },
+          "note": "Tuiles OpenStreetMap gratuites mais sans garantie de service ; fournisseur payant (Stadia Maps, 20 $/mois) si une disponibilité garantie est demandée."
         }
       },
       "fiabilite": "estimation"
@@ -396,15 +418,26 @@
       "formules": {
         "standard": {
           "statut": "inclus",
-          "jours": 0.5
+          "jours": 0.5,
+          "note": "Inclus dans le quota EmailJS du formulaire de contact."
         },
         "premium": {
           "statut": "inclus",
-          "jours": 0.75
+          "jours": 0.75,
+          "mensuel": {
+            "min": 8.03,
+            "max": 13.39
+          },
+          "note": "EmailJS : 200 e-mails par mois gratuits, 9 $/mois pour 2 000, 15 $/mois pour 5 000. Les notifications de messages consomment ce quota."
         },
         "diamant": {
           "statut": "inclus",
-          "jours": 1
+          "jours": 1,
+          "mensuel": {
+            "min": 8.03,
+            "max": 13.39
+          },
+          "note": "EmailJS : 200 e-mails par mois gratuits, 9 $/mois pour 2 000, 15 $/mois pour 5 000. Les notifications de messages consomment ce quota."
         }
       },
       "fiabilite": "estimation"
@@ -445,11 +478,25 @@
       "formules": {
         "premium": {
           "statut": "option",
-          "jours": 1.5
+          "jours": 1.5,
+          "parUnite": {
+            "prix": 0.06,
+            "unite": "SMS",
+            "volumeMin": 50,
+            "volumeMax": 300
+          },
+          "note": "Environ 0,06 € HT par SMS (OVHcloud, pack de 100) ; estimation de 50 à 300 SMS par mois."
         },
         "diamant": {
           "statut": "option",
-          "jours": 1.5
+          "jours": 1.5,
+          "parUnite": {
+            "prix": 0.06,
+            "unite": "SMS",
+            "volumeMin": 50,
+            "volumeMax": 300
+          },
+          "note": "Environ 0,06 € HT par SMS (OVHcloud, pack de 100) ; estimation de 50 à 300 SMS par mois."
         }
       },
       "fiabilite": "estimation"
@@ -485,11 +532,13 @@
       "formules": {
         "premium": {
           "statut": "option",
-          "jours": 3
+          "jours": 3,
+          "note": "Aucun abonnement : Stripe prélève 1,5 % + 0,25 € par paiement par carte européenne."
         },
         "diamant": {
           "statut": "option",
-          "jours": 3
+          "jours": 3,
+          "note": "Aucun abonnement : Stripe prélève 1,5 % + 0,25 € par paiement par carte européenne."
         }
       },
       "fiabilite": "estimation"
@@ -505,11 +554,21 @@
       "formules": {
         "premium": {
           "statut": "inclus",
-          "jours": 2
+          "jours": 2,
+          "mensuel": {
+            "min": 22.31,
+            "max": 26.78
+          },
+          "note": "Supabase Pro (25 $/mois) conseillé dès la mise en ligne : l'offre gratuite n'a pas de sauvegarde et se met en pause après 7 jours sans activité. Instance plus puissante si besoin (+5 $/mois)."
         },
         "diamant": {
           "statut": "inclus",
-          "jours": 3
+          "jours": 3,
+          "mensuel": {
+            "min": 22.31,
+            "max": 35.7
+          },
+          "note": "Supabase Pro (25 $/mois, sauvegardes quotidiennes) obligatoire ; instance plus puissante (+15 $/mois) si l'équipe ou la clientèle est importante."
         }
       },
       "fiabilite": "estimation"
@@ -526,11 +585,13 @@
       "formules": {
         "premium": {
           "statut": "inclus",
-          "jours": 1.5
+          "jours": 1.75,
+          "note": "Comprend l'hébergement des avatars sur le site (l'API publique DiceBear est réservée à un usage non commercial)."
         },
         "diamant": {
           "statut": "inclus",
-          "jours": 1.5
+          "jours": 1.75,
+          "note": "Comprend l'hébergement des avatars sur le site (l'API publique DiceBear est réservée à un usage non commercial)."
         }
       },
       "fiabilite": "estimation"
@@ -729,24 +790,27 @@
           "jours": 0.25,
           "mensuel": {
             "min": 0,
-            "max": 5
-          }
+            "max": 4.46
+          },
+          "note": "Offre gratuite (100 000 requêtes par jour) suffisante pour un commerce ; offre payante à 5 $/mois si le trafic ou le temps de calcul augmente."
         },
         "premium": {
           "statut": "inclus",
           "jours": 0.25,
           "mensuel": {
             "min": 0,
-            "max": 5
-          }
+            "max": 4.46
+          },
+          "note": "Offre gratuite (100 000 requêtes par jour) suffisante pour un commerce ; offre payante à 5 $/mois si le trafic ou le temps de calcul augmente."
         },
         "diamant": {
           "statut": "inclus",
           "jours": 0.25,
           "mensuel": {
-            "min": 0,
-            "max": 5
-          }
+            "min": 4.46,
+            "max": 4.46
+          },
+          "note": "Offre payante à 5 $/mois conseillée : plus de temps de calcul par page pour les espaces connectés."
         }
       },
       "fiabilite": "estimation"
@@ -764,25 +828,28 @@
           "statut": "inclus",
           "jours": 0.25,
           "annuel": {
-            "min": 10,
-            "max": 20
-          }
+            "min": 9.35,
+            "max": 16.19
+          },
+          "note": "Renouvellement annuel TTC : .fr 9,35 €, .com 16,19 € (OVHcloud)."
         },
         "premium": {
           "statut": "inclus",
           "jours": 0.25,
           "annuel": {
-            "min": 10,
-            "max": 20
-          }
+            "min": 9.35,
+            "max": 16.19
+          },
+          "note": "Renouvellement annuel TTC : .fr 9,35 €, .com 16,19 € (OVHcloud)."
         },
         "diamant": {
           "statut": "inclus",
           "jours": 0.25,
           "annuel": {
-            "min": 10,
-            "max": 20
-          }
+            "min": 9.35,
+            "max": 16.19
+          },
+          "note": "Renouvellement annuel TTC : .fr 9,35 €, .com 16,19 € (OVHcloud)."
         }
       },
       "fiabilite": "estimation"
@@ -823,24 +890,27 @@
           "jours": 0.25,
           "mensuel": {
             "min": 0,
-            "max": 7
-          }
+            "max": 8.16
+          },
+          "note": "Redirection gratuite vers une boîte existante, ou boîte complète (Google Workspace, environ 6,80 € HT par utilisateur)."
         },
         "premium": {
           "statut": "option",
           "jours": 0.25,
           "mensuel": {
             "min": 0,
-            "max": 7
-          }
+            "max": 8.16
+          },
+          "note": "Redirection gratuite vers une boîte existante, ou boîte complète (Google Workspace, environ 6,80 € HT par utilisateur)."
         },
         "diamant": {
           "statut": "option",
           "jours": 0.25,
           "mensuel": {
             "min": 0,
-            "max": 7
-          }
+            "max": 8.16
+          },
+          "note": "Redirection gratuite vers une boîte existante, ou boîte complète (Google Workspace, environ 6,80 € HT par utilisateur)."
         }
       },
       "fiabilite": "estimation"
@@ -849,32 +919,35 @@
       "id": "maintenance",
       "nom": "Maintenance et suivi",
       "categorie": "options",
-      "description": "Mises à jour, sauvegardes vérifiées, petites modifications de contenu (1 h par mois) et surveillance de la disponibilité.",
+      "description": "Mises à jour, sauvegardes vérifiées, surveillance de la disponibilité et petites modifications de contenu chaque mois.",
       "outils": [],
       "formules": {
         "standard": {
           "statut": "option",
           "jours": 0,
           "mensuel": {
-            "min": 30,
-            "max": 30
-          }
+            "min": 40,
+            "max": 40
+          },
+          "note": "Comprend 1 h de modifications par mois."
         },
         "premium": {
           "statut": "option",
           "jours": 0,
           "mensuel": {
-            "min": 50,
-            "max": 50
-          }
+            "min": 90,
+            "max": 90
+          },
+          "note": "Comprend 2 h de modifications par mois et le suivi de la base de données."
         },
         "diamant": {
           "statut": "option",
           "jours": 0,
           "mensuel": {
-            "min": 90,
-            "max": 90
-          }
+            "min": 150,
+            "max": 150
+          },
+          "note": "Comprend 3 h de modifications par mois, le suivi de la base de données et des comptes de l'équipe."
         }
       },
       "fiabilite": "estimation"
