@@ -1,0 +1,883 @@
+{
+  "meta": {
+    "dateTarifs": "2026-10-06",
+    "tjm": 300,
+    "devise": "EUR",
+    "mentionTva": "TVA non applicable, art. 293 B du CGI",
+    "noteTjm": "Taux journalier de main d'œuvre utilisé pour chiffrer les jours de travail. À ajuster dans ce fichier : tous les montants du devis en dépendent.",
+    "noteFrais": "Frais de fonctionnement : abonnements des services tiers, payés directement par le client sur ses propres comptes ou refacturés à l'euro près."
+  },
+  "formules": [
+    {
+      "id": "standard",
+      "nom": "Standard",
+      "accroche": "Site vitrine et réservation dans Google Agenda",
+      "description": "Un site vitrine rapide, sans base de données, dont les rendez-vous arrivent directement dans l'agenda Google du professionnel."
+    },
+    {
+      "id": "premium",
+      "nom": "Premium",
+      "accroche": "Base de données, espace client et tableau de bord",
+      "description": "Une plateforme avec base de données : comptes clients, espace client, tableau de bord, statistiques, messagerie et fidélité."
+    },
+    {
+      "id": "diamant",
+      "nom": "Diamant",
+      "accroche": "Plateforme sur mesure avec gestion d'équipe",
+      "description": "Tout Premium, avec gestion d'équipe et des droits, modération des clients, recherche unifiée, fidélité VIP et design exclusif."
+    }
+  ],
+  "categories": [
+    {
+      "id": "conception",
+      "nom": "Conception et design"
+    },
+    {
+      "id": "site",
+      "nom": "Site vitrine"
+    },
+    {
+      "id": "reservation",
+      "nom": "Réservation et notifications"
+    },
+    {
+      "id": "plateforme",
+      "nom": "Plateforme et espaces connectés"
+    },
+    {
+      "id": "avance",
+      "nom": "Fonctions avancées"
+    },
+    {
+      "id": "infra",
+      "nom": "Hébergement et mise en ligne"
+    },
+    {
+      "id": "options",
+      "nom": "Options"
+    }
+  ],
+  "services": [
+    {
+      "id": "cadrage",
+      "nom": "Cadrage du projet",
+      "categorie": "conception",
+      "description": "Recueil du besoin, liste des prestations et des contenus, planning. En Diamant : cahier des charges écrit et validé.",
+      "outils": [],
+      "formules": {
+        "standard": {
+          "statut": "inclus",
+          "jours": 0.5
+        },
+        "premium": {
+          "statut": "inclus",
+          "jours": 1
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 3
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "design",
+      "nom": "Charte graphique et maquette",
+      "categorie": "conception",
+      "description": "Couleurs, typographies, maquette des pages clés. Standard et Premium partent d'un modèle adapté à l'image du client ; Diamant est dessiné sur mesure.",
+      "outils": [],
+      "formules": {
+        "standard": {
+          "statut": "inclus",
+          "jours": 1.5
+        },
+        "premium": {
+          "statut": "inclus",
+          "jours": 2.5
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 6
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "logo-anime",
+      "nom": "Logo animé et identité signature",
+      "categorie": "conception",
+      "description": "Logo vectoriel animé et éléments graphiques exclusifs.",
+      "outils": [],
+      "formules": {
+        "diamant": {
+          "statut": "inclus",
+          "jours": 1.5
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "pages-vitrine",
+      "nom": "Pages du site vitrine",
+      "categorie": "site",
+      "description": "Accueil, prestations et tarifs, à propos, contact et page 404, avec intégration des textes et photos fournis.",
+      "outils": [
+        "Astro",
+        "React",
+        "Tailwind CSS"
+      ],
+      "formules": {
+        "standard": {
+          "statut": "inclus",
+          "jours": 2
+        },
+        "premium": {
+          "statut": "inclus",
+          "jours": 2.5
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 3.5
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "pages-legales",
+      "nom": "Pages légales et bandeau cookies",
+      "categorie": "site",
+      "description": "Mentions légales, conditions d'utilisation, politique de confidentialité et gestion du consentement.",
+      "outils": [],
+      "formules": {
+        "standard": {
+          "statut": "inclus",
+          "jours": 0.5
+        },
+        "premium": {
+          "statut": "inclus",
+          "jours": 0.5
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 0.75
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "mobile-animations",
+      "nom": "Version mobile et animations",
+      "categorie": "site",
+      "description": "Adaptation au téléphone, menu animé, apparitions au défilement. Premium : parallaxe ; Diamant : animations signature.",
+      "outils": [
+        "AOS",
+        "Framer Motion"
+      ],
+      "formules": {
+        "standard": {
+          "statut": "inclus",
+          "jours": 0.5
+        },
+        "premium": {
+          "statut": "inclus",
+          "jours": 1
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 1.5
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "seo",
+      "nom": "Référencement technique et performances",
+      "categorie": "site",
+      "description": "Balises, plan du site, images optimisées, pages servies en cache pour un chargement rapide.",
+      "outils": [
+        "@astrojs/sitemap"
+      ],
+      "formules": {
+        "standard": {
+          "statut": "inclus",
+          "jours": 0.5
+        },
+        "premium": {
+          "statut": "inclus",
+          "jours": 0.75
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 1
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "contact",
+      "nom": "Formulaire de contact",
+      "categorie": "site",
+      "description": "Formulaire relié à la boîte mail du professionnel.",
+      "outils": [
+        "EmailJS"
+      ],
+      "formules": {
+        "standard": {
+          "statut": "inclus",
+          "jours": 0.25
+        },
+        "premium": {
+          "statut": "inclus",
+          "jours": 0.25
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 0.25
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "carte",
+      "nom": "Carte interactive",
+      "categorie": "site",
+      "description": "Carte de l'adresse ou de la zone d'intervention.",
+      "outils": [
+        "Leaflet",
+        "Tuiles OpenStreetMap"
+      ],
+      "formules": {
+        "standard": {
+          "statut": "inclus",
+          "jours": 0.25
+        },
+        "premium": {
+          "statut": "inclus",
+          "jours": 0.25
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 0.25
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "pages-sup",
+      "nom": "Deux pages supplémentaires",
+      "categorie": "options",
+      "description": "Par exemple une page réalisations, une FAQ ou une page par métier.",
+      "outils": [],
+      "formules": {
+        "standard": {
+          "statut": "option",
+          "jours": 1
+        },
+        "premium": {
+          "statut": "option",
+          "jours": 1
+        },
+        "diamant": {
+          "statut": "option",
+          "jours": 1
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "redaction",
+      "nom": "Rédaction des textes",
+      "categorie": "options",
+      "description": "Rédaction des textes du site à partir d'un entretien, au lieu de textes fournis par le client.",
+      "outils": [],
+      "formules": {
+        "standard": {
+          "statut": "option",
+          "jours": 1
+        },
+        "premium": {
+          "statut": "option",
+          "jours": 1.5
+        },
+        "diamant": {
+          "statut": "option",
+          "jours": 2
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "multilingue",
+      "nom": "Version anglaise",
+      "categorie": "options",
+      "description": "Site vitrine en français et en anglais (traductions fournies ou relues par le client).",
+      "outils": [],
+      "formules": {
+        "standard": {
+          "statut": "option",
+          "jours": 1.5
+        },
+        "premium": {
+          "statut": "option",
+          "jours": 2.5
+        },
+        "diamant": {
+          "statut": "option",
+          "jours": 3.5
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "resa-agenda",
+      "nom": "Réservation dans Google Agenda",
+      "categorie": "reservation",
+      "description": "Le client choisit une prestation et un créneau ; le rendez-vous est créé dans l'agenda Google du professionnel, sans compte à créer.",
+      "outils": [
+        "Google Calendar API",
+        "Compte de service Google Cloud"
+      ],
+      "formules": {
+        "standard": {
+          "statut": "inclus",
+          "jours": 1.5
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "resa-base",
+      "nom": "Moteur de réservation en base",
+      "categorie": "reservation",
+      "description": "Créneaux calculés selon la durée de chaque prestation et les disponibilités, blocage des doubles réservations, statut à confirmer.",
+      "outils": [
+        "Supabase (PostgreSQL)"
+      ],
+      "formules": {
+        "premium": {
+          "statut": "inclus",
+          "jours": 2
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 2.5
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "sync-agenda",
+      "nom": "Synchronisation Google Agenda",
+      "categorie": "reservation",
+      "description": "Les rendez-vous enregistrés en base sont aussi envoyés dans Google Agenda. À développer : non présent dans le code actuel des démos.",
+      "outils": [
+        "Google Calendar API"
+      ],
+      "formules": {
+        "premium": {
+          "statut": "option",
+          "jours": 2
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 2
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "emails",
+      "nom": "E-mails de confirmation",
+      "categorie": "reservation",
+      "description": "E-mails automatiques au client et au professionnel lors d'une réservation ou d'un nouveau message.",
+      "outils": [
+        "EmailJS"
+      ],
+      "formules": {
+        "standard": {
+          "statut": "inclus",
+          "jours": 0.5
+        },
+        "premium": {
+          "statut": "inclus",
+          "jours": 0.75
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 1
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "rappel-email",
+      "nom": "Rappel e-mail la veille",
+      "categorie": "options",
+      "description": "Rappel automatique la veille du rendez-vous avec un lien pour confirmer ou annuler. À développer.",
+      "outils": [
+        "Cloudflare Cron Triggers",
+        "EmailJS"
+      ],
+      "formules": {
+        "standard": {
+          "statut": "option",
+          "jours": 2
+        },
+        "premium": {
+          "statut": "option",
+          "jours": 1.5
+        },
+        "diamant": {
+          "statut": "option",
+          "jours": 1.5
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "rappel-sms",
+      "nom": "Rappel par SMS",
+      "categorie": "options",
+      "description": "Rappel SMS la veille du rendez-vous. À développer ; chaque SMS est facturé par le fournisseur.",
+      "outils": [
+        "Fournisseur SMS"
+      ],
+      "formules": {
+        "premium": {
+          "statut": "option",
+          "jours": 1.5
+        },
+        "diamant": {
+          "statut": "option",
+          "jours": 1.5
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "avis-google",
+      "nom": "Demande d’avis Google",
+      "categorie": "options",
+      "description": "Après un rendez-vous terminé, le client reçoit un lien vers la fiche Google du commerce. À développer.",
+      "outils": [
+        "EmailJS"
+      ],
+      "formules": {
+        "premium": {
+          "statut": "option",
+          "jours": 1
+        },
+        "diamant": {
+          "statut": "option",
+          "jours": 1
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "acompte",
+      "nom": "Acompte en ligne",
+      "categorie": "options",
+      "description": "Paiement d'un acompte à la réservation par carte bancaire. À développer ; frais Stripe prélevés sur chaque paiement.",
+      "outils": [
+        "Stripe"
+      ],
+      "formules": {
+        "premium": {
+          "statut": "option",
+          "jours": 3
+        },
+        "diamant": {
+          "statut": "option",
+          "jours": 3
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "bdd",
+      "nom": "Base de données sécurisée",
+      "categorie": "plateforme",
+      "description": "Tables, règles de sécurité (chaque client ne voit que ses données), migrations et sauvegardes.",
+      "outils": [
+        "Supabase (PostgreSQL)"
+      ],
+      "formules": {
+        "premium": {
+          "statut": "inclus",
+          "jours": 2
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 3
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "comptes",
+      "nom": "Comptes clients",
+      "categorie": "plateforme",
+      "description": "Inscription et connexion par e-mail ou compte Google, mot de passe oublié, profil.",
+      "outils": [
+        "Supabase Auth",
+        "Google OAuth"
+      ],
+      "formules": {
+        "premium": {
+          "statut": "inclus",
+          "jours": 1.5
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 1.5
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "espace-client",
+      "nom": "Espace client",
+      "categorie": "plateforme",
+      "description": "Rendez-vous à venir et passés, annulation, profil et avatar. Diamant : historique détaillé des passages.",
+      "outils": [
+        "React"
+      ],
+      "formules": {
+        "premium": {
+          "statut": "inclus",
+          "jours": 2
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 2.5
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "dashboard",
+      "nom": "Tableau de bord professionnel",
+      "categorie": "plateforme",
+      "description": "Rendez-vous à confirmer, gestion des prestations avec photos, disponibilités, fermetures et congés.",
+      "outils": [
+        "React",
+        "Supabase"
+      ],
+      "formules": {
+        "premium": {
+          "statut": "inclus",
+          "jours": 3
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 3.5
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "fiches-clients",
+      "nom": "Fiches clients et notes privées",
+      "categorie": "plateforme",
+      "description": "Historique, coordonnées et note privée par client, visibles du professionnel uniquement.",
+      "outils": [
+        "Supabase"
+      ],
+      "formules": {
+        "premium": {
+          "statut": "inclus",
+          "jours": 1
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 1.5
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "statistiques",
+      "nom": "Statistiques",
+      "categorie": "plateforme",
+      "description": "Chiffre d'affaires, nombre de rendez-vous, panier moyen, prestations phares. Diamant : période personnalisable.",
+      "outils": [
+        "Recharts"
+      ],
+      "formules": {
+        "premium": {
+          "statut": "inclus",
+          "jours": 1.5
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 2.5
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "messagerie",
+      "nom": "Messagerie pro et client",
+      "categorie": "plateforme",
+      "description": "Un fil de discussion par client. Diamant : mise à jour en temps réel, compteur de non-lus et accusés de lecture.",
+      "outils": [
+        "Supabase",
+        "Supabase Realtime"
+      ],
+      "formules": {
+        "premium": {
+          "statut": "inclus",
+          "jours": 2
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 3
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "fidelite",
+      "nom": "Programme de fidélité",
+      "categorie": "plateforme",
+      "description": "Points cumulés à chaque passage, niveaux et avantages. Diamant : quatre niveaux VIP de Cristal à Diamant.",
+      "outils": [],
+      "formules": {
+        "premium": {
+          "statut": "inclus",
+          "jours": 1.5
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 2
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "equipe-droits",
+      "nom": "Équipe et gestion des droits",
+      "categorie": "avance",
+      "description": "Comptes administrateur, employé et démo ; accès lecture, modification ou masqué, onglet par onglet.",
+      "outils": [
+        "Supabase"
+      ],
+      "formules": {
+        "diamant": {
+          "statut": "inclus",
+          "jours": 4
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "moderation",
+      "nom": "Modération des clients",
+      "categorie": "avance",
+      "description": "Bannissement avec motif, blocage de la réservation, réactivation et suppression complète des données.",
+      "outils": [
+        "Supabase (fonctions sécurisées)"
+      ],
+      "formules": {
+        "diamant": {
+          "statut": "inclus",
+          "jours": 2
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "recherche",
+      "nom": "Recherche unifiée",
+      "categorie": "avance",
+      "description": "Retrouver un rendez-vous ou un client par nom, e-mail, téléphone ou prestation.",
+      "outils": [],
+      "formules": {
+        "diamant": {
+          "statut": "inclus",
+          "jours": 1.5
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "integration-sur-mesure",
+      "nom": "Intégration sur mesure",
+      "categorie": "options",
+      "description": "Connexion à un logiciel existant (caisse, CRM, ERP) ou fonction métier spécifique. Chiffrage après étude ; montant indiqué pour une intégration simple par API.",
+      "outils": [],
+      "formules": {
+        "diamant": {
+          "statut": "option",
+          "jours": 5
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "hebergement",
+      "nom": "Hébergement",
+      "categorie": "infra",
+      "description": "Mise en ligne et hébergement du site sur le réseau Cloudflare, certificat HTTPS inclus.",
+      "outils": [
+        "Cloudflare Workers"
+      ],
+      "formules": {
+        "standard": {
+          "statut": "inclus",
+          "jours": 0.25,
+          "mensuel": {
+            "min": 0,
+            "max": 5
+          }
+        },
+        "premium": {
+          "statut": "inclus",
+          "jours": 0.25,
+          "mensuel": {
+            "min": 0,
+            "max": 5
+          }
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 0.25,
+          "mensuel": {
+            "min": 0,
+            "max": 5
+          }
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "domaine",
+      "nom": "Nom de domaine",
+      "categorie": "infra",
+      "description": "Réservation et configuration du nom de domaine (.fr ou .com).",
+      "outils": [
+        "Registrar"
+      ],
+      "formules": {
+        "standard": {
+          "statut": "inclus",
+          "jours": 0.25,
+          "annuel": {
+            "min": 10,
+            "max": 20
+          }
+        },
+        "premium": {
+          "statut": "inclus",
+          "jours": 0.25,
+          "annuel": {
+            "min": 10,
+            "max": 20
+          }
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 0.25,
+          "annuel": {
+            "min": 10,
+            "max": 20
+          }
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "recette",
+      "nom": "Tests, mise en ligne et formation",
+      "categorie": "infra",
+      "description": "Tests sur ordinateur et téléphone, corrections, mise en production et prise en main avec le professionnel.",
+      "outils": [],
+      "formules": {
+        "standard": {
+          "statut": "inclus",
+          "jours": 0.75
+        },
+        "premium": {
+          "statut": "inclus",
+          "jours": 1.5
+        },
+        "diamant": {
+          "statut": "inclus",
+          "jours": 3
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "email-pro",
+      "nom": "Adresse e-mail professionnelle",
+      "categorie": "options",
+      "description": "Adresse à votre nom de domaine (contact@votre-domaine.fr), configurée sur votre messagerie.",
+      "outils": [
+        "Google Workspace ou redirection"
+      ],
+      "formules": {
+        "standard": {
+          "statut": "option",
+          "jours": 0.25,
+          "mensuel": {
+            "min": 0,
+            "max": 7
+          }
+        },
+        "premium": {
+          "statut": "option",
+          "jours": 0.25,
+          "mensuel": {
+            "min": 0,
+            "max": 7
+          }
+        },
+        "diamant": {
+          "statut": "option",
+          "jours": 0.25,
+          "mensuel": {
+            "min": 0,
+            "max": 7
+          }
+        }
+      },
+      "fiabilite": "estimation"
+    },
+    {
+      "id": "maintenance",
+      "nom": "Maintenance et suivi",
+      "categorie": "options",
+      "description": "Mises à jour, sauvegardes vérifiées, petites modifications de contenu (1 h par mois) et surveillance de la disponibilité.",
+      "outils": [],
+      "formules": {
+        "standard": {
+          "statut": "option",
+          "jours": 0,
+          "mensuel": {
+            "min": 30,
+            "max": 30
+          }
+        },
+        "premium": {
+          "statut": "option",
+          "jours": 0,
+          "mensuel": {
+            "min": 50,
+            "max": 50
+          }
+        },
+        "diamant": {
+          "statut": "option",
+          "jours": 0,
+          "mensuel": {
+            "min": 90,
+            "max": 90
+          }
+        }
+      },
+      "fiabilite": "estimation"
+    }
+  ]
+}
