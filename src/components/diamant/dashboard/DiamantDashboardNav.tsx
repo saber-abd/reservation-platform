@@ -13,7 +13,7 @@ import {
 	ShieldCheck,
 	Lock
 } from 'lucide-react';
-import { getActiveProRole, setActiveProRole, getProSession, clearProSession, type ProRole } from '@/lib/permissions';
+import { getActiveProRole, getRealProRole, setActiveProRole, getProSession, clearProSession, type ProRole } from '@/lib/permissions';
 
 interface DiamantDashboardNavProps {
 	basePath: string;
@@ -24,12 +24,14 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 	const [currentPath, setCurrentPath] = React.useState('');
 	const [unreadCount, setUnreadCount] = React.useState(0);
 	const [role, setRole] = React.useState<ProRole>('admin');
+	const [realRole, setRealRole] = React.useState<ProRole | null>(null);
 	const [proUser, setProUser] = React.useState<ReturnType<typeof getProSession>>(null);
 
 	React.useEffect(() => {
 		setCurrentPath(window.location.pathname);
 		setProUser(getProSession());
 		setRole(getActiveProRole());
+		setRealRole(getRealProRole());
 
 		async function checkUnread() {
 			try {
@@ -53,6 +55,7 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 		const onRoleChange = (e: any) => {
 			if (e.detail?.role) setRole(e.detail.role);
 			setProUser(getProSession());
+			setRealRole(getRealProRole());
 		};
 
 		window.addEventListener('diamant:new-message', onMsgUpdate);
@@ -119,6 +122,7 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 						<p className="text-[11px] text-stone-500 truncate">{proUser.email}</p>
 					</div>
 				)}
+				{realRole === 'admin' && (<>
 				<div className="flex items-center justify-between mb-2">
 					<span className="text-[10px] font-black uppercase tracking-wider text-stone-400">Rôle Actif</span>
 					<span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
@@ -169,6 +173,7 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 						Démo
 					</button>
 				</div>
+				</>)}
 			</div>
 
 			{role === 'demo' && (

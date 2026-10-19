@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
 	getActiveProRole, 
+	getRealProRole,
 	setActiveProRole, 
 	refreshTeamMembers,
 	loadProContext,
@@ -99,6 +100,7 @@ function AccessCell({ access, label }: { access: Access; label: string }) {
 
 export default function DiamantRightsPanel() {
 	const [activeRole, setActiveRole] = useState<ProRole>('admin');
+	const [realRole, setRealRole] = useState<ProRole | null>(null);
 	const [activeTab, setActiveTab] = useState<'team' | 'clients' | 'matrix'>('team');
 	const [proId, setProId] = useState<string>('eff1f7ef-33ee-49a2-9e4f-52ab675a4dc7');
 	
@@ -177,10 +179,12 @@ export default function DiamantRightsPanel() {
 	useEffect(() => {
 		const currentRole = getActiveProRole();
 		setActiveRole(currentRole);
+		setRealRole(getRealProRole());
 
 		async function init() {
 			const tag = getDemoTag();
 			const ctx = await loadProContext();
+			setRealRole(getRealProRole());
 			const pro = ctx ? null : await getPrimaryProfessional(tag).catch(() => null);
 			const effectiveId = ctx?.professional_id || pro?.id || 'eff1f7ef-33ee-49a2-9e4f-52ab675a4dc7';
 			setProId(effectiveId);
@@ -614,6 +618,7 @@ export default function DiamantRightsPanel() {
 					</p>
 				</div>
 
+				{realRole === 'admin' && (
 				<div className="shrink-0">
 					<p id="diamant-role-preview" className="text-xs font-bold text-stone-500 mb-1.5">Voir l'espace en tant que</p>
 					<div role="radiogroup" aria-labelledby="diamant-role-preview" className="inline-flex rounded-xl border border-border bg-white p-1 shadow-2xs">
@@ -643,6 +648,7 @@ export default function DiamantRightsPanel() {
 							: 'Accès complet, modifications autorisées.'}
 					</p>
 				</div>
+				)}
 			</header>
 
 			{/* Navigation interne des onglets */}

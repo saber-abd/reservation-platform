@@ -55,6 +55,11 @@ function getServerRole(): ProRole | null {
 	}
 }
 
+/** Rôle réel renvoyé par la base (null tant que le contexte pro n'est pas chargé). */
+export function getRealProRole(): ProRole | null {
+	return getServerRole();
+}
+
 /**
  * Rôle effectif pour l'interface : le rôle serveur, éventuellement abaissé par un mode
  * "aperçu" (un admin peut prévisualiser la vue employé/démo, jamais l'inverse).
