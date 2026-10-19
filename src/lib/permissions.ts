@@ -66,7 +66,10 @@ export function getRealProRole(): ProRole | null {
  */
 export function getActiveProRole(): ProRole {
 	// Les rôles (admin / employé / démo) n'existent que dans la démo Diamant : les autres démos restent en admin.
-	if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/demo-diamant')) return 'admin';
+	// Seule exception : un compte « démo » reste en lecture seule dans toutes les démos.
+	if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/demo-diamant')) {
+		return getServerRole() === 'demo' ? 'demo' : 'admin';
+	}
 	const server = getServerRole();
 	if (!server) return 'demo';
 	try {
