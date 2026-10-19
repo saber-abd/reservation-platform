@@ -72,7 +72,7 @@ export default function ServicesPanel() {
 
 	async function onSubmit(values: FormValues) {
 		if (isRoleReadOnly()) {
-			setFormError("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			setFormError("Action désactivée : cette démonstration est en lecture seule.");
 			return;
 		}
 		if (!professional) return;
@@ -119,7 +119,7 @@ export default function ServicesPanel() {
 
 	async function handleToggleActive(service: Service) {
 		if (isRoleReadOnly()) {
-			alert("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			alert("Action désactivée : cette démonstration est en lecture seule.");
 			return;
 		}
 		const updated = await updateService(service.id, { is_active: !service.is_active });
@@ -128,7 +128,7 @@ export default function ServicesPanel() {
 
 	async function handleDelete(id: string) {
 		if (isRoleReadOnly()) {
-			alert("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			alert("Action désactivée : cette démonstration est en lecture seule.");
 			return;
 		}
 		await deleteService(id);

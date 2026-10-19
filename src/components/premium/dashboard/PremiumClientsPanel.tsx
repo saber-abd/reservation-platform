@@ -35,7 +35,7 @@ function ClientNoteCard({ professionalId, client }: { professionalId: string; cl
 
 	async function handleSave() {
 		if (isRoleReadOnly()) {
-			setStatus("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			setStatus("Action désactivée : cette démonstration est en lecture seule.");
 			setTimeout(() => setStatus(null), 3000);
 			return;
 		}
@@ -183,7 +183,7 @@ export default function ClientsPanel() {
 	async function handleSaveEdit(e: React.FormEvent) {
 		e.preventDefault();
 		if (isRoleReadOnly()) {
-			showEditToast("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			showEditToast("Action désactivée : cette démonstration est en lecture seule.");
 			return;
 		}
 		if (!selectedClient) return;

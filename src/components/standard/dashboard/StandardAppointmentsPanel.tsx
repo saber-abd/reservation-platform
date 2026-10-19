@@ -158,7 +158,7 @@ export default function AppointmentsPanel() {
 
 	async function handleCancel(id: string) {
 		if (isRoleReadOnly()) {
-			alert("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			alert("Action désactivée : cette démonstration est en lecture seule.");
 			return;
 		}
 		const updated = await updateAppointmentStatus(id, 'cancelled');
@@ -167,7 +167,7 @@ export default function AppointmentsPanel() {
 
 	async function handleConfirm(id: string) {
 		if (isRoleReadOnly()) {
-			alert("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			alert("Action désactivée : cette démonstration est en lecture seule.");
 			return;
 		}
 		const updated = await updateAppointmentStatus(id, 'confirmed');
@@ -176,7 +176,7 @@ export default function AppointmentsPanel() {
 
 	async function handleComplete(id: string) {
 		if (isRoleReadOnly()) {
-			alert("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			alert("Action désactivée : cette démonstration est en lecture seule.");
 			return;
 		}
 		const updated = await updateAppointmentStatus(id, 'completed');

@@ -18,7 +18,7 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-// Compte de démonstration en lecture seule (rôle « demo » en base : aucune écriture possible).
+// Compte de démonstration en lecture seule (aucune écriture possible côté base).
 // Ces identifiants sont volontairement publics : ils servent au bouton « Accéder à la démo ».
 const DEMO_EMAIL = 'demo-premium@example.com';
 const DEMO_PASSWORD = 'Demo26!';
