@@ -1,4 +1,14 @@
 import { supabase } from './supabase';
+import {
+	isPreviewMode,
+	assertNotPreview,
+	previewProfessional,
+	previewServices,
+	previewAppointments,
+	previewAvailabilityRules,
+	previewClients,
+	previewMessagesFor,
+} from './preview';
 import { clampName } from './limits';
 
 /** Helper pour extraire le tag de la démo depuis l'URL côté client ou via paramètre. */
@@ -149,6 +159,7 @@ export interface Appointment {
 }
 
 export async function getPrimaryProfessional(tag = getDemoTag()): Promise<Professional | null> {
+	if (isPreviewMode()) return previewProfessional;
 	const { data, error } = await supabase.from('professionals').select('*').eq('tag_bd', tag).limit(1).maybeSingle();
 	if (error) throw error;
 	return data;
@@ -161,6 +172,7 @@ export async function getProfessionalByUserId(userId: string, tag = getDemoTag()
 }
 
 export async function getProfessionalById(id: string, tag = getDemoTag()): Promise<Professional | null> {
+	if (isPreviewMode()) return previewProfessional;
 	const { data, error } = await supabase.from('professionals').select('*').eq('id', id).eq('tag_bd', tag).maybeSingle();
 	if (error) throw error;
 	return data;
@@ -173,12 +185,14 @@ export async function createProfessional(professional: Pick<Professional, 'user_
 }
 
 export async function updateProfessional(id: string, changes: Partial<Professional>, tag = getDemoTag()) {
+	assertNotPreview();
 	const { data, error } = await supabase.from('professionals').update(changes).eq('id', id).eq('tag_bd', tag).select().single();
 	if (error) throw error;
 	return data as Professional;
 }
 
 export async function getServices(professionalId: string, tag = getDemoTag()): Promise<Service[]> {
+	if (isPreviewMode()) return previewServices;
 	const { data, error } = await supabase
 		.from('services')
 		.select('*')
@@ -192,6 +206,7 @@ export async function getServices(professionalId: string, tag = getDemoTag()): P
 }
 
 export async function getAllServices(professionalId: string, tag = getDemoTag()): Promise<Service[]> {
+	if (isPreviewMode()) return previewServices;
 	const { data, error } = await supabase
 		.from('services')
 		.select('*')
@@ -208,12 +223,14 @@ export async function createService(
 		Partial<Pick<Service, 'image_url'>>,
 	tag = getDemoTag()
 ) {
+	assertNotPreview();
 	const { data, error } = await supabase.from('services').insert({ ...service, tag_bd: tag }).select().single();
 	if (error) throw error;
 	return data as Service;
 }
 
 export async function uploadServiceImage(professionalId: string, file: File): Promise<string> {
+	assertNotPreview();
 	const extension = file.name.split('.').pop() || 'jpg';
 	const path = `${professionalId}/${crypto.randomUUID()}.${extension}`;
 	const { error } = await supabase.storage.from('service-images').upload(path, file, { upsert: true });
@@ -223,12 +240,14 @@ export async function uploadServiceImage(professionalId: string, file: File): Pr
 }
 
 export async function updateService(id: string, changes: Partial<Service>, tag = getDemoTag()) {
+	assertNotPreview();
 	const { data, error } = await supabase.from('services').update(changes).eq('id', id).eq('tag_bd', tag).select().single();
 	if (error) throw error;
 	return data as Service;
 }
 
 export async function deleteService(id: string, tag = getDemoTag()) {
+	assertNotPreview();
 	const { error } = await supabase.from('services').update({ is_deleted: true }).eq('id', id).eq('tag_bd', tag);
 	if (error) throw error;
 }
@@ -258,12 +277,14 @@ export async function getAllSlots(professionalId: string, tag = getDemoTag()): P
 }
 
 export async function createAvailability(availability: Pick<Availability, 'professional_id' | 'start_time' | 'end_time'>, tag = getDemoTag()) {
+	assertNotPreview();
 	const { data, error } = await supabase.from('availabilities').insert({ ...availability, tag_bd: tag }).select().single();
 	if (error) throw error;
 	return data as Availability;
 }
 
 export async function deleteAvailability(id: string, tag = getDemoTag()) {
+	assertNotPreview();
 	const { error } = await supabase.from('availabilities').delete().eq('id', id).eq('tag_bd', tag);
 	if (error) throw error;
 }
@@ -279,6 +300,7 @@ export async function createAppointment(appointment: {
 	start_time: string;
 	end_time: string;
 }, tag = getDemoTag()) {
+	assertNotPreview();
 	if (new Date(appointment.start_time) <= new Date()) {
 		throw new Error("Impossible de réserver un créneau déjà passé.");
 	}
@@ -294,6 +316,7 @@ export async function createAppointment(appointment: {
 export async function getAppointmentsForProfessional(
 	professionalId: string, tag = getDemoTag()
 ): Promise<(Appointment & { services: { name: string; duration_minutes: number; price: number } | null })[]> {
+	if (isPreviewMode()) return previewAppointments;
 	const { data, error } = await supabase
 		.from('appointments')
 		.select('*, services(name, duration_minutes, price)')
@@ -307,6 +330,7 @@ export async function getAppointmentsForProfessional(
 }
 
 export async function getAppointmentsForDate(professionalId: string, date: string, tag = getDemoTag()): Promise<Appointment[]> {
+	if (isPreviewMode()) return previewAppointments.filter((a) => new Date(a.start_time).toLocaleDateString('sv') === date && a.status !== 'cancelled');
 	const { data, error } = await supabase
 		.from('appointments')
 		.select('*')
@@ -320,6 +344,7 @@ export async function getAppointmentsForDate(professionalId: string, date: strin
 }
 
 export async function getAvailabilityRules(professionalId: string, tag = getDemoTag()): Promise<AvailabilityRule[]> {
+	if (isPreviewMode()) return previewAvailabilityRules;
 	const { data, error } = await supabase
 		.from('availability_rules')
 		.select('*')
@@ -333,17 +358,20 @@ export async function getAvailabilityRules(professionalId: string, tag = getDemo
 export async function createAvailabilityRule(
 	rule: Omit<AvailabilityRule, 'id' | 'created_at' | 'tag_bd'>, tag = getDemoTag()
 ): Promise<AvailabilityRule> {
+	assertNotPreview();
 	const { data, error } = await supabase.from('availability_rules').insert({ ...rule, tag_bd: tag }).select().single();
 	if (error) throw error;
 	return data as AvailabilityRule;
 }
 
 export async function deleteAvailabilityRule(id: string, tag = getDemoTag()) {
+	assertNotPreview();
 	const { error } = await supabase.from('availability_rules').delete().eq('id', id).eq('tag_bd', tag);
 	if (error) throw error;
 }
 
 export async function getRegisteredClients(professionalId: string, tag = getDemoTag()): Promise<Client[]> {
+	if (isPreviewMode()) return previewClients;
 	const { data, error } = await supabase
 		.from('appointments')
 		.select('clients(id, full_name, phone, avatar_url, created_at, tag_bd)')
@@ -366,6 +394,7 @@ export async function getAllClients(
 	tag = getDemoTag(),
 	extraClients: Client[] = []
 ): Promise<Client[]> {
+	if (isPreviewMode()) return previewClients;
 	const clientsMap = new Map<string, Client>();
 
 	// 1. Clients directly from clients table (filtrés strictement pour cette démo)
@@ -531,6 +560,7 @@ export interface ClientNote {
 }
 
 export async function getClientNote(professionalId: string, clientId: string, tag = getDemoTag()): Promise<ClientNote | null> {
+	if (isPreviewMode()) return null;
 	const { data, error } = await supabase
 		.from('client_notes')
 		.select('*')
@@ -543,6 +573,7 @@ export async function getClientNote(professionalId: string, clientId: string, ta
 }
 
 export async function upsertClientNote(professionalId: string, clientId: string, note: string, tag = getDemoTag()): Promise<ClientNote> {
+	assertNotPreview();
 	const { data, error } = await supabase
 		.from('client_notes')
 		.upsert(
@@ -556,6 +587,7 @@ export async function upsertClientNote(professionalId: string, clientId: string,
 }
 
 export async function getMessages(professionalId: string, clientId: string, tag = getDemoTag()): Promise<Message[]> {
+	if (isPreviewMode()) return previewMessagesFor(clientId);
 	try {
 		const { data, error } = await supabase
 			.from('messages')
@@ -591,6 +623,7 @@ export async function sendMessage(message: {
 	sender: 'professional' | 'client';
 	body: string;
 }, tag = getDemoTag()): Promise<Message> {
+	assertNotPreview();
 	try {
 		const { data, error } = await supabase.from('messages').insert({ ...message, tag_bd: tag }).select().single();
 		if (!error && data) return data as Message;
@@ -615,6 +648,7 @@ export async function sendMessage(message: {
 }
 
 export async function getUnreadMessagesCount(professionalId: string): Promise<Record<string, number>> {
+	if (isPreviewMode()) return {};
 	const counts: Record<string, number> = {};
 
 	try {
@@ -652,6 +686,7 @@ export async function getUnreadMessagesCount(professionalId: string): Promise<Re
 }
 
 export async function markMessagesAsRead(professionalId: string, clientId: string, reader: 'professional' | 'client'): Promise<void> {
+	assertNotPreview();
 	const senderToMark = reader === 'professional' ? 'client' : 'professional';
 	try {
 		await supabase
@@ -683,12 +718,14 @@ export async function markMessagesAsRead(professionalId: string, clientId: strin
 }
 
 export async function updateAppointmentStatus(id: string, status: Appointment['status'], tag = getDemoTag()) {
+	assertNotPreview();
 	const { data, error } = await supabase.from('appointments').update({ status }).eq('id', id).eq('tag_bd', tag).select().single();
 	if (error) throw error;
 	return data as Appointment;
 }
 
 export async function rescheduleAppointment(id: string, startTime: string, endTime: string, tag = getDemoTag()) {
+	assertNotPreview();
 	if (new Date(startTime) <= new Date()) {
 		throw new Error('Impossible de choisir un créneau déjà passé.');
 	}
@@ -723,6 +760,7 @@ export async function enrollClientInDemo(
 	tag = getDemoTag(),
 	metadata?: { full_name?: string | null; email?: string | null; avatar_url?: string | null; phone?: string | null }
 ): Promise<Client> {
+	assertNotPreview();
 	// 1. Récupérer le client existant (si déjà présent en BDD)
 	let existing: Client | null = null;
 	try {
@@ -818,6 +856,7 @@ export async function enrollClientInDemo(
 }
 
 export async function createClient(client: Pick<Client, 'id'> & Partial<Client>, tag = getDemoTag()): Promise<Client> {
+	assertNotPreview();
 	return enrollClientInDemo(client.id, tag, client);
 }
 
@@ -844,6 +883,7 @@ export function saveClientOverride(clientId: string, changes: Partial<Client>): 
 }
 
 export async function updateClient(id: string, changes: Partial<Client>, tag = getDemoTag()): Promise<Client> {
+	assertNotPreview();
 	if (typeof changes.full_name === 'string') changes = { ...changes, full_name: clampName(changes.full_name) };
 	// 1. Sauvegarder immédiatement les surcharges locales pour persistance instantanée
 	saveClientOverride(id, changes);
@@ -919,6 +959,7 @@ export async function updateClient(id: string, changes: Partial<Client>, tag = g
 }
 
 export async function getAppointmentsForClient(clientId: string, tag = getDemoTag()): Promise<(Appointment & { services: { name: string } | null })[]> {
+	if (isPreviewMode()) return previewAppointments.filter((a) => a.client_id === clientId);
 	const { data, error } = await supabase
 		.from('appointments')
 		.select('*, services(name)')

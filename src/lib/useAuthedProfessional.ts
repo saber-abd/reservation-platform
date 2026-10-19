@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getSession } from '@/lib/auth';
 import { getClientById, getProfessionalById, getDemoTag, type Professional } from '@/lib/queries';
 import { loadProContext } from '@/lib/permissions';
+import { isPreviewMode, previewProfessional } from '@/lib/preview';
 
 interface AuthedProfessionalState {
 	loading: boolean;
@@ -25,6 +26,10 @@ export function useAuthedProfessional(): AuthedProfessionalState {
 		let cancelled = false;
 
 		async function load() {
+			if (isPreviewMode()) {
+				if (!cancelled) setState({ loading: false, professional: previewProfessional, error: null });
+				return;
+			}
 			try {
 				const match = typeof window !== 'undefined' ? window.location.pathname.match(/^\/(demo-[^/]+)/) : null;
 				const basePath = match

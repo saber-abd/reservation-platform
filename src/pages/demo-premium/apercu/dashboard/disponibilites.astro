@@ -1,0 +1,11 @@
+---
+import PremiumDashboardLayout from '@/layouts/premium/PremiumDashboardLayout.astro';
+import PremiumDashboardNav from '@/components/premium/dashboard/PremiumDashboardNav';
+import AvailabilitiesPanel from '@/components/premium/dashboard/PremiumAvailabilitiesPanel';
+---
+
+<PremiumDashboardLayout title="Mes disponibilités">
+	<PremiumDashboardNav slot="sidebar" basePath="/demo-premium/apercu" client:load />
+	<AvailabilitiesPanel client:load />
+</PremiumDashboardLayout>
+

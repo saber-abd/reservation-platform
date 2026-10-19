@@ -1,0 +1,11 @@
+---
+import PremiumDashboardLayout from '@/layouts/premium/PremiumDashboardLayout.astro';
+import PremiumDashboardNav from '@/components/premium/dashboard/PremiumDashboardNav';
+import AppointmentsPanel from '@/components/premium/dashboard/PremiumAppointmentsPanel';
+---
+
+<PremiumDashboardLayout title="Rendez-vous">
+	<PremiumDashboardNav slot="sidebar" basePath="/demo-premium/apercu" client:load />
+	<AppointmentsPanel client:load />
+</PremiumDashboardLayout>
+

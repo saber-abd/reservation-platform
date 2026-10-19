@@ -1,0 +1,11 @@
+---
+import PremiumDashboardLayout from '@/layouts/premium/PremiumDashboardLayout.astro';
+import PremiumDashboardNav from '@/components/premium/dashboard/PremiumDashboardNav';
+import PremiumStatsPanel from '@/components/premium/dashboard/PremiumStatsPanel';
+---
+
+<PremiumDashboardLayout title="Statistiques">
+	<PremiumDashboardNav slot="sidebar" basePath="/demo-premium/apercu" client:load />
+	<PremiumStatsPanel client:load />
+</PremiumDashboardLayout>
+

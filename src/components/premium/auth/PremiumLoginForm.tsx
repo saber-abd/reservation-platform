@@ -18,10 +18,6 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-// Compte de démonstration en lecture seule (aucune écriture possible côté base).
-// Ces identifiants sont volontairement publics : ils servent au bouton « Accéder à la démo ».
-const DEMO_EMAIL = 'demo-premium@example.com';
-const DEMO_PASSWORD = 'Demo26!';
 
 const EMPTY_BAN: BanNotice = { reason: null, bannedAt: null, bannedUntil: null };
 
@@ -253,21 +249,6 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 		}
 	}
 
-	async function handleDemoLogin() {
-		setSubmitting(true);
-		setError(null);
-		setBan(null);
-		try {
-			const { user } = await signIn(DEMO_EMAIL, DEMO_PASSWORD);
-			if (!user) throw new Error('Connexion impossible.');
-			await routeUser(user);
-		} catch (err) {
-			setError("Le compte de démonstration est momentanément indisponible. Réessayez plus tard.");
-		} finally {
-			setSubmitting(false);
-		}
-	}
-
 	async function handleResendConfirmation() {
 		if (!unconfirmedEmail) return;
 		setResendStatus(null);
@@ -352,14 +333,12 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 				{submitting ? 'Connexion...' : 'Démarrer'}
 			</button>
 
-			<button
-				type="button"
-				onClick={handleDemoLogin}
-				disabled={submitting}
-				className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm font-bold text-stone-800 transition-colors hover:bg-stone-50 disabled:opacity-50"
+			<a
+				href="/demo-premium/apercu/dashboard"
+				className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-center text-sm font-bold text-stone-800 transition-colors hover:bg-stone-50"
 			>
-				Accéder à la démo (lecture seule)
-			</button>
+				Voir un aperçu du tableau de bord
+			</a>
 
 			<div className="relative my-4 flex items-center py-2">
 				<div className="flex-grow border-t border-stone-200"></div>

@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { getDemoTag } from './queries';
+import { isPreviewMode } from './preview';
 
 export type ProRole = 'admin' | 'employee' | 'demo';
 
@@ -65,6 +66,8 @@ export function getRealProRole(): ProRole | null {
  * "aperçu" (un admin peut prévisualiser la vue employé/démo, jamais l'inverse).
  */
 export function getActiveProRole(): ProRole {
+	// Pages d'aperçu (données fictives) : toujours en lecture seule.
+	if (isPreviewMode()) return 'demo';
 	// Les rôles (admin / employé / démo) n'existent que dans la démo Diamant : les autres démos restent en admin.
 	// Seule exception : un compte « démo » reste en lecture seule dans toutes les démos.
 	if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/demo-diamant')) {

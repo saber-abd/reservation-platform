@@ -19,7 +19,13 @@ export default function PremiumDashboardNav({ basePath = '' }: { basePath?: stri
 		setCurrentPath(window.location.pathname);
 	}, []);
 
+	const isPreview = effectiveBasePath.endsWith('/apercu');
+
 	async function handleSignOut() {
+		if (isPreview) {
+			window.location.href = effectiveBasePath.replace(/\/apercu$/, '') || '/demo-premium';
+			return;
+		}
 		await signOut();
 		window.location.href = effectiveBasePath ? `${effectiveBasePath}/connexion` : '/demo-premium/connexion';
 	}
@@ -51,7 +57,7 @@ export default function PremiumDashboardNav({ basePath = '' }: { basePath?: stri
 					className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-stone-400 hover:bg-stone-900 hover:text-primary transition-colors"
 				>
 					<LogOut size={16} />
-					Se déconnecter
+					{isPreview ? "Quitter l'aperçu" : 'Se déconnecter'}
 				</button>
 			</div>
 		</nav>
