@@ -47,6 +47,7 @@ const basePath = "/demo-standard";
 			import AOS from 'aos';
 
 			AOS.init({
+				disable: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
 				duration: 800,
 				easing: 'ease-out-cubic',
 				once: true,

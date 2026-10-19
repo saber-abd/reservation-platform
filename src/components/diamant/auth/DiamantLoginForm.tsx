@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { resendConfirmationEmail, signIn, getSession, getUser } from '@/lib/auth';
 import { getAccountType, createProfessional, enrollClientInDemo, getDemoTag } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
-import { getBannedClientRecord, checkIsClientBannedInDb, findProAccount, setProSession, setActiveProRole } from '@/lib/permissions';
+import { getBannedClientRecord, checkIsClientBannedInDb, loadProContext } from '@/lib/permissions';
 import { clearRejectedSession, consumeBanErrorFromUrl, fetchBanNotice, isBannedAuthError, takeStoredBanNotice, type BanNotice } from '@/lib/ban';
 import BanNoticeDiamant from '@/components/diamant/auth/DiamantBanNotice';
 import CompleteProfileForm from '@/components/diamant/auth/DiamantCompleteProfileForm';
@@ -127,6 +127,15 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 			} catch (e) {}
 		}
 
+		// Compte professionnel (propriétaire ou collaborateur) : le rôle vient de la base.
+		const proContext = await loadProContext();
+		if (proContext) {
+			window.location.href = proContext.role === 'employee'
+				? `${basePath}/dashboard/disponibilites`
+				: `${basePath}/dashboard`;
+			return;
+		}
+
 		const accountType = await getAccountType(user.id, currentTag);
 		if (accountType === 'professional') {
 			window.location.href = `${basePath}/dashboard`;
@@ -215,36 +224,6 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 		if (preBan) {
 			setBan((await fetchBanNotice(values.email)) ?? toNotice(preBan));
 			setSubmitting(false);
-			return;
-		}
-
-		// Check if credentials match a created Pro/Admin account
-		const proAccount = findProAccount(values.email);
-		if (proAccount) {
-			if (proAccount.password && proAccount.password !== values.password) {
-				setError('Mot de passe incorrect pour ce compte.');
-				setSubmitting(false);
-				return;
-			}
-			if (proAccount.status === 'suspended') {
-				setError("Connexion refusée : votre compte employé est actuellement suspendu par l'administrateur.");
-				setSubmitting(false);
-				return;
-			}
-
-			// Initialiser la session professionnelle
-			setProSession(proAccount);
-			setActiveProRole(proAccount.role);
-
-			// Tenter en arrière-plan une synchronisation Supabase si possible
-			try {
-				await signIn(values.email, values.password).catch(() => null);
-			} catch (e) {}
-
-			const basePath = getEffectiveBasePath();
-			window.location.href = proAccount.role === 'employee'
-				? `${basePath}/dashboard/disponibilites`
-				: `${basePath}/dashboard`;
 			return;
 		}
 

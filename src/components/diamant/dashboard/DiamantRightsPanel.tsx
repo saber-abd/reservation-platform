@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
 	getActiveProRole, 
 	setActiveProRole, 
-	getTeamMembers, 
+	refreshTeamMembers,
+	loadProContext,
 	addTeamMember, 
 	updateTeamMember, 
 	deleteTeamMember, 
@@ -110,7 +111,7 @@ export default function DiamantRightsPanel() {
 	const [newMemberEmail, setNewMemberEmail] = useState('');
 	const [newMemberSpecialty, setNewMemberSpecialty] = useState('');
 	const [newMemberRole, setNewMemberRole] = useState<ProRole>('employee');
-	const [newMemberPassword, setNewMemberPassword] = useState('Pro2026!');
+	const [newMemberPassword, setNewMemberPassword] = useState('');
 	const [showNewPassword, setShowNewPassword] = useState(false);
 
 	// Edit Member Modal State
@@ -178,16 +179,14 @@ export default function DiamantRightsPanel() {
 		setActiveRole(currentRole);
 
 		async function init() {
-			// Comptes locaux affichés tout de suite, sans attendre la réponse de Supabase
-			setMembers(getTeamMembers('eff1f7ef-33ee-49a2-9e4f-52ab675a4dc7'));
 			const tag = getDemoTag();
-			const pro = await getPrimaryProfessional(tag).catch(() => null);
-			const effectiveId = pro?.id || 'eff1f7ef-33ee-49a2-9e4f-52ab675a4dc7';
+			const ctx = await loadProContext();
+			const pro = ctx ? null : await getPrimaryProfessional(tag).catch(() => null);
+			const effectiveId = ctx?.professional_id || pro?.id || 'eff1f7ef-33ee-49a2-9e4f-52ab675a4dc7';
 			setProId(effectiveId);
 
-			// Load team members
-			const m = getTeamMembers(effectiveId);
-			setMembers(m);
+			// Équipe chargée depuis la base (visible par les administrateurs)
+			setMembers(await refreshTeamMembers());
 
 			// Load clients
 			const all = await getAllClients(effectiveId, tag, DEMO_DIAMANT_CLIENTS);
@@ -260,7 +259,7 @@ export default function DiamantRightsPanel() {
 		setEditMemberEmail(member.email);
 		setEditMemberSpecialty(member.specialty || '');
 		setEditMemberRole(member.role);
-		setEditMemberPassword(member.password || '');
+		setEditMemberPassword('');
 		setShowEditPassword(false);
 	}
 
@@ -277,14 +276,14 @@ export default function DiamantRightsPanel() {
 			showToast('Un compte utilise déjà cette adresse email.');
 			return;
 		}
-		if (editMemberPassword && editMemberPassword.length < 6) {
-			showToast("Le mot de passe doit comporter au moins 6 caractères.");
+		if (editMemberPassword && editMemberPassword.length < 8) {
+			showToast("Le mot de passe doit comporter au moins 8 caractères.");
 			return;
 		}
 
 		setIsSavingMember(true);
 		try {
-			const changes: Partial<TeamMember> = {
+			const changes: Partial<TeamMember> & { password?: string } = {
 				name: editMemberName.trim(),
 				email: editMemberEmail.trim(),
 				specialty: editMemberSpecialty.trim(),
@@ -292,17 +291,14 @@ export default function DiamantRightsPanel() {
 				...(editMemberPassword ? { password: editMemberPassword } : {})
 			};
 
-			updateTeamMember(proId, editMemberModal.id, changes);
+			await updateTeamMember(proId, editMemberModal.id, changes);
 
 			// Si le compte modifié est la session active, synchroniser la session locale
 			const currentSession = getProSession();
 			if (currentSession && currentSession.id === editMemberModal.id) {
-				const updatedSession: TeamMember = { ...editMemberModal, ...changes };
-				setProSession(updatedSession);
-				if (editMemberRole !== activeRole) {
-					setActiveProRole(editMemberRole);
-					setActiveRole(editMemberRole);
-				}
+				// Le rôle réel vient de la base : on le recharge au lieu de le forcer côté navigateur.
+				await loadProContext();
+				setActiveRole(getActiveProRole());
 			}
 
 			setEditMemberModal(null);
@@ -382,7 +378,7 @@ export default function DiamantRightsPanel() {
 		window.location.href = '/demo-diamant/inscription';
 	}
 
-	function handleCreateMember(e: React.FormEvent) {
+	async function handleCreateMember(e: React.FormEvent) {
 		e.preventDefault();
 		if (checkReadOnly()) return;
 		if (!newMemberName.trim() || !newMemberEmail.trim()) return;
@@ -390,25 +386,30 @@ export default function DiamantRightsPanel() {
 			showToast('Un compte utilise déjà cette adresse email.');
 			return;
 		}
-		if (!newMemberPassword || newMemberPassword.length < 6) {
-			showToast("Le mot de passe doit comporter au moins 6 caractères.");
+		if (!newMemberPassword || newMemberPassword.length < 8) {
+			showToast("Le mot de passe doit comporter au moins 8 caractères.");
 			return;
 		}
 
-		const created = addTeamMember(proId, {
-			name: newMemberName.trim(),
-			email: newMemberEmail.trim(),
-			role: newMemberRole,
-			specialty: newMemberSpecialty.trim() || (newMemberRole === 'admin' ? 'Co-gérant / Administrateur' : newMemberRole === 'demo' ? 'Compte Visite Démo' : 'Coiffeur(se) Artisan'),
-			status: 'active',
-			password: newMemberPassword
-		});
+		let created: TeamMember;
+		try {
+			created = await addTeamMember(proId, {
+				name: newMemberName.trim(),
+				email: newMemberEmail.trim(),
+				role: newMemberRole,
+				specialty: newMemberSpecialty.trim() || (newMemberRole === 'admin' ? 'Co-gérant / Administrateur' : newMemberRole === 'demo' ? 'Compte Visite Démo' : 'Coiffeur(se) Artisan'),
+				password: newMemberPassword
+			});
+		} catch (err) {
+			showToast(err instanceof Error ? err.message : 'Création du compte impossible.');
+			return;
+		}
 
 		setShowAddModal(false);
 		setNewMemberName('');
 		setNewMemberEmail('');
 		setNewMemberSpecialty('');
-		setNewMemberPassword('Pro2026!');
+		setNewMemberPassword('');
 		setShowNewPassword(false);
 		showToast(
 			created.role === 'admin'
@@ -419,10 +420,15 @@ export default function DiamantRightsPanel() {
 		);
 	}
 
-	function handleToggleMemberStatus(member: TeamMember) {
+	async function handleToggleMemberStatus(member: TeamMember) {
 		if (checkReadOnly()) return;
 		const nextStatus = member.status === 'active' ? 'suspended' : 'active';
-		updateTeamMember(proId, member.id, { status: nextStatus });
+		try {
+			await updateTeamMember(proId, member.id, { status: nextStatus });
+		} catch (err) {
+			showToast(err instanceof Error ? err.message : 'Mise à jour impossible.');
+			return;
+		}
 		showToast(`Statut de ${member.name} mis à jour : ${nextStatus === 'active' ? 'Actif' : 'Suspendu'}.`);
 	}
 
@@ -445,7 +451,12 @@ export default function DiamantRightsPanel() {
 			}
 		}
 
-		await banClient(banModalClient.id, banModalClient.full_name || 'Client', finalReason, resolvedEmail);
+		try {
+			await banClient(banModalClient.id, banModalClient.full_name || 'Client', finalReason, resolvedEmail);
+		} catch (err) {
+			showToast(err instanceof Error ? err.message : 'Bannissement impossible.');
+			return;
+		}
 
 		// Synchroniser l'état local des clients
 		setClients(prev => prev.map(c => c.id === banModalClient.id ? {
@@ -474,7 +485,12 @@ export default function DiamantRightsPanel() {
 
 	async function handleUnban(client: Client) {
 		if (checkReadOnly()) return;
-		await unbanClient(client.id);
+		try {
+			await unbanClient(client.id);
+		} catch (err) {
+			showToast(err instanceof Error ? err.message : 'Action impossible.');
+			return;
+		}
 
 		// Synchroniser l'état local des clients
 		setClients(prev => prev.map(c => c.id === client.id ? {
@@ -498,16 +514,22 @@ export default function DiamantRightsPanel() {
 		if (checkReadOnly()) return;
 		if (!deleteConfirm) return;
 		if (deleteConfirm.type === 'member') {
-			deleteTeamMember(proId, deleteConfirm.id);
-			const currentSession = getProSession();
-			if (currentSession && currentSession.id === deleteConfirm.id) {
-				clearProSession();
-				setActiveProRole('admin');
-				setActiveRole('admin');
+			try {
+				await deleteTeamMember(proId, deleteConfirm.id);
+			} catch (err) {
+				showToast(err instanceof Error ? err.message : 'Suppression impossible.');
+				setDeleteConfirm(null);
+				return;
 			}
 			showToast(`Compte ${deleteConfirm.name} supprimé.`);
 		} else {
-			await deleteClientAccount(deleteConfirm.id);
+			try {
+				await deleteClientAccount(deleteConfirm.id);
+			} catch (err) {
+				showToast(err instanceof Error ? err.message : 'Suppression impossible.');
+				setDeleteConfirm(null);
+				return;
+			}
 			setClients(prev => prev.filter(c => c.id !== deleteConfirm.id));
 			setBannedClients(prev => {
 				const next = { ...prev };
@@ -1212,10 +1234,10 @@ export default function DiamantRightsPanel() {
 									<input id="rights-field-3"
 										type={showNewPassword ? 'text' : 'password'}
 										required
-										minLength={6}
+										minLength={8}
 										value={newMemberPassword}
 										onChange={e => setNewMemberPassword(e.target.value)}
-										placeholder="Minimum 6 caractères"
+										placeholder="Minimum 8 caractères"
 										className="w-full rounded-xl border border-stone-200 bg-stone-50 pl-3.5 pr-11 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
 									/>
 									<button
@@ -1400,7 +1422,7 @@ export default function DiamantRightsPanel() {
 								<div className="relative">
 									<input id="rights-field-7"
 										type={showEditPassword ? 'text' : 'password'}
-										minLength={6}
+										minLength={8}
 										value={editMemberPassword}
 										onChange={e => setEditMemberPassword(e.target.value)}
 										placeholder="Laisser vide pour ne pas modifier"

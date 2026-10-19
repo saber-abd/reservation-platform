@@ -270,7 +270,7 @@ export default function DiamantClientProfile() {
 				<div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-stone-100 pb-4 mb-6 gap-4">
 					<div>
 						<h3 className="text-lg font-bold text-stone-900">Informations Personnelles</h3>
-						<p className="text-xs text-stone-400 mt-0.5">Vos coordonnées réelles utilisées pour vos réservations et rappels SMS.</p>
+						<p className="text-xs text-stone-400 mt-0.5">Vos coordonnées réelles utilisées pour vos réservations et contact par le salon.</p>
 					</div>
 					{successMsg && (
 						<span className="text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-200 animate-in fade-in">

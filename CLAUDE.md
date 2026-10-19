@@ -40,10 +40,10 @@ Pas de lint ni de tests automatisés : `npm run build` est la seule vérificatio
 ## Pièges connus
 
 - **Multi-démo dans une seule base** : les tables portent une colonne `tag_bd` (`standard` / `premium` / `diamant`). `getDemoTag()` la déduit de l'URL `/demo-<x>` et retombe sur `'diamant'` par défaut : toute nouvelle requête doit filtrer sur `tag_bd`.
-- **Rôles Admin / Employé / Démo** : uniquement dans Diamant, stockés en `localStorage` (`pro_active_role`), pas en base. Le rôle Démo est en lecture seule (`isRoleReadOnly`).
+- **Rôles Admin / Employé / Démo** : uniquement dans Diamant, stockés en base (table `team_members`, migration 0013). Le rôle réel vient de la fonction SQL `my_pro_context()` ; `localStorage` ne sert qu'à l'affichage (aperçu d'un rôle inférieur). Les droits sont appliqués par la RLS. Les comptes collaborateurs se créent via `/api/team` (clé `SUPABASE_SERVICE_ROLE_KEY`, serveur uniquement).
 - Clés `localStorage` et événements `window` de Standard et Premium préfixés par la démo (`standard_…`, `premium_…`) : garder ce préfixe.
 - **Diamant, échelle `deep-teal` inversée** dans `diamant.css` (100 = foncé, 900 = clair, pas de 50) : dans le dashboard, préférer les jetons sémantiques (`bg-secondary`, `text-primary`, `border-border`).
-- Les migrations récentes (`0010`, `0011`) doivent être appliquées sur Supabase, sinon le code utilise un repli.
+- Les migrations récentes (`0010` à `0013`) doivent être appliquées sur Supabase. `0012` (sécurité : RLS, fonctions admin) et `0013` (équipe) sont indispensables : sans elles, la connexion pro et la gestion des droits ne fonctionnent pas.
 - Performance : le site tourne sur des machines modestes. Éviter d'ajouter des animations lourdes (framer-motion, AOS, WebGL/3D) ou de grosses dépendances client ; préférer `client:visible` ou `client:idle` à `client:load` quand l’îlot n’est pas visible au chargement.
 - `components.json` pointe vers `src/styles/global.css`, qui n'existe pas : ajuster le chemin avant un `npx shadcn add`.
 - Scripts racine `seed_loyalty.js` (importe `dotenv`, absent des dépendances) et `update_images.js` : utilitaires ponctuels qui lisent `.env`.

@@ -29,7 +29,7 @@ const LOYALTY_BADGES: LoyaltyBadge[] = [
 	{
 		id: 'welcome',
 		title: 'Membre Privilège Diamant',
-		description: 'Accès exclusif à la réservation prioritaire en ligne et rappels SMS automatisés.',
+		description: 'Accès exclusif à la réservation prioritaire en ligne (rappels automatiques à venir).',
 		requiredPoints: 0,
 		requiredVisits: 0,
 		icon: Sparkles,

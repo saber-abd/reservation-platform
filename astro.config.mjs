@@ -22,7 +22,10 @@ export default defineConfig({
       filter: (page) =>
         !page.includes('/dashboard') &&
         !page.includes('/connexion') &&
-        !page.includes('/inscription'),
+        !page.includes('/inscription') &&
+        !page.includes('/espace-client') &&
+        !page.includes('/mot-de-passe-oublie') &&
+        !page.includes('/reinitialiser-mot-de-passe'),
     }),
   ],
   adapter: cloudflare({

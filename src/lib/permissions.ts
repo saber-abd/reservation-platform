@@ -11,7 +11,6 @@ export interface TeamMember {
 	specialty?: string;
 	status: 'active' | 'suspended';
 	created_at: string;
-	password?: string;
 }
 
 export interface BannedClientRecord {
@@ -22,15 +21,54 @@ export interface BannedClientRecord {
 	bannedAt: string;
 }
 
-const DEFAULT_TEAM_MEMBERS: TeamMember[] = [];
+export interface ProContext {
+	role: ProRole;
+	owner: boolean;
+	professional_id: string;
+	name: string;
+	email: string;
+	tag_bd?: string;
+	specialty?: string;
+	member_id?: string;
+}
 
+const RANK: Record<ProRole, number> = { demo: 0, employee: 1, admin: 2 };
+const SERVER_ROLE_KEY = 'pro_server_role';
+const SESSION_KEY = 'diamant_pro_user';
+
+function isRole(v: unknown): v is ProRole {
+	return v === 'admin' || v === 'employee' || v === 'demo';
+}
+
+/**
+ * Rôle réel de l'utilisateur, tel que renvoyé par la base à la connexion (cache de session).
+ * ATTENTION : ceci ne sert qu'à l'affichage de l'interface. Les droits réels sont
+ * appliqués par la base (RLS + fonctions SECURITY DEFINER) : modifier ce cache ne donne aucun accès.
+ */
+function getServerRole(): ProRole | null {
+	if (typeof window === 'undefined') return null;
+	try {
+		const v = sessionStorage.getItem(SERVER_ROLE_KEY);
+		return isRole(v) ? v : null;
+	} catch (e) {
+		return null;
+	}
+}
+
+/**
+ * Rôle effectif pour l'interface : le rôle serveur, éventuellement abaissé par un mode
+ * "aperçu" (un admin peut prévisualiser la vue employé/démo, jamais l'inverse).
+ */
 export function getActiveProRole(): ProRole {
-	if (typeof window === 'undefined') return 'admin';
 	// Les rôles (admin / employé / démo) n'existent que dans la démo Diamant : les autres démos restent en admin.
-	if (!window.location.pathname.startsWith('/demo-diamant')) return 'admin';
-	const saved = localStorage.getItem('pro_active_role');
-	if (saved === 'employee' || saved === 'admin' || saved === 'demo') return saved;
-	return 'admin';
+	if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/demo-diamant')) return 'admin';
+	const server = getServerRole();
+	if (!server) return 'demo';
+	try {
+		const preview = localStorage.getItem('pro_active_role');
+		if (isRole(preview) && RANK[preview] < RANK[server]) return preview;
+	} catch (e) {}
+	return server;
 }
 
 export function isRoleReadOnly(role?: ProRole): boolean {
@@ -38,84 +76,65 @@ export function isRoleReadOnly(role?: ProRole): boolean {
 	return current === 'demo';
 }
 
+/** Change le mode d'aperçu de l'interface (n'élève jamais les droits réels). */
 export function setActiveProRole(role: ProRole): void {
 	if (typeof window === 'undefined') return;
-	localStorage.setItem('pro_active_role', role);
-	window.dispatchEvent(new CustomEvent('pro:role-changed', { detail: { role } }));
+	try {
+		localStorage.setItem('pro_active_role', role);
+	} catch (e) {}
+	window.dispatchEvent(new CustomEvent('pro:role-changed', { detail: { role: getActiveProRole() } }));
 }
 
 /**
- * Enregistre ou met à jour un compte pro dans le registre global de la démo
+ * Charge le contexte professionnel depuis la base pour la session Supabase courante.
+ * Renvoie null si l'utilisateur n'est ni propriétaire ni collaborateur actif.
  */
-export function saveProAccount(member: TeamMember): void {
-	if (typeof window === 'undefined') return;
+export async function loadProContext(): Promise<ProContext | null> {
 	try {
-		const raw = localStorage.getItem('diamant_pro_accounts') || '[]';
-		const list: TeamMember[] = JSON.parse(raw);
-		const idx = list.findIndex(m => m.email.toLowerCase().trim() === member.email.toLowerCase().trim());
-		if (idx >= 0) {
-			list[idx] = { ...list[idx], ...member };
-		} else {
-			list.push(member);
+		const { data, error } = await supabase.rpc('my_pro_context');
+		if (error || !data || !isRole((data as any).role)) {
+			clearProSession();
+			return null;
 		}
-		localStorage.setItem('diamant_pro_accounts', JSON.stringify(list));
-	} catch (e) {}
-}
-
-/**
- * Recherche un compte pro (collaborateur ou admin) par son adresse email
- */
-export function findProAccount(email: string): TeamMember | null {
-	if (typeof window === 'undefined' || !email) return null;
-	const cleanEmail = email.toLowerCase().trim();
-
-	// 1. Recherche dans le registre global des comptes créés
-	try {
-		const raw = localStorage.getItem('diamant_pro_accounts');
-		if (raw) {
-			const list: TeamMember[] = JSON.parse(raw);
-			const found = list.find(m => m.email && m.email.toLowerCase().trim() === cleanEmail);
-			if (found) return found;
-		}
-	} catch (e) {}
-
-	// 2. Recherche dans toutes les clés diamant_team_members_* du localStorage
-	try {
-		for (let i = 0; i < localStorage.length; i++) {
-			const key = localStorage.key(i);
-			if (key && key.startsWith('diamant_team_members_')) {
-				const raw = localStorage.getItem(key);
-				if (raw) {
-					const list: TeamMember[] = JSON.parse(raw);
-					if (Array.isArray(list)) {
-						const found = list.find(m => m.email && m.email.toLowerCase().trim() === cleanEmail);
-						if (found) return found;
-					}
-				}
+		const ctx = data as ProContext;
+		const previousRole = getServerRole();
+		if (typeof window !== 'undefined') {
+			sessionStorage.setItem(SERVER_ROLE_KEY, ctx.role);
+			if (previousRole !== ctx.role) {
+				// Les composants déjà montés (navigation, garde) se mettent à jour.
+				window.dispatchEvent(new CustomEvent('pro:role-changed', { detail: { role: getActiveProRole() } }));
 			}
 		}
-	} catch (e) {}
-
-	return null;
+		setProSession({
+			id: ctx.member_id || ctx.professional_id,
+			name: ctx.name,
+			email: ctx.email,
+			role: ctx.role,
+			specialty: ctx.specialty,
+		});
+		return ctx;
+	} catch (e) {
+		return null;
+	}
 }
 
-export function setProSession(member: TeamMember): void {
+export function setProSession(member: { id: string; name: string; email: string; role: ProRole; specialty?: string }): void {
 	if (typeof window === 'undefined') return;
-	localStorage.setItem('diamant_pro_user', JSON.stringify({
-		id: member.id,
-		name: member.name,
-		email: member.email,
-		role: member.role,
-		specialty: member.specialty
-	}));
-	localStorage.setItem('diamant_client_email', member.email);
-	setActiveProRole(member.role);
+	try {
+		sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+			id: member.id,
+			name: member.name,
+			email: member.email,
+			role: member.role,
+			specialty: member.specialty
+		}));
+	} catch (e) {}
 }
 
 export function getProSession(): { id: string; name: string; email: string; role: ProRole; specialty?: string } | null {
 	if (typeof window === 'undefined') return null;
 	try {
-		const raw = localStorage.getItem('diamant_pro_user');
+		const raw = sessionStorage.getItem(SESSION_KEY);
 		if (raw) return JSON.parse(raw);
 	} catch (e) {}
 	return null;
@@ -123,81 +142,108 @@ export function getProSession(): { id: string; name: string; email: string; role
 
 export function clearProSession(): void {
 	if (typeof window === 'undefined') return;
-	localStorage.removeItem('diamant_pro_user');
-	localStorage.removeItem('pro_active_role');
-	localStorage.removeItem('diamant_client_email');
-}
-
-export function getTeamMembers(proId: string): TeamMember[] {
-	if (typeof window === 'undefined') return DEFAULT_TEAM_MEMBERS;
 	try {
-		const key = `diamant_team_members_${proId}`;
-		const saved = localStorage.getItem(key);
-		if (saved) {
-			const parsed = JSON.parse(saved);
-			if (Array.isArray(parsed)) {
-				// Purger les anciens comptes fictifs de démonstration
-				const legacyMockIds = ['member-owner-1', 'member-emp-1', 'member-emp-2', 'member-emp-3'];
-				const cleaned = parsed.filter(m => !legacyMockIds.includes(m.id));
-				if (cleaned.length !== parsed.length) {
-					localStorage.setItem(key, JSON.stringify(cleaned));
-				}
-				return cleaned;
-			}
+		sessionStorage.removeItem(SESSION_KEY);
+		sessionStorage.removeItem(SERVER_ROLE_KEY);
+		localStorage.removeItem('pro_active_role');
+		// Anciennes clés (versions précédentes qui stockaient comptes et mots de passe en local)
+		localStorage.removeItem('diamant_pro_user');
+		localStorage.removeItem('diamant_pro_accounts');
+		for (let i = localStorage.length - 1; i >= 0; i--) {
+			const key = localStorage.key(i);
+			if (key && key.startsWith('diamant_team_members_')) localStorage.removeItem(key);
 		}
-		return DEFAULT_TEAM_MEMBERS;
-	} catch (e) {
-		return DEFAULT_TEAM_MEMBERS;
+	} catch (e) {}
+}
+
+// ---------------------------------------------------------------------------
+// Équipe : stockée en base (table team_members), gérée via la route serveur /api/team
+// ---------------------------------------------------------------------------
+let teamCache: TeamMember[] = [];
+
+function emitTeam(): void {
+	if (typeof window !== 'undefined') {
+		window.dispatchEvent(new CustomEvent('diamant:team-updated', { detail: { members: teamCache } }));
 	}
 }
 
-export function addTeamMember(proId: string, member: Omit<TeamMember, 'id' | 'created_at'>): TeamMember {
-	const current = getTeamMembers(proId);
-	const newMember: TeamMember = {
-		...member,
-		id: 'emp-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-		created_at: new Date().toISOString()
+function rowToMember(r: any): TeamMember {
+	return {
+		id: r.id,
+		name: r.name,
+		email: r.email,
+		role: r.role,
+		specialty: r.specialty || undefined,
+		status: r.status,
+		created_at: r.created_at,
 	};
-	const updated = [...current, newMember];
-	if (typeof window !== 'undefined') {
-		localStorage.setItem(`diamant_team_members_${proId}`, JSON.stringify(updated));
-		saveProAccount(newMember);
-		window.dispatchEvent(new CustomEvent('diamant:team-updated', { detail: { members: updated } }));
-	}
-	return newMember;
 }
 
-export function updateTeamMember(proId: string, id: string, changes: Partial<TeamMember>): void {
-	const current = getTeamMembers(proId);
-	const updated = current.map(m => m.id === id ? { ...m, ...changes } : m);
-	if (typeof window !== 'undefined') {
-		localStorage.setItem(`diamant_team_members_${proId}`, JSON.stringify(updated));
-		const modified = updated.find(m => m.id === id);
-		if (modified) saveProAccount(modified);
-		window.dispatchEvent(new CustomEvent('diamant:team-updated', { detail: { members: updated } }));
-	}
+/** Membres déjà chargés (synchrone). Appelez refreshTeamMembers() pour les rafraîchir. */
+export function getTeamMembers(_proId?: string): TeamMember[] {
+	return teamCache;
 }
 
-export function deleteTeamMember(proId: string, id: string): void {
-	const current = getTeamMembers(proId);
-	const toDelete = current.find(m => m.id === id);
-	const updated = current.filter(m => m.id !== id);
-	if (typeof window !== 'undefined') {
-		localStorage.setItem(`diamant_team_members_${proId}`, JSON.stringify(updated));
-		if (toDelete?.email) {
-			try {
-				const raw = localStorage.getItem('diamant_pro_accounts');
-				if (raw) {
-					const list: TeamMember[] = JSON.parse(raw);
-					const filtered = list.filter(m => m.email.toLowerCase().trim() !== toDelete.email.toLowerCase().trim());
-					localStorage.setItem('diamant_pro_accounts', JSON.stringify(filtered));
-				}
-			} catch (e) {}
-		}
-		window.dispatchEvent(new CustomEvent('diamant:team-updated', { detail: { members: updated } }));
+export async function refreshTeamMembers(): Promise<TeamMember[]> {
+	const { data, error } = await supabase
+		.from('team_members')
+		.select('id, name, email, role, specialty, status, created_at')
+		.order('created_at', { ascending: true });
+	if (error) {
+		console.warn('Chargement équipe:', error.message);
+		return teamCache;
 	}
+	teamCache = (data || []).map(rowToMember);
+	emitTeam();
+	return teamCache;
 }
 
+async function callTeamApi(payload: Record<string, unknown>): Promise<any> {
+	const { data: sessionData } = await supabase.auth.getSession();
+	const token = sessionData.session?.access_token;
+	if (!token) throw new Error('Session expirée, reconnectez-vous.');
+	const res = await fetch('/api/team', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+		body: JSON.stringify(payload),
+	});
+	const body = await res.json().catch(() => ({}));
+	if (!res.ok) throw new Error(body.error || 'Opération impossible.');
+	return body;
+}
+
+export async function addTeamMember(
+	_proId: string,
+	member: Pick<TeamMember, 'name' | 'email' | 'role' | 'specialty'> & { password: string }
+): Promise<TeamMember> {
+	const { member: row } = await callTeamApi({ action: 'create', ...member });
+	const created = rowToMember(row);
+	teamCache = [...teamCache, created];
+	emitTeam();
+	return created;
+}
+
+export async function updateTeamMember(
+	_proId: string,
+	id: string,
+	changes: Partial<TeamMember> & { password?: string }
+): Promise<void> {
+	const { member: row } = await callTeamApi({ action: 'update', id, changes });
+	const updated = rowToMember(row);
+	teamCache = teamCache.map((m) => (m.id === id ? updated : m));
+	emitTeam();
+}
+
+export async function deleteTeamMember(_proId: string, id: string): Promise<void> {
+	await callTeamApi({ action: 'delete', id });
+	teamCache = teamCache.filter((m) => m.id !== id);
+	emitTeam();
+}
+
+// ---------------------------------------------------------------------------
+// Bannissement : l'autorité est la base (colonne clients.is_banned + auth.users.banned_until).
+// Le cache local ci-dessous n'est qu'un confort d'affichage.
+// ---------------------------------------------------------------------------
 export function getBannedClients(): Record<string, BannedClientRecord> {
 	if (typeof window === 'undefined') return {};
 	try {
@@ -217,8 +263,8 @@ export function getBannedClients(): Record<string, BannedClientRecord> {
 }
 
 export function getBannedClientRecord(
-	clientId?: string | null, 
-	clientEmail?: string | null, 
+	clientId?: string | null,
+	clientEmail?: string | null,
 	clientName?: string | null
 ): BannedClientRecord | null {
 	const banned = getBannedClients();
@@ -270,25 +316,33 @@ export function isClientBanned(clientId?: string | null, clientEmail?: string | 
 	return getBannedClientRecord(clientId, clientEmail, clientName) !== null;
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
- * Vérifie en temps réel dans la base de données Supabase si un client est banni (par ID ou email)
+ * Vérifie dans la base si un client est banni (par ID ou email).
+ * Les règles d'accès (RLS) limitent la lecture : un visiteur non connecté ne voit rien.
+ * Pour un compte banni, la connexion elle-même est refusée par Supabase (banned_until).
  */
 export async function checkIsClientBannedInDb(
-	userId?: string | null, 
+	userId?: string | null,
 	userEmail?: string | null
 ): Promise<{ isBanned: boolean; reason: string | null } | null> {
 	if (!userId && !userEmail) return null;
 
 	try {
 		let query = supabase.from('clients').select('id, email, is_banned, ban, ban_reason');
-		const cleanEmail = userEmail ? userEmail.toLowerCase().trim() : null;
+		const validId = userId && UUID_RE.test(userId) ? userId : null;
+		// Neutralise les caractères de syntaxe du filtre PostgREST
+		const cleanEmail = userEmail ? userEmail.toLowerCase().trim().replace(/[,()"\\*]/g, '') : null;
 
-		if (userId && cleanEmail) {
-			query = query.or(`id.eq.${userId},email.eq.${cleanEmail}`);
-		} else if (userId) {
-			query = query.eq('id', userId);
+		if (validId && cleanEmail) {
+			query = query.or(`id.eq.${validId},email.eq.${cleanEmail}`);
+		} else if (validId) {
+			query = query.eq('id', validId);
 		} else if (cleanEmail) {
 			query = query.eq('email', cleanEmail);
+		} else {
+			return null;
 		}
 
 		const { data, error } = await query;
@@ -308,58 +362,41 @@ export async function checkIsClientBannedInDb(
 	return null;
 }
 
+function persistBannedCache(banned: Record<string, BannedClientRecord>): void {
+	const serialized = JSON.stringify(banned);
+	localStorage.setItem('diamant_banned_clients', serialized);
+	document.cookie = `diamant_banned_clients=${encodeURIComponent(serialized)}; path=/; max-age=31536000; SameSite=Lax`;
+}
+
 /**
- * Bannit un client : applique la sanction en base de données (public.clients + auth.users) et en local
+ * Bannit un client via la fonction serveur ban_user_by_admin (réservée aux admins).
+ * Lève une erreur si la base refuse l'action.
  */
 export async function banClient(
-	clientId: string, 
-	clientName: string, 
-	reason: string, 
+	clientId: string,
+	clientName: string,
+	reason: string,
 	clientEmail?: string | null
 ): Promise<void> {
 	const finalReason = reason.trim() || 'Absences non prévenues ou non-respect des conditions du salon';
 
-	// 1. Tenter l'appel RPC de bannissement sécurisé (met à jour clients + verrouille auth.users)
-	try {
-		await supabase.rpc('ban_user_by_admin', {
-			target_user_id: clientId,
-			reason: finalReason
-		});
-	} catch (e) {
-		console.warn('RPC ban_user_by_admin:', e);
+	const { error } = await supabase.rpc('ban_user_by_admin', {
+		target_user_id: clientId,
+		reason: finalReason
+	});
+	if (error) {
+		throw new Error("Action refusée : seuls les administrateurs de l'établissement peuvent bannir un client.");
 	}
 
-	// 2. Mise à jour directe de la table public.clients en BD
-	try {
-		await supabase
-			.from('clients')
-			.update({
-				is_banned: true,
-				ban: 'oui',
-				ban_reason: finalReason,
-				banned_at: new Date().toISOString()
-			})
-			.eq('id', clientId);
-	} catch (e) {
-		console.warn('Direct clients table ban update:', e);
-	}
-
-	// 3. Mise à jour du cache local pour réactivité instantanée
+	// Cache local pour la réactivité de l'interface
 	if (typeof window !== 'undefined') {
 		const banned = getBannedClients();
 
-		// Tenter de résoudre l'email si absent
 		let resolvedEmail = clientEmail ? clientEmail.toLowerCase().trim() : null;
 		if (!resolvedEmail) {
 			try {
 				const emailsMap = JSON.parse(localStorage.getItem('diamant_client_emails') || '{}');
 				if (emailsMap[clientId]) resolvedEmail = emailsMap[clientId].toLowerCase().trim();
-			} catch (e) {}
-		}
-		if (!resolvedEmail) {
-			try {
-				const overrides = JSON.parse(localStorage.getItem('diamant_clients_overrides') || '{}');
-				if (overrides[clientId]?.email) resolvedEmail = overrides[clientId].email.toLowerCase().trim();
 			} catch (e) {}
 		}
 
@@ -372,42 +409,22 @@ export async function banClient(
 		};
 
 		banned[clientId] = record;
-		const serialized = JSON.stringify(banned);
-		localStorage.setItem('diamant_banned_clients', serialized);
-		document.cookie = `diamant_banned_clients=${encodeURIComponent(serialized)}; path=/; max-age=31536000; SameSite=Lax`;
+		persistBannedCache(banned);
 		window.dispatchEvent(new CustomEvent('diamant:client-banned', { detail: { clientId, reason: finalReason, record } }));
 	}
 }
 
 /**
- * Lève le bannissement d'un client en base de données et en local
+ * Lève le bannissement d'un client via la fonction serveur unban_user_by_admin.
  */
 export async function unbanClient(clientId: string): Promise<void> {
-	// 1. Tenter le déverrouillage via RPC
-	try {
-		await supabase.rpc('unban_user_by_admin', {
-			target_user_id: clientId
-		});
-	} catch (e) {
-		console.warn('RPC unban_user_by_admin:', e);
+	const { error } = await supabase.rpc('unban_user_by_admin', {
+		target_user_id: clientId
+	});
+	if (error) {
+		throw new Error("Action refusée : seuls les administrateurs de l'établissement peuvent lever un bannissement.");
 	}
 
-	// 2. Mise à jour directe de la table public.clients en BD
-	try {
-		await supabase
-			.from('clients')
-			.update({
-				is_banned: false,
-				ban: 'non',
-				ban_reason: null,
-				banned_at: null
-			})
-			.eq('id', clientId);
-	} catch (e) {
-		console.warn('Direct clients table unban update:', e);
-	}
-
-	// 3. Mise à jour du cache local
 	if (typeof window !== 'undefined') {
 		const banned = getBannedClients();
 		let modified = false;
@@ -425,51 +442,29 @@ export async function unbanClient(clientId: string): Promise<void> {
 		}
 
 		if (modified) {
-			const serialized = JSON.stringify(banned);
-			localStorage.setItem('diamant_banned_clients', serialized);
-			document.cookie = `diamant_banned_clients=${encodeURIComponent(serialized)}; path=/; max-age=31536000; SameSite=Lax`;
+			persistBannedCache(banned);
 			window.dispatchEvent(new CustomEvent('diamant:client-unbanned', { detail: { clientId } }));
 		}
 	}
 }
 
 /**
- * Supprime définitivement un compte client en base de données (cascade tables + auth.users)
+ * Supprime définitivement un compte client (cascade tables + auth.users) via delete_user_by_admin.
  */
 export async function deleteClientAccount(clientId: string): Promise<void> {
-	// 1. Suppression complète via fonction RPC sécurisée (supprime dans public.* ET dans auth.users)
-	let rpcSuccess = false;
-	try {
-		const { data, error } = await supabase.rpc('delete_user_by_admin', { target_user_id: clientId });
-		if (!error && data === true) {
-			rpcSuccess = true;
-		}
-	} catch (e) {
-		console.warn('RPC delete_user_by_admin error:', e);
+	const { data, error } = await supabase.rpc('delete_user_by_admin', { target_user_id: clientId });
+	if (error || data !== true) {
+		throw new Error("Action refusée : seuls les administrateurs de l'établissement peuvent supprimer un compte client.");
 	}
 
-	// 2. Si le RPC n'est pas encore actif, suppression directe des tables en BD
-	if (!rpcSuccess) {
-		try {
-			await supabase.from('appointments').delete().eq('client_id', clientId);
-		} catch (e) {}
-		try {
-			await supabase.from('messages').delete().eq('client_id', clientId);
-		} catch (e) {}
-		try {
-			await supabase.from('client_notes').delete().eq('client_id', clientId);
-		} catch (e) {}
-		try {
-			await supabase.from('clients').delete().eq('id', clientId);
-		} catch (e) {
-			console.warn('Could not delete client from clients table:', e);
-		}
-	}
-
-	// 3. Nettoyer les caches locaux et bannissements
+	// Nettoyer les caches locaux
 	if (typeof window !== 'undefined') {
 		try {
-			await unbanClient(clientId);
+			const banned = getBannedClients();
+			if (banned[clientId]) {
+				delete banned[clientId];
+				persistBannedCache(banned);
+			}
 			const metaRaw = localStorage.getItem('diamant_conversations_meta');
 			if (metaRaw) {
 				const meta = JSON.parse(metaRaw);
@@ -487,18 +482,14 @@ export async function deleteClientAccount(clientId: string): Promise<void> {
 	}
 }
 
-
 /**
- * Vérifie si une route donnée est accessible pour un rôle donné
+ * Vérifie si une route donnée est accessible pour un rôle donné (affichage de l'interface).
+ * Les données elles-mêmes sont protégées par la base, pas par cette fonction.
  */
 export function isTabAllowedForRole(pathname: string, role: ProRole): boolean {
 	if (role === 'admin' || role === 'demo') return true; // Le rôle Démo a accès à tous les onglets en consultation complète
 
-	// Pour l'employé, seuls ces 4 onglets sont autorisés :
-	// - Planning & RDV (/dashboard/disponibilites)
-	// - Clientèle (/dashboard/clients)
-	// - Messagerie (/dashboard/messages)
-	// - Recherche (/dashboard/recherche)
+	// Pour l'employé, seuls ces onglets sont autorisés :
 	const allowedPaths = [
 		'/dashboard/disponibilites',
 		'/dashboard/clients',

@@ -2,10 +2,12 @@
 import DashboardLayout from '@/layouts/standard/StandardDashboardLayout.astro';
 import ClientNav from '@/components/standard/client/StandardClientNav';
 import ClientProfilePanel from '@/components/standard/client/StandardClientProfilePanel';
+import AccountPrivacyActions from '@/components/shared/AccountPrivacyActions';
 ---
 
 <DashboardLayout title="Mon profil">
 	<ClientNav basePath="/demo-standard" client:load />
 	<ClientProfilePanel client:load />
+	<AccountPrivacyActions basePath="/demo-standard" client:idle />
 </DashboardLayout>
 

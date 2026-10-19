@@ -2,8 +2,49 @@ import type { APIRoute } from 'astro';
 import { SignJWT, importPKCS8 } from 'jose';
 import { getServerEnv } from '@/lib/server/env';
 
-export const POST: APIRoute = async ({ request, cookies }) => {
+const jsonResponse = (body: unknown, status: number) =>
+	new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
+
+// Limite par IP (par instance Worker) en plus du cookie ci-dessous, qu'un client peut supprimer.
+// Une vraie limite globale se règle dans Cloudflare : Security > WAF > Rate limiting rules.
+const WINDOW_MS = 10 * 60_000;
+const MAX_PER_WINDOW = 6;
+const hits = new Map<string, number[]>();
+
+function rateLimited(ip: string): boolean {
+	const now = Date.now();
+	const recent = (hits.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
+	recent.push(now);
+	hits.set(ip, recent);
+	if (hits.size > 5000) hits.clear();
+	return recent.length > MAX_PER_WINDOW;
+}
+
+function validEvent(b: any): boolean {
+	if (!b || typeof b !== 'object') return false;
+	if (typeof b.title !== 'string' || !b.title.trim() || b.title.length > 200) return false;
+	if (b.description !== undefined && (typeof b.description !== 'string' || b.description.length > 2000)) return false;
+	const start = typeof b.start_time === 'string' ? new Date(b.start_time) : null;
+	const end = typeof b.end_time === 'string' ? new Date(b.end_time) : null;
+	if (!start || !end || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return false;
+	const now = Date.now();
+	if (end <= start || end.getTime() - start.getTime() > 8 * 3600_000) return false;
+	// Entre hier et dans un an
+	return start.getTime() > now - 24 * 3600_000 && start.getTime() < now + 366 * 24 * 3600_000;
+}
+
+export const POST: APIRoute = async ({ request, cookies, clientAddress }) => {
 	try {
+		// Même origine uniquement
+		const origin = request.headers.get('origin');
+		if (!origin || new URL(origin).host !== new URL(request.url).host) {
+			return jsonResponse({ error: 'Forbidden' }, 403);
+		}
+		const ip = request.headers.get('cf-connecting-ip') || clientAddress || 'unknown';
+		if (rateLimited(ip)) {
+			return jsonResponse({ error: 'Trop de requêtes, réessayez dans quelques minutes.' }, 429);
+		}
+
 		// --- Rate Limiting Logic ---
 		const historyCookie = cookies.get('calendar_sync_history');
 		let history: number[] = [];
@@ -49,6 +90,9 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 		// ---------------------------
 
 		const body = await request.json();
+		if (!validEvent(body)) {
+			return jsonResponse({ error: 'Données de réservation invalides.' }, 400);
+		}
 		const { title, description, start_time, end_time } = body;
 
 		const clientEmail = getServerEnv('GOOGLE_SERVICE_ACCOUNT_EMAIL');
@@ -91,7 +135,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
 		const tokenData = await tokenResponse.json();
 		if (!tokenResponse.ok) {
-			throw new Error(`Erreur d'authentification Google: ${JSON.stringify(tokenData)}`);
+			console.error('Erreur authentification Google:', tokenResponse.status, JSON.stringify(tokenData));
+			throw new Error('calendar_auth');
 		}
 
 		const accessToken = tokenData.access_token;
@@ -119,16 +164,17 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
 		const eventData = await eventResponse.json();
 		if (!eventResponse.ok) {
-			throw new Error(`Erreur Google Calendar: ${JSON.stringify(eventData)}`);
+			console.error('Erreur Google Calendar:', eventResponse.status, JSON.stringify(eventData));
+			throw new Error('calendar_event');
 		}
 
-		return new Response(JSON.stringify({ success: true, event: eventData }), {
+		return new Response(JSON.stringify({ success: true, id: eventData.id }), {
 			status: 200,
 			headers: { 'Content-Type': 'application/json' },
 		});
 	} catch (error) {
 		console.error('Erreur intégration Calendar:', error);
-		return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Erreur inconnue' }), {
+		return new Response(JSON.stringify({ error: 'Synchronisation du calendrier impossible, réessayez plus tard.' }), {
 			status: 500,
 			headers: { 'Content-Type': 'application/json' },
 		});

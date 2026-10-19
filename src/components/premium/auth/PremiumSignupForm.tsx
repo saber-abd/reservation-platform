@@ -32,6 +32,7 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 	const [resendStatus, setResendStatus] = useState<string | null>(null);
 	const [pendingUser, setPendingUser] = useState<any | null>(null);
 	const [showCompletion, setShowCompletion] = useState(false);
+	const [acceptedTerms, setAcceptedTerms] = useState(false);
 
 	const {
 		register,
@@ -157,7 +158,9 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 			const metadata = {
 				account_role: 'client',
 				full_name: values.fullName,
-				demo_tag: currentTag
+				demo_tag: currentTag,
+				terms_accepted_at: new Date().toISOString(),
+				terms_version: '2026-10'
 			};
 			
 			const { error: updateError } = await supabase.auth.updateUser({ data: metadata });
@@ -177,6 +180,10 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 	}
 
 	async function onSubmit(values: FormValues) {
+		if (!acceptedTerms) {
+			setError("Vous devez accepter les conditions d'utilisation et la politique de confidentialité.");
+			return;
+		}
 		if (existingUser) {
 			return onFinishProfile(values);
 		}
@@ -382,6 +389,26 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 			
 			{error && <p className="text-sm text-destructive">{error}</p>}
 			
+			<label className="flex items-start gap-2 text-xs text-stone-500">
+				<input
+					type="checkbox"
+					checked={acceptedTerms}
+					onChange={(e) => setAcceptedTerms(e.target.checked)}
+					className="mt-0.5"
+				/>
+				<span>
+					J'ai lu et j'accepte les{' '}
+					<a href={`${getEffectiveBasePath()}/conditions-utilisation`} className="underline" target="_blank" rel="noopener">
+						conditions d'utilisation
+					</a>{' '}
+					et la{' '}
+					<a href={`${getEffectiveBasePath()}/politique-de-confidentialite`} className="underline" target="_blank" rel="noopener">
+						politique de confidentialité
+					</a>
+					.
+				</span>
+			</label>
+
 			<button
 				type="submit"
 				disabled={submitting}

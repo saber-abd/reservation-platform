@@ -52,6 +52,7 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 		const onMsgUpdate = () => checkUnread();
 		const onRoleChange = (e: any) => {
 			if (e.detail?.role) setRole(e.detail.role);
+			setProUser(getProSession());
 		};
 
 		window.addEventListener('diamant:new-message', onMsgUpdate);

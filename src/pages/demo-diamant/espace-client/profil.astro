@@ -2,6 +2,7 @@
 import DiamantDashboardLayout from '@/layouts/diamant/DiamantDashboardLayout.astro';
 import DiamantClientNav from '@/components/diamant/dashboard/DiamantClientNav';
 import DiamantClientProfile from '@/components/diamant/dashboard/DiamantClientProfile';
+import AccountPrivacyActions from '@/components/shared/AccountPrivacyActions';
 ---
 
 <DiamantDashboardLayout title="Mon Profil">
@@ -14,4 +15,5 @@ import DiamantClientProfile from '@/components/diamant/dashboard/DiamantClientPr
 
 	<DiamantClientProfile client:load />
 
+	<AccountPrivacyActions basePath="/demo-diamant" client:idle />
 </DiamantDashboardLayout>

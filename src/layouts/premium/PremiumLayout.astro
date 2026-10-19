@@ -46,10 +46,10 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 			import AOS from 'aos';
 
 			AOS.init({
+				disable: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
 				duration: 600,
 				easing: 'ease-out',
-				once: false,
-				mirror: true,
+				once: true,
 				offset: 80,
 			});
 		</script>

@@ -2,5 +2,20 @@ User-agent: *
 Disallow: /dashboard
 Disallow: /connexion
 Disallow: /inscription
+Disallow: /mot-de-passe-oublie
+Disallow: /reinitialiser-mot-de-passe
+Disallow: /api/
+Disallow: /demo-standard/dashboard
+Disallow: /demo-standard/espace-client
+Disallow: /demo-standard/connexion
+Disallow: /demo-standard/inscription
+Disallow: /demo-premium/dashboard
+Disallow: /demo-premium/espace-client
+Disallow: /demo-premium/connexion
+Disallow: /demo-premium/inscription
+Disallow: /demo-diamant/dashboard
+Disallow: /demo-diamant/espace-client
+Disallow: /demo-diamant/connexion
+Disallow: /demo-diamant/inscription
 
 Sitemap: https://reservation-platform.demonstration-pro.workers.dev/sitemap-index.xml

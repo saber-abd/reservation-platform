@@ -1,15 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getSession } from '@/lib/auth';
-import { getClientById, getProfessionalByUserId, getPrimaryProfessional, getDemoTag, type Professional } from '@/lib/queries';
-import { getProSession, getActiveProRole } from '@/lib/permissions';
-
-// Identité de repli quand la base n'a pas encore de fiche pro pour la démo.
-const FALLBACK_IDENTITY: Record<string, { business_name: string; email: string }> = {
-	diamant: { business_name: 'Maison Prestige Diamant', email: 'contact@diamant-prestige.fr' },
-	premium: { business_name: 'Premium Auto', email: 'contact@premium-auto.fr' },
-	standard: { business_name: 'TechDom', email: 'contact@techdom-reparation.fr' },
-};
-const fallbackIdentity = (tag: string) => FALLBACK_IDENTITY[tag] ?? FALLBACK_IDENTITY.diamant;
+import { getClientById, getProfessionalById, getDemoTag, type Professional } from '@/lib/queries';
+import { loadProContext } from '@/lib/permissions';
 
 interface AuthedProfessionalState {
 	loading: boolean;
@@ -18,8 +10,9 @@ interface AuthedProfessionalState {
 }
 
 /**
- * Hook partagé par les panneaux du dashboard : vérifie la session Supabase ou pro démo,
- * charge le professionnel lié, et redirige vers /connexion si non authentifié.
+ * Hook partagé par les panneaux du dashboard : exige une session Supabase, charge le rôle
+ * (propriétaire ou collaborateur) depuis la base, puis l'établissement correspondant.
+ * Sans session ou sans rôle professionnel, redirige vers la connexion / l'espace client.
  */
 export function useAuthedProfessional(): AuthedProfessionalState {
 	const [state, setState] = useState<AuthedProfessionalState>({
@@ -34,68 +27,30 @@ export function useAuthedProfessional(): AuthedProfessionalState {
 		async function load() {
 			try {
 				const match = typeof window !== 'undefined' ? window.location.pathname.match(/^\/(demo-[^/]+)/) : null;
-				const basePath = match ? `/${match[1]}` : (typeof window !== 'undefined' ? (sessionStorage.getItem('oauth_demo_redirect') || localStorage.getItem('preferred_demo') || '/demo-premium') : '/demo-premium');
+				const basePath = match
+					? `/${match[1]}`
+					: (typeof window !== 'undefined'
+						? (sessionStorage.getItem('oauth_demo_redirect') || localStorage.getItem('preferred_demo') || '/demo-premium')
+						: '/demo-premium');
 				const tag = getDemoTag();
 
-				// 1. Si une session pro locale/démo est active (ex: compte créé via gestion des droits)
-				const proSession = getProSession();
-				if (proSession) {
-					const pro = await getPrimaryProfessional(tag).catch(() => null);
-					const effectivePro: Professional = pro || {
-						id: 'eff1f7ef-33ee-49a2-9e4f-52ab675a4dc7',
-						user_id: proSession.id,
-						business_name: fallbackIdentity(tag).business_name,
-						email: proSession.email,
-						tag_bd: tag,
-						created_at: new Date().toISOString()
-					};
-					if (!cancelled) setState({ loading: false, professional: effectivePro, error: null });
-					return;
-				}
-
-				// 2. Si on est dans une démo et qu'un rôle pro (admin, employee, demo) est actif
-				const activeRole = getActiveProRole();
-				if (match && activeRole) {
-					const pro = await getPrimaryProfessional(tag).catch(() => null);
-					const effectivePro: Professional = pro || {
-						id: 'eff1f7ef-33ee-49a2-9e4f-52ab675a4dc7',
-						user_id: 'demo-pro-user',
-						...fallbackIdentity(tag),
-						tag_bd: tag,
-						created_at: new Date().toISOString()
-					};
-					if (!cancelled) setState({ loading: false, professional: effectivePro, error: null });
-					return;
-				}
-
-				// 3. Vérification session Supabase standard
 				const session = await getSession().catch(() => null);
 				if (!session) {
-					// Si on est dans un environnement démo (/demo-*), on ne bloque pas avec une redirection brutale
-					if (match) {
-						const fallbackPro: Professional = {
-							id: 'eff1f7ef-33ee-49a2-9e4f-52ab675a4dc7',
-							user_id: 'demo-pro-user',
-							...fallbackIdentity(tag),
-							tag_bd: tag,
-							created_at: new Date().toISOString()
-						};
-						if (!cancelled) setState({ loading: false, professional: fallbackPro, error: null });
-						return;
-					}
 					window.location.href = `${basePath}/connexion`;
 					return;
 				}
 
-				let professional = await getProfessionalByUserId(session.user.id, tag).catch(() => null);
-				if (!professional) {
-					professional = await getPrimaryProfessional(tag).catch(() => null);
-				}
-
-				if (!professional) {
-					// Compte client connecté sur l'espace pro : renvoyer vers son propre espace, pas vers l'inscription.
+				const ctx = await loadProContext();
+				if (!ctx) {
+					// Compte client connecté sur l'espace pro : renvoyer vers son propre espace.
 					const client = await getClientById(session.user.id, tag).catch(() => null);
 					window.location.href = client ? `${basePath}/espace-client` : `${basePath}/inscription`;
+					return;
+				}
+
+				const professional = await getProfessionalById(ctx.professional_id, ctx.tag_bd || tag).catch(() => null);
+				if (!professional) {
+					if (!cancelled) setState({ loading: false, professional: null, error: 'Établissement introuvable.' });
 					return;
 				}
 

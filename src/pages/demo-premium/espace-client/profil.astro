@@ -2,10 +2,12 @@
 import PremiumDashboardLayout from '@/layouts/premium/PremiumDashboardLayout.astro';
 import PremiumClientNav from '@/components/premium/client/PremiumClientNav';
 import ClientProfilePanel from '@/components/premium/client/PremiumClientProfilePanel';
+import AccountPrivacyActions from '@/components/shared/AccountPrivacyActions';
 ---
 
 <PremiumDashboardLayout title="Mon profil">
 	<PremiumClientNav slot="sidebar" basePath="/demo-premium" client:load />
 	<ClientProfilePanel client:load />
+	<AccountPrivacyActions basePath="/demo-premium" client:idle />
 </PremiumDashboardLayout>
 

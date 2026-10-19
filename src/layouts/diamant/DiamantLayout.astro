@@ -64,6 +64,7 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 
 			function initAnimations() {
 				AOS.init({
+				disable: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
 					duration: 700,
 					easing: 'ease-out-cubic',
 					once: true,
