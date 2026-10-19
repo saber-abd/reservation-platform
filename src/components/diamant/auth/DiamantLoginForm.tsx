@@ -18,6 +18,11 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+// Compte de démonstration en lecture seule (rôle « demo » en base : aucune écriture possible).
+// Ces identifiants sont volontairement publics : ils servent au bouton « Accéder à la démo ».
+const DEMO_EMAIL = 'demo@example.com';
+const DEMO_PASSWORD = 'Demo26!';
+
 const EMPTY_BAN: BanNotice = { reason: null, bannedAt: null, bannedUntil: null };
 
 function toNotice(ban: { reason: string; bannedAt: string }): BanNotice {
@@ -248,6 +253,21 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 		}
 	}
 
+	async function handleDemoLogin() {
+		setSubmitting(true);
+		setError(null);
+		setBan(null);
+		try {
+			const { user } = await signIn(DEMO_EMAIL, DEMO_PASSWORD);
+			if (!user) throw new Error('Connexion impossible.');
+			await routeUser(user);
+		} catch (err) {
+			setError("Le compte de démonstration est momentanément indisponible. Réessayez plus tard.");
+		} finally {
+			setSubmitting(false);
+		}
+	}
+
 	async function handleResendConfirmation() {
 		if (!unconfirmedEmail) return;
 		setResendStatus(null);
@@ -330,6 +350,15 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 				className="rounded-xl bg-primary px-4 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-[0_0_15px_rgba(255,50,50,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(255,50,50,0.6)] active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
 			>
 				{submitting ? 'Connexion...' : 'Démarrer'}
+			</button>
+
+			<button
+				type="button"
+				onClick={handleDemoLogin}
+				disabled={submitting}
+				className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm font-bold text-stone-800 transition-colors hover:bg-stone-50 disabled:opacity-50"
+			>
+				Accéder à la démo (lecture seule)
 			</button>
 
 			<div className="relative my-4 flex items-center py-2">
