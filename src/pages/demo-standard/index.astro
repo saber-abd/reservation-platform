@@ -1,186 +1,257 @@
 ---
 import StandardLayout from '@/layouts/standard/StandardLayout.astro';
 import Map from '@/components/standard/StandardMap.astro';
-import TestimonialsCarousel from '@/components/standard/StandardTestimonialsCarousel';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname);
+const { business, services, testimonials } = siteConfig;
 
-const servicesPreview = [
+const formatDuration = (min: number) =>
+	min < 60 ? `${min} min` : min % 60 === 0 ? `${min / 60} h` : `${Math.floor(min / 60)} h ${min % 60}`;
+
+const diagnostic = services.find((s) => /diagnostic/i.test(s.name));
+const phoneHref = `tel:${business.phone.replace(/\s+/g, '')}`;
+
+// Familles d'appareils pris en charge (texte d'habillage).
+const domaines = [
 	{
-		title: 'Smartphones & Tablettes',
-		icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-smartphone"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>',
-		desc: 'Changement d\'écran, remplacement de batterie, réparation connecteur de charge.',
+		title: 'Ordinateurs, PC et Mac',
+		pannes: "Ne démarre plus, rame, écran noir, virus, disque plein. Remplacement du disque par un SSD, ajout de mémoire, réinstallation du système avec récupération des fichiers.",
 	},
 	{
-		title: 'Ordinateurs (PC & Mac)',
-		icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-laptop"><path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/></svg>',
-		desc: 'Diagnostic, nettoyage virus, réinstallation système, augmentation RAM/SSD.',
+		title: 'Smartphones et tablettes',
+		pannes: "Écran fissuré, batterie qui tient une demi-journée, prise de charge qui ne tient plus le câble. La plupart des pièces se changent en une heure.",
 	},
 	{
-		title: 'Télévisions & Périphériques',
-		icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-monitor"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>',
-		desc: 'Remplacement de dalles TV, configuration d\'imprimantes et réseaux Wi-Fi.',
-	}
+		title: 'Télévisions, imprimantes, Wi-Fi',
+		pannes: "Dalle rayée ou sans image, imprimante qui n'apparaît plus sur le réseau, box mal placée. Réglage sur place, chez vous, sur vos propres appareils.",
+	},
 ];
+
+const appareils = ['PC portable', 'PC fixe', 'Mac', 'Smartphone', 'Tablette', 'Téléviseur', 'Imprimante', 'Box et Wi-Fi', 'Disque dur', 'Écran'];
+
+const etapes = [
+	{
+		title: 'Vous choisissez un créneau en ligne',
+		text: "Le calendrier affiche les créneaux encore libres. Vous indiquez l'appareil et ce qui ne va pas, la confirmation arrive par email.",
+	},
+	{
+		title: 'Diagnostic et devis, sur place',
+		text: "Le technicien cherche la panne devant vous, chez vous ou à l'atelier. Il annonce le prix avant de toucher à quoi que ce soit : vous acceptez ou non.",
+	},
+	{
+		title: 'Réparation, puis un an de garantie',
+		text: "La pièce est changée, l'appareil testé avec vous. Si la même panne revient dans l'année, la reprise est à nos frais.",
+	},
+];
+
+const [avisPrincipal, ...autresAvis] = testimonials;
 ---
 
 <StandardLayout>
-	<!-- Hero Section -->
-	<section class="relative mx-auto flex min-h-[85vh] flex-col justify-center px-6 py-24 md:py-32 overflow-hidden">
-		<!-- Tech Background Image -->
-		<div class="absolute inset-0 z-[-2]">
-			<img src="https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?q=75&w=1600&auto=format&fit=crop" alt="Composants électroniques" class="h-full w-full object-cover object-center grayscale-[0.3]" />
-		</div>
-		<!-- Overlay Gradient -->
-		<div class="absolute inset-0 z-[-1] bg-gradient-to-r from-slate-900/95 via-slate-900/80 to-transparent"></div>
-
-		<div class="max-w-7xl mx-auto w-full">
-			<div class="max-w-2xl" data-aos="fade-right">
-				<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 text-sm font-semibold uppercase tracking-wider mb-6">
-					<span class="relative flex h-2 w-2">
-					  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-					  <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-					</span>
-					{siteConfig.business.activity}
-				</div>
-				<h1 class="text-4xl font-black tracking-tight text-white md:text-6xl/tight mb-6">
-					Vos problèmes informatiques résolus, <span class="text-blue-500">directement chez vous.</span>
-				</h1>
-				<p class="text-lg text-slate-300 mb-8 leading-relaxed">
-					{siteConfig.business.description}
+	<!-- Héros : titre à gauche, photo d'atelier à droite -->
+	<section class="st-container pb-14 pt-10 md:pb-20 md:pt-16">
+		<div class="grid items-start gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+			<div data-reveal-group>
+				<p class="st-note mb-5 text-ink-soft">
+					{business.activity} à domicile et en atelier, Paris 11<sup>e</sup>
 				</p>
-				<div class="flex flex-col sm:flex-row gap-4">
-					<a
-						href="/demo-standard/reservation"
-						class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-blue-600/30 transition-all hover:bg-blue-500 hover:-translate-y-1"
-					>
+				<h1 class="st-h1">
+					Ordinateur ou téléphone en panne&nbsp;? On vient le réparer <span class="st-accent">chez vous.</span>
+				</h1>
+				<p class="st-lead mt-6 max-w-[50ch]">
+					{diagnostic && <>Diagnostic à <span class="st-num">{diagnostic.price}&nbsp;€</span>, prix</>}
+					{!diagnostic && <>Prix</>} annoncé avant toute réparation, passage sous 24 à 48&nbsp;heures.
+					Vous choisissez le créneau dans l'agenda, le technicien se déplace avec ses outils et ses pièces.
+				</p>
+				<div class="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
+					<a href="/demo-standard/reservation" class="st-btn">
 						Réserver une intervention
+						<svg class="st-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
 					</a>
-					<a
-						href="/demo-standard/services"
-						class="inline-flex items-center justify-center rounded-xl bg-white/10 px-8 py-4 text-base font-bold text-white backdrop-blur-md border border-white/20 transition-all hover:bg-white/20"
-					>
-						Voir nos tarifs
-					</a>
+					<a href="/demo-standard/services" class="st-link st-link--on font-semibold text-ink">Voir les tarifs</a>
 				</div>
+
+				<dl class="st-facts mt-12">
+					<div>
+						<dt>Horaires</dt>
+						<dd class="st-num">
+							{business.openingHours.map((slot) => (
+								<span class="block">{slot.day.replace(' - ', ' – ')}&nbsp;: {slot.hours.replace(' - ', ' – ')}</span>
+							))}
+						</dd>
+					</div>
+					<div>
+						<dt>Zone d'intervention</dt>
+						<dd>Paris et 20&nbsp;km autour, déplacement offert</dd>
+					</div>
+					<div>
+						<dt>Atelier</dt>
+						<dd>{business.address}</dd>
+					</div>
+				</dl>
+			</div>
+
+			<figure class="lg:pt-2">
+				<div class="st-frame aspect-[4/3] lg:aspect-[5/6]" data-reveal="fade" data-clip>
+					<picture>
+						<source
+							type="image/avif"
+							srcset="/images/standard/atelier-carte-mere-700.avif 700w, /images/standard/atelier-carte-mere-1100.avif 1100w, /images/standard/atelier-carte-mere-1600.avif 1600w"
+							sizes="(min-width: 1024px) 42vw, 100vw"
+						/>
+						<img
+							src="/images/standard/atelier-carte-mere-1100.webp"
+							srcset="/images/standard/atelier-carte-mere-700.webp 700w, /images/standard/atelier-carte-mere-1100.webp 1100w, /images/standard/atelier-carte-mere-1600.webp 1600w"
+							sizes="(min-width: 1024px) 42vw, 100vw"
+							width="1600"
+							height="1143"
+							alt="Deux mains démontent au tournevis le radiateur d'une carte mère d'ordinateur"
+							fetchpriority="high"
+							decoding="async"
+						/>
+					</picture>
+				</div>
+				<figcaption class="st-caption">
+					<span>À l'atelier : démontage d'un radiateur de carte mère.</span>
+					<span class="st-num shrink-0">Fig. 1</span>
+				</figcaption>
+			</figure>
+		</div>
+	</section>
+
+	<!-- Bandeau défilant : appareils pris en charge -->
+	<div class="marquee st-marquee" aria-label="Appareils réparés">
+		<div class="marquee-track">
+			<ul>
+				{appareils.map((a) => <li>{a}</li>)}
+			</ul>
+			<ul aria-hidden="true">
+				{appareils.map((a) => <li>{a}</li>)}
+			</ul>
+		</div>
+	</div>
+
+	<!-- Repères chiffrés -->
+	<section class="st-container pt-14 md:pt-20" aria-label="Repères">
+		<dl class="st-figures" data-reveal-group>
+			{diagnostic && (
+				<div class="flex flex-col-reverse gap-2">
+					<dt class="st-note">le diagnostic complet, en {formatDuration(diagnostic.durationMinutes)}</dt>
+					<dd class="st-figure-value st-num"><span data-count={diagnostic.price}>{diagnostic.price}</span><small>€</small></dd>
+				</div>
+			)}
+			<div class="flex flex-col-reverse gap-2">
+				<dt class="st-note">de délai au plus avant le passage du technicien</dt>
+				<dd class="st-figure-value st-num"><span data-count="48">48</span><small>h</small></dd>
+			</div>
+			<div class="flex flex-col-reverse gap-2">
+				<dt class="st-note">autour de l'atelier sans frais de déplacement</dt>
+				<dd class="st-figure-value st-num"><span data-count="20">20</span><small>km</small></dd>
+			</div>
+			<div class="flex flex-col-reverse gap-2">
+				<dt class="st-note">de garantie sur les réparations matérielles</dt>
+				<dd class="st-figure-value st-num"><span data-count="12">12</span><small>mois</small></dd>
+			</div>
+		</dl>
+	</section>
+
+	<!-- Ce qu'on répare -->
+	<section class="st-container st-section">
+		<div class="grid gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+			<div class="lg:sticky lg:top-24 lg:self-start">
+				<h2 class="st-h2" data-reveal>Ce qu'on répare, et ce qui casse le plus souvent</h2>
+				<figure class="mt-8 hidden lg:block">
+					<div class="st-frame aspect-[3/2]" data-reveal="fade" data-clip>
+						<picture>
+							<source
+								type="image/avif"
+								srcset="/images/standard/reparation-smartphone-480.avif 480w, /images/standard/reparation-smartphone-800.avif 800w, /images/standard/reparation-smartphone-1280.avif 1280w"
+								sizes="(min-width: 1024px) 34vw, 100vw"
+							/>
+							<img
+								src="/images/standard/reparation-smartphone-800.webp"
+								srcset="/images/standard/reparation-smartphone-480.webp 480w, /images/standard/reparation-smartphone-800.webp 800w, /images/standard/reparation-smartphone-1280.webp 1280w"
+								sizes="(min-width: 1024px) 34vw, 100vw"
+								width="1280"
+								height="853"
+								alt="Un smartphone ouvert sur un tapis de réparation, entouré de pinces et de petits outils"
+								loading="lazy"
+								decoding="async"
+							/>
+						</picture>
+					</div>
+					<figcaption class="st-caption">
+						<span>Changement de batterie sur un smartphone.</span>
+						<span class="st-num shrink-0">Fig. 2</span>
+					</figcaption>
+				</figure>
+			</div>
+
+			<div>
+				<ol class="st-rows" data-reveal-group>
+					{domaines.map((d, i) => (
+						<li class="st-row st-row--two">
+							<span class="st-row-index st-num" aria-hidden="true">0{i + 1}</span>
+							<div>
+								<h3 class="st-h3 md:text-2xl">{d.title}</h3>
+								<p class="mt-2.5 max-w-[56ch] leading-relaxed text-ink-soft">{d.pannes}</p>
+							</div>
+						</li>
+					))}
+				</ol>
+				<p class="mt-8 text-ink-soft" data-reveal>
+					Votre appareil n'est pas dans la liste&nbsp;?
+					<a href="/demo-standard/contact" class="st-link st-link--on font-semibold text-ink">Décrivez la panne</a>, la réponse arrive dans la journée.
+				</p>
 			</div>
 		</div>
 	</section>
 
-	<!-- Process / Comment ça marche -->
-	<section class="py-24 bg-white">
-		<div class="max-w-7xl mx-auto px-6">
-			<div class="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up">
-				<h2 class="text-3xl font-bold text-slate-900 md:text-4xl mb-4">Un dépannage simple et rapide</h2>
-				<p class="text-slate-500 text-lg">Ne vous déplacez plus, notre technicien s'occupe de tout.</p>
-			</div>
-			
-			<div class="grid md:grid-cols-3 gap-8 relative">
-				<!-- Connecting line (desktop only) -->
-				<div class="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-slate-100 -z-10"></div>
-				
-				<div class="bg-slate-50 border border-slate-100 rounded-2xl p-8 text-center relative z-10 transition-transform hover:-translate-y-2 duration-300 shadow-sm hover:shadow-xl" data-aos="fade-up" data-aos-delay="0">
-					<div class="w-20 h-20 mx-auto bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
-						<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-check-2"><path d="M8 2v4"/><path d="M16 2v4"/><path d="M21 14V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/><path d="M3 10h18"/><path d="m16 20 2 2 4-4"/></svg>
-					</div>
-					<h3 class="text-xl font-bold text-slate-900 mb-3">1. Prise de RDV en ligne</h3>
-					<p class="text-slate-600">Choisissez votre créneau horaire et décrivez votre problème en quelques clics via notre plateforme sécurisée.</p>
-				</div>
-				
-				<div class="bg-slate-50 border border-slate-100 rounded-2xl p-8 text-center relative z-10 transition-transform hover:-translate-y-2 duration-300 shadow-sm hover:shadow-xl" data-aos="fade-up" data-aos-delay="100">
-					<div class="w-20 h-20 mx-auto bg-blue-600 text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-600/30">
-						<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wrench"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-					</div>
-					<h3 class="text-xl font-bold text-slate-900 mb-3">2. Diagnostic et Devis</h3>
-					<p class="text-slate-600">Notre technicien évalue la panne sur place. Un devis transparent et gratuit vous est proposé avant toute intervention.</p>
-				</div>
-				
-				<div class="bg-slate-50 border border-slate-100 rounded-2xl p-8 text-center relative z-10 transition-transform hover:-translate-y-2 duration-300 shadow-sm hover:shadow-xl" data-aos="fade-up" data-aos-delay="200">
-					<div class="w-20 h-20 mx-auto bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
-						<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
-					</div>
-					<h3 class="text-xl font-bold text-slate-900 mb-3">3. Appareil Réparé</h3>
-					<p class="text-slate-600">L'intervention est réalisée rapidement avec des pièces certifiées. Le matériel réparé est garanti 1 an.</p>
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<!-- Domaines d'intervention -->
-	<section class="bg-slate-50 py-24 border-y border-slate-200">
-		<div class="max-w-7xl mx-auto px-6">
-			<div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6" data-aos="fade-up">
-				<div class="max-w-2xl">
-					<h2 class="text-3xl font-bold text-slate-900 md:text-4xl mb-4">Nos domaines d'intervention</h2>
-					<p class="text-slate-500 text-lg">Des professionnels équipés pour résoudre les pannes de n'importe quel appareil high-tech.</p>
-				</div>
-				<a href="/demo-standard/services" class="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700">
-					Voir la grille tarifaire complète
-					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-				</a>
-			</div>
-			
-			<div class="grid md:grid-cols-3 gap-6">
-				{servicesPreview.map((service, index) => (
-					<div class="group rounded-2xl bg-white border border-slate-200 p-8 shadow-sm transition-all hover:shadow-xl hover:border-blue-200 cursor-pointer" data-aos="fade-up" data-aos-delay={index * 100}>
-						<div class="w-14 h-14 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-600 group-hover:bg-blue-600 group-hover:text-white transition-colors mb-6" set:html={service.icon}></div>
-						<h3 class="text-xl font-bold text-slate-900 mb-3">{service.title}</h3>
-						<p class="text-slate-600 leading-relaxed">{service.desc}</p>
-					</div>
-				))}
-			</div>
-		</div>
-	</section>
-
-	<!-- Grille de prix populaire (Highlight) -->
-	<section class="py-24 bg-white">
-		<div class="max-w-7xl mx-auto px-6">
-			<div class="grid lg:grid-cols-2 gap-16 items-center">
-				<div data-aos="fade-right">
-					<h2 class="text-3xl font-bold text-slate-900 md:text-4xl mb-6">Des tarifs clairs, <br/>sans surprise.</h2>
-					<p class="text-slate-600 text-lg mb-8 leading-relaxed">
-						La transparence est au cœur de notre service. Pour les pannes courantes, nos forfaits incluent le diagnostic, la main d'œuvre et la pièce. Pour les cas plus complexes, un devis vous est systématiquement proposé.
+	<!-- Carte des prix -->
+	<section class="st-rule-top bg-surface">
+		<div class="st-container st-section">
+			<div class="grid gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+				<div data-reveal-group>
+					<h2 class="st-h2">Les prix, avant de prendre rendez-vous</h2>
+					<p class="st-lead mt-5 max-w-[42ch]">
+						Les pannes courantes sont au forfait : diagnostic, main-d'œuvre et pièce compris.
+						Pour le reste, un devis écrit est remis sur place et rien n'est facturé si vous le refusez.
 					</p>
-					<ul class="space-y-4 mb-10">
-						<li class="flex items-center gap-3 text-slate-700 font-medium">
-							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
-							Déplacement offert dans un rayon de 20km
-						</li>
-						<li class="flex items-center gap-3 text-slate-700 font-medium">
-							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
-							Devis gratuit sur place
-						</li>
-						<li class="flex items-center gap-3 text-slate-700 font-medium">
-							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
-							Garantie 1 an sur les réparations matérielles
-						</li>
+					<ul class="mt-8 max-w-md border-t border-rule">
+						<li class="flex justify-between gap-4 border-b border-rule py-3"><span class="text-ink-soft">Déplacement jusqu'à 20&nbsp;km</span><span class="font-semibold">Offert</span></li>
+						<li class="flex justify-between gap-4 border-b border-rule py-3"><span class="text-ink-soft">Devis sur place</span><span class="font-semibold">Gratuit</span></li>
+						<li class="flex justify-between gap-4 border-b border-rule py-3"><span class="text-ink-soft">Garantie pièces et main-d'œuvre</span><span class="st-num font-semibold">1 an</span></li>
 					</ul>
 				</div>
-				
-				<div class="bg-slate-900 rounded-3xl p-8 md:p-10 shadow-2xl relative overflow-hidden" data-aos="fade-left">
-					<div class="absolute top-0 right-0 p-32 bg-blue-500/20 blur-[100px] rounded-full pointer-events-none"></div>
-					<h3 class="text-xl font-bold text-white mb-8 relative z-10">Interventions Fréquentes</h3>
-					
-					<div class="space-y-6 relative z-10">
-						{siteConfig.services.slice(0, 4).map((service) => (
-							<div class="flex items-center justify-between border-b border-slate-800 pb-4 last:border-0 last:pb-0">
-								<div>
-									<p class="font-semibold text-white">{service.name}</p>
-									<p class="text-sm text-slate-400 mt-1">{service.description.substring(0, 50)}...</p>
+
+				<div data-reveal>
+					<div class="st-prices" role="table" aria-label="Tarifs des interventions les plus demandées">
+						<div class="st-prices-head" role="row">
+							<span role="columnheader">Intervention</span>
+							<span role="columnheader">Durée</span>
+							<span role="columnheader">Prix</span>
+						</div>
+						{services.slice(0, 5).map((service) => (
+							<div class="st-price" role="row">
+								<div class="st-price-main" role="cell">
+									<p class="st-price-name">{service.name}</p>
+									<p class="st-price-desc">{service.description}</p>
 								</div>
-								<div class="text-right ml-4">
-									<p class="font-bold text-lg text-blue-400 whitespace-nowrap">
-										{service.price > 0 ? `${service.price} €` : 'Sur devis'}
-									</p>
-								</div>
+								<p class="st-price-time st-num" role="cell">{formatDuration(service.durationMinutes)}</p>
+								{service.price > 0
+									? <p class="st-price-amount st-num" role="cell">{service.price}&nbsp;€</p>
+									: <p class="st-price-amount" data-devis role="cell">Sur devis</p>}
 							</div>
 						))}
 					</div>
-					
-					<div class="mt-10 relative z-10">
-						<a href="/demo-standard/reservation" class="block w-full py-4 text-center rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-colors shadow-lg shadow-blue-600/20">
-							Réserver ce tarif
+					<div class="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
+						<a href="/demo-standard/reservation" class="st-btn">
+							Réserver à ce tarif
+							<svg class="st-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
+						</a>
+						<a href="/demo-standard/services" class="st-link st-link--on font-semibold text-ink">
+							Toute la grille (<span class="st-num">{services.length}</span> interventions)
 						</a>
 					</div>
 				</div>
@@ -188,48 +259,101 @@ const servicesPreview = [
 		</div>
 	</section>
 
-	<!-- Avis clients -->
-	<section class="bg-slate-50 py-24 border-y border-slate-200">
-		<div class="max-w-7xl mx-auto px-6">
-			<div class="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up">
-				<h2 class="text-3xl font-bold text-slate-900 md:text-4xl mb-4">Ils nous ont fait confiance</h2>
-				<p class="text-slate-500 text-lg">Retrouvez les avis de nos clients sur nos interventions.</p>
-			</div>
-			<div data-aos="fade-up" class="pb-10">
-				<!-- Using existing TestimonialsCarousel but wrapping to fit standard layout -->
-				<TestimonialsCarousel client:visible testimonials={siteConfig.testimonials} />
+	<!-- Comment ça se passe : liste numérotée, trait qui se remplit au défilement -->
+	<section class="st-rule-top">
+		<div class="st-container st-section">
+			<div class="grid gap-x-14 gap-y-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+				<div class="lg:sticky lg:top-24 lg:self-start" data-reveal>
+					<h2 class="st-h2">Comment ça se passe, du clic à l'appareil réparé</h2>
+					<p class="st-lead mt-5 max-w-[40ch]">Trois étapes, et vous savez le prix avant la deuxième.</p>
+				</div>
+				<ol class="st-steps">
+					<li class="st-steps-line" aria-hidden="true" role="presentation"></li>
+					{etapes.map((e, i) => (
+						<li class="st-step" data-reveal>
+							<span class="st-step-num st-num" data-n={i + 1} aria-hidden="true">{i + 1}</span>
+							<h3 class="st-h3 md:text-[1.6rem]">{e.title}</h3>
+							<p class="mt-3 max-w-[52ch] leading-relaxed text-ink-soft">{e.text}</p>
+						</li>
+					))}
+				</ol>
 			</div>
 		</div>
 	</section>
 
-	<!-- CTA final -->
-	<section class="mx-auto max-w-5xl px-6 py-24">
-		<div class="rounded-3xl bg-blue-600 p-10 md:p-16 text-center shadow-2xl relative overflow-hidden" data-aos="zoom-in">
-			<!-- Abstract decorative shapes -->
-			<div class="absolute -top-24 -left-24 w-64 h-64 bg-blue-500 rounded-full mix-blend-screen opacity-50 blur-3xl"></div>
-			<div class="absolute -bottom-24 -right-24 w-80 h-80 bg-cyan-400 rounded-full mix-blend-screen opacity-30 blur-3xl"></div>
-			
-			<div class="relative z-10">
-				<h2 class="text-3xl font-black text-white md:text-5xl mb-6">Besoin d'un dépannage urgent ?</h2>
-				<p class="text-blue-100 text-lg md:text-xl max-w-2xl mx-auto mb-10">
-					Nos techniciens sont disponibles 6j/7. Planifiez votre intervention dès maintenant via notre calendrier en ligne.
-				</p>
-				<div class="flex flex-col sm:flex-row justify-center gap-4">
-					<a
-						href="/demo-standard/reservation"
-						class="inline-flex items-center justify-center rounded-xl bg-white px-8 py-4 text-lg font-bold text-blue-700 shadow-xl hover:bg-slate-50 hover:-translate-y-1 transition-all"
-					>
-						Voir les disponibilités
-					</a>
-					<a
-						href="/demo-standard/contact"
-						class="inline-flex items-center justify-center rounded-xl bg-blue-700/50 backdrop-blur border border-blue-500/50 px-8 py-4 text-lg font-bold text-white shadow-xl hover:bg-blue-700 hover:-translate-y-1 transition-all"
-					>
-						Nous contacter
-					</a>
+	<!-- Avis -->
+	<section class="st-rule-top bg-surface">
+		<div class="st-container st-section">
+			<h2 class="st-h2 max-w-[18ch]" data-reveal>Ce qu'en disent les clients dépannés</h2>
+			{avisPrincipal && (
+				<figure class="st-quote st-quote--lead mt-10" data-reveal>
+					<blockquote class="max-w-[30ch] md:max-w-[34ch]">«&nbsp;{avisPrincipal.comment}&nbsp;»</blockquote>
+					<figcaption class="flex items-center gap-4 text-sm">
+						<span class="font-semibold text-ink">{avisPrincipal.name}</span>
+						<span class="st-rating" role="img" aria-label={`Note : ${avisPrincipal.rating} sur 5`}>
+							{[1, 2, 3, 4, 5].map((n) => <i data-on={n <= avisPrincipal.rating ? '' : undefined}></i>)}
+						</span>
+					</figcaption>
+				</figure>
+			)}
+			<div class="grid gap-x-10 md:grid-cols-3" data-reveal-group>
+				{autresAvis.map((avis) => (
+					<figure class="st-quote">
+						<blockquote>«&nbsp;{avis.comment}&nbsp;»</blockquote>
+						<figcaption class="flex items-center gap-4 text-sm">
+							<span class="font-semibold text-ink">{avis.name}</span>
+							<span class="st-rating" role="img" aria-label={`Note : ${avis.rating} sur 5`}>
+								{[1, 2, 3, 4, 5].map((n) => <i data-on={n <= avis.rating ? '' : undefined}></i>)}
+							</span>
+						</figcaption>
+					</figure>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<!-- Où et quand -->
+	<section class="st-rule-top">
+		<div class="st-container st-section">
+			<div class="grid gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+				<div data-reveal-group>
+					<h2 class="st-h2">À domicile, ou déposé à l'atelier</h2>
+					<p class="st-lead mt-5 max-w-[42ch]">
+						Le technicien se déplace dans Paris et jusqu'à 20&nbsp;km autour. Vous pouvez aussi déposer l'appareil au {business.address}.
+					</p>
+					<dl class="st-num mt-8 max-w-md border-t border-ink">
+						{business.openingHours.map((slot) => (
+							<div class="flex justify-between gap-4 border-b border-rule py-3">
+								<dt class="text-ink-soft">{slot.day}</dt>
+								<dd class="font-semibold">{slot.hours}</dd>
+							</div>
+						))}
+					</dl>
+				</div>
+				<div data-reveal>
+					<Map lat={business.lat} lng={business.lng} label={business.name} class="aspect-[4/3] md:aspect-[16/9]" />
 				</div>
 			</div>
 		</div>
 	</section>
-</StandardLayout>
 
+	<!-- Appel final -->
+	<section class="st-cta">
+		<div class="st-container grid items-end gap-10 py-16 md:py-24 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+			<div data-reveal>
+				<h2 class="st-h2 max-w-[16ch]">Une panne aujourd'hui&nbsp;? Le prochain créneau libre est dans l'agenda.</h2>
+			</div>
+			<div class="flex flex-col items-start gap-6 lg:items-end" data-reveal data-reveal-delay="120">
+				<a href="/demo-standard/reservation" class="st-btn st-btn--light">
+					Voir les disponibilités
+					<svg class="st-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
+				</a>
+				<p class="text-[#b9c0d0] lg:text-right">
+					ou par téléphone<br />
+					<a href={phoneHref} class="st-link st-cta-phone st-num mt-2">{business.phone}</a>
+				</p>
+				<a href="/demo-standard/contact" class="st-link st-link--on text-sm font-semibold text-paper">Nous écrire</a>
+			</div>
+		</div>
+	</section>
+</StandardLayout>

@@ -1,0 +1,33 @@
+---
+// Capture d'écran d'une démo (public/images/galerie/<demo>/<file>-960|1600|2160), AVIF avec repli WebP.
+// Proportions 16:10 ; `sizes` à ajuster selon la place occupée dans la page.
+interface Props {
+	demo: 'standard' | 'premium' | 'diamant';
+	file: string;
+	alt: string;
+	sizes?: string;
+	/** Image du héros : chargée tout de suite, en priorité. */
+	prioritaire?: boolean;
+	class?: string;
+}
+
+const { demo, file, alt, sizes = '(min-width: 992px) 50vw, 92vw', prioritaire = false, class: className = '' } = Astro.props;
+const base = `/images/galerie/${demo}/${file}`;
+const srcset = (ext: string) => `${base}-960.${ext} 960w, ${base}-1600.${ext} 1600w, ${base}-2160.${ext} 2160w`;
+---
+
+<picture>
+	<source type="image/avif" srcset={srcset('avif')} sizes={sizes} />
+	<img
+		src={`${base}-960.webp`}
+		srcset={srcset('webp')}
+		sizes={sizes}
+		width="1600"
+		height="1000"
+		alt={alt}
+		loading={prioritaire ? 'eager' : 'lazy'}
+		decoding="async"
+		fetchpriority={prioritaire ? 'high' : undefined}
+		class={className}
+	/>
+</picture>

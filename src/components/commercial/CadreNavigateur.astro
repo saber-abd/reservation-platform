@@ -1,0 +1,29 @@
+---
+// Fenêtre de navigateur dessinée en CSS (styles .cadre-nav dans commercial.css) autour d'une capture de démo.
+import Capture from './Capture.astro';
+
+interface Props {
+	demo: 'standard' | 'premium' | 'diamant';
+	file: string;
+	alt: string;
+	/** Texte de la barre d'adresse (décoratif). */
+	url?: string;
+	sizes?: string;
+	prioritaire?: boolean;
+	sombre?: boolean;
+	petit?: boolean;
+	class?: string;
+}
+
+const { demo, file, alt, url, sizes, prioritaire, sombre = false, petit = false, class: className = '' } = Astro.props;
+---
+
+<span class:list={['cadre-nav', { 'est-sombre': sombre, 'est-petit': petit }, className]}>
+	<span class="cadre-nav-barre" aria-hidden="true">
+		<span class="cadre-nav-points"><i></i><i></i><i></i></span>
+		{url && !petit && <span class="cadre-nav-url">{url}</span>}
+	</span>
+	<span class="cadre-nav-ecran">
+		<Capture demo={demo} file={file} alt={alt} sizes={sizes} prioritaire={prioritaire} />
+	</span>
+</span>

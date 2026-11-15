@@ -1,6 +1,8 @@
 ---
+import '@fontsource-variable/bricolage-grotesque/index.css';
+import '@fontsource-variable/geist/index.css';
 import '../../styles/commercial.css';
-import { Code2, ArrowRight, Phone, Mail } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Phone, Mail } from 'lucide-react';
 import SmoothScroll from '@/components/shared/SmoothScroll.astro';
 import CookieBanner from '@/components/shared/CookieBanner.astro';
 import Avatar from '@/components/commercial/Avatar.astro';
@@ -17,8 +19,9 @@ interface Props {
 
 const { title, description, footerCta = true } = Astro.props;
 const currentYear = new Date().getFullYear();
+const chemin = Astro.url.pathname.replace(/\/$/, '') || '/';
 
-const mobileLinks = [
+const liens = [
 	{ label: 'Présentation', href: '/#presentation' },
 	{ label: 'Formules', href: '/#tarification' },
 	{ label: 'Notre histoire', href: '/notre-histoire' },
@@ -27,9 +30,9 @@ const mobileLinks = [
 ];
 
 const formules = [
-	{ label: 'Standard', href: '/galerie/standard', dot: 'bg-prussian-blue-600' },
-	{ label: 'Premium', href: '/galerie/premium', dot: 'bg-rose-600' },
-	{ label: 'Diamant', href: '/galerie/diamant', dot: 'bg-violet-600' },
+	{ id: 'standard', label: 'Standard', href: '/galerie/standard', resume: 'Site vitrine, réservation dans Google Agenda' },
+	{ id: 'premium', label: 'Premium', href: '/galerie/premium', resume: 'Espace client, tableau de bord, fidélité' },
+	{ id: 'diamant', label: 'Diamant', href: '/galerie/diamant', resume: 'Gestion d’équipe, droits, modération' },
 ];
 
 const legal = [
@@ -47,164 +50,132 @@ const legal = [
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="description" content={description} />
 		<title>{title}</title>
-		<meta name="theme-color" content="#1c1917" />
+		<meta name="theme-color" content="#f4efe6" />
 		<!-- Active les apparitions au défilement uniquement si le JS tourne (sinon tout reste visible). -->
 		<script is:inline>document.documentElement.classList.add('js');</script>
 	</head>
-	<body class="commercial-page flex min-h-screen flex-col bg-stone-50 selection:bg-stone-900 selection:text-white">
+	<body class="commercial-page flex min-h-screen flex-col">
+		<a href="#contenu" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-encre focus:px-4 focus:py-2 focus:text-papier">Aller au contenu</a>
 
-		<!-- HEADER COMMERCIAL -->
-		<header class="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-stone-200">
-			<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
-				<a href="/" class="flex items-center gap-2 group">
-					<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-900 text-white transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-6">
-						<Code2 size={20} />
-					</div>
-					<span class="text-lg font-extrabold text-stone-900 tracking-tight">SaberWeb<span class="text-stone-400">.dev</span></span>
+		<!-- NAVIGATION FLOTTANTE -->
+		<header class="site-nav" data-site-nav>
+			<div class="site-nav-pilule">
+				<a href="/" class="logo" aria-label="SaberWeb.dev, accueil">
+					<span>SaberWeb</span><span class="logo-point">.</span><span class="logo-ext">dev</span>
 				</a>
 
-				<!-- Desktop Nav -->
-				<nav class="hidden md:flex items-center gap-8" aria-label="Navigation principale">
+				<nav class="hidden items-center gap-0.5 lg:flex" aria-label="Navigation principale">
 					<a href="/#presentation" class="nav-link">Présentation</a>
-					<a href="/notre-histoire" class="nav-link">Notre histoire</a>
 
-					<!-- Mega Menu Formules -->
-					<div class="relative group">
-						<button type="button" class="nav-link flex items-center gap-1 pb-6 -mb-6" aria-haspopup="true">
+					<div class="nav-menu" data-nav-menu>
+						<button type="button" class="nav-link" aria-expanded="false" aria-controls="menu-formules">
 							Formules
-							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-300 group-hover:rotate-180 group-focus-within:rotate-180"><path d="m6 9 6 6 6-6"/></svg>
+							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
 						</button>
-
-						<!-- Dropdown Panel -->
-						<div class="absolute top-full left-1/2 -translate-x-1/2 pt-4 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 transition-all duration-300 w-[700px] z-[100]">
-							<div class="rounded-2xl border border-stone-200 bg-white p-8 shadow-2xl grid grid-cols-3 gap-8">
-								<div>
-									<a href="/galerie/standard" class="block mb-4">
-										<h4 class="font-bold text-prussian-blue-600 hover:text-prussian-blue-700 transition-colors flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-prussian-blue-600"></span> Démo Standard</h4>
-									</a>
-									<ul class="space-y-3 text-sm text-stone-500 font-medium ml-4">
-										<li><a href="/galerie/standard#fonctionnalites" class="hover:text-prussian-blue-600 transition-colors block">Fonctionnalités</a></li>
-										<li><a href="/galerie/standard#technologies" class="hover:text-prussian-blue-600 transition-colors block">Technologies</a></li>
-										<li><a href="/galerie/standard#couts" class="hover:text-prussian-blue-600 transition-colors block">Coûts détaillés</a></li>
-									</ul>
-								</div>
-								<div class="border-l border-stone-100 pl-8">
-									<a href="/galerie/premium" class="block mb-4">
-										<h4 class="font-bold text-rose-600 hover:text-rose-700 transition-colors flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-rose-600"></span> Démo Premium</h4>
-									</a>
-									<ul class="space-y-3 text-sm text-stone-500 font-medium ml-4">
-										<li><a href="/galerie/premium#fonctionnalites" class="hover:text-rose-600 transition-colors block">Fonctionnalités</a></li>
-										<li><a href="/galerie/premium#technologies" class="hover:text-rose-600 transition-colors block">Technologies</a></li>
-										<li><a href="/galerie/premium#couts" class="hover:text-rose-600 transition-colors block">Coûts détaillés</a></li>
-									</ul>
-								</div>
-								<div class="border-l border-stone-100 pl-8">
-									<a href="/galerie/diamant" class="block mb-4">
-										<h4 class="font-bold text-violet-600 hover:text-violet-700 transition-colors flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-violet-600"></span> Démo Diamant</h4>
-									</a>
-									<ul class="space-y-3 text-sm text-stone-500 font-medium ml-4">
-										<li><a href="/galerie/diamant#fonctionnalites" class="hover:text-violet-600 transition-colors block">Fonctionnalités</a></li>
-										<li><a href="/galerie/diamant#technologies" class="hover:text-violet-600 transition-colors block">Technologies</a></li>
-										<li><a href="/galerie/diamant#couts" class="hover:text-violet-600 transition-colors block">Coûts détaillés</a></li>
-									</ul>
-								</div>
+						<div id="menu-formules" class="nav-panneau">
+							<div class="grid grid-cols-3 gap-1">
+								{formules.map((f, i) => (
+									<div class="nav-colonne">
+										<a href={f.href}>
+											<span class="repere">0{i + 1}</span>
+											<span class="mt-1 block font-heading text-xl font-semibold tracking-tight">{f.label}</span>
+											<span class="mt-1 block text-sm leading-snug text-gris">{f.resume}</span>
+										</a>
+										<ul class="mt-3 border-t border-filet pt-2">
+											<li><a href={`${f.href}#fonctionnalites`} class="nav-sous">Fonctionnalités</a></li>
+											<li><a href={`${f.href}#technologies`} class="nav-sous">Technologies</a></li>
+											<li><a href={`${f.href}#couts`} class="nav-sous">Coûts détaillés</a></li>
+										</ul>
+									</div>
+								))}
 							</div>
 						</div>
 					</div>
 
-					<a href="/devis" class="nav-link">Devis</a>
-					<a href="/contact" class="nav-link">Contact</a>
+					<a href="/notre-histoire" class="nav-link" aria-current={chemin === '/notre-histoire' ? 'page' : undefined}>Notre histoire</a>
+					<a href="/devis" class="nav-link" aria-current={chemin === '/devis' ? 'page' : undefined}>Devis</a>
 				</nav>
 
-				<div class="hidden md:block">
-					<a href="/contact" class="btn btn-dark btn-sm">
-						Contactez-nous <ArrowRight size={16} class="btn-arrow" />
+				<div class="flex items-center gap-2">
+					<a href="/contact" class="btn btn-dark btn-sm hidden sm:inline-flex">
+						Nous contacter <ArrowRight size={15} class="btn-arrow" />
 					</a>
+					<!-- Bouton menu mobile -->
+					<button id="mobile-menu-btn" type="button" class="burger lg:hidden" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-nav">
+						<span></span><span></span>
+					</button>
 				</div>
-
-				<!-- Bouton menu mobile : les trois barres se transforment en croix -->
-				<button id="mobile-menu-btn" type="button" class="burger md:hidden" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-nav">
-					<span></span><span></span><span></span>
-				</button>
 			</div>
 
-			<!-- Mobile Nav -->
-			<div id="mobile-nav" class="mobile-nav md:hidden" data-open="false">
-				<div class="overflow-hidden">
-					<nav class="flex flex-col gap-1 px-4 pb-6 pt-2 sm:px-6" aria-label="Navigation mobile">
-						{mobileLinks.map((l, i) => (
-							<a href={l.href} class="mobile-nav-item flex items-center justify-between rounded-xl px-3 py-3 text-lg font-semibold text-stone-800 hover:bg-stone-100" style={`--i:${i}`}>
-								{l.label} <ArrowRight size={18} class="text-stone-400" />
-							</a>
+			<!-- Menu mobile -->
+			<div id="mobile-nav" class="mobile-nav lg:hidden" data-open="false" data-lenis-prevent>
+				<nav class="flex flex-col p-5" aria-label="Navigation mobile">
+					{liens.map((l, i) => (
+						<a href={l.href} class="mobile-nav-item mobile-nav-lien" style={`--i:${i}`}>
+							{l.label} <span class="repere">0{i + 1}</span>
+						</a>
+					))}
+					<div class="mobile-nav-item mt-5 grid grid-cols-3 gap-2" style={`--i:${liens.length}`}>
+						{formules.map((f) => (
+							<a href={f.href} class="rounded-2xl border border-filet px-3 py-3 text-center text-sm font-medium">{f.label}</a>
 						))}
-						<div class="mobile-nav-item mt-2 grid grid-cols-3 gap-2" style={`--i:${mobileLinks.length}`}>
-							{formules.map((f) => (
-								<a href={f.href} class="flex flex-col items-center gap-1.5 rounded-xl border border-stone-200 bg-white py-3 text-sm font-bold text-stone-800">
-									<span class={`h-2 w-2 rounded-full ${f.dot}`}></span>{f.label}
-								</a>
-							))}
-						</div>
-						<div class="mobile-nav-item mt-4 grid grid-cols-2 gap-2" style={`--i:${mobileLinks.length + 1}`}>
-							<a href={contact.telephoneHref} class="btn btn-dark justify-center">Appeler</a>
-							<a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp justify-center">
-								<BrandIcon name="whatsapp" size={18} /> WhatsApp
-							</a>
-						</div>
-					</nav>
-				</div>
+					</div>
+					<div class="mobile-nav-item mt-3 grid grid-cols-2 gap-2" style={`--i:${liens.length + 1}`}>
+						<a href={contact.telephoneHref} class="btn btn-dark justify-center"><Phone size={16} /> Appeler</a>
+						<a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp justify-center">
+							<BrandIcon name="whatsapp" size={17} /> WhatsApp
+						</a>
+					</div>
+				</nav>
 			</div>
 		</header>
 
-		<main class="flex-1">
+		<main id="contenu" class="flex-1 overflow-x-clip">
 			<slot />
 		</main>
 
-		<!-- FOOTER COMMERCIAL -->
-		<footer class="site-footer relative overflow-hidden bg-stone-950 text-stone-400">
-			<div class="footer-glow" aria-hidden="true"></div>
-
-			<div class="relative mx-auto max-w-6xl px-6">
-				<!-- Bandeau d'appel -->
+		<!-- PIED DE PAGE -->
+		<footer class="site-footer sur-nuit relative overflow-hidden">
+			<div class="conteneur relative">
 				{footerCta && (
-				<div class="flex flex-col items-start justify-between gap-6 border-b border-white/10 py-12 md:flex-row md:items-center">
+				<div class="flex flex-col items-start justify-between gap-8 border-b border-white/15 py-14 md:flex-row md:items-end lg:py-20">
 					<div>
-						<p class="text-2xl font-bold text-white sm:text-3xl">Un projet de site en tête ?</p>
-						<p class="mt-2 text-stone-400">Échangeons quelques minutes, c’est sans engagement.</p>
+						<p class="titre-xl max-w-[14ch]">Un projet de site en tête ?</p>
+						<p class="chapo mt-4">Un appel d’une quinzaine de minutes suffit pour savoir quelle formule vous convient.</p>
 					</div>
 					<div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-						<a href="/contact" class="btn btn-light justify-center">
-							Nous écrire <ArrowRight size={16} class="btn-arrow" />
+						<a href="/contact" class="btn btn-accent btn-lg justify-center">
+							Nous écrire <ArrowRight size={17} class="btn-arrow" />
 						</a>
-						<a href={contact.telephoneHref} class="btn btn-ghost-dark justify-center">
+						<a href={contact.telephoneHref} class="btn btn-ghost-dark btn-lg num justify-center">
 							<Phone size={16} /> {contact.telephone}
 						</a>
 					</div>
 				</div>
 				)}
 
-				<div class="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
+				<div class="grid gap-x-8 gap-y-12 py-14 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1.3fr]">
 					<div class="sm:col-span-2 lg:col-span-1">
-						<a href="/" class="group inline-flex items-center gap-2">
-							<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-stone-900 transition-transform duration-300 group-hover:-rotate-6"><Code2 size={20} /></span>
-							<span class="text-lg font-extrabold tracking-tight text-white">SaberWeb<span class="text-stone-500">.dev</span></span>
+						<a href="/" class="logo text-2xl" aria-label="SaberWeb.dev, accueil">
+							<span>SaberWeb</span><span class="logo-point">.</span><span class="logo-ext">dev</span>
 						</a>
-						<p class="mt-4 max-w-xs text-sm leading-relaxed">Sites vitrines et plateformes de réservation sur mesure pour les commerces et les petites entreprises.</p>
+						<p class="mt-4 max-w-xs text-sm leading-relaxed text-stone-400">Sites vitrines et plateformes de réservation pour les indépendants et les petites entreprises.</p>
 						<ul class="mt-6 flex items-center gap-2" aria-label="Nous suivre et nous écrire">
 							<li>
 								<a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" class="social" aria-label="Nous écrire sur WhatsApp">
-									<BrandIcon name="whatsapp" size={18} />
+									<BrandIcon name="whatsapp" size={17} />
 								</a>
 							</li>
 							{membres.map((m) => (
 								<li>
 									<a href={m.linkedin} target="_blank" rel="noopener noreferrer" class="social" aria-label={`Profil LinkedIn de ${m.prenom}`} title={`LinkedIn de ${m.prenom}`}>
-										<BrandIcon name="linkedin" size={17} />
+										<BrandIcon name="linkedin" size={16} />
 									</a>
 								</li>
 							))}
 							{contact.email && (
 								<li>
-									<a href={`mailto:${contact.email}`} class="social" aria-label="Nous écrire par e-mail"><Mail size={18} /></a>
+									<a href={`mailto:${contact.email}`} class="social" aria-label="Nous écrire par e-mail"><Mail size={17} /></a>
 								</li>
 							)}
 						</ul>
@@ -212,17 +183,16 @@ const legal = [
 					<div>
 						<p class="footer-title">Navigation</p>
 						<ul class="mt-4 space-y-2.5 text-sm">
-							{mobileLinks.map((l) => <li><a href={l.href} class="footer-link">{l.label}</a></li>)}
+							{liens.map((l) => <li><a href={l.href} class="footer-link">{l.label}</a></li>)}
 						</ul>
 					</div>
 					<div>
 						<p class="footer-title">Formules</p>
 						<ul class="mt-4 space-y-2.5 text-sm">
 							{formules.map((f) => (
-								<li>
-									<a href={f.href} class="footer-link inline-flex items-center gap-2"><span class={`h-1.5 w-1.5 rounded-full ${f.dot}`}></span>{f.label}</a>
-								</li>
+								<li><a href={f.href} class="footer-link">{f.label}</a></li>
 							))}
+							<li><a href="/devis" class="footer-link inline-flex items-center gap-1">Simuler un devis <ArrowUpRight size={14} /></a></li>
 						</ul>
 					</div>
 					<div>
@@ -231,10 +201,10 @@ const legal = [
 							{membres.map((m) => (
 								<li>
 									<a href={m.linkedin} target="_blank" rel="noopener noreferrer" class="group flex items-center gap-3" aria-label={`Profil LinkedIn de ${m.prenom}`}>
-										<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={40} class="ring-2 ring-white/10 transition duration-300 group-hover:ring-[#0A66C2]" />
+										<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={40} class="ring-1 ring-white/20" />
 										<span class="min-w-0">
-											<span class="block text-sm font-semibold text-stone-200 transition-colors group-hover:text-white">{m.prenom}</span>
-											<span class="block truncate text-xs text-stone-500">{m.role}</span>
+											<span class="block text-sm font-medium text-stone-100 transition-colors group-hover:text-accent-clair">{m.prenom}</span>
+											<span class="block truncate text-xs text-stone-400">{m.role}</span>
 										</span>
 									</a>
 								</li>
@@ -243,45 +213,66 @@ const legal = [
 					</div>
 				</div>
 
-				<div class="flex flex-col items-center justify-between gap-4 border-t border-white/10 py-7 text-sm md:flex-row">
-					<p>© {currentYear} SaberWeb.dev</p>
-					<ul class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+				<div class="flex flex-col items-start justify-between gap-4 border-t border-white/15 py-6 text-sm md:flex-row md:items-center">
+					<p class="num text-stone-400">© {currentYear} SaberWeb.dev</p>
+					<ul class="flex flex-wrap items-center gap-x-5 gap-y-2">
 						{legal.map((l) => <li><a href={l.href} class="footer-link">{l.label}</a></li>)}
 						<li><button type="button" class="footer-link" data-cookie-settings>Gérer mes cookies</button></li>
 					</ul>
 				</div>
 			</div>
+			<p class="footer-marque -mb-[0.06em] text-center" aria-hidden="true">SaberWeb.dev</p>
 		</footer>
 
 		<CookieBanner policyHref="/cookies" />
 
 		<script>
-			// Apparitions au défilement : remplace AOS (~14 Ko) par ~0,5 Ko.
-			// L'animation CSS n'est pas conservée après sa fin (fill-mode: backwards),
-			// donc les effets de survol (translate, ombre) gardent leur propre transition.
-			const items = document.querySelectorAll<HTMLElement>('[data-aos]');
-			const show = (el: HTMLElement) => {
-				const delay = el.dataset.aosDelay;
-				if (delay) el.style.setProperty('--reveal-delay', `${delay}ms`);
-				el.classList.add('is-revealed');
-			};
-			if ('IntersectionObserver' in window) {
-				const io = new IntersectionObserver(
-					(entries) => {
-						for (const entry of entries) {
-							if (!entry.isIntersecting) continue;
-							show(entry.target as HTMLElement);
-							io.unobserve(entry.target);
-						}
-					},
-					{ rootMargin: '0px 0px -8% 0px' },
-				);
-				items.forEach((el) => io.observe(el));
-			} else {
-				items.forEach(show);
+			import { initReveal, pauseOffscreen } from '@/lib/motion/reveal';
+
+			// Apparitions au défilement (socle commun) et bandeaux en pause hors écran.
+			initReveal();
+			pauseOffscreen('.marquee');
+
+			// Pilule de navigation : se compacte dès que la page défile.
+			const header = document.querySelector<HTMLElement>('[data-site-nav]');
+			if (header) {
+				let frame = 0;
+				const update = () => {
+					frame = 0;
+					header.classList.toggle('is-compact', window.scrollY > 40);
+				};
+				window.addEventListener('scroll', () => { if (!frame) frame = requestAnimationFrame(update); }, { passive: true });
+				update();
 			}
 
-			// Menu mobile animé
+			// Menu « Formules » : survol et focus en CSS ; clic (tactile) et Échap ici.
+			const menu = document.querySelector<HTMLElement>('[data-nav-menu]');
+			const menuBtn = menu?.querySelector<HTMLButtonElement>('button');
+			if (menu && menuBtn) {
+				const sync = () => menuBtn.setAttribute('aria-expanded', String(menu.dataset.open === 'true' || (menu.dataset.open !== 'false' && menu.matches(':hover, :focus-within'))));
+				const setMenu = (state: 'true' | 'false' | undefined) => {
+					if (state) menu.dataset.open = state;
+					else delete menu.dataset.open;
+					sync();
+				};
+				menuBtn.addEventListener('click', () => setMenu(menu.dataset.open === 'true' ? 'false' : 'true'));
+				menu.addEventListener('mouseenter', sync);
+				menu.addEventListener('mouseleave', () => setMenu(undefined));
+				menu.addEventListener('focusin', sync);
+				menu.addEventListener('focusout', (e) => {
+					if (!menu.contains(e.relatedTarget as Node | null)) setMenu(undefined);
+				});
+				menu.addEventListener('keydown', (e) => {
+					if (e.key !== 'Escape') return;
+					setMenu('false');
+					menuBtn.focus();
+				});
+				document.addEventListener('click', (e) => {
+					if (!menu.contains(e.target as Node)) setMenu(undefined);
+				});
+			}
+
+			// Menu mobile
 			const btn = document.getElementById('mobile-menu-btn');
 			const nav = document.getElementById('mobile-nav');
 			if (btn && nav) {
@@ -295,7 +286,10 @@ const legal = [
 					if ((e.target as HTMLElement).closest('a')) setOpen(false);
 				});
 				document.addEventListener('keydown', (e) => {
-					if (e.key === 'Escape') setOpen(false);
+					if (e.key === 'Escape' && nav.dataset.open === 'true') {
+						setOpen(false);
+						btn.focus();
+					}
 				});
 			}
 		</script>

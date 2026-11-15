@@ -1,10 +1,9 @@
 ---
+import '@fontsource-variable/instrument-sans/index.css';
 import '../../styles/standard.css';
-import 'aos/dist/aos.css';
 import StandardHeader from '@/components/standard/StandardHeader.astro';
 import Footer from '@/components/standard/StandardFooter.astro';
 import CookieBanner from '@/components/shared/CookieBanner.astro';
-import SmoothScroll from '@/components/shared/SmoothScroll.astro';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname);
@@ -35,26 +34,23 @@ const basePath = "/demo-standard";
 		<link rel="canonical" href={canonicalURL} />
 		{noindex && <meta name="robots" content="noindex, nofollow" />}
 		<title>{pageTitle}</title>
-		<meta name="theme-color" content="#0f172a" />
+		<meta name="theme-color" content="#101b33" />
+		<script is:inline>document.documentElement.classList.add('js');</script>
 	</head>
-	<body class="flex min-h-screen flex-col bg-slate-50 text-slate-900 font-sans selection:bg-blue-600 selection:text-white">
+	<body class="flex min-h-screen flex-col bg-paper text-ink font-sans">
+		<a href="#contenu" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded focus:bg-ink focus:px-4 focus:py-2 focus:text-paper">Aller au contenu</a>
 		<StandardHeader basePath={basePath} />
-		<main class="flex-1 overflow-x-hidden">
+		<main id="contenu" class="flex-1 overflow-x-clip">
 			<slot />
 		</main>
 		<Footer basePath={basePath} />
 		<script>
-			import AOS from 'aos';
+			import { initReveal, initCounters, pauseOffscreen } from '@/lib/motion/reveal';
 
-			AOS.init({
-				disable: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-				duration: 800,
-				easing: 'ease-out-cubic',
-				once: true,
-				offset: 50,
-			});
+			initReveal();
+			initCounters();
+			pauseOffscreen('.marquee');
 		</script>
-		<SmoothScroll />
 		<CookieBanner policyHref="/cookies" />
 	</body>
 </html>

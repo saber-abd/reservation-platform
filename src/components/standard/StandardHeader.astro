@@ -1,32 +1,50 @@
 ---
-import { Wrench, Menu, X } from 'lucide-react';
 import { getSiteConfig } from '@/config/site';
 const siteConfig = await getSiteConfig(Astro.url.pathname);
 
 const currentPath = Astro.url.pathname;
 const basePathMatch = currentPath.match(/^\/(demo-[^/]+)/);
 const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
+
+const normalise = (p: string) => (p.length > 1 ? p.replace(/\/$/, '') : p);
+const isCurrent = (href: string) => normalise(currentPath) === normalise(`${basePath}${href}`);
+
+// La réservation est mise en avant par le bouton, les autres rubriques restent dans la navigation.
+const navItems = siteConfig.nav.filter((item) => item.href !== '/reservation');
+const openDays = siteConfig.business.openingHours.filter((slot) => !/ferm/i.test(slot.hours));
+const phoneHref = `tel:${siteConfig.business.phone.replace(/\s+/g, '')}`;
 ---
 
-<header class="sticky top-0 z-50 bg-white border-b border-frosted-blue-200 shadow-sm">
-	<div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-		<a href={`${basePath}/`} aria-label={siteConfig.business.name} class="flex items-center gap-3">
-			<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-cerulean text-white shadow-sm">
-				<Wrench size={20} />
+<!-- Bandeau pratique : horaires et téléphone, visibles dès l'arrivée -->
+<div class="st-topbar">
+	<div class="st-container flex items-center justify-between gap-6 py-2">
+		<p class="st-num flex min-w-0 flex-wrap gap-x-5 gap-y-0.5">
+			{openDays.map((slot) => (
+				<span class="whitespace-nowrap">{slot.day.replace(' - ', ' – ')} : {slot.hours.replace(' - ', ' – ')}</span>
+			))}
+			<span class="hidden whitespace-nowrap lg:inline">Déplacement offert jusqu'à 20 km</span>
+		</p>
+		<a href={phoneHref} class="st-link st-num hidden shrink-0 font-semibold sm:inline-block">{siteConfig.business.phone}</a>
+	</div>
+</div>
+
+<header class="st-header" data-header>
+	<div class="st-container st-header-inner">
+		<a href={`${basePath}/`} aria-label={`${siteConfig.business.name}, accueil`} class="flex items-center gap-2.5">
+			<span class="st-logo-mark" aria-hidden="true">
+				<!-- Tête de vis cruciforme -->
+				<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6.2" /><path d="M8 4.6v6.8M4.6 8h6.8" /></svg>
 			</span>
-			<span class="text-xl font-black text-oxford-navy tracking-tight">{siteConfig.business.name}</span>
+			<span class="text-[1.3rem] font-bold tracking-[-0.04em] text-ink">{siteConfig.business.name}</span>
 		</a>
 
-		<!-- Desktop Nav -->
-		<nav class="hidden items-center gap-8 md:flex">
+		<nav class="hidden items-center gap-8 min-[900px]:flex" aria-label="Navigation principale">
 			{
-				siteConfig.nav.map((item) => (
+				navItems.map((item) => (
 					<a
 						href={`${basePath}${item.href}`}
-						class:list={[
-							'text-sm font-bold uppercase tracking-wider transition-colors hover:text-punch-red',
-							currentPath === item.href ? 'text-cerulean' : 'text-oxford-navy',
-						]}
+						class="st-link st-nav-link"
+						aria-current={isCurrent(item.href) ? 'page' : undefined}
 					>
 						{item.label}
 					</a>
@@ -34,61 +52,104 @@ const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 			}
 		</nav>
 
-		<div class="flex items-center gap-4">
-			<div class="hidden md:flex items-center gap-4">
-				{basePath && (
-					<a href="/" class="rounded-xl border-2 border-cerulean/20 px-4 py-2 text-sm font-bold text-cerulean hover:bg-cerulean/10 transition-colors">
-						← Retour
-					</a>
-				)}
-			</div>
-
-			<!-- Mobile Menu Toggle -->
-			<button id="mobile-menu-btn" class="md:hidden text-oxford-navy hover:text-cerulean focus:outline-none">
-				<span id="icon-menu"><Menu size={24} /></span>
-				<span id="icon-close" class="hidden"><X size={24} /></span>
+		<div class="flex items-center gap-3">
+			{basePath && (
+				<a href="/" class="st-link hidden text-sm text-ink-mute min-[900px]:inline-block">← Portfolio</a>
+			)}
+			<a href={`${basePath}/reservation`} class="st-btn st-btn--small hidden min-[480px]:inline-flex" aria-current={isCurrent('/reservation') ? 'page' : undefined}>
+				Réserver
+				<svg class="st-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
+			</a>
+			<button
+				id="mobile-menu-btn"
+				type="button"
+				class="st-burger min-[900px]:hidden"
+				aria-expanded="false"
+				aria-controls="mobile-nav"
+				aria-label="Ouvrir le menu"
+			>
+				<span></span><span></span>
 			</button>
 		</div>
 	</div>
 
-	<!-- Mobile Nav -->
-	<div id="mobile-nav" class="hidden border-t border-frosted-blue-200 bg-white md:hidden">
-		<nav class="flex flex-col px-6 py-4 gap-4">
-			{
-				siteConfig.nav.map((item) => (
-					<a
-						href={`${basePath}${item.href}`}
-						class:list={[
-							'text-lg font-bold uppercase transition-colors hover:text-punch-red',
-							currentPath === item.href ? 'text-cerulean' : 'text-oxford-navy',
-						]}
-					>
-						{item.label}
-					</a>
-				))
-			}
-			<div class="mt-4 pt-4 border-t border-frosted-blue-200">
-				{basePath && (
-					<a href="/" class="mb-2 block rounded-xl border-2 border-cerulean/20 px-4 py-3 text-center text-sm font-bold text-cerulean hover:bg-cerulean/10">
-						← Retour au Portfolio
-					</a>
-				)}
-			</div>
+	<div id="mobile-nav" class="st-mobile-nav" inert>
+		<nav class="st-container py-6" aria-label="Navigation mobile">
+			<ul class="flex flex-col">
+				{
+					siteConfig.nav.map((item, i) => (
+						<li style={`--i:${i}`} class="border-b border-rule">
+							<a
+								href={`${basePath}${item.href}`}
+								class="flex items-baseline justify-between py-3.5 text-2xl font-semibold tracking-[-0.03em] text-ink"
+								aria-current={isCurrent(item.href) ? 'page' : undefined}
+							>
+								{item.label}
+								<span class="st-num text-sm font-medium text-ink-mute">0{i + 1}</span>
+							</a>
+						</li>
+					))
+				}
+				<li style={`--i:${siteConfig.nav.length}`} class="flex flex-wrap items-center justify-between gap-4 pt-6">
+					<a href={phoneHref} class="st-num text-lg font-semibold text-ink">{siteConfig.business.phone}</a>
+					{basePath && (
+						<a href="/" class="text-sm text-ink-mute underline underline-offset-4">← Retour au portfolio</a>
+					)}
+				</li>
+			</ul>
 		</nav>
 	</div>
 </header>
 
 <script>
+	// En-tête qui se compacte après quelques pixels de défilement.
+	const header = document.querySelector<HTMLElement>('[data-header]');
+	if (header) {
+		let ticking = false;
+		const update = () => {
+			header.classList.toggle('is-scrolled', window.scrollY > 48);
+			ticking = false;
+		};
+		window.addEventListener(
+			'scroll',
+			() => {
+				if (ticking) return;
+				ticking = true;
+				requestAnimationFrame(update);
+			},
+			{ passive: true },
+		);
+		update();
+	}
+
+	// Menu mobile : aria-expanded, fermeture à Échap, au clic sur un lien et au retour en grand écran.
 	const btn = document.getElementById('mobile-menu-btn');
 	const nav = document.getElementById('mobile-nav');
-	const iconMenu = document.getElementById('icon-menu');
-	const iconClose = document.getElementById('icon-close');
 
-	if (btn && nav && iconMenu && iconClose) {
-		btn.addEventListener('click', () => {
-			nav.classList.toggle('hidden');
-			iconMenu.classList.toggle('hidden');
-			iconClose.classList.toggle('hidden');
+	if (btn && nav) {
+		const setOpen = (open: boolean) => {
+			btn.setAttribute('aria-expanded', String(open));
+			btn.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+			nav.classList.toggle('is-open', open);
+			nav.toggleAttribute('inert', !open);
+		};
+		const isOpen = () => btn.getAttribute('aria-expanded') === 'true';
+
+		btn.addEventListener('click', () => setOpen(!isOpen()));
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && isOpen()) {
+				setOpen(false);
+				btn.focus();
+			}
+		});
+		nav.addEventListener('click', (e) => {
+			if ((e.target as HTMLElement).closest('a')) setOpen(false);
+		});
+		document.addEventListener('click', (e) => {
+			if (isOpen() && header && !header.contains(e.target as Node)) setOpen(false);
+		});
+		window.matchMedia('(min-width: 900px)').addEventListener('change', (e) => {
+			if (e.matches) setOpen(false);
 		});
 	}
 </script>

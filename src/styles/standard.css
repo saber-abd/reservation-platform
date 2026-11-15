@@ -4,87 +4,855 @@
 @source "../layouts/standard";
 @source "../pages/demo-standard";
 
-/* Démo Standard : palette bleu/rouge et thème .theme-standard. */
+/*
+ * Démo Standard (TechDom, dépannage informatique).
+ * Ambiance « atelier bien rangé » : fond papier, encre bleu nuit, un seul accent bleu,
+ * rouge réservé aux signaux. Une seule police : Instrument Sans Variable.
+ */
 
 @theme inline {
-    --font-sans: sans-serif;
+    --font-sans: 'Instrument Sans Variable', ui-sans-serif, system-ui, sans-serif;
     --font-heading: var(--font-sans);
+}
 
-    /* Custom Palette (Standard Demo) */
-    --color-punch-red: #e63946;
-    --color-punch-red-100: #33060a;
-    --color-punch-red-200: #660d14;
-    --color-punch-red-300: #99131e;
-    --color-punch-red-400: #cb1928;
-    --color-punch-red-500: #e63946;
-    --color-punch-red-600: #eb5f6b;
-    --color-punch-red-700: #f08790;
-    --color-punch-red-800: #f5afb5;
-    --color-punch-red-900: #fad7da;
+@theme {
+    /* Jetons de la démo */
+    --color-paper: #f5f3ee;
+    --color-surface: #fdfcfa;
+    --color-ink: #101b33;
+    --color-ink-soft: #414c66;
+    --color-ink-mute: #646d82;
+    --color-rule: #d9d5ca;
+    --color-brand: #1f4fd6;
+    --color-brand-dark: #173da8;
+    --color-brand-tint: #e6ecfb;
+    --color-signal: #e63946;
 
-    --color-honeydew: #f1faee;
-    --color-honeydew-100: #234c16;
-    --color-honeydew-200: #47982c;
-    --color-honeydew-300: #75ce57;
-    --color-honeydew-400: #b4e4a3;
-    --color-honeydew-500: #f1faee;
-    --color-honeydew-600: #f5fbf2;
-    --color-honeydew-700: #f7fcf6;
-    --color-honeydew-800: #fafdf9;
-    --color-honeydew-900: #fcfefc;
+    /*
+     * Les îlots (formulaires, dashboard, espace client) utilisent les échelles
+     * Tailwind blue / rose / slate / stone : on les recale ici sur la palette de la
+     * démo, ce qui les rhabille sans toucher à leur code.
+     */
+    --color-blue-50: #eef2fd;
+    --color-blue-100: #dde5fb;
+    --color-blue-200: #bccbf7;
+    --color-blue-300: #8fa8f0;
+    --color-blue-400: #5b7fe6;
+    --color-blue-500: #3562de;
+    --color-blue-600: #1f4fd6;
+    --color-blue-700: #173da8;
+    --color-blue-800: #15348c;
+    --color-blue-900: #132c70;
+    --color-blue-950: #0c1b47;
 
-    --color-frosted-blue: #a8dadc;
-    --color-frosted-blue-100: #163637;
-    --color-frosted-blue-200: #2c6d6f;
-    --color-frosted-blue-300: #42a3a6;
-    --color-frosted-blue-400: #70c3c6;
-    --color-frosted-blue-500: #a8dadc;
-    --color-frosted-blue-600: #b9e2e3;
-    --color-frosted-blue-700: #cae9ea;
-    --color-frosted-blue-800: #dcf0f1;
-    --color-frosted-blue-900: #edf8f8;
+    --color-rose-50: #eef2fd;
+    --color-rose-100: #dde5fb;
+    --color-rose-200: #bccbf7;
+    --color-rose-300: #8fa8f0;
+    --color-rose-400: #5b7fe6;
+    --color-rose-500: #3562de;
+    --color-rose-600: #1f4fd6;
+    --color-rose-700: #173da8;
+    --color-rose-800: #15348c;
+    --color-rose-900: #132c70;
+    --color-rose-950: #0c1b47;
 
-    --color-cerulean: #457b9d;
-    --color-cerulean-100: #0e181f;
-    --color-cerulean-200: #1b313e;
-    --color-cerulean-300: #29495e;
-    --color-cerulean-400: #37627d;
-    --color-cerulean-500: #457b9d;
-    --color-cerulean-600: #6097b9;
-    --color-cerulean-700: #88b1cb;
-    --color-cerulean-800: #b0cbdc;
-    --color-cerulean-900: #d7e5ee;
+    --color-slate-50: #f5f3ee;
+    --color-slate-100: #ecebe5;
+    --color-slate-200: #d9d5ca;
+    --color-slate-300: #c2c1bb;
+    --color-slate-400: #8a90a0;
+    --color-slate-500: #646d82;
+    --color-slate-600: #414c66;
+    --color-slate-700: #2c3752;
+    --color-slate-800: #1b2641;
+    --color-slate-900: #101b33;
+    --color-slate-950: #0a1224;
 
-    --color-oxford-navy: #1d3557;
-    --color-oxford-navy-100: #060b12;
-    --color-oxford-navy-200: #0c1623;
-    --color-oxford-navy-300: #122035;
-    --color-oxford-navy-400: #172b46;
-    --color-oxford-navy-500: #1d3557;
-    --color-oxford-navy-600: #315a93;
-    --color-oxford-navy-700: #4e7fc4;
-    --color-oxford-navy-800: #89aad8;
-    --color-oxford-navy-900: #c4d4eb;
+    --color-stone-50: #f5f3ee;
+    --color-stone-100: #ecebe5;
+    --color-stone-200: #d9d5ca;
+    --color-stone-300: #c2c1bb;
+    --color-stone-400: #8a90a0;
+    --color-stone-500: #646d82;
+    --color-stone-600: #414c66;
+    --color-stone-700: #2c3752;
+    --color-stone-800: #1b2641;
+    --color-stone-900: #101b33;
+    --color-stone-950: #0a1224;
 }
 
 .theme-standard {
-    --background: #f1faee; /* Honeydew */
-    --foreground: #1d3557; /* Oxford Navy */
-    --card: #ffffff;
-    --card-foreground: #1d3557;
-    --popover: #ffffff;
-    --popover-foreground: #1d3557;
-    --primary: #457b9d; /* Cerulean */
+    --background: #f5f3ee;
+    --foreground: #101b33;
+    --card: #fdfcfa;
+    --card-foreground: #101b33;
+    --popover: #fdfcfa;
+    --popover-foreground: #101b33;
+    --primary: #1f4fd6;
     --primary-foreground: #ffffff;
-    --secondary: #a8dadc; /* Frosted Blue */
-    --secondary-foreground: #1d3557;
-    --muted: #edf8f8;
-    --muted-foreground: #37627d;
-    --accent: #e63946; /* Punch Red */
-    --accent-foreground: #ffffff;
+    --secondary: #ecebe5;
+    --secondary-foreground: #101b33;
+    --muted: #ecebe5;
+    --muted-foreground: #646d82;
+    --accent: #e6ecfb;
+    --accent-foreground: #101b33;
     --destructive: #e63946;
-    --border: #cae9ea;
-    --input: #ffffff;
-    --font-heading: sans-serif;
-    --font-sans: sans-serif;
+    --border: #d9d5ca;
+    --input: #d9d5ca;
+    --ring: #1f4fd6;
+    --radius: 0.375rem;
+
+    --st-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    font-feature-settings: 'kern', 'liga', 'calt';
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+.theme-standard body {
+    font-weight: 450;
+}
+
+.theme-standard ::selection {
+    background: var(--color-brand);
+    color: #fff;
+}
+
+.theme-standard :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+.theme-standard h1 { text-wrap: pretty; }
+.theme-standard h2,
+.theme-standard h3 {
+    text-wrap: balance;
+}
+
+/* ---------- Structure ---------- */
+
+.st-container {
+    width: 100%;
+    max-width: 76rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+}
+@media (min-width: 768px) {
+    .st-container { padding-inline: 2.5rem; }
+}
+
+.st-section { padding-block: 4.5rem; }
+@media (min-width: 768px) {
+    .st-section { padding-block: 7rem; }
+}
+
+.st-rule-top { border-top: 1px solid var(--color-rule); }
+
+/* ---------- Typographie ---------- */
+
+.st-h1 {
+    font-size: clamp(2.5rem, 1.3rem + 3.9vw, 4.25rem);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    font-weight: 650;
+    color: var(--color-ink);
+}
+.st-h1--page {
+    font-size: clamp(2.4rem, 1.4rem + 3.6vw, 4rem);
+}
+.st-h2 {
+    font-size: clamp(1.85rem, 1.2rem + 2vw, 2.9rem);
+    line-height: 1.06;
+    letter-spacing: -0.028em;
+    font-weight: 650;
+    color: var(--color-ink);
+}
+.st-h3 {
+    font-size: 1.25rem;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+    color: var(--color-ink);
+}
+.st-lead {
+    font-size: clamp(1.05rem, 1rem + 0.35vw, 1.25rem);
+    line-height: 1.55;
+    color: var(--color-ink-soft);
+}
+.st-note {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-ink-mute);
+}
+.st-num {
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: 'tnum', 'lnum';
+}
+.st-accent { color: var(--color-brand); }
+
+/* ---------- Liens et boutons ---------- */
+
+/* Soulignement qui se déploie de gauche à droite */
+.st-link {
+    position: relative;
+    display: inline-block;
+    color: inherit;
+    text-decoration: none;
+}
+.st-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.15em;
+    height: 1.5px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right center;
+    transition: transform 0.45s var(--st-ease);
+}
+.st-link:hover::after,
+.st-link:focus-visible::after,
+.st-link[aria-current='page']::after {
+    transform: scaleX(1);
+    transform-origin: left center;
+}
+/* Variante : souligné au repos, se redessine au survol */
+.st-link--on::after { transform: scaleX(1); transform-origin: left center; }
+.st-link--on:hover::after { animation: st-redraw 0.7s var(--st-ease); }
+@keyframes st-redraw {
+    0% { transform: scaleX(1); transform-origin: right center; }
+    45% { transform: scaleX(0); transform-origin: right center; }
+    46% { transform: scaleX(0); transform-origin: left center; }
+    100% { transform: scaleX(1); transform-origin: left center; }
+}
+
+.st-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    padding: 0.95rem 1.4rem;
+    border: 1.5px solid var(--color-brand);
+    border-radius: 6px;
+    background: var(--color-brand);
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+.st-btn:hover { background: var(--color-brand-dark); border-color: var(--color-brand-dark); }
+.st-btn:active { transform: translateY(1px); }
+.st-btn--ghost {
+    background: transparent;
+    color: var(--color-ink);
+    border-color: var(--color-ink);
+}
+.st-btn--ghost:hover { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-paper); }
+.st-btn--light {
+    background: var(--color-paper);
+    border-color: var(--color-paper);
+    color: var(--color-ink);
+}
+.st-btn--light:hover { background: #fff; border-color: #fff; }
+.st-btn--small { padding: 0.65rem 0.95rem; font-size: 0.9rem; }
+
+/* Flèche qui glisse */
+.st-arrow {
+    display: inline-block;
+    width: 1.05em;
+    height: 1.05em;
+    flex: none;
+    transition: transform 0.4s var(--st-ease);
+}
+.st-btn:hover .st-arrow,
+a:hover > .st-arrow,
+.st-link:hover .st-arrow { transform: translateX(5px); }
+
+/* ---------- Bandeau du haut et en-tête ---------- */
+
+.st-topbar {
+    background: var(--color-ink);
+    color: #dfe3ec;
+    font-size: 0.8125rem;
+}
+.st-topbar a { color: #fff; }
+
+.st-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--color-paper);
+    border-bottom: 1px solid var(--color-rule);
+}
+.st-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    height: 4.75rem;
+    transition: height 0.35s var(--st-ease);
+}
+.st-header.is-scrolled .st-header-inner { height: 3.5rem; }
+.st-header::after {
+    /* Ombre fine qui n'apparaît qu'une fois la page défilée */
+    content: '';
+    position: absolute;
+    inset: auto 0 -9px 0;
+    height: 8px;
+    background: linear-gradient(to bottom, rgb(16 27 51 / 0.07), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+.st-header.is-scrolled::after { opacity: 1; }
+
+.st-logo-mark {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 5px;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    transition: transform 0.35s var(--st-ease), background-color 0.25s ease;
+}
+.st-header.is-scrolled .st-logo-mark { transform: scale(0.86); }
+a:hover > .st-logo-mark { background: var(--color-brand); }
+
+.st-nav-link {
+    font-size: 0.95rem;
+    font-weight: 550;
+    color: var(--color-ink);
+}
+.st-nav-link[aria-current='page'] { color: var(--color-brand); }
+
+/* Bouton du menu mobile : deux traits qui se croisent */
+.st-burger {
+    position: relative;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1.5px solid var(--color-ink);
+    border-radius: 6px;
+    color: var(--color-ink);
+}
+.st-burger span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 1.1rem;
+    height: 1.5px;
+    margin-left: -0.55rem;
+    background: currentColor;
+    transition: transform 0.35s var(--st-ease);
+}
+.st-burger span:first-child { transform: translateY(-4px); }
+.st-burger span:last-child { transform: translateY(4px); }
+.st-burger[aria-expanded='true'] span:first-child { transform: rotate(45deg); }
+.st-burger[aria-expanded='true'] span:last-child { transform: rotate(-45deg); }
+
+.st-mobile-nav {
+    position: absolute;
+    inset: 100% 0 auto 0;
+    background: var(--color-paper);
+    border-bottom: 1px solid var(--color-rule);
+    box-shadow: 0 18px 30px -18px rgb(16 27 51 / 0.25);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.25s ease, transform 0.35s var(--st-ease), visibility 0s linear 0.35s;
+}
+.st-mobile-nav.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity 0.25s ease, transform 0.35s var(--st-ease), visibility 0s;
+}
+.st-mobile-nav li {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.35s ease, transform 0.45s var(--st-ease);
+}
+.st-mobile-nav.is-open li {
+    opacity: 1;
+    transform: none;
+    transition-delay: calc(60ms + var(--i, 0) * 45ms);
+}
+@media (min-width: 900px) {
+    .st-mobile-nav { display: none; }
+}
+
+/* ---------- Héros ---------- */
+
+.st-frame {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    background: #e4e1d8;
+}
+.st-frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+/*
+ * Découverte de la photo par clip-path. Le cadre garde sa boîte entière (l'observateur
+ * d'intersection ne voit pas un élément entièrement rogné) : on ne rogne qu'à l'intérieur.
+ */
+.js .st-frame[data-clip] {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+}
+.js .st-frame[data-clip] > picture {
+    display: block;
+    height: 100%;
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 1.2s var(--ease-in-out);
+}
+.js .st-frame[data-clip].is-revealed > picture { clip-path: inset(0 0 0 0); }
+.js .st-frame[data-clip] img {
+    transform: scale(1.12);
+    transition: transform 1.7s var(--st-ease);
+}
+.js .st-frame[data-clip].is-revealed img { transform: none; }
+.st-frame > picture { display: block; height: 100%; }
+
+.st-caption {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--color-ink-mute);
+}
+
+/* Fiche d'infos pratiques (horaires, zone) */
+.st-facts {
+    display: grid;
+    border-top: 1px solid var(--color-ink);
+}
+.st-facts > div {
+    padding-block: 0.95rem;
+    border-bottom: 1px solid var(--color-rule);
+}
+@media (min-width: 640px) {
+    .st-facts { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr) minmax(0, 1fr); }
+    .st-facts > div { padding-right: 1.25rem; border-bottom: 0; }
+    .st-facts > div + div { padding-left: 1.25rem; border-left: 1px solid var(--color-rule); }
+}
+.st-facts dt {
+    font-size: 0.8125rem;
+    color: var(--color-ink-mute);
+    margin-bottom: 0.3rem;
+}
+.st-facts dd {
+    font-size: 0.95rem;
+    font-weight: 550;
+    line-height: 1.4;
+    color: var(--color-ink);
+}
+
+/* ---------- Bandeau défilant ---------- */
+
+.st-marquee {
+    border-block: 1px solid var(--color-rule);
+    padding-block: 1.1rem;
+    --marquee-duration: 46s;
+}
+.st-marquee ul {
+    display: flex;
+    align-items: center;
+    flex: none;
+}
+.st-marquee li {
+    display: flex;
+    align-items: center;
+    gap: 2.25rem;
+    padding-right: 2.25rem;
+    font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.4rem);
+    font-weight: 550;
+    letter-spacing: -0.015em;
+    color: var(--color-ink);
+    white-space: nowrap;
+}
+.st-marquee li::after {
+    content: '';
+    width: 7px;
+    height: 7px;
+    background: var(--color-brand);
+    transform: rotate(45deg);
+}
+@media (prefers-reduced-motion: reduce) {
+    .st-marquee .marquee-track { flex-wrap: wrap; width: auto; row-gap: 0.6rem; padding-inline: 1.25rem; }
+    .st-marquee ul[aria-hidden='true'] { display: none; }
+    .st-marquee ul { flex-wrap: wrap; row-gap: 0.6rem; }
+}
+
+/* ---------- Chiffres ---------- */
+
+.st-figures {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid var(--color-ink);
+}
+.st-figures > div {
+    padding: 1.5rem 1rem 1.5rem 0;
+    border-bottom: 1px solid var(--color-rule);
+}
+.st-figures > div:nth-child(even) { padding-left: 1rem; border-left: 1px solid var(--color-rule); }
+@media (min-width: 900px) {
+    .st-figures { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .st-figures > div { padding: 2rem 1.5rem 2rem 0; border-bottom: 0; }
+    .st-figures > div + div { padding-left: 1.5rem; border-left: 1px solid var(--color-rule); }
+}
+.st-figure-value {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    font-size: clamp(2.4rem, 1.6rem + 2.6vw, 3.75rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 650;
+    color: var(--color-ink);
+}
+.st-figure-value small {
+    font-size: 0.42em;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+    color: var(--color-brand);
+}
+
+/* ---------- Listes à filets (domaines, engagements, diplômes) ---------- */
+
+.st-rows { border-top: 1px solid var(--color-ink); }
+.st-row {
+    display: grid;
+    gap: 0.5rem 2rem;
+    padding-block: 1.75rem;
+    border-bottom: 1px solid var(--color-rule);
+}
+@media (min-width: 768px) {
+    .st-row { grid-template-columns: 3.5rem minmax(0, 1fr) minmax(0, 1.25fr); align-items: baseline; }
+    .st-row--two { grid-template-columns: 3.5rem minmax(0, 1fr); }
+}
+.st-row-index {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-brand);
+}
+
+/* ---------- Carte des prix ---------- */
+
+.st-prices {
+    border-top: 2px solid var(--color-ink);
+}
+.st-prices-head {
+    display: none;
+    font-size: 0.8125rem;
+    color: var(--color-ink-mute);
+    padding: 0.7rem 0.75rem;
+    border-bottom: 1px solid var(--color-rule);
+}
+.st-price {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.25rem 1.25rem;
+    align-items: baseline;
+    padding: 1.15rem 0.75rem;
+    border-bottom: 1px solid var(--color-rule);
+    transition: background-color 0.25s ease;
+}
+/* Repère bleu qui se déploie au survol de la ligne */
+.st-price::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--color-brand);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.35s var(--st-ease);
+}
+.st-price:hover,
+.st-price:focus-within { background: var(--color-brand-tint); }
+.st-price:hover::before,
+.st-price:focus-within::before { transform: scaleY(1); transform-origin: top; }
+.st-price-name {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    color: var(--color-ink);
+}
+.st-price-desc {
+    grid-column: 1 / -1;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--color-ink-mute);
+    max-width: 46ch;
+}
+.st-price-time {
+    grid-column: 1;
+    font-size: 0.875rem;
+    color: var(--color-ink-soft);
+}
+.st-price-amount {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 1.125rem;
+    font-weight: 650;
+    text-align: right;
+    white-space: nowrap;
+    color: var(--color-ink);
+}
+.st-price-amount[data-devis] { font-size: 0.95rem; font-weight: 600; color: var(--color-brand); }
+.st-price-action { grid-column: 2; text-align: right; font-size: 0.875rem; font-weight: 600; color: var(--color-brand); }
+@media (min-width: 768px) {
+    .st-prices-head,
+    .st-price {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 5.5rem 6.5rem;
+        gap: 0 1.5rem;
+    }
+    .st-prices--action .st-prices-head,
+    .st-prices--action .st-price { grid-template-columns: 2.5rem minmax(0, 1fr) 5.5rem 6.5rem 6.5rem; }
+    .st-price-desc { grid-column: auto; grid-row: auto; }
+    .st-price-main { display: grid; gap: 0.2rem; }
+    .st-price-time,
+    .st-price-amount,
+    .st-price-action { grid-column: auto; grid-row: auto; text-align: right; }
+    .st-prices-head span:nth-last-child(-n + 2),
+    .st-prices--action .st-prices-head span:nth-last-child(-n + 3) { text-align: right; }
+}
+
+/* ---------- Étapes : trait de progression ---------- */
+
+.st-steps {
+    position: relative;
+    display: grid;
+    gap: 2.75rem;
+    padding-left: 4rem;
+}
+@media (min-width: 768px) {
+    .st-steps { gap: 4rem; padding-left: 5.5rem; }
+}
+.st-steps-line {
+    position: absolute;
+    left: 1.25rem;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 2px;
+    margin-left: -1px;
+    background: var(--color-rule);
+}
+/* État par défaut (navigateurs sans animation-timeline, mouvement réduit) : trait plein */
+.st-steps-line::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--color-brand);
+    transform-origin: top;
+}
+.st-step { position: relative; }
+.st-step-num {
+    position: absolute;
+    left: -4rem;
+    top: -0.35rem;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-rule);
+    background: var(--color-paper);
+    color: var(--color-ink-mute);
+    font-weight: 650;
+    font-size: 1rem;
+}
+@media (min-width: 768px) {
+    .st-step-num { left: -5.5rem; }
+}
+/* Pastille pleine superposée : visible par défaut, révélée par le défilement quand c'est possible */
+.st-step-num::after {
+    content: attr(data-n);
+    position: absolute;
+    inset: -1.5px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-brand);
+    color: #fff;
+}
+@media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+        .st-steps-line::after {
+            transform: scaleY(0);
+            animation: st-line-fill linear both;
+            animation-timeline: view();
+            animation-range: cover 22% cover 62%;
+        }
+        .st-step-num::after {
+            opacity: 0;
+            transform: scale(0.6);
+            animation: st-step-on linear both;
+            animation-timeline: view();
+            animation-range: cover 32% cover 44%;
+        }
+    }
+}
+@keyframes st-line-fill { to { transform: scaleY(1); } }
+@keyframes st-step-on { to { opacity: 1; transform: scale(1); } }
+
+/* ---------- Avis ---------- */
+
+.st-quote {
+    display: grid;
+    gap: 1.25rem;
+    align-content: space-between;
+    padding: 1.75rem 0;
+    border-top: 1px solid var(--color-rule);
+}
+.st-quote blockquote {
+    font-size: 1.125rem;
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+}
+.st-quote--lead blockquote {
+    font-size: clamp(1.5rem, 1.1rem + 1.5vw, 2.25rem);
+    line-height: 1.18;
+    letter-spacing: -0.025em;
+    font-weight: 550;
+}
+.st-quote--lead { border-top-color: var(--color-ink); }
+.st-rating { display: inline-flex; gap: 3px; }
+.st-rating i {
+    width: 9px;
+    height: 9px;
+    background: var(--color-rule);
+    transform: rotate(45deg);
+}
+.st-rating i[data-on] { background: var(--color-brand); }
+
+/* ---------- Bloc d'appel final ---------- */
+
+.st-cta {
+    background: var(--color-ink);
+    color: var(--color-paper);
+}
+.st-cta .st-h2 { color: var(--color-paper); }
+.st-cta-phone {
+    font-size: clamp(1.75rem, 1.2rem + 2vw, 2.75rem);
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: #fff;
+}
+
+/* ---------- Pied de page ---------- */
+
+.st-footer {
+    border-top: 1px solid var(--color-rule);
+    background: var(--color-paper);
+    color: var(--color-ink-soft);
+    font-size: 0.9375rem;
+}
+.st-footer-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    margin-bottom: 1rem;
+}
+/* ---------- Formulaires (pages contact, connexion…) ---------- */
+
+.st-panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-rule);
+    border-radius: 6px;
+}
+.st-field label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    margin-bottom: 0.4rem;
+}
+.st-input {
+    width: 100%;
+    padding: 0.8rem 0.9rem;
+    border: 1px solid var(--color-rule);
+    border-radius: 6px;
+    background: #fff;
+    font-size: 1rem;
+    color: var(--color-ink);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.st-input:hover { border-color: var(--color-ink-mute); }
+.st-input:focus {
+    outline: none;
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 3px var(--color-brand-tint);
+}
+
+/* ---------- Texte long (pages légales) ---------- */
+
+.st-prose { color: var(--color-ink-soft); font-size: 1.0625rem; line-height: 1.65; }
+.st-prose > * + * { margin-top: 1rem; }
+.st-prose h2 {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-rule);
+    font-size: 1.375rem;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-weight: 650;
+    color: var(--color-ink);
+}
+.st-prose h3 { font-weight: 600; color: var(--color-ink); margin-top: 1.5rem; }
+.st-prose ul { list-style: none; padding: 0; }
+.st-prose ul li { position: relative; padding-left: 1.25rem; }
+.st-prose ul li + li { margin-top: 0.4rem; }
+.st-prose ul li::before {
+    content: '';
+    position: absolute;
+    left: 0.15rem;
+    top: 0.65em;
+    width: 6px;
+    height: 6px;
+    background: var(--color-brand);
+    transform: rotate(45deg);
+}
+.st-prose a { color: var(--color-brand); text-decoration: underline; text-underline-offset: 3px; }
+.st-prose a:hover { color: var(--color-brand-dark); }
+.st-prose strong { color: var(--color-ink); font-weight: 600; }
+
+/* Carte Leaflet : cadre net, cohérent avec les photos */
+.theme-standard .leaflet-mount { border-radius: 4px; border-color: var(--color-rule); }
+
+@media (prefers-reduced-motion: reduce) {
+    .st-link::after,
+    .st-arrow,
+    .st-header-inner,
+    .st-mobile-nav,
+    .st-mobile-nav li,
+    .st-price::before,
+    .st-burger span { transition: none; }
+    .st-link--on:hover::after { animation: none; }
+    .js .st-frame[data-clip] > picture { clip-path: none; transition: none; }
+    .js .st-frame[data-clip] img { transform: none; transition: none; }
+}
+
+/* Numéro de ligne de la grille complète : masqué sur mobile */
+.st-price-index { display: none; font-size: 0.875rem; font-weight: 600; color: var(--color-brand); }
+.st-price-main { grid-column: 1; }
+@media (min-width: 768px) {
+    .st-price-index { display: block; }
+    .st-price-main { grid-column: auto; }
 }

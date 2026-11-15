@@ -2,6 +2,10 @@
 
 Plateforme vitrine + réservation pour indépendants (coiffeur, garage…), vendue en trois formules : **Standard**, **Premium**, **Diamant**. Chaque formule a sa démo complète (site public, espace client, dashboard pro) et une page commerciale les présente. Le propriétaire communique en français : code commenté, commits et textes en français.
 
+## Chantier en cours : refonte graphique (en pause depuis le 15/11/2026)
+
+Branche `refonte-graphique`, état intermédiaire non fusionnable. **Avant toute chose, lire `Documentation/refonte/REPRISE.md`** (état, constats, pile retenue, direction par démo, étapes restantes) et `Documentation/refonte/brief-commun.md` (règles données aux agents). La règle « éviter les animations lourdes » ci-dessous est levée pour Diamant et la page commerciale (GSAP + ScrollTrigger), dans les limites décrites dans ces fichiers.
+
 ## Stack
 
 Astro 7 (`output: 'server'`) + îlots React 19, Tailwind 4 (`@tailwindcss/vite`), composants shadcn/base-ui, Supabase (Auth + Postgres), déploiement Cloudflare Workers (`@astrojs/cloudflare`, `wrangler.jsonc`).
