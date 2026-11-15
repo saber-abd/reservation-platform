@@ -24,6 +24,8 @@
     });
 
     window.lenis = lenis;
+    // Les pages qui utilisent ScrollTrigger s'y raccordent (src/lib/motion/gsap.ts).
+    window.dispatchEvent(new Event('lenis:ready'));
 
     let rafId = 0;
 
