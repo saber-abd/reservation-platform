@@ -1,103 +1,119 @@
 ---
+// Pied de page sombre : coordonnées, horaires, liens, puis le nom du salon en très grand,
+// ajusté à la largeur de la page et révélé lettre par lettre à son arrivée dans l'écran (SplitText).
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
-const currentYear = new Date().getFullYear();
+const { business } = siteConfig;
+const annee = new Date().getFullYear();
+const base = '/demo-diamant';
+const tel = business.phone.replace(/[^\d+]/g, '');
 ---
 
-<footer class="bg-[#fff0e8] border-t border-stone-200 pt-20 pb-10">
-	<div class="mx-auto max-w-7xl px-6">
-		<div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-			<!-- Marque -->
-			<div class="md:col-span-1">
-				<a href="/demo-diamant/" class="inline-block mb-5">
-					<span class="text-xl font-bold tracking-widest text-stone-800 uppercase" data-diamant-business-name>
-						{siteConfig.business.name}
-					</span>
+<footer class="dia-pied dia-sombre">
+	<div class="dia-wrap">
+		<div class="dia-pied__colonnes">
+			<div class="col-span-2 lg:col-span-1">
+				<p class="dia-pied__titre">Le salon</p>
+				<address class="not-italic text-[#b5a898]">
+					{business.address}<br />
+					<a href={`tel:${tel}`}>{business.phone}</a><br />
+					<a href={`mailto:${business.email}`}>{business.email}</a>
+				</address>
+				<a href={`${base}/reservation`} class="dia-btn mt-7">
+					Prendre rendez-vous
+					<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
 				</a>
-				<p class="text-stone-500 text-sm leading-relaxed mb-7">
-					L'excellence de la coiffure haut de gamme. Un service sur-mesure conçu pour sublimer votre allure.
-				</p>
-				<div class="flex items-center gap-3">
-					<a href="#" class="w-9 h-9 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-400 hover:text-deep-teal-500 hover:border-deep-teal-200 transition-all">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-					</a>
-					<a href="#" class="w-9 h-9 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-400 hover:text-deep-teal-500 hover:border-deep-teal-200 transition-all">
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-					</a>
-				</div>
 			</div>
 
-			<!-- Navigation -->
 			<div>
-				<h4 class="text-stone-800 font-bold tracking-widest uppercase text-xs mb-5">Navigation</h4>
-				<ul class="space-y-3">
-					<li><a href="/demo-diamant/services" class="text-stone-500 hover:text-deep-teal-600 transition-colors text-sm">Prestations</a></li>
-					<li><a href="/demo-diamant/a-propos" class="text-stone-500 hover:text-deep-teal-600 transition-colors text-sm">La Maison Prestige</a></li>
-					<li><a href="/demo-diamant/contact" class="text-stone-500 hover:text-deep-teal-600 transition-colors text-sm">Contact & Accès</a></li>
-					<li><a href="/demo-diamant/reservation" class="text-deep-teal-600 font-medium hover:text-deep-teal-500 transition-colors text-sm">Réserver en ligne</a></li>
-				</ul>
+				<p class="dia-pied__titre">Horaires</p>
+				<dl class="grid gap-2 text-[#b5a898]">
+					{business.openingHours.map((h) => (
+						<div>
+							<dt class="text-[#f1e9dd]">{h.day}</dt>
+							<dd class="dia-chiffre">{h.hours}</dd>
+						</div>
+					))}
+				</dl>
 			</div>
 
-			<!-- Espace Membre -->
-			<div>
-				<h4 class="text-stone-800 font-bold tracking-widest uppercase text-xs mb-5">Espace Membre</h4>
-				<ul class="space-y-3">
-					<li><a href="/demo-diamant/connexion" class="text-stone-500 hover:text-deep-teal-600 transition-colors text-sm">Se connecter</a></li>
-					<li><a href="/demo-diamant/inscription" class="text-stone-500 hover:text-deep-teal-600 transition-colors text-sm">Créer un compte</a></li>
-					<li><a href="/demo-diamant/espace-client" class="text-stone-500 hover:text-deep-teal-600 transition-colors text-sm">Mon Profil</a></li>
-					<li><a href="/demo-diamant/dashboard" class="text-stone-400 hover:text-stone-700 transition-colors text-sm">Accès Pro</a></li>
+			<nav aria-label="Pages du site">
+				<p class="dia-pied__titre">Pages</p>
+				<ul>
+					<li><a href={`${base}/services`}>Prestations et tarifs</a></li>
+					<li><a href={`${base}/a-propos`}>Le salon</a></li>
+					<li><a href={`${base}/contact`}>Contact et accès</a></li>
+					<li><a href={`${base}/reservation`}>Réserver en ligne</a></li>
+					<li><a href="/">Retour au portfolio</a></li>
 				</ul>
-			</div>
+			</nav>
 
-			<!-- Informations légales -->
-			<div>
-				<h4 class="text-stone-800 font-bold tracking-widest uppercase text-xs mb-5">Mentions Légales</h4>
-				<ul class="space-y-3">
-					<li><a href="/demo-diamant/mentions-legales" class="text-stone-500 hover:text-stone-700 transition-colors text-sm">Mentions légales</a></li>
-					<li><a href="/demo-diamant/politique-de-confidentialite" class="text-stone-500 hover:text-stone-700 transition-colors text-sm">Politique de confidentialité</a></li>
-					<li><a href="/demo-diamant/conditions-utilisation" class="text-stone-500 hover:text-stone-700 transition-colors text-sm">Conditions d'utilisation</a></li>
+			<nav aria-label="Compte et informations">
+				<p class="dia-pied__titre">Compte</p>
+				<ul>
+					<li><a href={`${base}/connexion`}>Se connecter</a></li>
+					<li><a href={`${base}/inscription`}>Créer un compte</a></li>
+					<li><a href={`${base}/espace-client`}>Espace client</a></li>
+					<li><a href={`${base}/dashboard`}>Espace professionnel</a></li>
 				</ul>
-			</div>
+				<ul class="mt-6">
+					<li><a href={`${base}/mentions-legales`}>Mentions légales</a></li>
+					<li><a href={`${base}/politique-de-confidentialite`}>Confidentialité</a></li>
+					<li><a href={`${base}/conditions-utilisation`}>Conditions d'utilisation</a></li>
+				</ul>
+			</nav>
 		</div>
 
-		<div class="pt-8 border-t border-stone-200 flex flex-col md:flex-row items-center justify-between gap-4">
-			<p class="text-stone-400 text-sm">
-				&copy; {currentYear} <span data-diamant-business-name>{siteConfig.business.name}</span>. Tous droits réservés.
-			</p>
-			<p class="text-stone-300 text-sm">
-				Demo Diamant — Plateforme de Réservation
-			</p>
+		<p class="dia-pied__nom" data-pied-nom><span data-diamant-business-name>{business.name}</span></p>
+
+		<div class="dia-pied__bas">
+			<p>&copy; {annee} <span data-diamant-business-name>{business.name}</span>. Tous droits réservés.</p>
+			<p>Démo Diamant, plateforme de réservation</p>
 		</div>
 	</div>
 </footer>
 
-<script is:inline>
-	function syncDiamantFooter() {
-		try {
-			var saved = localStorage.getItem('diamant_pro_profile');
-			var name = null;
-			if (saved) {
-				var parsed = JSON.parse(saved);
-				if (parsed && parsed.business_name) name = parsed.business_name;
-			}
-			if (!name) {
-				var match = document.cookie.match(/(?:^|;\s*)diamant_business_name=([^;]+)/);
-				if (match) name = decodeURIComponent(match[1]);
-			}
-			if (name) {
-				document.querySelectorAll('[data-diamant-business-name]').forEach(function(el) {
-					el.textContent = name;
-				});
-			}
-		} catch (e) {}
+<script>
+	import { gsap, MQ, SplitText } from '@/lib/motion/gsap';
+
+	const bloc = document.querySelector<HTMLElement>('[data-pied-nom]');
+	const nom = bloc?.querySelector<HTMLElement>('span');
+
+	if (bloc && nom) {
+		// Le nom occupe toute la largeur disponible, quelle que soit sa longueur.
+		const ajuster = () => {
+			bloc.style.fontSize = '';
+			const dispo = bloc.clientWidth;
+			const actuel = nom.getBoundingClientRect().width;
+			if (!dispo || !actuel) return;
+			const taille = parseFloat(getComputedStyle(bloc).fontSize);
+			bloc.style.fontSize = `${Math.min(taille * (dispo / actuel) * 0.98, 560)}px`;
+		};
+		ajuster();
+		document.fonts?.ready.then(ajuster);
+		let attente = 0;
+		window.addEventListener('resize', () => {
+			cancelAnimationFrame(attente);
+			attente = requestAnimationFrame(ajuster);
+		});
+
+		const mm = gsap.matchMedia();
+		mm.add(MQ.motion, () => {
+			SplitText.create(nom, {
+				// Pas de masque : il rognerait les débords des lettres (Fraunces, approche serrée).
+				type: 'chars',
+				autoSplit: true,
+				onSplit: (self) =>
+					gsap.from(self.chars, {
+						yPercent: 45,
+						autoAlpha: 0,
+						duration: 1.1,
+						ease: 'power3.out',
+						stagger: 0.05,
+						scrollTrigger: { trigger: bloc, start: 'top 92%', once: true },
+					}),
+			});
+		});
 	}
-	syncDiamantFooter();
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', syncDiamantFooter);
-	}
-	window.addEventListener('storage', function(e) {
-		if (e.key === 'diamant_pro_profile') syncDiamantFooter();
-	});
-	window.addEventListener('diamant:profile-updated', syncDiamantFooter);
 </script>

@@ -1,0 +1,33 @@
+---
+// Image locale de /images/diamant servie en AVIF avec repli WebP.
+interface Props {
+	fichier: string;
+	largeurs: number[];
+	ratio: [number, number];
+	alt: string;
+	sizes?: string;
+	prioritaire?: boolean;
+	class?: string;
+}
+
+const { fichier, largeurs, ratio, alt, sizes = '100vw', prioritaire = false, class: className } = Astro.props;
+const base = `/images/diamant/${fichier}`;
+const srcset = (ext: string) => largeurs.map((l) => `${base}-${l}.${ext} ${l}w`).join(', ');
+const largeurMax = largeurs[largeurs.length - 1];
+const hauteur = Math.round((largeurMax * ratio[1]) / ratio[0]);
+---
+
+<picture>
+	<source type="image/avif" srcset={srcset('avif')} sizes={sizes} />
+	<source type="image/webp" srcset={srcset('webp')} sizes={sizes} />
+	<img
+		src={`${base}-${largeurs[0]}.webp`}
+		alt={alt}
+		width={largeurMax}
+		height={hauteur}
+		class={className}
+		loading={prioritaire ? 'eager' : 'lazy'}
+		decoding={prioritaire ? 'auto' : 'async'}
+		fetchpriority={prioritaire ? 'high' : undefined}
+	/>
+</picture>

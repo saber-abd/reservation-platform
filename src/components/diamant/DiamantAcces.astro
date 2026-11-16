@@ -1,0 +1,49 @@
+---
+// Venir au salon : adresse, téléphone, horaires et carte Leaflet (chargée à l'approche de l'écran).
+import Map from '@/components/diamant/DiamantMap.astro';
+import { getSiteConfig } from '@/config/site';
+
+interface Props {
+	numero?: string;
+}
+
+const { numero = '04' } = Astro.props;
+const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
+const { business } = siteConfig;
+const tel = business.phone.replace(/[^\d+]/g, '');
+const itineraire = `https://www.openstreetmap.org/directions?to=${business.lat}%2C${business.lng}`;
+---
+
+<section class="dia-section" aria-labelledby="acces-titre">
+	<div class="dia-wrap dia-grille items-start">
+		<div class="dia-col-moitie-g">
+			<p class="dia-num"><b>{numero}</b> Accès</p>
+			<h2 id="acces-titre" class="dia-h2 mt-6" data-split>Venir <em>au salon.</em></h2>
+			<p class="dia-acces__adresse mt-10" data-reveal>{business.address}</p>
+			<p class="mt-4 flex flex-wrap gap-x-6 gap-y-2" data-reveal data-reveal-delay="80">
+				<a href={`tel:${tel}`} class="dia-lien dia-chiffre">{business.phone}</a>
+				<a href={`mailto:${business.email}`} class="dia-lien">{business.email}</a>
+			</p>
+			<dl class="dia-horaires mt-10 max-w-md" data-reveal data-reveal-delay="140">
+				{business.openingHours.map((h) => (
+					<div>
+						<dt>{h.day}</dt>
+						<dd>{h.hours}</dd>
+					</div>
+				))}
+			</dl>
+			<div class="mt-10 flex flex-wrap gap-3" data-reveal data-reveal-delay="200">
+				<a href="/demo-diamant/reservation" class="dia-btn">
+					Réserver
+					<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+				</a>
+				<a href={itineraire} class="dia-btn dia-btn--ligne" target="_blank" rel="noopener noreferrer">Itinéraire</a>
+			</div>
+		</div>
+		<div class="dia-col-moitie-d" data-reveal="fade">
+			<div class="dia-carte aspect-[4/5] lg:aspect-[5/6]">
+				<Map lat={business.lat} lng={business.lng} label={business.name} class="h-full w-full" />
+			</div>
+		</div>
+	</div>
+</section>

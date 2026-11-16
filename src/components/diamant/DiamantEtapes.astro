@@ -1,0 +1,191 @@
+---
+// « Le rendez-vous, étape par étape ».
+// Bureau (≥ 992 px, mouvement autorisé) : section épinglée pilotée par le défilement (GSAP ScrollTrigger,
+// scrub + aimantation sur chaque étape). Le fond passe de l'ivoire au sombre, la photo du salon se
+// resserre en carte portrait aux coins arrondis, puis chaque étape remplace la précédente (texte,
+// photo dévoilée par le bas, forme de la carte qui change). Ailleurs : étapes empilées sur fond sombre.
+import DiamantPicture from '@/components/diamant/DiamantPicture.astro';
+import { images } from '@/components/diamant/images';
+
+interface Props {
+	numero?: string;
+}
+
+const { numero = '02' } = Astro.props;
+
+const etapes = [
+	{
+		titre: 'Le diagnostic',
+		duree: '10 min',
+		texte: "On regarde la nature du cheveu, sa longueur, les couleurs passées. Vous dites ce que vous voulez ; on vous dit ce qui est réaliste et le prix exact avant de commencer.",
+		image: images.diagnostic,
+	},
+	{
+		titre: 'Le bac',
+		duree: '15 min',
+		texte: 'Shampoing choisi selon le cuir chevelu, soin si besoin, deux minutes de massage. Le fauteuil s’incline et l’eau est réglée à votre goût.',
+		image: images.bac,
+	},
+	{
+		titre: 'La coupe',
+		duree: '30 à 45 min',
+		texte: 'Aux ciseaux d’abord, au rasoir ou à la tondeuse seulement si la coupe le demande. La longueur vous est montrée avant chaque passage.',
+		image: images.coupe,
+	},
+	{
+		titre: 'La finition',
+		duree: '15 min',
+		texte: 'Séchage, brushing ou mise en forme, puis le miroir pour voir l’arrière. La coupe et la formule de couleur sont notées dans votre fiche pour la prochaine fois.',
+		image: images.finition,
+	},
+];
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<section class="dia-etapes" data-etapes aria-labelledby="etapes-titre">
+	<div class="dia-etapes__scene" data-etapes-scene>
+		<div class="dia-etapes__fond" data-etapes-fond aria-hidden="true"></div>
+
+		<div class="dia-etapes__intro dia-wrap" data-etapes-intro>
+			<div>
+				<p class="dia-num mb-6"><b>{numero}</b> Comment se passe un rendez-vous</p>
+				<h2 id="etapes-titre" class="dia-h1">Le rendez-vous,<br /><em>étape par étape.</em></h2>
+			</div>
+			<p class="dia-lead hidden lg:block">Une heure en moyenne pour une coupe, shampoing et coiffage compris.</p>
+		</div>
+
+		<div class="dia-etapes__media" data-etapes-media>
+			<DiamantPicture {...images.salon} sizes="100vw" />
+		</div>
+
+		<ol class="dia-etapes__textes">
+			{etapes.map((e, i) => (
+				<li class="dia-etape" data-etape-texte>
+					<div class="dia-etape__img">
+						<DiamantPicture {...e.image} alt={e.image.alt} sizes="(min-width: 700px) 45vw, 92vw" />
+					</div>
+					<div class="dia-etape__tete">
+						<span class="dia-etape__n">{pad(i + 1)}</span>
+						<span class="dia-etape__duree">{e.duree}</span>
+					</div>
+					<h3 class="dia-etape__titre">{e.titre}</h3>
+					<p class="dia-etape__texte">{e.texte}</p>
+				</li>
+			))}
+		</ol>
+
+		<div class="dia-etapes__carte" data-etapes-carte aria-hidden="true">
+			{etapes.map((e) => (
+				<figure data-etape-img>
+					<DiamantPicture {...e.image} alt="" sizes="460px" />
+				</figure>
+			))}
+		</div>
+
+		<ol class="dia-etapes__index" aria-hidden="true">
+			{etapes.map((e, i) => (
+				<li data-etape-index class:list={[i === 0 && 'is-actif']}><b>{pad(i + 1)}</b> {e.titre.replace(/^L[ea]\s/, '')}</li>
+			))}
+		</ol>
+	</div>
+</section>
+
+<script>
+	import { gsap, MQ, wireScroll } from '@/lib/motion/gsap';
+
+	const section = document.querySelector<HTMLElement>('[data-etapes]');
+	if (section) {
+		const scene = section.querySelector<HTMLElement>('[data-etapes-scene]')!;
+		const fond = section.querySelector<HTMLElement>('[data-etapes-fond]')!;
+		const intro = section.querySelector<HTMLElement>('[data-etapes-intro]')!;
+		const media = section.querySelector<HTMLElement>('[data-etapes-media]')!;
+		const carte = section.querySelector<HTMLElement>('[data-etapes-carte]')!;
+		const photos = Array.from(section.querySelectorAll<HTMLElement>('[data-etape-img]'));
+		const textes = Array.from(section.querySelectorAll<HTMLElement>('[data-etape-texte]'));
+		const index = Array.from(section.querySelectorAll<HTMLElement>('[data-etape-index]'));
+		const indexBloc = index[0]?.parentElement;
+		const n = textes.length;
+
+		const mm = gsap.matchMedia();
+		mm.add(MQ.desktop, () => {
+			section.classList.add('is-pinned');
+
+			// Rectangle de la carte, en pourcentage de la scène : cible du masque de la grande photo.
+			const masqueCarte = () => {
+				const s = scene.getBoundingClientRect();
+				const c = carte.getBoundingClientRect();
+				const pc = (v: number, total: number) => `${((v / total) * 100).toFixed(3)}%`;
+				return `inset(${pc(c.top - s.top, s.height)} ${pc(s.right - c.right, s.width)} ${pc(s.bottom - c.bottom, s.height)} ${pc(c.left - s.left, s.width)} round 28px 28px 28px 28px)`;
+			};
+			// Formes successives de la carte : rectangle arrondi, arche, feuille, rectangle.
+			const forme = (i: number) => {
+				const r = Math.round(carte.offsetWidth / 2);
+				const formes = [
+					[28, 28, 28, 28],
+					[r, r, 28, 28],
+					[28, r, 28, r],
+					[28, 28, 28, 28],
+				];
+				const [a, b, c, d] = formes[i % formes.length];
+				return `inset(0.000% 0.000% 0.000% 0.001% round ${a}px ${b}px ${c}px ${d}px)`;
+			};
+			let courant = -1;
+			const marquer = (i: number) => {
+				if (i === courant) return;
+				courant = i;
+				index.forEach((el, j) => el.classList.toggle('is-actif', j === i));
+			};
+
+			// Les masques sont toujours animés avec fromTo et des chaînes complètes : le navigateur abrège
+			// la valeur relue (« inset(0% round 28px) »), ce qui fausserait l'interpolation de GSAP.
+			const masqueDepart = 'inset(44.000% 4.000% 6.000% 4.001% round 6px 6px 6px 6px)';
+			const cache = 'inset(100.000% 0.000% 0.000% 0.001%)';
+			const visible = 'inset(0.000% 0.000% 0.000% 0.001%)';
+			gsap.set(media, { clipPath: masqueDepart });
+			gsap.set(fond, { opacity: 0 });
+			gsap.set(carte, { autoAlpha: 0, clipPath: () => forme(0) });
+			gsap.set(photos.slice(1), { clipPath: cache });
+			gsap.set(textes, { autoAlpha: 0, y: 48 });
+			if (indexBloc) gsap.set(indexBloc, { autoAlpha: 0 });
+
+			const tl = gsap.timeline({
+				defaults: { ease: 'none' },
+				scrollTrigger: {
+					trigger: scene,
+					pin: true,
+					start: 'top top',
+					end: () => `+=${(n + 0.6) * window.innerHeight}`,
+					scrub: 0.8,
+					anticipatePin: 1,
+					invalidateOnRefresh: true,
+					snap: { snapTo: 'labelsDirectional', duration: { min: 0.25, max: 0.8 }, delay: 0.12, ease: 'power2.inOut', inertia: false },
+					onUpdate: () => marquer(Math.max(0, Math.min(n - 1, Math.round(tl.time() - 1.05)))),
+				},
+			});
+
+			tl.addLabel('debut', 0)
+				.fromTo(media, { clipPath: masqueDepart }, { clipPath: masqueCarte, duration: 1, ease: 'power2.inOut', immediateRender: false }, 0)
+				.to(fond, { opacity: 1, duration: 0.6 }, 0.25)
+				.to(intro, { autoAlpha: 0, y: -60, duration: 0.45 }, 0.15)
+				.to(textes[0], { autoAlpha: 1, y: 0, duration: 0.3 }, 0.75)
+				.to(carte, { autoAlpha: 1, duration: 0.15 }, 0.9);
+			if (indexBloc) tl.to(indexBloc, { autoAlpha: 1, duration: 0.3 }, 0.75);
+			tl.set(media, { autoAlpha: 0 }, 1.05).addLabel('e0', 1.05);
+
+			for (let i = 1; i < n; i++) {
+				const t = 1.05 + i;
+				tl.to(textes[i - 1], { autoAlpha: 0, y: -48, duration: 0.35 }, t - 0.85)
+					.fromTo(photos[i], { clipPath: cache }, { clipPath: visible, duration: 0.7, ease: 'power2.inOut', immediateRender: false }, t - 0.85)
+					.fromTo(carte, { clipPath: () => forme(i - 1) }, { clipPath: () => forme(i), duration: 0.7, ease: 'power2.inOut', immediateRender: false }, t - 0.85)
+					.to(textes[i], { autoAlpha: 1, y: 0, duration: 0.4 }, t - 0.5)
+					.addLabel(`e${i}`, t);
+			}
+			tl.to({}, { duration: 0.55 }).addLabel('fin');
+
+			return () => {
+				section.classList.remove('is-pinned');
+			};
+		});
+		wireScroll();
+	}
+</script>

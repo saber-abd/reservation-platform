@@ -1,0 +1,20 @@
+---
+// Bandeau défilant en serif italique : les prestations du salon (socle .marquee de motion.css,
+// arrêté si le mouvement est réduit, en pause hors de l'écran et au survol).
+interface Props {
+	mots: string[];
+}
+
+const { mots } = Astro.props;
+const uniques = [...new Set(mots.map((m) => m.trim()).filter(Boolean))].slice(0, 9);
+---
+
+<div class="dia-bandeau marquee" aria-hidden="true">
+	<div class="marquee-track">
+		{[0, 1].map(() => (
+			<div class="flex">
+				{uniques.map((m) => <span class="dia-bandeau__mot">{m}</span>)}
+			</div>
+		))}
+	</div>
+</div>

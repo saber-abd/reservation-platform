@@ -1,182 +1,30 @@
 ---
+// Accueil Diamant. Sections : héros, bandeau des prestations, carte des prestations (colonne
+// collante), le rendez-vous étape par étape (épinglé), avis (diagonale), accès.
+// ScrollTrigger sur la page : parallaxe du héros, ligne active des prestations, épinglage des étapes,
+// diagonale des avis, titres découpés (prestations, avis, accès) et nom du pied de page : 8 au total.
 import DiamantLayout from '@/layouts/diamant/DiamantLayout.astro';
-import Diamant3DLogo from '@/components/diamant/Diamant3DLogo';
-import Map from '@/components/diamant/DiamantMap.astro';
-import ServicesCarousel from '@/components/diamant/DiamantServicesCarousel';
-import TestimonialsCarousel from '@/components/diamant/DiamantTestimonialsCarousel';
+import DiamantHero from '@/components/diamant/DiamantHero.astro';
+import DiamantBandeau from '@/components/diamant/DiamantBandeau.astro';
+import DiamantPrestations from '@/components/diamant/DiamantPrestations.astro';
+import DiamantEtapes from '@/components/diamant/DiamantEtapes.astro';
+import DiamantTemoignages from '@/components/diamant/DiamantTemoignages.astro';
+import DiamantAcces from '@/components/diamant/DiamantAcces.astro';
+import { chargerPrestations } from '@/components/diamant/prestations';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
+const prestations = await chargerPrestations();
 ---
 
-<DiamantLayout>
-	<!-- Hero Section -->
-	<section class="relative min-h-screen flex items-center pt-24 pb-16 bg-[#fff7f1] overflow-hidden">
-		<!-- Décor géométrique léger (pas de blur lourd) -->
-		<div class="absolute top-0 right-0 w-96 h-96 bg-deep-teal-100/60 rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
-		<div class="absolute bottom-0 left-0 w-64 h-64 bg-jasmine-100/60 rounded-full translate-y-1/2 -translate-x-1/3 pointer-events-none"></div>
-
-		<div class="relative z-10 mx-auto max-w-7xl px-6 w-full grid md:grid-cols-2 gap-12 items-center">
-			<!-- Text Content -->
-			<div class="text-left section-fade" data-aos="fade-up" data-aos-duration="800">
-				<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-deep-teal-50 border border-deep-teal-200 text-deep-teal-600 font-semibold mb-8 uppercase tracking-widest text-xs" data-aos="fade-down" data-aos-delay="100">
-					<span class="w-1.5 h-1.5 rounded-full bg-deep-teal-400 animate-pulse"></span>
-					{siteConfig.business.activity}
-				</div>
-				<h1 class="text-4xl font-black text-stone-800 mb-6 tracking-tight leading-tight" data-aos="fade-up" data-aos-delay="200">
-					L'Art de la <br />
-					<span class="text-deep-teal-500">Coiffure</span>
-				</h1>
-				<p class="text-lg text-stone-500 mb-10 max-w-lg leading-relaxed" data-aos="fade-up" data-aos-delay="300">
-					Une expérience sur-mesure dans un cadre d'exception. Confiez votre image à nos experts pour un résultat sublime.
-				</p>
-				<div class="flex flex-col sm:flex-row gap-4" data-aos="fade-up" data-aos-delay="400">
-					<a
-						href="/demo-diamant/reservation"
-						class="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-deep-teal-500 text-white font-bold text-base hover:bg-deep-teal-400 transition-colors shadow-sm"
-					>
-						Réserver un moment
-					</a>
-					<a
-						href="#prestige"
-						class="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-white border border-stone-200 text-stone-700 font-bold text-base hover:bg-stone-50 transition-colors"
-					>
-						Découvrir la Maison
-					</a>
-				</div>
-			</div>
-
-			<!-- Logo SVG animé -->
-			<div class="h-[420px] md:h-[520px] relative w-full section-fade" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
-				<Diamant3DLogo client:idle />
-			</div>
-		</div>
-
-		<!-- Scroll indicator -->
-		<div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40 pointer-events-none" data-aos="fade-up" data-aos-delay="600">
-			<span class="text-xs text-stone-500 uppercase tracking-widest">Scroll</span>
-			<div class="w-[1px] h-10 bg-gradient-to-b from-stone-400 to-transparent"></div>
-		</div>
-	</section>
-
-	<!-- L'Expérience Prestige -->
-	<section id="prestige" class="py-24 bg-white border-t border-stone-100">
-		<div class="mx-auto max-w-7xl px-6">
-			<div class="grid items-center gap-16 md:grid-cols-2">
-				<div class="relative section-fade" data-aos="fade-right" data-aos-duration="800">
-					<div class="overflow-hidden rounded-2xl border border-stone-100 aspect-[4/5] shadow-md">
-						<img src="/images/about_salon.webp" loading="lazy" decoding="async" alt="Ambiance salon" class="h-full w-full object-cover hover:scale-105 transition-transform duration-700" />
-					</div>
-					<!-- Badge overlay -->
-					<div class="absolute -bottom-4 -right-4 bg-white border border-stone-200 rounded-2xl p-4 shadow-lg" data-aos="zoom-in" data-aos-delay="300">
-						<p class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-0.5">Depuis</p>
-						<p class="text-2xl font-black text-stone-900">2008</p>
-					</div>
-				</div>
-				<div class="section-fade" data-aos="fade-left" data-aos-duration="800">
-					<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-4">L'Expérience</p>
-					<h2 class="text-3xl md:text-4xl font-bold text-stone-800 mb-6 leading-tight">L'Excellence<br/>à chaque détail</h2>
-					<p class="text-stone-500 text-lg leading-relaxed mb-8">
-						{siteConfig.business.description} Plongez dans un univers de raffinement où nos artisans coiffeurs dédient leur savoir-faire à révéler votre beauté unique.
-					</p>
-					
-					<div class="space-y-4">
-						<div class="group flex items-start gap-4 p-4 rounded-2xl border border-stone-200/80 bg-white/70 backdrop-blur-xs shadow-xs hover:bg-white hover:border-deep-teal-200 hover:shadow-md transition-all duration-300 card-hover cursor-pointer" data-aos="fade-up" data-aos-delay="100">
-							<div class="w-11 h-11 rounded-xl bg-deep-teal-50 border border-deep-teal-100 flex items-center justify-center shrink-0 text-deep-teal-500 group-hover:scale-110 group-hover:bg-deep-teal-500 group-hover:text-white transition-all duration-300">
-								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-							</div>
-							<div>
-								<h4 class="text-stone-900 font-bold mb-1 group-hover:text-deep-teal-600 transition-colors">Produits d'exception</h4>
-								<p class="text-stone-500 text-sm leading-relaxed">Nous utilisons exclusivement les gammes les plus prestigieuses pour le soin de vos cheveux.</p>
-							</div>
-						</div>
-						<div class="group flex items-start gap-4 p-4 rounded-2xl border border-stone-200/80 bg-white/70 backdrop-blur-xs shadow-xs hover:bg-white hover:border-jasmine-300 hover:shadow-md transition-all duration-300 card-hover cursor-pointer" data-aos="fade-up" data-aos-delay="200">
-							<div class="w-11 h-11 rounded-xl bg-jasmine-50 border border-jasmine-100 flex items-center justify-center shrink-0 text-jasmine-600 group-hover:scale-110 group-hover:bg-jasmine-500 group-hover:text-white transition-all duration-300">
-								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-							</div>
-							<div>
-								<h4 class="text-stone-900 font-bold mb-1 group-hover:text-jasmine-700 transition-colors">Service Prestige</h4>
-								<p class="text-stone-500 text-sm leading-relaxed">Salon privé, boisson offerte et consultation sur-mesure avant chaque prestation.</p>
-							</div>
-						</div>
-					</div>
-					
-					<a href="/demo-diamant/a-propos" class="inline-flex items-center gap-2 mt-10 text-deep-teal-500 font-bold hover:text-deep-teal-400 transition-colors uppercase tracking-wider text-sm" data-aos="fade-up" data-aos-delay="300">
-						Découvrir notre histoire
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-					</a>
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<!-- Aperçu services -->
-	<section class="py-24 bg-stone-50 border-t border-stone-100">
-		<div class="mx-auto max-w-7xl px-6">
-			<div class="mb-14 flex flex-col md:flex-row md:items-end justify-between gap-6 section-fade" data-aos="fade-up">
-				<div>
-					<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-2">Prestations</p>
-					<h2 class="text-3xl md:text-4xl font-bold text-stone-900">Nos services signatures</h2>
-				</div>
-				<a href="/demo-diamant/services" class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-stone-300 text-stone-700 hover:bg-white transition-colors text-sm font-bold uppercase tracking-wider">
-					Voir la carte complète
-				</a>
-			</div>
-			
-			<div class="section-fade" data-aos="fade-up" data-aos-delay="150">
-				<ServicesCarousel client:visible limit={6} basePath="/demo-diamant" />
-			</div>
-		</div>
-	</section>
-
-	<!-- Avis clients -->
-	<section class="py-24 bg-white border-t border-stone-100">
-		<div class="mx-auto max-w-7xl px-6">
-			<div class="text-center mb-14 section-fade" data-aos="fade-up">
-				<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-2">Témoignages</p>
-				<h2 class="text-3xl md:text-4xl font-bold text-stone-900">L'avis de notre clientèle</h2>
-			</div>
-			<div class="section-fade" data-aos="fade-up" data-aos-delay="150">
-				<TestimonialsCarousel client:visible testimonials={siteConfig.testimonials} />
-			</div>
-		</div>
-	</section>
-
-	<!-- Où nous trouver -->
-	<section class="py-24 bg-stone-50 border-t border-stone-100">
-		<div class="mx-auto max-w-7xl px-6">
-			<div class="grid items-center gap-16 md:grid-cols-2">
-				<div class="section-fade" data-aos="fade-right" data-aos-duration="800">
-					<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-2">Accès</p>
-					<h2 class="text-3xl md:text-4xl font-bold text-stone-900 mb-6">Le Salon Prestige</h2>
-					<p class="text-stone-600 text-lg mb-8 leading-relaxed">
-						Venez vivre l'expérience dans notre écrin situé au cœur de la ville. Un espace conçu pour votre détente absolue.
-					</p>
-					
-					<div class="space-y-5 mb-10">
-						<div class="flex items-center gap-4 text-stone-700" data-aos="fade-up" data-aos-delay="100">
-							<div class="w-10 h-10 rounded-xl bg-deep-teal-50 flex items-center justify-center text-deep-teal-500 shrink-0">
-								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-							</div>
-							<span class="font-medium">{siteConfig.business.address}</span>
-						</div>
-						<div class="flex items-center gap-4 text-stone-700" data-aos="fade-up" data-aos-delay="200">
-							<div class="w-10 h-10 rounded-xl bg-deep-teal-50 flex items-center justify-center text-deep-teal-500 shrink-0">
-								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-							</div>
-							<span class="font-medium">{siteConfig.business.phone}</span>
-						</div>
-					</div>
-
-					<a href="/demo-diamant/contact" class="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-deep-teal-500 hover:text-deep-teal-400 transition-colors" data-aos="fade-up" data-aos-delay="300">
-						Voir tous les détails
-						<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-					</a>
-				</div>
-				<div class="section-fade rounded-2xl overflow-hidden border border-stone-200 shadow-md h-[400px] z-0 relative isolate" data-aos="fade-left" data-aos-duration="800" data-aos-delay="200">
-					<Map lat={siteConfig.business.lat} lng={siteConfig.business.lng} label={siteConfig.business.name} class="w-full h-full" />
-				</div>
-			</div>
-		</div>
-	</section>
+<DiamantLayout
+	title="Salon de coiffure"
+	description={`${siteConfig.business.name} : coupe, couleur, coiffage au ${siteConfig.business.address}. Tarifs affichés et réservation en ligne.`}
+>
+	<DiamantHero nbPrestations={prestations.length} />
+	<DiamantBandeau mots={prestations.map((p) => p.nom)} />
+	<DiamantPrestations prestations={prestations} limite={8} numero="01" />
+	<DiamantEtapes numero="02" />
+	<DiamantTemoignages avis={siteConfig.testimonials} numero="03" />
+	<DiamantAcces numero="04" />
 </DiamantLayout>

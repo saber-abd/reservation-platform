@@ -1,6 +1,11 @@
 ---
+// Layout du site public Diamant (salon de coiffure) : ivoire chaud, Fraunces + Hanken Grotesk,
+// défilement lissé (Lenis) raccordé à GSAP ScrollTrigger. Animations communes à toutes les pages
+// dans le script plus bas ; les sections animées de l'accueil ont leur propre script.
+import '@fontsource-variable/fraunces/opsz.css';
+import '@fontsource-variable/fraunces/opsz-italic.css';
+import '@fontsource-variable/hanken-grotesk/index.css';
 import '../../styles/diamant.css';
-import 'aos/dist/aos.css';
 import DiamantHeader from '@/components/diamant/DiamantHeader.astro';
 import DiamantFooter from '@/components/diamant/DiamantFooter.astro';
 import CookieBanner from '@/components/shared/CookieBanner.astro';
@@ -16,17 +21,17 @@ interface Props {
 }
 
 const {
-	title = "Prestige",
-	description = "L'excellence de la coiffure haut de gamme. Un service sur-mesure dans un cadre luxueux et raffiné, conçu pour sublimer votre allure.",
+	title = 'Accueil',
+	description = `${siteConfig.business.name}, salon de coiffure : coupe, couleur, coiffage. Tarifs affichés et réservation en ligne.`,
 	noindex = false,
 } = Astro.props;
 
-const pageTitle = `${title} — ${siteConfig.business.name} Diamant`;
+const pageTitle = `${title} — ${siteConfig.business.name}`;
 const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 ---
 
 <!doctype html>
-<html lang="fr" class="theme-diamant">
+<html lang="fr" class="theme-diamant site-diamant">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -34,75 +39,64 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 		<link rel="canonical" href={canonicalURL} />
 		{noindex && <meta name="robots" content="noindex, nofollow" />}
 		<title>{pageTitle}</title>
-		
-		<!-- Open Graph / Facebook -->
+
 		<meta property="og:type" content="website" />
 		<meta property="og:url" content={canonicalURL} />
 		<meta property="og:title" content={pageTitle} />
 		<meta property="og:description" content={description} />
 		<meta property="og:locale" content="fr_FR" />
-		<meta property="og:site_name" content="Prestige Diamant" />
-
-		<!-- Twitter -->
+		<meta property="og:site_name" content={siteConfig.business.name} />
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:title" content={pageTitle} />
 		<meta name="twitter:description" content={description} />
 
-		<meta name="theme-color" content="#fff7f1" />
+		<meta name="theme-color" content="#f5efe6" />
+		<script is:inline>
+			document.documentElement.classList.add('js');
+			// Filet de sécurité : si les animations n'ont pas démarré, tout s'affiche.
+			setTimeout(function () { document.documentElement.classList.add('dia-secours'); }, 3500);
+		</script>
 	</head>
-	<body class="flex min-h-screen flex-col bg-[#fff7f1] text-stone-800 antialiased font-sans">
+	<body class="flex min-h-screen flex-col">
 		<DiamantHeader />
-		
-		<main class="flex-1 overflow-x-hidden relative">
+
+		<main id="contenu" class="relative flex-1 overflow-x-clip">
 			<slot />
 		</main>
-		
+
 		<DiamantFooter />
-		
-		<script>
-			import AOS from 'aos';
 
-			function initAnimations() {
-				AOS.init({
-				disable: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-					duration: 700,
-					easing: 'ease-out-cubic',
-					once: true,
-					offset: 60,
-				});
-
-				// Support des éléments avec classe .section-fade
-				if ('IntersectionObserver' in window) {
-					const observer = new IntersectionObserver((entries) => {
-						entries.forEach(entry => {
-							if (entry.isIntersecting) {
-								entry.target.classList.add('visible');
-								observer.unobserve(entry.target);
-							}
-						});
-					}, {
-						threshold: 0.1,
-						rootMargin: "0px 0px -30px 0px"
-					});
-
-					document.querySelectorAll('.section-fade:not(.visible)').forEach(el => {
-						observer.observe(el);
-					});
-				} else {
-					document.querySelectorAll('.section-fade').forEach(el => {
-						el.classList.add('visible');
-					});
-				}
-			}
-
-			if (document.readyState === 'loading') {
-				document.addEventListener('DOMContentLoaded', initAnimations);
-			} else {
-				initAnimations();
-			}
-			document.addEventListener('astro:page-load', initAnimations);
-		</script>
 		<SmoothScroll />
 		<CookieBanner policyHref="/cookies" />
+		<script>
+			// Animations communes du site public : apparitions (data-reveal), titres découpés en lignes
+			// (data-split : au défilement ; data-split="load" : dès le chargement), logos et bandeaux
+			// mis en pause hors de l'écran.
+			import { initReveal, pauseOffscreen } from '@/lib/motion/reveal';
+			import { gsap, MQ, SplitText, splitLines, wireScroll } from '@/lib/motion/gsap';
+
+			initReveal();
+			pauseOffscreen('.marquee, .dia-logo');
+
+			const mm = gsap.matchMedia();
+			mm.add(MQ.motion, () => {
+				document.querySelectorAll<HTMLElement>('[data-split]').forEach((titre) => {
+					if (titre.dataset.split !== 'load') {
+						splitLines(titre);
+						return;
+					}
+					SplitText.create(titre, {
+						type: 'lines',
+						mask: 'lines',
+						autoSplit: true,
+						onSplit: (self) => {
+							titre.classList.add('is-split');
+							return gsap.from(self.lines, { yPercent: 110, duration: 1.15, ease: 'power4.out', stagger: 0.1, delay: 0.1 });
+						},
+					});
+				});
+			});
+			wireScroll();
+		</script>
 	</body>
 </html>

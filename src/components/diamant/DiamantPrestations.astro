@@ -1,0 +1,136 @@
+---
+// Prestations en colonne collante. Bureau (≥ 992 px) : la photo reste collée à gauche et change
+// selon la ligne active (celle qui passe au milieu de l'écran, ou celle survolée / focalisée) ;
+// la liste défile à droite. Mobile : liste simple avec une vignette par ligne.
+// Chaque ligne mène à la réservation avec la prestation présélectionnée (?service=<id>).
+import DiamantPicture from '@/components/diamant/DiamantPicture.astro';
+import { images } from '@/components/diamant/images';
+import type { Prestation } from '@/components/diamant/prestations';
+
+interface Props {
+	prestations: Prestation[];
+	numero?: string;
+	/** Nombre maximal de lignes affichées (toutes si absent). */
+	limite?: number;
+	/** Titre de niveau 1 (page Prestations) ou 2 (accueil). */
+	titreH1?: boolean;
+	avecLienCarte?: boolean;
+}
+
+const { prestations, numero = '01', limite, titreH1 = false, avecLienCarte = true } = Astro.props;
+const base = '/demo-diamant';
+const liste = limite ? prestations.slice(0, limite) : prestations;
+const cles = [...new Set(liste.map((p) => p.cleImage))];
+const pad = (n: number) => String(n).padStart(2, '0');
+const Titre = titreH1 ? 'h1' : 'h2';
+---
+
+<section id="prestations" class="dia-presta dia-section" data-presta aria-labelledby="presta-titre">
+	<div class="dia-wrap dia-presta__grille">
+		<div class="dia-presta__visuel" aria-hidden="true">
+			<div class="dia-presta__pile">
+				{cles.map((cle, i) => (
+					<div class:list={['dia-presta__img', i === 0 && 'is-actif']} data-presta-img={cle}>
+						<DiamantPicture {...images[cle]} alt="" sizes="(min-width: 1440px) 520px, 36vw" />
+					</div>
+				))}
+			</div>
+			<p class="dia-presta__legende">
+				<span data-presta-legende-nom>{liste[0]?.nom}</span>
+				<span class="dia-chiffre" data-presta-legende-prix>{liste[0]?.prix}</span>
+			</p>
+		</div>
+
+		<div>
+			<p class="dia-num"><b>{numero}</b> Prestations et tarifs</p>
+			<Titre id="presta-titre" class="dia-h2 mt-6" data-split={titreH1 ? 'load' : ''}>
+				La carte du salon, <em>prix affichés.</em>
+			</Titre>
+			<p class="dia-texte mt-6">
+				Les prix comprennent le shampoing et le coiffage, sauf mention contraire. Une coloration
+				sur cheveux très longs peut demander un supplément, annoncé au diagnostic, avant de commencer.
+			</p>
+		</div>
+
+		<div>
+			<ol class="dia-presta__liste" data-presta-liste>
+				{liste.map((p, i) => (
+					<li class:list={['dia-presta__ligne', i === 0 && 'is-actif']} data-presta-ligne data-img={p.cleImage} data-nom={p.nom} data-prix={p.prix}>
+						<span class="dia-presta__n">{pad(i + 1)}</span>
+						<h3 class="dia-presta__nom">{p.nom}</h3>
+						{p.description && <p class="dia-presta__desc">{p.description}</p>}
+						<div class="dia-presta__chiffres">
+							<span class="dia-presta__prix">{p.prix}</span>
+							<span class="dia-presta__duree">{p.duree}</span>
+						</div>
+						<a href={p.id ? `${base}/reservation?service=${p.id}` : `${base}/reservation`} class="dia-lien dia-presta__go text-[0.9375rem]" aria-label={`Réserver : ${p.nom}`}>
+							Réserver
+							<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+						</a>
+						<div class="dia-presta__vignette" aria-hidden="true">
+							<DiamantPicture {...p.image} alt="" sizes="76px" />
+						</div>
+					</li>
+				))}
+			</ol>
+			{avecLienCarte && limite && prestations.length > limite && (
+				<p class="mt-8">
+					<a href={`${base}/services`} class="dia-lien">
+						Les {prestations.length} prestations
+						<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+					</a>
+				</p>
+			)}
+		</div>
+	</div>
+</section>
+
+<script>
+	import { ScrollTrigger, wireScroll } from '@/lib/motion/gsap';
+
+	document.querySelectorAll<HTMLElement>('[data-presta]').forEach((section) => {
+		const liste = section.querySelector<HTMLElement>('[data-presta-liste]');
+		const lignes = Array.from(section.querySelectorAll<HTMLElement>('[data-presta-ligne]'));
+		const photos = Array.from(section.querySelectorAll<HTMLElement>('[data-presta-img]'));
+		const legendeNom = section.querySelector<HTMLElement>('[data-presta-legende-nom]');
+		const legendePrix = section.querySelector<HTMLElement>('[data-presta-legende-prix]');
+		if (!liste || !lignes.length) return;
+
+		let actif = 0;
+		const activer = (i: number) => {
+			if (i === actif) return;
+			actif = i;
+			const ligne = lignes[i];
+			lignes.forEach((l, j) => l.classList.toggle('is-actif', j === i));
+			photos.forEach((p) => p.classList.toggle('is-actif', p.dataset.prestaImg === ligne.dataset.img));
+			if (legendeNom) legendeNom.textContent = ligne.dataset.nom ?? '';
+			if (legendePrix) legendePrix.textContent = ligne.dataset.prix ?? '';
+		};
+		section.classList.add('is-js');
+
+		// Ligne active : celle dont le centre est le plus proche du milieu de l'écran.
+		const suivre = () => {
+			const milieu = window.innerHeight / 2;
+			let meilleure = 0;
+			let ecart = Infinity;
+			lignes.forEach((l, i) => {
+				const r = l.getBoundingClientRect();
+				const d = Math.abs(r.top + r.height / 2 - milieu);
+				if (d < ecart) {
+					ecart = d;
+					meilleure = i;
+				}
+			});
+			activer(meilleure);
+		};
+		ScrollTrigger.create({ trigger: liste, start: 'top 60%', end: 'bottom 40%', onUpdate: suivre, onToggle: suivre });
+
+		// Survol (souris) et clavier : la ligne pointée devient active.
+		const souris = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+		lignes.forEach((l, i) => {
+			if (souris) l.addEventListener('pointerenter', () => activer(i));
+			l.addEventListener('focusin', () => activer(i));
+		});
+	});
+	wireScroll();
+</script>

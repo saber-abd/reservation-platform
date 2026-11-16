@@ -1,85 +1,69 @@
 ---
+// Navigation flottante en pilule. Elle s'efface quand on descend et revient dès qu'on remonte.
+// Sous 1024 px : nom du salon, bouton Réserver et menu déroulant.
 import HeaderAuthButton from '@/components/diamant/DiamantHeaderAuthButton';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
+const base = '/demo-diamant';
+const chemin = Astro.url.pathname.replace(/\/$/, '') || base;
+
+const liens = [
+	{ href: `${base}/`, label: 'Accueil', actif: chemin === base },
+	{ href: `${base}/services`, label: 'Prestations', actif: chemin === `${base}/services` },
+	{ href: `${base}/a-propos`, label: 'Le salon', actif: chemin === `${base}/a-propos` },
+	{ href: `${base}/contact`, label: 'Contact', actif: chemin === `${base}/contact` },
+];
 ---
 
-<header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-sm border-b border-stone-200" id="diamant-header">
-	<div class="mx-auto max-w-7xl px-6">
-		<div class="flex h-18 items-center justify-between py-4">
-			<!-- Logo -->
-			<a href="/demo-diamant/" class="flex items-center gap-3 group">
-				<div class="w-9 h-9 rounded-xl bg-gradient-to-br from-deep-teal-400 to-deep-teal-600 flex items-center justify-center transition-transform group-hover:scale-105">
-					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-						<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
-						<line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/>
-						<line x1="8.12" y1="8.12" x2="12" y2="12"/>
-					</svg>
-				</div>
-				<span class="text-lg font-bold tracking-widest text-stone-800 uppercase" data-diamant-business-name>
-					{siteConfig.business.name}
-				</span>
-			</a>
+<header class="dia-entete" id="diamant-header" data-cache="false">
+	<div class="dia-entete__pilule">
+		<a href={`${base}/`} class="dia-entete__marque" aria-label={`${siteConfig.business.name}, accueil`}>
+			<span data-diamant-business-name>{siteConfig.business.name}</span>
+		</a>
 
-			<!-- Navigation Desktop -->
-			<nav class="hidden md:flex items-center gap-8">
-				<a href="/demo-diamant/" class="text-sm font-medium text-stone-600 hover:text-deep-teal-500 transition-colors tracking-wide uppercase">Accueil</a>
-				<a href="/demo-diamant/services" class="text-sm font-medium text-stone-600 hover:text-deep-teal-500 transition-colors tracking-wide uppercase">Services</a>
-				<a href="/demo-diamant/a-propos" class="text-sm font-medium text-stone-600 hover:text-deep-teal-500 transition-colors tracking-wide uppercase">La Maison</a>
-				<a href="/demo-diamant/contact" class="text-sm font-medium text-stone-600 hover:text-deep-teal-500 transition-colors tracking-wide uppercase">Contact</a>
-				<a href="/demo-diamant/reservation" class="text-sm font-medium text-stone-600 hover:text-deep-teal-500 transition-colors tracking-wide uppercase">Réserver</a>
-			</nav>
+		<nav class="dia-entete__nav" aria-label="Navigation principale">
+			{liens.map((l) => (
+				<a href={l.href} aria-current={l.actif ? 'page' : undefined}>{l.label}</a>
+			))}
+		</nav>
 
-			<!-- CTA & Auth -->
-			<div class="flex items-center gap-4">
-				<a
-					href="/"
-					class="hidden xl:inline-flex items-center justify-center px-3 py-1 rounded-full border border-stone-200 text-stone-500 font-semibold text-[11px] tracking-wider uppercase hover:text-stone-800 hover:bg-stone-50 transition-colors"
-				>
-					Retour Portfolio
-				</a>
-				<div class="hidden sm:block">
-					<HeaderAuthButton client:load basePath="/demo-diamant" />
-				</div>
-				<a
-					href="/demo-diamant/reservation"
-					class="hidden md:inline-flex items-center justify-center px-5 py-2 rounded-full bg-deep-teal-500 text-white font-bold text-sm tracking-wide hover:bg-deep-teal-400 transition-colors"
-				>
-					Réserver
-				</a>
-				
-				<!-- Bouton menu mobile : les trois barres se transforment en croix -->
-				<button type="button" class="burger md:hidden" id="mobile-menu-btn" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu">
-					<span></span><span></span><span></span>
-				</button>
+		<div class="flex items-center gap-2">
+			<div class="hidden lg:block">
+				<HeaderAuthButton client:load basePath={base} />
 			</div>
+			<a href={`${base}/reservation`} class="dia-btn dia-btn--sm">
+				Réserver
+				<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+			</a>
+			<button type="button" class="dia-burger lg:hidden" id="mobile-menu-btn" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu">
+				<span></span><span></span>
+			</button>
 		</div>
 	</div>
 
-	<!-- Mobile Menu -->
-	<div class="mobile-panel md:hidden" id="mobile-menu" data-open="false">
-		<div class="overflow-hidden">
-			<nav class="px-6 pb-6 pt-2" aria-label="Navigation mobile">
-			<a href="/demo-diamant/" class="mobile-item flex items-center justify-between border-b border-stone-100 py-3.5 text-sm font-semibold uppercase tracking-widest text-stone-700" style="--i:0">Accueil<span aria-hidden="true" class="text-stone-300">→</span></a>
-			<a href="/demo-diamant/services" class="mobile-item flex items-center justify-between border-b border-stone-100 py-3.5 text-sm font-semibold uppercase tracking-widest text-stone-700" style="--i:1">Services<span aria-hidden="true" class="text-stone-300">→</span></a>
-			<a href="/demo-diamant/a-propos" class="mobile-item flex items-center justify-between border-b border-stone-100 py-3.5 text-sm font-semibold uppercase tracking-widest text-stone-700" style="--i:2">La Maison<span aria-hidden="true" class="text-stone-300">→</span></a>
-			<a href="/demo-diamant/contact" class="mobile-item flex items-center justify-between border-b border-stone-100 py-3.5 text-sm font-semibold uppercase tracking-widest text-stone-700" style="--i:3">Contact<span aria-hidden="true" class="text-stone-300">→</span></a>
-			<a href="/demo-diamant/reservation" class="mobile-item flex items-center justify-between border-b border-stone-100 py-3.5 text-sm font-semibold uppercase tracking-widest text-stone-700" style="--i:4">Réserver<span aria-hidden="true" class="text-stone-300">→</span></a>
-			<div class="mobile-item mt-5 sm:hidden" style="--i:5">
-				<HeaderAuthButton client:visible basePath="/demo-diamant" />
-			</div>
-			<div class="mobile-item mt-4 grid grid-cols-2 gap-3" style="--i:6">
-				<a href="/demo-diamant/reservation" class="rounded-full bg-stone-900 py-3 text-center text-sm font-bold text-white">Réserver</a>
-				<a href="/" class="rounded-full border border-stone-200 py-3 text-center text-sm font-bold text-stone-500">Portfolio</a>
-			</div>
+	<div class="dia-menu lg:hidden" id="mobile-menu" data-open="false">
+		<div>
+			<nav aria-label="Navigation mobile">
+				{liens.map((l, i) => (
+					<a href={l.href} class="dia-menu__lien dia-menu__item" style={`--i:${i}`} aria-current={l.actif ? 'page' : undefined}>
+						{l.label}<span aria-hidden="true">0{i + 1}</span>
+					</a>
+				))}
+				<a href={`${base}/reservation`} class="dia-menu__lien dia-menu__item" style="--i:4">Réserver en ligne<span aria-hidden="true">05</span></a>
+				<div class="dia-menu__item mt-6" style="--i:5">
+					<HeaderAuthButton client:visible basePath={base} />
+				</div>
+				<p class="dia-menu__item mt-6 text-sm text-[#6e6157]" style="--i:6">
+					<a href="/" class="dia-lien">Retour au portfolio</a>
+				</p>
 			</nav>
 		</div>
 	</div>
 </header>
 
 <script is:inline>
-	// Synchronisation dynamique du nom de l'établissement (Démo Diamant)
+	// Nom de l'établissement : modifiable depuis l'espace pro (localStorage) ou par cookie.
 	function syncDiamantBusinessName() {
 		try {
 			var saved = localStorage.getItem('diamant_pro_profile');
@@ -94,7 +78,8 @@ const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 			}
 			if (name) {
 				document.querySelectorAll('[data-diamant-business-name]').forEach(function(el) {
-					el.textContent = name;
+					// Ne réécrit que si le nom diffère : un titre déjà découpé par l'animation reste intact.
+					if (el.textContent !== name) el.textContent = name;
 				});
 			}
 		} catch (e) {}
@@ -107,80 +92,51 @@ const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 		if (e.key === 'diamant_pro_profile') syncDiamantBusinessName();
 	});
 	window.addEventListener('diamant:profile-updated', syncDiamantBusinessName);
+</script>
 
-	// Mobile menu toggle
+<script>
+	const entete = document.getElementById('diamant-header');
 	const btn = document.getElementById('mobile-menu-btn');
 	const menu = document.getElementById('mobile-menu');
-	function setMenuOpen(open) {
+
+	function setMenuOpen(open: boolean) {
 		if (!btn || !menu) return;
 		menu.dataset.open = String(open);
 		btn.setAttribute('aria-expanded', String(open));
 		btn.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+		if (open && entete) entete.dataset.cache = 'false';
 	}
 	btn?.addEventListener('click', () => setMenuOpen(menu?.dataset.open !== 'true'));
-	menu?.addEventListener('click', (e) => { if (e.target.closest('a')) setMenuOpen(false); });
-	document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenuOpen(false); });
+	menu?.addEventListener('click', (e) => {
+		if ((e.target as HTMLElement).closest('a')) setMenuOpen(false);
+	});
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape' && menu?.dataset.open === 'true') {
+			setMenuOpen(false);
+			btn?.focus();
+		}
+	});
 
-	// Ombre légère au scroll
-	const header = document.getElementById('diamant-header');
-	if (header) {
+	// La pilule s'efface en descendant (au-delà de 200 px) et revient en remontant.
+	if (entete) {
+		let dernier = window.scrollY;
+		let attente = false;
+		const maj = () => {
+			attente = false;
+			const y = window.scrollY;
+			const delta = y - dernier;
+			if (Math.abs(delta) < 6) return;
+			const cacher = delta > 0 && y > 200 && menu?.dataset.open !== 'true';
+			entete.dataset.cache = String(cacher);
+			dernier = y;
+		};
 		window.addEventListener('scroll', () => {
-			if (window.scrollY > 10) {
-				header.classList.add('shadow-sm');
-			} else {
-				header.classList.remove('shadow-sm');
+			if (!attente) {
+				attente = true;
+				requestAnimationFrame(maj);
 			}
 		}, { passive: true });
+		// Un lien focalisé au clavier ne doit jamais être caché.
+		entete.addEventListener('focusin', () => { entete.dataset.cache = 'false'; });
 	}
 </script>
-
-<style>
-	/* Burger -> croix */
-	.burger {
-		position: relative;
-		width: 44px;
-		height: 44px;
-		border-radius: 9999px;
-		color: var(--color-stone-700);
-		transition: background-color 0.2s ease;
-	}
-	.burger:hover { background: var(--color-stone-100); }
-	.burger span {
-		position: absolute;
-		left: 12px;
-		width: 20px;
-		height: 1.5px;
-		border-radius: 2px;
-		background: currentColor;
-		transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
-	}
-	.burger span:nth-child(1) { top: 16px; }
-	.burger span:nth-child(2) { top: 21.5px; }
-	.burger span:nth-child(3) { top: 27px; }
-	.burger[aria-expanded='true'] span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
-	.burger[aria-expanded='true'] span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-	.burger[aria-expanded='true'] span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
-
-	/* Panneau qui se déplie (hauteur animée), liens en cascade */
-	.mobile-panel {
-		display: grid;
-		grid-template-rows: 0fr;
-		background: #fff;
-		border-top: 1px solid transparent;
-		transition: grid-template-rows 0.45s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
-	}
-	.mobile-panel[data-open='true'] { grid-template-rows: 1fr; border-top-color: var(--color-stone-200); }
-	.mobile-item {
-		opacity: 0;
-		transform: translateY(-6px);
-		transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-	}
-	.mobile-panel[data-open='true'] .mobile-item {
-		opacity: 1;
-		transform: none;
-		transition-delay: calc(70ms + var(--i, 0) * 50ms);
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.burger span, .mobile-panel, .mobile-item { transition-duration: 0.01ms !important; transition-delay: 0ms !important; }
-	}
-</style>

@@ -1,0 +1,75 @@
+---
+// Témoignages sur fond sombre. Bureau (≥ 992 px, mouvement autorisé) : les avis forment une
+// diagonale qui traverse l'écran pendant la descente (GSAP ScrollTrigger, scrub). Ailleurs : bande
+// horizontale qu'on fait défiler au doigt ou au clavier, avec aimantation sur chaque avis.
+import type { Testimonial } from '@/config/site';
+
+interface Props {
+	avis: Testimonial[];
+	numero?: string;
+}
+
+const { avis, numero = '03' } = Astro.props;
+const moyenne = avis.length ? avis.reduce((s, a) => s + a.rating, 0) / avis.length : 0;
+const fmt = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 });
+---
+
+{avis.length > 0 && (
+	<section class="dia-avis dia-sombre" data-avis aria-labelledby="avis-titre">
+		<div class="dia-wrap dia-avis__tete">
+			<div>
+				<p class="dia-num"><b>{numero}</b> Avis des clients</p>
+				<h2 id="avis-titre" class="dia-h2 mt-6" data-split>
+					Ce qu'on en dit <em>en sortant.</em>
+				</h2>
+			</div>
+			<p class="dia-lead">
+				Note moyenne de <span class="dia-chiffre text-[#f1e9dd]">{fmt.format(moyenne)}/5</span> sur
+				les {avis.length} avis publiés après un rendez-vous.
+			</p>
+		</div>
+
+		<div class="dia-avis__scene">
+			<ul class="dia-avis__piste" data-avis-piste tabindex="0" aria-label="Avis des clients, faire défiler horizontalement">
+				{avis.map((a) => (
+					<li class="dia-avis__carte">
+						<figure class="contents">
+							<p class="dia-avis__etoiles" aria-label={`Note : ${a.rating} sur 5`}>{'★'.repeat(a.rating)}{'☆'.repeat(Math.max(0, 5 - a.rating))}</p>
+							<blockquote class="dia-avis__citation">« {a.comment} »</blockquote>
+							<figcaption>{a.name}<span class="dia-chiffre">{a.rating}/5</span></figcaption>
+						</figure>
+					</li>
+				))}
+			</ul>
+		</div>
+	</section>
+)}
+
+<script>
+	import { gsap, MQ, wireScroll } from '@/lib/motion/gsap';
+
+	const section = document.querySelector<HTMLElement>('[data-avis]');
+	const piste = section?.querySelector<HTMLElement>('[data-avis-piste]');
+
+	if (section && piste) {
+		const mm = gsap.matchMedia();
+		mm.add(MQ.desktop, () => {
+			section.classList.add('is-diagonal');
+			piste.removeAttribute('tabindex');
+			gsap.fromTo(
+				piste,
+				{ x: () => window.innerWidth * 0.45 },
+				{
+					x: () => -(piste.scrollWidth - window.innerWidth * 0.55),
+					ease: 'none',
+					scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: 0.6, invalidateOnRefresh: true },
+				},
+			);
+			return () => {
+				section.classList.remove('is-diagonal');
+				piste.setAttribute('tabindex', '0');
+			};
+		});
+		wireScroll();
+	}
+</script>
