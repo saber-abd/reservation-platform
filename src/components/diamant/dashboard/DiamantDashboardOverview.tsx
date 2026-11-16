@@ -291,9 +291,14 @@ export default function DiamantDashboardOverview() {
 								<a href="/demo-diamant/dashboard/statistiques" className="text-xs font-bold uppercase tracking-widest text-deep-teal-500 hover:text-deep-teal-400">Rapport complet →</a>
 							</div>
 							{/* On utilise les données dynamiques */}
-							<Suspense fallback={<div className="animate-pulse h-64 bg-stone-100 rounded-xl"></div>}>
-								<DiamantRevenueChart appointments={appointments} range={range} />
-							</Suspense>
+							{/* Graphique chargé à la demande : jamais pendant le rendu serveur (loading y vaut true). */}
+							{loading ? (
+								<div className="animate-pulse h-64 bg-stone-100 rounded-xl"></div>
+							) : (
+								<Suspense fallback={<div className="animate-pulse h-64 bg-stone-100 rounded-xl"></div>}>
+									<DiamantRevenueChart appointments={appointments} range={range} />
+								</Suspense>
+							)}
 						</div>
 
 						{/* Prochains RDV / Derniers RDV */}

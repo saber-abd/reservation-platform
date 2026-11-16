@@ -36,7 +36,7 @@ Branche locale **`refonte-graphique`** (créée depuis `main` à jour avec `orig
 | `CLAUDE.md` par démo | à faire |
 | Compte rendu | à faire |
 
-**Attention : le dernier commit de la branche est un état intermédiaire.** Des fichiers à moitié migrés cohabitent avec des pages encore dans l'ancien style (par exemple la page commerciale : nouveau layout, ancien `index.astro`). Au moment de la pause, `/demo-diamant/` et `/` renvoyaient une erreur 500 « fetch failed » sur le serveur de dev ; cause non identifiée (à regarder en premier : `npx astro dev logs`). Ne pas fusionner dans `main` avant la fin de la refonte et un `npm run build` réussi.
+**Attention : le dernier commit de la branche est un état intermédiaire.** Des fichiers à moitié migrés cohabitent avec des pages encore dans l'ancien style (par exemple la page commerciale : nouveau layout, ancien `index.astro`). Au moment de la pause, toutes les pages renvoyaient une erreur 500 « fetch failed » sur le serveur de dev : ce n'était pas le code, mais le processus `workerd` du serveur de dev mort après des heures de fonctionnement. Remède : `npx astro dev stop` puis `npx astro dev --port 4321`. Ne pas fusionner dans `main` avant la fin de la refonte et un `npm run build` réussi.
 
 ## Constats faits pendant l'analyse
 

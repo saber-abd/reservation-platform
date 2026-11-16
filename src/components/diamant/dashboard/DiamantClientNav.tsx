@@ -8,14 +8,16 @@ interface DiamantClientNavProps {
 }
 
 export default function DiamantClientNav({ basePath }: DiamantClientNavProps) {
-	const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
-	const [bannedRecord, setBannedRecord] = useState<BannedClientRecord | null>(() => {
-		if (typeof window !== 'undefined') {
-			const email = localStorage.getItem('diamant_client_email');
-			if (email) return getBannedClientRecord(null, email);
-		}
-		return null;
-	});
+	// URL et localStorage lus après le montage : les lire pendant le rendu donnait un HTML
+	// serveur différent de celui du navigateur (avertissement d'hydratation React).
+	const [currentPath, setCurrentPath] = useState('');
+	const [bannedRecord, setBannedRecord] = useState<BannedClientRecord | null>(null);
+
+	useEffect(() => {
+		setCurrentPath(window.location.pathname);
+		const email = localStorage.getItem('diamant_client_email');
+		if (email) setBannedRecord(getBannedClientRecord(null, email));
+	}, []);
 
 	useEffect(() => {
 		async function checkBan() {

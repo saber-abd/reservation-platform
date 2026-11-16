@@ -287,9 +287,14 @@ export default function DiamantPerformancePanel() {
 						{appointments.length} prestation{appointments.length > 1 ? 's' : ''}
 					</span>
 				</div>
-				<Suspense fallback={<div className="animate-pulse h-64 bg-stone-100 rounded-xl"></div>}>
-					<DiamantRevenueChart appointments={appointments} range={range} />
-				</Suspense>
+				{/* Graphique chargé à la demande : jamais pendant le rendu serveur (loading y vaut true). */}
+				{loading ? (
+					<div className="animate-pulse h-64 bg-stone-100 rounded-xl"></div>
+				) : (
+					<Suspense fallback={<div className="animate-pulse h-64 bg-stone-100 rounded-xl"></div>}>
+						<DiamantRevenueChart appointments={appointments} range={range} />
+					</Suspense>
+				)}
 			</div>
 
 			{/* Top Prestations & Fidélité */}
