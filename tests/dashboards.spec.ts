@@ -62,9 +62,6 @@ for (const demo of DEMOS) {
 		});
 
 		test(`/demo-${demo}/dashboard/ sans session renvoie à la connexion`, async ({ page }) => {
-			// Diamant affiche volontairement son tableau de bord en lecture seule sans session
-			// (getActiveProRole renvoie « demo » quand aucun rôle serveur n'est connu).
-			test.skip(demo === 'diamant', 'Diamant : tableau de bord visible en lecture seule sans session (comportement actuel)');
 			await mockSupabase(page, { demo, role: 'anonyme' });
 			await page.goto(`/demo-${demo}/dashboard/`, { waitUntil: 'load' });
 			await page.waitForURL(new RegExp(`/demo-${demo}/connexion`), { timeout: 20_000 });
@@ -112,6 +109,27 @@ test.describe('aperçu Premium (données fictives, sans compte)', () => {
 			expect(errors).toEqual([]);
 		});
 	}
+});
+
+// Accès visiteur depuis la page de connexion : Premium (aperçu à données fictives) et Diamant
+// (compte de démonstration en lecture seule). Standard n'a pas d'accès visiteur.
+test('Premium : la connexion propose l’aperçu du tableau de bord', async ({ page }) => {
+	await mockSupabase(page, { demo: 'premium' });
+	await page.goto('/demo-premium/connexion', { waitUntil: 'load' });
+	await expect(page.locator('a[href^="/demo-premium/apercu/dashboard"]').first()).toBeVisible();
+});
+
+test('Diamant : la connexion propose le compte de démonstration', async ({ page }) => {
+	await mockSupabase(page, { demo: 'diamant' });
+	await page.goto('/demo-diamant/connexion', { waitUntil: 'load' });
+	await expect(page.getByRole('button', { name: /démonstration|visiteur|démo/i }).first()).toBeVisible();
+});
+
+test('Standard : pas d’accès visiteur au tableau de bord', async ({ page }) => {
+	await mockSupabase(page, { demo: 'standard' });
+	await page.goto('/demo-standard/connexion', { waitUntil: 'load' });
+	await expect(page.locator('a[href*="/apercu/"]')).toHaveCount(0);
+	await expect(page.getByRole('button', { name: /démonstration|visiteur/i })).toHaveCount(0);
 });
 
 test('Diamant : un compte « démo » est en lecture seule', async ({ page }) => {

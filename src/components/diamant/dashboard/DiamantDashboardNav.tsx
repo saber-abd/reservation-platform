@@ -13,7 +13,7 @@ import {
 	ShieldCheck,
 	Lock
 } from 'lucide-react';
-import { getActiveProRole, getRealProRole, setActiveProRole, getProSession, clearProSession, type ProRole } from '@/lib/permissions';
+import { getActiveProRole, getRealProRole, setActiveProRole, getProSession, clearProSession, loadProContext, type ProRole } from '@/lib/permissions';
 
 interface DiamantDashboardNavProps {
 	basePath: string;
@@ -26,6 +26,27 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 	const [role, setRole] = React.useState<ProRole>('admin');
 	const [realRole, setRealRole] = React.useState<ProRole | null>(null);
 	const [proUser, setProUser] = React.useState<ReturnType<typeof getProSession>>(null);
+
+	// Espace pro réservé aux comptes connectés : sans session, renvoi vers la connexion (qui propose
+	// l'accès au compte de démonstration) ; compte client connecté, renvoi vers son espace client.
+	React.useEffect(() => {
+		let cancelled = false;
+		(async () => {
+			const session = await supabase.auth.getSession().then((r) => r.data.session).catch(() => null);
+			if (cancelled) return;
+			if (!session) {
+				window.location.href = `${basePath}/connexion`;
+				return;
+			}
+			if (!getRealProRole()) {
+				const ctx = await loadProContext();
+				if (!cancelled && !ctx) window.location.href = `${basePath}/espace-client`;
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [basePath]);
 
 	React.useEffect(() => {
 		setCurrentPath(window.location.pathname);
