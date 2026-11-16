@@ -7,6 +7,8 @@
 export interface GalleryShot {
 	/** Nom de fichier sans suffixe dans /images/galerie/<demo>/ */
 	file: string;
+	/** Capture prise pour la page commerciale (public/images/commercial/<nom>), à la place de la galerie. */
+	commercial?: string;
 	title: string;
 	caption: string;
 }
@@ -22,49 +24,25 @@ const { demo, shots, title, intro } = Astro.props;
 const base = `/images/galerie/${demo}`;
 const galleryId = `galerie-${demo}`;
 
-// Classes littérales par démo (Tailwind ne génère que ce qu'il voit dans les sources).
-const themes = {
-	standard: {
-		section: 'bg-white',
-		heading: 'text-stone-900',
-		text: 'text-stone-600',
-		frame: 'bg-stone-100 border-stone-200',
-		button: 'bg-white/90 text-stone-900 border-stone-200 hover:bg-prussian-blue-600 hover:text-white hover:border-prussian-blue-600',
-		thumb: 'border-transparent opacity-60 hover:opacity-100 aria-[current=true]:border-prussian-blue-600 aria-[current=true]:opacity-100',
-		ring: 'focus-visible:ring-prussian-blue-600',
-		counter: 'text-prussian-blue-600',
-	},
-	premium: {
-		section: 'bg-white',
-		heading: 'text-stone-900',
-		text: 'text-stone-600',
-		frame: 'bg-stone-900 border-stone-800',
-		button: 'bg-white/90 text-stone-900 border-stone-200 hover:bg-brick-ember-500 hover:text-white hover:border-brick-ember-500',
-		thumb: 'border-transparent opacity-60 hover:opacity-100 aria-[current=true]:border-brick-ember-500 aria-[current=true]:opacity-100',
-		ring: 'focus-visible:ring-brick-ember-500',
-		counter: 'text-brick-ember-500',
-	},
-	diamant: {
-		section: 'bg-stone-950 border-t border-white/5',
-		heading: 'text-white',
-		text: 'text-stone-400',
-		frame: 'bg-white/[0.04] border-white/10',
-		button: 'bg-stone-900/80 text-white border-white/15 hover:bg-jasmine-500 hover:text-stone-900 hover:border-jasmine-500',
-		thumb: 'border-transparent opacity-50 hover:opacity-100 aria-[current=true]:border-jasmine-400 aria-[current=true]:opacity-100',
-		ring: 'focus-visible:ring-jasmine-400',
-		counter: 'text-jasmine-400',
-	},
-} as const;
-const t = themes[demo];
-const sizes = '(min-width: 1152px) 1104px, calc(100vw - 48px)';
-const srcset = (file: string, ext: string) => `${base}/${file}-960.${ext} 960w, ${base}/${file}-1600.${ext} 1600w, ${base}/${file}-2160.${ext} 2160w`;
+// Habillage commun aux trois formules (charte de la page commerciale : un seul accent).
+const t = {
+	frame: 'bg-stone-200 border-filet',
+	button: 'bg-carte/90 text-encre border-filet hover:bg-encre hover:text-papier hover:border-encre',
+	thumb: 'border-transparent opacity-55 hover:opacity-100 aria-[current=true]:border-encre aria-[current=true]:opacity-100',
+	ring: 'focus-visible:ring-accent',
+};
+const sizes = '(min-width: 1312px) 1216px, calc(100vw - 40px)';
+// Chemin sans suffixe d'une capture, et de sa vignette (les captures commerciales n'en ont pas : on prend la 960).
+const chemin = (shot: GalleryShot) => (shot.commercial ? `/images/commercial/${shot.commercial}` : `${base}/${shot.file}`);
+const vignette = (shot: GalleryShot, ext: string) => (shot.commercial ? `${chemin(shot)}-960.${ext}` : `${chemin(shot)}-thumb.${ext}`);
+const srcset = (shot: GalleryShot, ext: string) => `${chemin(shot)}-960.${ext} 960w, ${chemin(shot)}-1600.${ext} 1600w, ${chemin(shot)}-2160.${ext} 2160w`;
 ---
 
-<section id="galerie" class={`py-24 ${t.section}`}>
-	<div class="mx-auto max-w-6xl px-6">
-		<div class="text-center mb-12" data-aos="fade-up">
-			<h2 class={`text-4xl font-bold mb-4 ${t.heading}`}>{title}</h2>
-			<p class={`text-lg max-w-2xl mx-auto ${t.text}`}>{intro}</p>
+<section id="galerie" class="galerie-section">
+	<div class="conteneur">
+		<div class="detail-section-tete">
+			<h2 class="titre-xl" data-split>{title}</h2>
+			<p class="chapo" data-reveal>{intro}</p>
 		</div>
 
 		<div
@@ -76,7 +54,8 @@ const srcset = (file: string, ext: string) => `${base}/${file}-960.${ext} 960w, 
 			id={galleryId}
 			tabindex="-1"
 		>
-			<div class={`relative rounded-3xl border overflow-hidden shadow-xl ${t.frame}`}>
+			<div class={`cadre-nav relative ${t.frame}`} data-reveal>
+				<span class="cadre-nav-barre" aria-hidden="true"><span class="cadre-nav-points"><i></i><i></i><i></i></span></span>
 				<div class="relative aspect-[16/10]" data-viewport>
 					{shots.map((shot, i) => (
 						<figure
@@ -94,10 +73,10 @@ const srcset = (file: string, ext: string) => `${base}/${file}-960.${ext} 960w, 
 								aria-label={`Agrandir : ${shot.title}`}
 							>
 								<picture>
-									<source type="image/avif" srcset={srcset(shot.file, 'avif')} sizes={sizes} />
+									<source type="image/avif" srcset={srcset(shot, 'avif')} sizes={sizes} />
 									<img
-										src={`${base}/${shot.file}-1600.webp`}
-										srcset={srcset(shot.file, 'webp')}
+										src={`${chemin(shot)}-1600.webp`}
+										srcset={srcset(shot, 'webp')}
 										sizes={sizes}
 										width="2160"
 										height="1350"
@@ -118,18 +97,18 @@ const srcset = (file: string, ext: string) => `${base}/${file}-960.${ext} 960w, 
 				<button type="button" data-next aria-controls={galleryId} aria-label="Capture suivante" class={`absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 md:w-11 md:h-11 rounded-full border shadow-md flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-4 ${t.button} ${t.ring}`}>
 					<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
 				</button>
-				<button type="button" data-zoom-current aria-label="Agrandir la capture" class={`absolute right-3 top-3 z-10 w-9 h-9 md:w-11 md:h-11 rounded-full border shadow-md flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-4 ${t.button} ${t.ring}`}>
+				<button type="button" data-zoom-current aria-label="Agrandir la capture" class={`absolute right-3 top-12 z-10 w-9 h-9 md:w-11 md:h-11 rounded-full border shadow-md flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-4 ${t.button} ${t.ring}`}>
 					<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
 				</button>
 			</div>
 
 			<div class="mt-6 flex flex-col md:flex-row md:items-start gap-2 md:gap-8">
-				<p class={`text-sm font-bold tabular-nums shrink-0 ${t.counter}`} aria-hidden="true">
+				<p class="repere num shrink-0" aria-hidden="true">
 					<span data-index>1</span> / {shots.length}
 				</p>
 				<div aria-live="polite" class="min-h-[3.5rem]">
-					<h3 class={`text-xl font-bold ${t.heading}`} data-current-title>{shots[0].title}</h3>
-					<p class={`text-sm mt-1 ${t.text}`} data-current-caption>{shots[0].caption}</p>
+					<h3 class="titre-m" data-current-title>{shots[0].title}</h3>
+					<p class="mt-1 text-[0.9375rem] text-gris" data-current-caption>{shots[0].caption}</p>
 				</div>
 			</div>
 
@@ -143,11 +122,11 @@ const srcset = (file: string, ext: string) => `${base}/${file}-960.${ext} 960w, 
 							aria-current={i === 0 ? 'true' : 'false'}
 							data-title={shot.title}
 							data-caption={shot.caption}
-							class={`block w-32 md:w-40 aspect-[16/10] rounded-xl overflow-hidden border-2 transition focus:outline-none focus-visible:ring-4 ${t.thumb} ${t.ring}`}
+							class={`block w-32 md:w-40 aspect-[16/10] rounded-lg overflow-hidden border-2 transition focus:outline-none focus-visible:ring-4 ${t.thumb} ${t.ring}`}
 						>
 							<picture>
-								<source type="image/avif" srcset={`${base}/${shot.file}-thumb.avif`} />
-								<img src={`${base}/${shot.file}-thumb.webp`} width="320" height="200" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover object-top" />
+								<source type="image/avif" srcset={vignette(shot, 'avif')} />
+								<img src={vignette(shot, 'webp')} width="320" height="200" alt="" loading="lazy" decoding="async" class="w-full h-full object-cover object-top" />
 							</picture>
 						</button>
 					</li>

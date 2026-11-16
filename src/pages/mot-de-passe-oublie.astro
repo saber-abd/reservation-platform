@@ -3,10 +3,10 @@ import CommercialLayout from '@/layouts/commercial/CommercialLayout.astro';
 ---
 
 <CommercialLayout title="Mot de passe oublié" description="Redirection...">
-	<section class="flex min-h-[70vh] items-center justify-center py-20 px-6">
+	<section class="conteneur flex min-h-[70svh] items-center justify-center pb-20 pt-32">
 		<div class="flex flex-col items-center justify-center gap-4 text-center">
-			<div class="h-10 w-10 animate-spin rounded-full border-4 border-stone-200 border-t-rose-600"></div>
-			<p class="text-sm font-semibold text-stone-700">Redirection en cours...</p>
+			<div class="attente" aria-hidden="true"></div>
+			<h1 class="titre-m">Redirection en cours...</h1>
 		</div>
 	</section>
 

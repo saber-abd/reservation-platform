@@ -404,25 +404,7 @@ const faq = [
 			.to(cDiamant, { yPercent: -5, ease: 'none' }, 0)
 			.to(cTel, { yPercent: -22, ease: 'none' }, 0);
 
-		// Titres de section révélés ligne par ligne (un ScrollTrigger chacun, joué une fois).
-		document.querySelectorAll<HTMLElement>('[data-split]').forEach((el) => {
-			SplitText.create(el, {
-				type: 'lines',
-				mask: 'lines',
-				autoSplit: true,
-				onSplit: (self) => {
-					el.classList.add('is-split');
-					return gsap.from(self.lines, {
-						yPercent: 110,
-						duration: 1.1,
-						ease: 'power4.out',
-						stagger: 0.09,
-						scrollTrigger: { trigger: el, start: 'top 85%', once: true },
-					});
-				},
-			});
-		});
-
+		// Les titres [data-split] sont révélés par le layout.
 		return () => racine.classList.remove('cm-hero-ok');
 	});
 

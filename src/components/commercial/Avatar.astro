@@ -26,7 +26,7 @@ const { photo, initiales, prenom, size, class: className = '' } = Astro.props;
 	<div
 		role="img"
 		aria-label={`Initiales de ${prenom}`}
-		class={`flex items-center justify-center rounded-full bg-gradient-to-br from-stone-800 to-rose-600 font-bold text-white ${className}`}
+		class={`flex items-center justify-center rounded-full bg-encre font-semibold text-papier ${className}`}
 		style={`width:${size}px;height:${size}px;font-size:${Math.round(size / 3)}px`}
 	>
 		{initiales}

@@ -82,7 +82,7 @@ export const projets = [
 		tags: ['PostgreSQL', 'RLS', 'RGPD'],
 	},
 	{
-		titre: 'Performance avant tout',
+		titre: 'Des pages légères',
 		texte:
 			'Pages légères, styles isolés par démo et animations sobres pour un site rapide même sur un matériel modeste.',
 		tags: ['Tailwind', 'Lighthouse', 'Accessibilité'],
@@ -90,7 +90,7 @@ export const projets = [
 ];
 
 export const valeurs = [
-	{ titre: 'Sur mesure', texte: 'Chaque outil part de votre métier, pas d’un modèle générique.' },
-	{ titre: 'Transparence', texte: 'Coûts détaillés, choix techniques expliqués, pas de surprise.' },
-	{ titre: 'Proximité', texte: 'Deux interlocuteurs directs, du cahier des charges à la mise en ligne.' },
+	{ titre: 'Votre métier d’abord', texte: 'Chaque outil part de la façon dont vous travaillez, pas d’un modèle générique.' },
+	{ titre: 'Des coûts expliqués', texte: 'Devis ligne par ligne, frais de fonctionnement à votre nom, choix techniques expliqués.' },
+	{ titre: 'Deux interlocuteurs', texte: 'Les mêmes deux personnes, du cahier des charges à la mise en ligne.' },
 ];

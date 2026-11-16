@@ -18,27 +18,28 @@ import {
 const data = devisJson as DevisData;
 
 // Classes littérales par formule (Tailwind ne génère que ce qu'il lit dans les sources).
+// Un seul accent pour les trois formules (charte de la page commerciale) ; seul le point change de teinte.
 const ACCENTS: Record<FormuleId, { carte: string; point: string; texte: string; case: string; bouton: string }> = {
 	standard: {
-		carte: 'border-sky-600 bg-sky-50 ring-2 ring-sky-600',
-		point: 'bg-sky-600',
-		texte: 'text-sky-800',
-		case: 'accent-sky-700',
-		bouton: 'btn-dark',
+		carte: 'border-encre bg-carte ring-2 ring-encre',
+		point: 'bg-stone-400',
+		texte: 'text-accent-fonce',
+		case: 'accent-accent',
+		bouton: 'btn-accent',
 	},
 	premium: {
-		carte: 'border-rose-600 bg-rose-50 ring-2 ring-rose-600',
-		point: 'bg-rose-600',
-		texte: 'text-rose-700',
-		case: 'accent-rose-600',
-		bouton: 'btn-rose',
+		carte: 'border-encre bg-carte ring-2 ring-encre',
+		point: 'bg-stone-600',
+		texte: 'text-accent-fonce',
+		case: 'accent-accent',
+		bouton: 'btn-accent',
 	},
 	diamant: {
-		carte: 'border-violet-600 bg-violet-50 ring-2 ring-violet-600',
-		point: 'bg-violet-600',
-		texte: 'text-violet-700',
-		case: 'accent-violet-600',
-		bouton: 'btn-violet',
+		carte: 'border-encre bg-carte ring-2 ring-encre',
+		point: 'bg-encre',
+		texte: 'text-accent-fonce',
+		case: 'accent-accent',
+		bouton: 'btn-accent',
 	},
 };
 
@@ -99,14 +100,14 @@ export default function DevisSimulateur({ formuleInitiale, optionsInitiales = []
 			<div className="min-w-0 space-y-8">
 				{/* Choix de la formule */}
 				<fieldset className="print:hidden">
-					<legend className="text-lg font-bold text-stone-900">1. Choisissez une formule</legend>
+					<legend className="font-heading text-xl font-semibold tracking-tight text-encre">1. Choisissez une formule</legend>
 					<div className="mt-4 grid gap-3 sm:grid-cols-3">
 						{data.formules.map((f) => {
 							const actif = f.id === formule;
 							return (
 								<label
 									key={f.id}
-									className={`relative flex cursor-pointer flex-col rounded-2xl border bg-white p-4 transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-stone-900 ${
+									className={`relative flex cursor-pointer flex-col rounded-2xl border bg-carte p-4 transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent ${
 										actif ? ACCENTS[f.id].carte : 'border-stone-200 hover:border-stone-400'
 									}`}
 								>
@@ -135,11 +136,11 @@ export default function DevisSimulateur({ formuleInitiale, optionsInitiales = []
 
 				{/* Services */}
 				<div className="space-y-6">
-					<h2 className="text-lg font-bold text-stone-900 print:hidden">2. Ajustez les prestations</h2>
+					<h2 className="font-heading text-xl font-semibold tracking-tight text-encre print:hidden">2. Ajustez les prestations</h2>
 					{groupes.map(({ categorie, services }) => (
-						<fieldset key={categorie.id} className="devis-groupe rounded-3xl border border-stone-200 bg-white p-4 shadow-sm sm:p-6">
+						<fieldset key={categorie.id} className="devis-groupe rounded-2xl border border-filet bg-carte p-4 sm:p-6">
 							<legend className="sr-only">{categorie.nom}</legend>
-							<p className="text-xs font-bold uppercase tracking-wider text-stone-500" aria-hidden="true">
+							<p className="font-heading text-base font-semibold text-encre" aria-hidden="true">
 								{categorie.nom}
 							</p>
 							<ul className="mt-2 divide-y divide-stone-100">
@@ -159,7 +160,7 @@ export default function DevisSimulateur({ formuleInitiale, optionsInitiales = []
 				</div>
 
 				{indisponibles.length > 0 && (
-					<details className="group rounded-2xl border border-stone-200 bg-stone-50 print:hidden">
+					<details className="group rounded-2xl border border-filet bg-sable/60 print:hidden">
 						<summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-stone-700">
 							Disponible dans une autre formule ({indisponibles.length})
 							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 transition-transform group-open:rotate-180" aria-hidden="true">
@@ -184,8 +185,8 @@ export default function DevisSimulateur({ formuleInitiale, optionsInitiales = []
 
 			{/* Récapitulatif : collant sur desktop, dans le flux sur mobile (avec barre fixe en bas) */}
 			<aside id="recapitulatif" className="scroll-mt-24 lg:sticky lg:top-24 print:order-first" aria-labelledby="recap-titre">
-				<div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6 print:shadow-none">
-					<h2 id="recap-titre" className="text-lg font-bold text-stone-900">
+				<div className="rounded-2xl border border-encre bg-carte p-5 sm:p-6 print:shadow-none">
+					<h2 id="recap-titre" className="font-heading text-xl font-semibold tracking-tight text-encre">
 						Récapitulatif
 					</h2>
 					<div aria-live="polite" aria-atomic="true">
@@ -200,7 +201,7 @@ export default function DevisSimulateur({ formuleInitiale, optionsInitiales = []
 						</dl>
 						<div className="mt-4 border-t border-stone-200 pt-4">
 							<p className="text-sm text-stone-600">Coût estimé la première année</p>
-							<p className="mt-1 text-2xl font-extrabold text-stone-900">{premiereAnnee}</p>
+							<p className="mt-1 font-heading text-3xl font-semibold tracking-tight text-encre num">{premiereAnnee}</p>
 							<p className="mt-1 text-xs text-stone-500">
 								Main d’œuvre + 12 mois de frais. {data.meta.mentionTva}.
 							</p>
@@ -218,13 +219,13 @@ export default function DevisSimulateur({ formuleInitiale, optionsInitiales = []
 			</aside>
 
 			{/* Barre fixe mobile : total visible pendant le défilement */}
-			<div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white/95 px-4 py-3 shadow-[0_-8px_24px_-12px_rgb(0_0_0/0.25)] backdrop-blur lg:hidden print:hidden">
+			<div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-carte/95 px-4 py-3 shadow-[0_-8px_24px_-12px_rgb(0_0_0/0.25)] backdrop-blur lg:hidden print:hidden">
 				<div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
 					<div className="min-w-0">
 						<p className="truncate text-xs text-stone-500">
 							{formuleCourante.nom} · 1re année
 						</p>
-						<p className="truncate text-base font-extrabold text-stone-900">{premiereAnnee}</p>
+						<p className="truncate text-base font-semibold text-encre num">{premiereAnnee}</p>
 					</div>
 					<a href="#recapitulatif" className="btn btn-outline btn-sm shrink-0">
 						Détail

@@ -1,0 +1,215 @@
+---
+// Page de détail d'une formule (/galerie/<formule>) : héros, contenu, écrans, technologies, coûts.
+// Contenus, outils, durées et prix viennent de src/data/devis.json (via offre.ts et lib/devis).
+// Ancres conservées pour la navigation : #fonctionnalites, #galerie, #technologies, #couts.
+import CommercialLayout from '@/layouts/commercial/CommercialLayout.astro';
+import CadreNavigateur from '@/components/commercial/CadreNavigateur.astro';
+import CadreTelephone from '@/components/commercial/CadreTelephone.astro';
+import FormulaGallery, { type GalleryShot } from '@/components/commercial/FormulaGallery.astro';
+import { paliers, devis, estInclus, fr } from '@/components/commercial/offre';
+import { type FormuleId, calculerDevis, formatEuros, formatFourchette, formatJours, libellesFrais, mainOeuvre, tarifDe } from '@/lib/devis';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
+
+interface Props {
+	id: FormuleId;
+	titre: string;
+	chapo: string;
+	/** Paragraphe d'introduction de la section Technologies. */
+	technique: string;
+	shots: GalleryShot[];
+	galerieTitre: string;
+	galerieIntro: string;
+}
+
+const { id, titre, chapo, technique, shots, galerieTitre, galerieIntro } = Astro.props;
+const p = paliers.find((x) => x.id === id)!;
+const precedent = p.index > 0 ? paliers[p.index - 1] : undefined;
+const suivant = paliers[p.index + 1];
+const pad = (n: number) => String(n).padStart(2, '0');
+
+// Contenu : ce que la formule ajoute (avec description), puis ce qu'elle reprend.
+const ajouts = p.ajouts;
+const repris = p.contenu.filter((c) => !c.nouveau).map((c) => c.service.nom);
+
+// Technologies : chaque outil et les prestations qui l'utilisent.
+// (Les bibliothèques d'animation listées dans devis.json ne sont plus celles du site : on ne les affiche pas.)
+const ecartes = new Set(['AOS', 'Framer Motion', 'Registrar']);
+const outils = new Map<string, string[]>();
+for (const s of devis.services) {
+	if (!estInclus(s, id)) continue;
+	for (const o of s.outils) {
+		if (ecartes.has(o)) continue;
+		outils.set(o, [...(outils.get(o) ?? []), s.nom]);
+	}
+}
+
+// Coûts : prestations incluses, puis options proposées dans la formule.
+const totaux = calculerDevis(devis, id, []);
+const options = devis.services
+	.map((s) => ({ s, t: tarifDe(s, id) }))
+	.filter((x) => x.t?.statut === 'option')
+	.map(({ s, t }) => ({ nom: s.nom, jours: t!.jours, prix: mainOeuvre(t!, devis.meta.tjm), frais: libellesFrais(t!), note: t!.note }));
+---
+
+<CommercialLayout title={`Formule ${p.nom} | SaberWeb.dev`} description={`${p.description} Démo en ligne, écrans, technologies et coûts détaillés.`}>
+	<!-- HÉROS -->
+	<section class="conteneur entete-page detail-hero">
+		<nav class="detail-fil" aria-label="Fil d’Ariane">
+			<a href="/#tarification">Formules</a>
+			<span aria-hidden="true">/</span>
+			<span aria-current="page">{p.nom}</span>
+		</nav>
+		<p class="repere num mt-8">{pad(p.index + 1)} / 03 · {p.accroche}</p>
+		<h1 class="titre-geant detail-titre mt-4" data-split>{titre}</h1>
+
+		<div class="detail-hero-grille">
+			<div class="detail-hero-texte" data-reveal>
+				<p class="chapo">{fr(chapo)}</p>
+				<div class="flex flex-wrap gap-3">
+					<a href={p.demo} class="btn btn-dark btn-lg">Ouvrir la démo <ArrowUpRight size={17} class="btn-arrow" /></a>
+					<a href={p.devisHref} class="btn btn-outline btn-lg">Simuler un devis</a>
+				</div>
+				<dl class="detail-chiffres">
+					<div><dt>Main d’œuvre, sans option</dt><dd class="num">dès {p.prixBase}</dd></div>
+					<div><dt>Frais de fonctionnement</dt><dd class="num">{p.frais}</dd></div>
+					<div><dt>Travail estimé</dt><dd class="num">{p.jours}</dd></div>
+				</dl>
+			</div>
+			<div class="detail-visuel" data-reveal data-reveal-delay="120">
+				<CadreNavigateur file={`${id}-accueil`} alt={`Accueil de la démo ${p.nom}`} url={`saberweb.dev/demo-${id}`} sizes="(min-width: 992px) 54vw, 92vw" prioritaire sombre={id === 'premium'} />
+				<CadreTelephone file={`${id}-mobile`} alt={`La démo ${p.nom} sur téléphone`} class="detail-tel" sizes="(min-width: 992px) 12vw, 26vw" />
+			</div>
+		</div>
+
+		<ul class="detail-sommaire" aria-label="Sur cette page">
+			<li><a href="#fonctionnalites">Contenu</a></li>
+			<li><a href="#galerie">Écrans</a></li>
+			<li><a href="#technologies">Technologies</a></li>
+			<li><a href="#couts">Coûts détaillés</a></li>
+		</ul>
+	</section>
+
+	<!-- CONTENU -->
+	<section id="fonctionnalites" class="detail-section conteneur" aria-labelledby="contenu-titre">
+		<div class="detail-section-tete">
+			<h2 id="contenu-titre" class="titre-xl" data-split>
+				{precedent ? `Ce que ${p.nom} ajoute à ${precedent.nom}` : `Ce que contient ${p.nom}`}
+			</h2>
+			<p class="chapo" data-reveal>
+				{precedent
+					? `Tout ce que contient la formule ${precedent.nom}, plus les outils ci-dessous.`
+					: 'Le site vitrine, la réservation et les e-mails qui vont avec. Pas de base de données à administrer.'}
+			</p>
+		</div>
+		<ol class="detail-liste">
+			{ajouts.map((s, i) => (
+				<li class="detail-ligne" data-reveal>
+					<span class="repere num">{pad(i + 1)}</span>
+					<h3 class="titre-m">{s.nom}</h3>
+					<p class="detail-ligne-texte">{fr(s.description)}</p>
+					{s.outils.filter((o) => !ecartes.has(o)).length > 0 && (
+						<p class="detail-ligne-outils">{s.outils.filter((o) => !ecartes.has(o)).join(' · ')}</p>
+					)}
+				</li>
+			))}
+		</ol>
+		{repris.length > 0 && precedent && (
+			<div class="detail-repris" data-reveal>
+				<p class="font-medium">Repris de {precedent.nom}</p>
+				<ul>{repris.map((nom) => <li>{nom}</li>)}</ul>
+			</div>
+		)}
+		<p class="mt-6 text-sm text-gris" data-reveal>
+			Dans toutes les formules : cadrage du projet, charte graphique et maquette, pages légales et bandeau cookies, hébergement, nom de domaine, tests et prise en main.
+		</p>
+	</section>
+
+	<!-- ÉCRANS -->
+	<FormulaGallery demo={id} shots={shots} title={galerieTitre} intro={galerieIntro} />
+
+	<!-- TECHNOLOGIES -->
+	<section id="technologies" class="sur-nuit detail-techno" aria-labelledby="techno-titre">
+		<div class="conteneur">
+			<div class="detail-section-tete">
+				<h2 id="techno-titre" class="titre-xl" data-split>Technologies</h2>
+				<p class="chapo" data-reveal>{fr(technique)}</p>
+			</div>
+			<dl class="detail-outils">
+				{[...outils].map(([outil, usages]) => (
+					<div class="detail-outil" data-reveal>
+						<dt>{outil}</dt>
+						<dd>{usages.join(', ')}</dd>
+					</div>
+				))}
+			</dl>
+		</div>
+	</section>
+
+	<!-- COÛTS -->
+	<section id="couts" class="detail-section conteneur" aria-labelledby="couts-titre">
+		<div class="detail-section-tete">
+			<h2 id="couts-titre" class="titre-xl" data-split>Coûts détaillés</h2>
+			<p class="chapo" data-reveal>
+				Main d’œuvre au taux de {formatEuros(devis.meta.tjm)} HT la journée. Les frais de fonctionnement sont payés sur vos
+				propres comptes ou refacturés à l’identique. {devis.meta.mentionTva}.
+			</p>
+		</div>
+
+		<div class="detail-table-wrap" data-reveal>
+			<table class="detail-table">
+				<caption class="sr-only">Prestations incluses dans la formule {p.nom}</caption>
+				<thead>
+					<tr><th scope="col">Prestation incluse</th><th scope="col">Travail</th><th scope="col">Main d’œuvre</th><th scope="col">Frais récurrents</th></tr>
+				</thead>
+				<tbody>
+					{totaux.lignes.map((l) => (
+						<tr>
+							<th scope="row">{l.service.nom}{l.tarif.note && <span class="detail-note">{fr(l.tarif.note)}</span>}</th>
+							<td class="num">{formatJours(l.tarif.jours)}</td>
+							<td class="num">{formatEuros(l.mainOeuvre)}</td>
+							<td>{libellesFrais(l.tarif).join(' ; ') || '–'}</td>
+						</tr>
+					))}
+				</tbody>
+				<tfoot>
+					<tr>
+						<th scope="row">Total, sans option</th>
+						<td class="num">{formatJours(totaux.jours)}</td>
+						<td class="num">{formatEuros(totaux.mainOeuvre)}</td>
+						<td class="num">{formatFourchette(totaux.fraisMensuels)} / mois</td>
+					</tr>
+				</tfoot>
+			</table>
+		</div>
+
+		{options.length > 0 && (
+			<div class="detail-table-wrap mt-12" data-reveal>
+				<table class="detail-table">
+					<caption class="detail-caption">Options disponibles en {p.nom}</caption>
+					<thead>
+						<tr><th scope="col">Option</th><th scope="col">Travail</th><th scope="col">Main d’œuvre</th><th scope="col">Frais récurrents</th></tr>
+					</thead>
+					<tbody>
+						{options.map((o) => (
+							<tr>
+								<th scope="row">{o.nom}{o.note && <span class="detail-note">{fr(o.note)}</span>}</th>
+								<td class="num">{o.jours ? formatJours(o.jours) : '–'}</td>
+								<td class="num">{o.prix ? formatEuros(o.prix) : '–'}</td>
+								<td>{o.frais.join(' ; ') || '–'}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
+		)}
+
+		<div class="detail-suite" data-reveal>
+			<a href={p.devisHref} class="btn btn-accent btn-lg">Composer mon devis {p.nom} <ArrowRight size={17} class="btn-arrow" /></a>
+			{suivant ? (
+				<a href={suivant.detail} class="lien">Voir la formule {suivant.nom} <ArrowRight size={15} /></a>
+			) : (
+				<a href="/#tarification" class="lien">Comparer les trois formules <ArrowRight size={15} /></a>
+			)}
+		</div>
+	</section>
+</CommercialLayout>

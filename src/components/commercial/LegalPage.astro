@@ -21,47 +21,49 @@ const current = Astro.url.pathname.replace(/\/$/, '');
 ---
 
 <CommercialLayout title={`${title} | SaberWeb.dev`} description={description}>
-	<section class="border-b border-stone-200 bg-white">
-		<div class="mx-auto max-w-3xl px-6 py-14 sm:py-20">
-			<p class="text-sm text-stone-500">Informations légales</p>
-			<h1 class="mt-2 text-3xl font-extrabold tracking-tight text-stone-900 sm:text-4xl">{title}</h1>
-			<p class="mt-3 text-stone-600">{description}</p>
-			<p class="mt-2 text-sm text-stone-400">Dernière mise à jour : {updated}</p>
-			<nav class="mt-8 flex flex-wrap gap-2" aria-label="Pages légales">
-				{pages.map((p) => (
-					<a href={p.href} aria-current={current === p.href ? 'page' : undefined} class="rounded-full border border-stone-200 px-4 py-1.5 text-sm font-semibold text-stone-600 transition-colors hover:border-stone-900 hover:text-stone-900 aria-[current=page]:border-stone-900 aria-[current=page]:bg-stone-900 aria-[current=page]:text-white">
-						{p.label}
-					</a>
-				))}
-			</nav>
-		</div>
+	<section class="conteneur entete-page">
+		<p class="repere num">Informations légales</p>
+		<h1 class="titre-xl mt-4 max-w-[18ch]" data-split>{title}</h1>
+		<p class="chapo mt-6 max-w-2xl">{description}</p>
+		<p class="mt-2 text-sm text-stone-500">Dernière mise à jour&nbsp;: {updated}</p>
+		<nav class="mt-10 flex flex-wrap gap-2 border-t border-encre pt-6" aria-label="Pages légales">
+			{pages.map((p) => (
+				<a href={p.href} aria-current={current === p.href ? 'page' : undefined} class="rounded-full border border-filet px-4 py-1.5 text-sm font-medium text-gris transition-colors hover:border-encre hover:text-encre aria-[current=page]:border-encre aria-[current=page]:bg-encre aria-[current=page]:text-papier">
+					{p.label}
+				</a>
+			))}
+		</nav>
 	</section>
 
-	<article class="legal-prose mx-auto max-w-3xl px-6 py-14">
-		<slot />
+	<article class="legal-prose conteneur pb-24">
+		<div class="max-w-3xl">
+			<slot />
+		</div>
 	</article>
 </CommercialLayout>
 
 <style>
 	.legal-prose :global(h2) {
 		margin-top: 2.5rem;
-		font-size: 1.25rem;
-		font-weight: 700;
-		color: var(--color-stone-900);
+		font-family: var(--font-heading);
+		font-size: 1.45rem;
+		font-weight: 600;
+		letter-spacing: -0.02em;
+		color: var(--color-encre);
 	}
 	.legal-prose :global(h2:first-child) {
 		margin-top: 0;
 	}
 	.legal-prose :global(h3) {
 		margin-top: 1.5rem;
-		font-weight: 700;
-		color: var(--color-stone-800);
+		font-weight: 600;
+		color: var(--color-encre);
 	}
 	.legal-prose :global(p),
 	.legal-prose :global(ul) {
 		margin-top: 0.75rem;
 		line-height: 1.7;
-		color: var(--color-stone-600);
+		color: var(--color-gris);
 	}
 	.legal-prose :global(ul) {
 		list-style: disc;
@@ -74,7 +76,7 @@ const current = Astro.url.pathname.replace(/\/$/, '');
 		color: var(--color-stone-800);
 	}
 	.legal-prose :global(a) {
-		color: var(--color-rose-700);
+		color: var(--color-accent-fonce);
 		text-decoration: underline;
 		text-underline-offset: 2px;
 	}
@@ -87,14 +89,14 @@ const current = Astro.url.pathname.replace(/\/$/, '');
 	.legal-prose :global(th),
 	.legal-prose :global(td) {
 		padding: 0.6rem 0.75rem;
-		border: 1px solid var(--color-stone-200);
+		border-bottom: 1px solid var(--color-filet);
 		text-align: left;
 		vertical-align: top;
 		color: var(--color-stone-600);
 	}
 	.legal-prose :global(th) {
-		background: var(--color-stone-100);
-		color: var(--color-stone-800);
+		color: var(--color-encre);
+		border-bottom-color: var(--color-encre);
 	}
 	.legal-prose :global(.table-wrap) {
 		overflow-x: auto;
