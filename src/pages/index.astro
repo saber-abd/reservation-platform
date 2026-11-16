@@ -10,33 +10,45 @@ import CadreNavigateur from '@/components/commercial/CadreNavigateur.astro';
 import CadreTelephone from '@/components/commercial/CadreTelephone.astro';
 import { membres } from '@/components/commercial/equipe';
 import { contact } from '@/components/commercial/contact';
-import { paliers, devis, descriptionService, formulesIncluant } from '@/components/commercial/offre';
-import { formatEuros } from '@/lib/devis';
-import { ArrowRight, ArrowUpRight, Phone } from 'lucide-react';
+import { paliers, devis, descriptionService, estInclus } from '@/components/commercial/offre';
+import { formatEuros, type FormuleId } from '@/lib/devis';
+import { ArrowRight, ArrowUpRight, Phone, Check, CalendarCheck, ShieldCheck, Gem, MessagesSquare, PenTool, Rocket } from 'lucide-react';
 
 const [standard, premium, diamant] = paliers;
 const pad = (n: number) => String(n).padStart(2, '0');
+const icones = { standard: CalendarCheck, premium: ShieldCheck, diamant: Gem };
 
-// Bandeau : ce que contiennent les formules, dans l'ordre où elles l'ajoutent.
-const bandeau = diamant.contenu.map((c) => c.service.nom);
+// Bandeau : ce que contiennent les formules, avec la couleur de la formule qui l'ajoute.
+const bandeau = diamant.contenu.map((c) => ({
+	nom: c.service.nom,
+	formule: paliers.find((p) => estInclus(c.service, p.id))?.id ?? 'diamant',
+}));
+
+// Formules qui incluent un service (une pastille de couleur par formule).
+const formulesDe = (ids: string[]): FormuleId[] =>
+	paliers.filter((p) => ids.some((id) => {
+		const s = devis.services.find((x) => x.id === id);
+		return s ? estInclus(s, p.id) : false;
+	})).map((p) => p.id);
+const nomFormule = (id: FormuleId) => paliers.find((p) => p.id === id)!.nom;
 
 // Colonne collante : une ligne par outil, avec la capture correspondante.
-type Fonction = { id: string; titre: string; texte: string; formules: string; capture: { demo?: 'premium' | 'diamant'; file: string; url: string } };
+type Fonction = { id: string; titre: string; texte: string; formules: FormuleId[]; capture: { demo?: 'premium' | 'diamant'; file: string; url: string } };
 const fonctions: Fonction[] = [
 	{
 		id: 'reservation',
 		titre: 'Réservation en ligne',
 		texte: `${descriptionService('resa-agenda')} En Premium et Diamant, les créneaux suivent vos disponibilités et les doubles réservations sont bloquées.`,
-		formules: 'Toutes les formules',
+		formules: formulesDe(['resa-agenda', 'resa-base']),
 		capture: { file: 'standard-reservation', url: 'demo-standard/reservation' },
 	},
-	{ id: 'dashboard', titre: 'Tableau de bord', texte: descriptionService('dashboard'), formules: formulesIncluant('dashboard'), capture: { file: 'premium-tableau', url: 'demo-premium/dashboard' } },
-	{ id: 'statistiques', titre: 'Statistiques', texte: descriptionService('statistiques'), formules: formulesIncluant('statistiques'), capture: { file: 'premium-stats', url: 'demo-premium/dashboard/statistiques' } },
-	{ id: 'espace-client', titre: 'Espace client', texte: descriptionService('espace-client'), formules: formulesIncluant('espace-client'), capture: { demo: 'premium', file: 'espace-client', url: 'demo-premium/espace-client' } },
-	{ id: 'messagerie', titre: 'Messagerie', texte: descriptionService('messagerie'), formules: formulesIncluant('messagerie'), capture: { demo: 'diamant', file: 'messagerie', url: 'demo-diamant/dashboard/messages' } },
-	{ id: 'fidelite', titre: 'Fidélité', texte: descriptionService('fidelite'), formules: formulesIncluant('fidelite'), capture: { demo: 'diamant', file: 'fidelite-client', url: 'demo-diamant/espace-client/fidelite' } },
-	{ id: 'equipe-droits', titre: 'Équipe et droits', texte: descriptionService('equipe-droits'), formules: formulesIncluant('equipe-droits'), capture: { demo: 'diamant', file: 'permissions', url: 'demo-diamant/dashboard/droits' } },
-	{ id: 'moderation', titre: 'Modération des clients', texte: descriptionService('moderation'), formules: formulesIncluant('moderation'), capture: { demo: 'diamant', file: 'moderation-clients', url: 'demo-diamant/dashboard/clients' } },
+	{ id: 'dashboard', titre: 'Tableau de bord', texte: descriptionService('dashboard'), formules: formulesDe(['dashboard']), capture: { file: 'premium-tableau', url: 'demo-premium/dashboard' } },
+	{ id: 'statistiques', titre: 'Statistiques', texte: descriptionService('statistiques'), formules: formulesDe(['statistiques']), capture: { file: 'premium-stats', url: 'demo-premium/dashboard/statistiques' } },
+	{ id: 'espace-client', titre: 'Espace client', texte: descriptionService('espace-client'), formules: formulesDe(['espace-client']), capture: { demo: 'premium', file: 'espace-client', url: 'demo-premium/espace-client' } },
+	{ id: 'messagerie', titre: 'Messagerie', texte: descriptionService('messagerie'), formules: formulesDe(['messagerie']), capture: { demo: 'diamant', file: 'messagerie', url: 'demo-diamant/dashboard/messages' } },
+	{ id: 'fidelite', titre: 'Fidélité', texte: descriptionService('fidelite'), formules: formulesDe(['fidelite']), capture: { demo: 'diamant', file: 'fidelite-client', url: 'demo-diamant/espace-client/fidelite' } },
+	{ id: 'equipe-droits', titre: 'Équipe et droits', texte: descriptionService('equipe-droits'), formules: formulesDe(['equipe-droits']), capture: { demo: 'diamant', file: 'permissions', url: 'demo-diamant/dashboard/droits' } },
+	{ id: 'moderation', titre: 'Modération des clients', texte: descriptionService('moderation'), formules: formulesDe(['moderation']), capture: { demo: 'diamant', file: 'moderation-clients', url: 'demo-diamant/dashboard/clients' } },
 ];
 
 const maintenance = devis.services.find((s) => s.id === 'maintenance');
@@ -44,16 +56,19 @@ const maintenanceMin = maintenance?.formules.standard?.mensuel?.min;
 
 const etapes = [
 	{
+		icone: MessagesSquare,
 		titre: 'On en parle',
 		texte: 'Un appel pour comprendre votre métier, vos prestations et la façon dont vous prenez les rendez-vous aujourd’hui. Vous repartez avec la formule qui vous convient et un devis détaillé, ligne par ligne.',
 		meta: 'Gratuit, sans engagement',
 	},
 	{
+		icone: PenTool,
 		titre: 'On construit',
 		texte: 'Maquette des pages principales, validée avec vous, puis développement du site et des outils de la formule. Vos textes et vos photos sont intégrés au fur et à mesure.',
-		meta: `${standard.jours} de travail en Standard, ${diamant.jours} en Diamant`,
+		meta: `${standard.jours} en Standard, ${diamant.jours} en Diamant`,
 	},
 	{
+		icone: Rocket,
 		titre: 'On met en ligne',
 		texte: `${descriptionService('recette')} Le site tourne ensuite sur votre nom de domaine et vos propres comptes.`,
 		meta: maintenanceMin !== undefined ? `Maintenance en option, dès ${formatEuros(maintenanceMin)} par mois` : 'Maintenance en option',
@@ -65,15 +80,15 @@ const faq = [
 		volet: 'Avant le projet',
 		questions: [
 			{
-				q: 'Combien de temps faut-il pour avoir mon site ?',
+				q: 'Combien de temps faut-il pour avoir mon site ?',
 				r: `Le devis compte ${standard.jours} de travail pour un site Standard, ${premium.jours} pour Premium et ${diamant.jours} pour Diamant, hors options. Le calendrier dépend surtout de la date à laquelle vos textes et vos photos sont prêts ; il est fixé avec vous au moment du devis.`,
 			},
 			{
-				q: 'Dois-je fournir les textes et les photos ?',
-				r: 'Oui, par défaut : vous connaissez votre métier mieux que nous. Si vous préférez, la rédaction des textes à partir d’un entretien existe en option dans le simulateur de devis.',
+				q: 'Dois-je fournir les textes et les photos ?',
+				r: 'Oui, par défaut : vous connaissez votre métier mieux que nous. Si vous préférez, la rédaction des textes à partir d’un entretien existe en option dans le simulateur de devis.',
 			},
 			{
-				q: 'Quelle formule choisir ?',
+				q: 'Quelle formule choisir ?',
 				r: 'Standard si vous voulez un site et des rendez-vous qui arrivent dans votre agenda Google. Premium si vos clients doivent avoir un compte, un historique et des points de fidélité. Diamant si vous travaillez à plusieurs et devez répartir les accès. En cas de doute, le premier appel sert à ça.',
 			},
 		],
@@ -82,20 +97,28 @@ const faq = [
 		volet: 'Après la mise en ligne',
 		questions: [
 			{
-				q: 'Quels sont les frais une fois le site en ligne ?',
-				r: `Hébergement, nom de domaine et services tiers : environ ${standard.frais} en Standard, ${premium.frais} en Premium et ${diamant.frais} en Diamant. Ils sont payés sur vos propres comptes ou refacturés à l’identique, sans marge.`,
+				q: 'Quels sont les frais une fois le site en ligne ?',
+				r: `Hébergement, nom de domaine et services tiers : environ ${standard.frais} en Standard, ${premium.frais} en Premium et ${diamant.frais} en Diamant. Ils sont payés sur vos propres comptes ou refacturés à l’identique, sans marge.`,
 			},
 			{
-				q: 'Pourrai-je modifier mes prestations et mes horaires ?',
-				r: 'En Premium et Diamant, oui : le tableau de bord gère les prestations, les prix, les photos et les disponibilités. En Standard, les rendez-vous arrivent dans votre Google Agenda et les modifications du site passent par nous.',
+				q: 'Pourrai-je modifier mes prestations et mes horaires ?',
+				r: 'En Premium et Diamant, oui : le tableau de bord gère les prestations, les prix, les photos et les disponibilités. En Standard, les rendez-vous arrivent dans votre Google Agenda et les modifications du site passent par nous.',
 			},
 			{
-				q: 'Qui s’occupe des mises à jour ?',
-				r: `Nous, si vous prenez l’option maintenance : ${descriptionService('maintenance').replace(/^./, (c) => c.toLowerCase())} Elle coûte ${standard.maintenance} en Standard et jusqu’à ${diamant.maintenance} en Diamant.`,
+				q: 'Qui s’occupe des mises à jour ?',
+				r: `Nous, si vous prenez l’option maintenance : ${descriptionService('maintenance').replace(/^./, (c) => c.toLowerCase())} Elle coûte ${standard.maintenance} en Standard et jusqu’à ${diamant.maintenance} en Diamant.`,
 			},
 		],
 	},
 ];
+
+// Éventail du héros : Diamant au fond, Premium, puis Standard devant.
+const eventail = [
+	{ id: 'diamant', file: 'diamant-accueil', alt: 'Accueil de la démo Diamant, un salon de coiffure', sombre: false },
+	{ id: 'premium', file: 'premium-accueil', alt: 'Accueil de la démo Premium, un garage', sombre: true },
+	{ id: 'standard', file: 'standard-accueil', alt: 'Accueil de la démo Standard, un dépanneur informatique', sombre: false },
+];
+const metiers: Record<FormuleId, string> = { standard: 'dépannage informatique', premium: 'garage', diamant: 'salon de coiffure' };
 ---
 
 <CommercialLayout
@@ -105,53 +128,53 @@ const faq = [
 >
 	<!-- HÉROS -->
 	<section id="presentation" class="hero" data-hero aria-labelledby="hero-titre">
-		<div class="conteneur">
-			<h1 id="hero-titre" class="hero-titre" data-hero-titre>
-				Un site qui prend les rendez-vous <span class="accent">pour vous.</span>
-			</h1>
+		<div class="conteneur hero-grille">
+			<div class="hero-texte">
+				<h1 id="hero-titre" class="hero-titre" data-hero-titre>
+					Un site qui prend les rendez-vous <span class="hero-souligne">pour vous.<svg viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 9 C 50 2, 120 2, 198 7" /></svg></span>
+				</h1>
+				<p class="chapo" data-hero-fade>
+					Nous construisons des sites vitrines avec réservation en ligne pour les coiffeurs, les garages,
+					les dépanneurs et les autres indépendants. Trois formules, de l’agenda Google à la plateforme
+					avec espace client et équipe. Les trois démos sont en ligne : vous pouvez les essayer.
+				</p>
+				<div class="hero-actions" data-hero-fade>
+					<a href="#tarification" class="btn btn-rose btn-lg">
+						Voir les formules <ArrowRight size={17} class="btn-arrow" />
+					</a>
+					<a href="/devis" class="btn btn-outline btn-lg">Simuler un devis</a>
+				</div>
+				<a href="#histoire" class="hero-duo" data-hero-fade>
+					<span class="hero-duo-photos">
+						{membres.map((m) => (
+							<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={48} class="ring-[3px] ring-white" />
+						))}
+					</span>
+					<span>
+						<span class="block font-semibold text-stone-900">{membres.map((m) => m.prenom).join(' et ')}</span>
+						<span class="block text-sm text-stone-500">Vos deux interlocuteurs, du premier appel à la mise en ligne.</span>
+					</span>
+				</a>
+			</div>
 
-			<div class="hero-grille">
-				<div class="hero-texte">
-					<p class="chapo" data-hero-fade>
-						Nous construisons des sites vitrines avec réservation en ligne pour les coiffeurs, les garages,
-						les dépanneurs et les autres indépendants. Trois formules, de l’agenda Google à la plateforme
-						avec espace client et équipe. Les trois démos sont en ligne : vous pouvez les essayer.
-					</p>
-					<div class="hero-actions" data-hero-fade>
-						<a href="#tarification" class="btn btn-dark btn-lg">
-							Voir les formules <ArrowRight size={17} class="btn-arrow" />
+			<div class="hero-visuel" data-hero-visuel>
+				<div class="hero-panneau" data-hero-panneau>
+					<div class="hero-eventail" data-hero-eventail>
+						{eventail.map((v, i) => (
+							<a href={`/galerie/${v.id}`} class={`hero-cadre hero-cadre-${i + 1}`} data-hero-cadre aria-label={`Formule ${nomFormule(v.id as FormuleId)} : voir le détail`}>
+								<CadreNavigateur file={v.file} alt={v.alt} url={`saberweb.dev/demo-${v.id}`} sizes="(min-width: 992px) 34vw, 70vw" sombre={v.sombre} prioritaire={i === 0} />
+							</a>
+						))}
+						<a href="/galerie/standard" class="hero-tel" data-hero-cadre aria-label="Formule Standard sur téléphone : voir le détail">
+							<CadreTelephone file="standard-mobile" alt="La démo Standard sur téléphone" sizes="(min-width: 992px) 9vw, 18vw" />
 						</a>
-						<a href="/devis" class="btn btn-outline btn-lg">Simuler un devis</a>
 					</div>
-					<a href="#histoire" class="hero-duo" data-hero-fade>
-						<span class="hero-duo-photos">
-							{membres.map((m) => (
-								<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={52} class="ring-[3px] ring-papier" />
-							))}
-						</span>
-						<span>
-							<span class="block font-medium text-encre">{membres.map((m) => m.prenom).join(' et ')}</span>
-							<span class="block text-sm text-gris">Vos deux interlocuteurs, du premier appel à la mise en ligne.</span>
-						</span>
-					</a>
 				</div>
-
-				<div class="hero-visuel" data-hero-visuel>
-					<a href="/galerie/premium" class="hero-cadre hero-cadre-premium" data-hero-cadre aria-label="Formule Premium : voir le détail">
-						<CadreNavigateur file="premium-accueil" alt="Accueil de la démo Premium, un garage" url="saberweb.dev/demo-premium" sizes="(min-width: 992px) 34vw, 60vw" sombre />
-					</a>
-					<a href="/galerie/diamant" class="hero-cadre hero-cadre-diamant" data-hero-cadre aria-label="Formule Diamant : voir le détail">
-						<CadreNavigateur file="diamant-accueil" alt="Accueil de la démo Diamant, un salon de coiffure" url="saberweb.dev/demo-diamant" sizes="(min-width: 992px) 46vw, 86vw" prioritaire />
-					</a>
-					<a href="/galerie/standard" class="hero-cadre hero-tel" data-hero-cadre aria-label="Formule Standard : voir le détail">
-						<CadreTelephone file="standard-mobile" alt="La démo Standard, un dépanneur informatique, sur téléphone" sizes="(min-width: 992px) 13vw, 30vw" />
-					</a>
-					<ul class="hero-legendes" data-hero-fade aria-hidden="true">
-						<li><b>Standard</b> dépannage informatique</li>
-						<li><b>Premium</b> garage</li>
-						<li><b>Diamant</b> salon de coiffure</li>
-					</ul>
-				</div>
+				<ul class="hero-legendes" data-hero-fade aria-label="Les trois démos">
+					{paliers.map((p) => (
+						<li class={`f-${p.id}`}><span class="pastille"></span><b>{p.nom}</b> {metiers[p.id]}</li>
+					))}
+				</ul>
 			</div>
 		</div>
 	</section>
@@ -161,15 +184,15 @@ const faq = [
 		<div class="marquee-track">
 			{[0, 1].map((copie) => (
 				<ul class="bandeau-groupe" aria-hidden={copie === 1 ? 'true' : undefined}>
-					{bandeau.map((nom) => <li>{nom}</li>)}
+					{bandeau.map((b) => <li class={`f-${b.formule}`}><span class="pastille"></span>{b.nom}</li>)}
 				</ul>
 			))}
 		</div>
 	</div>
 
 	<!-- TROIS FORMULES : section épinglée sur bureau -->
-	<section id="tarification" class="formules" data-formules aria-labelledby="formules-titre">
-		<div class="conteneur formules-intro">
+	<section id="tarification" class="formules" data-formules data-actif="standard" aria-labelledby="formules-titre">
+		<div class="conteneur section-tete formules-intro">
 			<h2 id="formules-titre" class="titre-xl" data-reveal>Trois formules. Chacune reprend la précédente et y ajoute des outils.</h2>
 			<p class="chapo" data-reveal data-reveal-delay="100">
 				Les prix ci-dessous sont la main d’œuvre des prestations incluses, sans option. Les frais de
@@ -179,61 +202,74 @@ const faq = [
 
 		<div class="formules-scene" data-formules-scene>
 			<nav class="formules-crans conteneur" aria-label="Aller à une formule">
+				<span class="formules-onglets">
+					{paliers.map((p, i) => (
+						<a href={`#formule-${p.id}`} class:list={['formules-cran', `f-${p.id}`, { 'is-actif': i === 0 }]} data-cran={i}>
+							<span class="num">{pad(i + 1)}</span> {p.nom}
+						</a>
+					))}
+				</span>
 				<span class="formules-piste" aria-hidden="true"><span class="formules-barre" data-formules-barre></span></span>
-				{paliers.map((p, i) => (
-					<a href={`#formule-${p.id}`} class:list={['formules-cran', { 'is-actif': i === 0 }]} data-cran={i}>
-						<span class="num">{pad(i + 1)}</span> {p.nom}
-					</a>
-				))}
 			</nav>
 
-			<div class="formules-paliers conteneur">
-				{paliers.map((p, i) => (
-					<article id={`formule-${p.id}`} class:list={['palier', { 'is-actif': i === 0 }]} data-palier aria-labelledby={`palier-${p.id}`}>
-						<div class="palier-ecran" data-palier-ecran>
-							<CadreNavigateur file={`${p.id}-accueil`} alt={`Accueil de la démo ${p.nom}`} url={`saberweb.dev/demo-${p.id}`} sizes="(min-width: 992px) 52vw, 92vw" sombre={p.id === 'premium'} />
-						</div>
-						<div class="palier-texte">
-							<div class="palier-tete" data-palier-tete>
-								<p class="repere num">{pad(i + 1)} / {pad(paliers.length)}</p>
-								<h3 id={`palier-${p.id}`} class="palier-nom">{p.nom}</h3>
-								<p class="palier-accroche">{p.accroche}</p>
-								<p class="palier-prix">
-									<span class="palier-montant num">dès {p.prixBase}</span>
-									<span class="palier-frais">puis {p.frais} de frais de fonctionnement</span>
-								</p>
-							</div>
-							{i > 0 && <p class="palier-herite">Tout {paliers[i - 1].nom}, plus :</p>}
-							<ul class="palier-liste">
-								{p.contenu.map((c) => (
-									<li class:list={['palier-item', c.nouveau ? 'est-nouveau' : 'est-herite']} data-service={c.service.id}>{c.service.nom}</li>
-								))}
-							</ul>
-							<div class="palier-actions" data-palier-actions>
-								<a href={p.demo} class="btn btn-dark">Voir la démo <ArrowUpRight size={16} class="btn-arrow" /></a>
-								<a href={p.detail} class="btn btn-outline">Le détail de {p.nom}</a>
-								<a href={p.devisHref} class="lien">Demander un devis <ArrowRight size={15} /></a>
-							</div>
-						</div>
-					</article>
-				))}
+			<div class="conteneur min-h-0">
+				<div class="formules-paliers" data-formules-paliers>
+					{paliers.map((p, i) => {
+						const Icone = icones[p.id];
+						return (
+							<article id={`formule-${p.id}`} class:list={['palier', `f-${p.id}`, { 'is-actif': i === 0 }]} data-palier aria-labelledby={`palier-${p.id}`}>
+								<div class="palier-ecran" data-palier-ecran>
+									<CadreNavigateur file={`${p.id}-accueil`} alt={`Accueil de la démo ${p.nom}`} url={`saberweb.dev/demo-${p.id}`} sizes="(min-width: 992px) 46vw, 88vw" sombre={p.id === 'premium'} />
+								</div>
+								<div class="palier-texte">
+									<div class="palier-tete" data-palier-tete>
+										<div class="palier-haut">
+											<span class="palier-icone" aria-hidden="true"><Icone size={22} /></span>
+											<span class="palier-etape num">{pad(i + 1)} / {pad(paliers.length)}</span>
+										</div>
+										<h3 id={`palier-${p.id}`} class="palier-nom">Formule <span>{p.nom}</span></h3>
+										<p class="palier-accroche">{p.accroche}</p>
+										<p class="palier-prix">
+											<span class="palier-montant num">dès {p.prixBase}</span>
+											<span class="palier-frais">puis {p.frais} de frais</span>
+										</p>
+									</div>
+									{i > 0 && <p class="palier-herite">Tout {paliers[i - 1].nom}, plus :</p>}
+									<ul class="palier-liste">
+										{p.contenu.map((c) => (
+											<li class:list={['palier-item', c.nouveau ? 'est-nouveau' : 'est-herite']} data-service={c.service.id}>
+												<span class="palier-coche" aria-hidden="true"><Check size={12} strokeWidth={3} /></span>
+												{c.service.nom}
+											</li>
+										))}
+									</ul>
+									<div class="palier-actions" data-palier-actions>
+										<a href={p.demo} class="btn btn-f">Voir la démo <ArrowUpRight size={16} class="btn-arrow" /></a>
+										<a href={p.detail} class="btn btn-f-outline">Le détail de {p.nom}</a>
+										<a href={p.devisHref} class="lien">Simuler un devis <ArrowRight size={15} /></a>
+									</div>
+								</div>
+							</article>
+						);
+					})}
+				</div>
 			</div>
 		</div>
 	</section>
 
 	<!-- FONCTIONNALITÉS : colonne collante -->
-	<section id="fonctionnalites" class="fonctions" data-fonctions aria-labelledby="fonctions-titre">
+	<section id="fonctionnalites" class="fonctions section" data-fonctions aria-labelledby="fonctions-titre">
 		<div class="conteneur fonctions-grille">
 			<div class="fonctions-visuel" aria-hidden="true">
 				<div class="fonctions-collant">
 					<div class="fonctions-pile">
 						{fonctions.map((f, i) => (
 							<div class:list={['fonctions-img', { 'is-actif': i === 0 }]} data-fonction-img>
-								<CadreNavigateur demo={f.capture.demo} file={f.capture.file} alt="" url={`saberweb.dev/${f.capture.url}`} sizes="(min-width: 1312px) 640px, 48vw" />
+								<CadreNavigateur demo={f.capture.demo} file={f.capture.file} alt="" url={`saberweb.dev/${f.capture.url}`} sizes="(min-width: 1216px) 540px, 44vw" />
 							</div>
 						))}
 					</div>
-					<p class="fonctions-legende"><span data-fonction-legende>{fonctions[0].titre}</span> <span class="num" data-fonction-num>01 / {pad(fonctions.length)}</span></p>
+					<p class="fonctions-legende"><span data-fonction-legende>{fonctions[0].titre}</span> <span class="num text-stone-400" data-fonction-num>01 / {pad(fonctions.length)}</span></p>
 				</div>
 			</div>
 
@@ -250,7 +286,9 @@ const faq = [
 							<div>
 								<h3 class="fonction-titre">{f.titre}</h3>
 								<p class="fonction-texte">{f.texte}</p>
-								<p class="fonction-formules">{f.formules}</p>
+								<ul class="fonction-formules" aria-label="Formules qui l’incluent">
+									{f.formules.map((id) => <li class={`f-${id}`}><span class="pastille"></span>{nomFormule(id)}</li>)}
+								</ul>
 								<div class="fonction-capture">
 									<CadreNavigateur demo={f.capture.demo} file={f.capture.file} alt={`Capture : ${f.titre}`} sizes="92vw" petit />
 								</div>
@@ -263,25 +301,32 @@ const faq = [
 	</section>
 
 	<!-- MÉTHODE : trois étapes, trait qui se dessine -->
-	<section class="methode" data-methode aria-labelledby="methode-titre">
+	<section class="methode section" data-methode aria-labelledby="methode-titre">
 		<div class="conteneur">
-			<div class="methode-tete">
+			<div class="section-tete">
 				<h2 id="methode-titre" class="titre-xl" data-split>Comment se passe un projet.</h2>
 				<p class="chapo" data-reveal>Trois étapes, avec les mêmes deux personnes du début à la fin.</p>
 			</div>
-			<div class="methode-piste">
-				<svg class="methode-trait" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true">
-					<path d="M0 30 C 150 4, 300 56, 450 30 S 750 4, 900 30 S 1110 50, 1200 30" pathLength="1" data-trait />
-				</svg>
+			<div class="methode-piste" data-methode-piste>
+				<div class="methode-trait" aria-hidden="true">
+					<svg viewBox="0 0 1000 64" preserveAspectRatio="none"><path class="trait-fond" d="M0 32 C 160 6, 340 58, 500 32 S 840 6, 1000 32" /></svg>
+					<div class="methode-trait-plein" data-trait>
+						<svg viewBox="0 0 1000 64" preserveAspectRatio="none"><path class="trait-plein" d="M0 32 C 160 6, 340 58, 500 32 S 840 6, 1000 32" /></svg>
+					</div>
+				</div>
 				<span class="methode-trait-v" aria-hidden="true"><span data-trait-v></span></span>
 				<ol class="methode-etapes">
 					{etapes.map((e, i) => (
 						<li class="etape" data-etape>
-							<span class="etape-point" aria-hidden="true"></span>
-							<p class="repere num">{pad(i + 1)}</p>
-							<h3 class="etape-titre">{e.titre}</h3>
-							<p class="etape-texte">{e.texte}</p>
-							<p class="etape-meta">{e.meta}</p>
+							<span class="etape-icone" aria-hidden="true">
+								<e.icone size={26} />
+								<span class="etape-numero">{i + 1}</span>
+							</span>
+							<div class="etape-carte">
+								<h3 class="etape-titre">{e.titre}</h3>
+								<p class="etape-texte">{e.texte}</p>
+								<p class="etape-meta">{e.meta}</p>
+							</div>
 						</li>
 					))}
 				</ol>
@@ -290,22 +335,22 @@ const faq = [
 	</section>
 
 	<!-- QUI SOMMES-NOUS : fond sombre -->
-	<section id="histoire" class="equipe sur-nuit" aria-labelledby="equipe-titre">
+	<section id="histoire" class="section sur-nuit" aria-labelledby="equipe-titre">
 		<div class="conteneur">
-			<div class="equipe-tete">
+			<div class="section-tete">
 				<h2 id="equipe-titre" class="titre-xl" data-split>
 					{membres.map((m) => m.prenom).join(' et ')}. L’un construit l’outil, l’autre vérifie qu’il sert votre activité.
 				</h2>
+				<p class="chapo" data-reveal>Un profil technique et un profil business : vous parlez directement aux personnes qui font le site.</p>
 			</div>
 			<div class="equipe-grille" data-reveal-group>
-				{membres.map((m, i) => (
+				{membres.map((m) => (
 					<article class="membre">
 						<div class="membre-tete">
-							<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={112} class="shrink-0" />
+							<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={88} class="shrink-0 ring-4 ring-white/10" />
 							<div>
-								<p class="repere num">{pad(i + 1)}</p>
 								<h3 class="titre-l">{m.prenom}</h3>
-								<p class="text-stone-400">{m.role}</p>
+								<p class="membre-role">{m.role}</p>
 							</div>
 						</div>
 						<p class="membre-texte">{m.accroche}</p>
@@ -318,18 +363,18 @@ const faq = [
 					</article>
 				))}
 			</div>
-			<p class="mt-14" data-reveal>
-				<a href="/notre-histoire" class="btn btn-ghost-dark btn-lg">Notre histoire <ArrowRight size={17} class="btn-arrow" /></a>
+			<p class="mt-12" data-reveal>
+				<a href="/notre-histoire" class="btn btn-light btn-lg">Notre histoire <ArrowRight size={17} class="btn-arrow" /></a>
 			</p>
 		</div>
 	</section>
 
 	<!-- FAQ : deux volets -->
-	<section class="faq" aria-labelledby="faq-titre">
+	<section class="section" aria-labelledby="faq-titre">
 		<div class="conteneur">
-			<div class="faq-tete">
+			<div class="section-tete">
 				<h2 id="faq-titre" class="titre-xl" data-reveal>Questions fréquentes</h2>
-				<p class="chapo" data-reveal data-reveal-delay="100">Une autre question ? <a href="/contact" class="lien">Écrivez-nous</a>, ou appelez le <a href={contact.telephoneHref} class="lien num">{contact.telephone}</a>.</p>
+				<p class="chapo" data-reveal data-reveal-delay="100">Une autre question ? <a href="/contact" class="lien">Écrivez-nous</a>, ou appelez le <a href={contact.telephoneHref} class="lien num">{contact.telephone}</a>.</p>
 			</div>
 			<div class="faq-volets">
 				{faq.map((v) => (
@@ -339,7 +384,7 @@ const faq = [
 							<details class="faq-item">
 								<summary>
 									{item.q}
-									<span class="faq-plus" aria-hidden="true"></span>
+									<span class="faq-plus" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg></span>
 								</summary>
 								<p>{item.r}</p>
 							</details>
@@ -351,17 +396,18 @@ const faq = [
 	</section>
 
 	<!-- APPEL FINAL -->
-	<section id="contact" class="final" aria-labelledby="final-titre">
-		<div class="conteneur">
-			<h2 id="final-titre" class="titre-geant" data-split>Parlons de votre activité.</h2>
+	<section id="contact" class="conteneur pb-24" aria-labelledby="final-titre">
+		<div class="final-carte sur-nuit" data-reveal>
+			<span class="trois-teintes" aria-hidden="true"><i></i><i></i><i></i></span>
+			<h2 id="final-titre" class="titre-geant mt-8" data-split>Parlons de votre activité.</h2>
 			<div class="final-bas">
-				<p class="chapo" data-reveal>
+				<p class="chapo">
 					Un premier appel suffit en général pour savoir quelle formule vous convient.
 					Vous pouvez aussi estimer le prix vous-même avec le <a href="/devis" class="lien">simulateur de devis</a>.
 				</p>
-				<div class="final-actions" data-reveal data-reveal-delay="100">
-					<a href="/contact" class="btn btn-accent btn-lg">Nous écrire <ArrowRight size={17} class="btn-arrow" /></a>
-					<a href={contact.telephoneHref} class="btn btn-outline btn-lg num"><Phone size={16} /> {contact.telephone}</a>
+				<div class="final-actions">
+					<a href="/contact" class="btn btn-light btn-lg">Nous écrire <ArrowRight size={17} class="btn-arrow" /></a>
+					<a href={contact.telephoneHref} class="btn btn-ghost-dark btn-lg num"><Phone size={16} /> {contact.telephone}</a>
 					<a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg"><BrandIcon name="whatsapp" size={18} /> WhatsApp</a>
 				</div>
 			</div>
@@ -369,13 +415,21 @@ const faq = [
 	</section>
 </CommercialLayout>
 
+<style>
+	/* Trait de la méthode : dessiné au défilement si le mouvement est autorisé (sinon entier). */
+	@media (prefers-reduced-motion: no-preference) {
+		:global(html.js) [data-trait],
+		:global(html.js) [data-trait-v] { --p: 0; }
+	}
+</style>
+
 <script>
 	import { gsap, ScrollTrigger, SplitText, MQ, wireScroll } from '@/lib/motion/gsap';
 
 	const racine = document.documentElement;
 	const mm = gsap.matchMedia();
 
-	// ---------- Héros : titre ligne par ligne, cadres qui montent, parallaxe au défilement ----------
+	// ---------- Héros : titre ligne par ligne, captures qui arrivent en éventail ----------
 	const hero = document.querySelector<HTMLElement>('[data-hero]');
 	mm.add(MQ.motion, () => {
 		if (!hero) return;
@@ -383,6 +437,7 @@ const faq = [
 		const fades = hero.querySelectorAll('[data-hero-fade]');
 		const cadres = Array.from(hero.querySelectorAll<HTMLElement>('[data-hero-cadre]'));
 		const visuel = hero.querySelector<HTMLElement>('[data-hero-visuel]')!;
+		const souligne = hero.querySelector<SVGPathElement>('.hero-souligne path');
 
 		SplitText.create(titre, {
 			type: 'lines',
@@ -390,22 +445,63 @@ const faq = [
 			autoSplit: true,
 			onSplit: (self) => {
 				titre.classList.add('is-split');
-				return gsap.from(self.lines, { yPercent: 112, duration: 1.2, ease: 'power4.out', stagger: 0.1, delay: 0.05 });
+				return gsap.from(self.lines, { yPercent: 112, duration: 1.1, ease: 'power4.out', stagger: 0.09, delay: 0.05 });
 			},
 		});
-		gsap.fromTo(fades, { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 0.9, ease: 'power3.out', stagger: 0.08, delay: 0.45 });
-		gsap.fromTo(cadres, { autoAlpha: 0, y: 80 }, { autoAlpha: 1, y: 0, duration: 1.4, ease: 'expo.out', stagger: 0.12, delay: 0.3 });
+		if (souligne) {
+			// Trait sous « pour vous. » : longueur réelle mesurée, pas d'arrondi au pixel.
+			const l = souligne.getTotalLength();
+			gsap.fromTo(souligne, { strokeDasharray: l, strokeDashoffset: l }, { strokeDashoffset: 0, duration: 0.9, ease: 'power2.inOut', delay: 0.8, autoRound: false });
+		}
+		gsap.fromTo(fades, { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 0.9, ease: 'power3.out', stagger: 0.08, delay: 0.4 });
+		gsap.fromTo(cadres, { autoAlpha: 0, y: 60 }, { autoAlpha: 1, y: 0, duration: 1.2, ease: 'expo.out', stagger: 0.12, delay: 0.25 });
 		racine.classList.add('cm-hero-ok');
 
-		// Les trois cadres glissent à des vitesses différentes (1 ScrollTrigger).
-		const [cPremium, cDiamant, cTel] = cadres;
-		gsap.timeline({ scrollTrigger: { trigger: visuel, start: 'top 60%', end: 'bottom top', scrub: true } })
-			.to(cPremium, { yPercent: -14, ease: 'none' }, 0)
-			.to(cDiamant, { yPercent: -5, ease: 'none' }, 0)
-			.to(cTel, { yPercent: -22, ease: 'none' }, 0);
+		// Au défilement, l'éventail se resserre légèrement (1 ScrollTrigger).
+		const [c1, c2, c3, tel] = cadres;
+		gsap.timeline({ scrollTrigger: { trigger: visuel, start: 'top 30%', end: 'bottom top', scrub: true } })
+			.to(c1, { yPercent: -6, ease: 'none' }, 0)
+			.to(c3, { yPercent: 6, ease: 'none' }, 0)
+			.to(tel, { yPercent: -18, ease: 'none' }, 0)
+			.to(c2, { yPercent: 0, ease: 'none' }, 0);
 
-		// Les titres [data-split] sont révélés par le layout.
 		return () => racine.classList.remove('cm-hero-ok');
+	});
+
+	// Inclinaison de l'éventail au pointeur (souris uniquement). On écoute le panneau fixe,
+	// jamais l'élément incliné, sinon la zone de survol bouge sous la souris.
+	mm.add(`${MQ.motion} and (hover: hover) and (pointer: fine)`, () => {
+		const panneau = document.querySelector<HTMLElement>('[data-hero-panneau]');
+		const eventail = document.querySelector<HTMLElement>('[data-hero-eventail]');
+		if (!panneau || !eventail) return;
+		let frame = 0;
+		let px = 0;
+		let py = 0;
+		const bouge = (e: PointerEvent) => {
+			px = e.clientX;
+			py = e.clientY;
+			if (frame) return;
+			frame = requestAnimationFrame(() => {
+				frame = 0;
+				const r = panneau.getBoundingClientRect();
+				const x = Math.max(-0.5, Math.min(0.5, (px - r.left) / r.width - 0.5));
+				const y = Math.max(-0.5, Math.min(0.5, (py - r.top) / r.height - 0.5));
+				eventail.style.setProperty('--ry', `${(x * 8).toFixed(2)}deg`);
+				eventail.style.setProperty('--rx', `${(-y * 6).toFixed(2)}deg`);
+			});
+		};
+		const sort = () => {
+			eventail.style.setProperty('--ry', '0deg');
+			eventail.style.setProperty('--rx', '0deg');
+		};
+		panneau.addEventListener('pointermove', bouge, { passive: true });
+		panneau.addEventListener('pointerleave', sort);
+		return () => {
+			panneau.removeEventListener('pointermove', bouge);
+			panneau.removeEventListener('pointerleave', sort);
+			if (frame) cancelAnimationFrame(frame);
+			sort();
+		};
 	});
 
 	// ---------- Trois formules : section épinglée (bureau) ----------
@@ -415,6 +511,7 @@ const faq = [
 		const barre = formules.querySelector<HTMLElement>('[data-formules-barre]');
 		const crans = Array.from(formules.querySelectorAll<HTMLAnchorElement>('[data-cran]'));
 		const articles = Array.from(formules.querySelectorAll<HTMLElement>('[data-palier]'));
+		const ids = articles.map((a) => a.id.replace('formule-', ''));
 		const n = articles.length;
 
 		mm.add(MQ.desktop, () => {
@@ -434,6 +531,7 @@ const faq = [
 			const marquer = (i: number) => {
 				if (i === courant) return;
 				courant = i;
+				formules.dataset.actif = ids[i];
 				articles.forEach((a, j) => a.classList.toggle('is-actif', j === i));
 				crans.forEach((c, j) => {
 					c.classList.toggle('is-actif', j === i);
@@ -443,13 +541,18 @@ const faq = [
 			};
 
 			// Masques toujours animés avec fromTo et des chaînes complètes (le navigateur abrège la valeur relue).
-			const cache = 'inset(100.000% 0.000% 0.000% 0.000% round 14px)';
-			const visible = 'inset(0.000% 0.000% 0.000% 0.000% round 14px)';
+			const cache = 'inset(100.000% 0.000% 0.000% 0.000% round 20px)';
+			const visible = 'inset(0.000% 0.000% 0.000% 0.000% round 20px)';
 			parts.slice(1).forEach((p) => {
 				gsap.set([...p.tete, ...p.items, p.actions], { autoAlpha: 0 });
 				gsap.set(p.ecran, { clipPath: cache });
 			});
-			if (barre) gsap.set(barre, { scaleX: 0 });
+			if (barre) gsap.set(barre, { scaleX: 1 / n });
+
+			// Pendant un défilement lancé par un cran, l'aimantation est suspendue (sinon elle
+			// ramène la page vers le palier quitté).
+			let programme = false;
+			let positions: number[] = [];
 
 			const tl = gsap.timeline({
 				defaults: { ease: 'none' },
@@ -461,49 +564,79 @@ const faq = [
 					scrub: 0.6,
 					anticipatePin: 1,
 					invalidateOnRefresh: true,
-					snap: { snapTo: 'labelsDirectional', duration: { min: 0.25, max: 0.8 }, delay: 0.12, ease: 'power2.inOut', inertia: false },
+					snap: {
+						snapTo: (valeur: number) => {
+							if (programme || !positions.length) return valeur;
+							// Palier suivant dans le sens du défilement (comme « labelsDirectional »).
+							const sens = tl.scrollTrigger?.direction ?? 1;
+							const candidats = positions.filter((p) => (sens > 0 ? p >= valeur - 0.002 : p <= valeur + 0.002));
+							const liste = candidats.length ? candidats : positions;
+							return liste.reduce((a, b) => (Math.abs(b - valeur) < Math.abs(a - valeur) ? b : a));
+						},
+						duration: { min: 0.25, max: 0.8 },
+						delay: 0.12,
+						ease: 'power2.inOut',
+						inertia: false,
+					},
 					onUpdate: () => marquer(Math.max(0, Math.min(n - 1, Math.round(tl.time())))),
 				},
 			});
 			tl.addLabel('p0', 0);
-			if (barre) tl.fromTo(barre, { scaleX: 0 }, { scaleX: 1, duration: n - 1, immediateRender: false }, 0);
+			if (barre) tl.fromTo(barre, { scaleX: 1 / n }, { scaleX: 1, duration: n - 1, immediateRender: false }, 0);
 
 			for (let i = 1; i < n; i++) {
 				const a = parts[i - 1];
 				const b = parts[i];
 				const garde = new Set(b.items.map((x) => x.dataset.service));
 				const partants = a.items.filter((x) => !garde.has(x.dataset.service));
-				tl.to([...a.tete, a.actions], { autoAlpha: 0, y: -22, duration: 0.3, stagger: 0.02 }, i - 0.8)
+				tl.to([...a.tete, a.actions], { autoAlpha: 0, y: -18, duration: 0.3, stagger: 0.02 }, i - 0.8)
 					.to(partants, { autoAlpha: 0, x: 12, duration: 0.2 }, i - 0.8)
 					.fromTo(b.ecran, { clipPath: cache }, { clipPath: visible, duration: 0.7, ease: 'power2.inOut', immediateRender: false }, i - 0.8);
 				if (b.img) tl.fromTo(b.img, { scale: 1.08 }, { scale: 1, duration: 0.8, ease: 'power2.out', immediateRender: false }, i - 0.8);
 				// La liste s'allonge : les lignes reprises restent en place, les nouvelles arrivent une à une.
 				tl.set(a.items, { autoAlpha: 0 }, i - 0.5)
 					.set(b.herites, { autoAlpha: 1 }, i - 0.5)
-					.fromTo(b.tete, { autoAlpha: 0, y: 22 }, { autoAlpha: 1, y: 0, duration: 0.35, stagger: 0.03, immediateRender: false }, i - 0.5)
+					.fromTo(b.tete, { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 0.35, stagger: 0.03, immediateRender: false }, i - 0.5)
 					.fromTo(b.nouveaux, { autoAlpha: 0, x: -14 }, { autoAlpha: 1, x: 0, duration: 0.25, stagger: 0.035, immediateRender: false }, i - 0.45)
 					.fromTo(b.actions, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.3, immediateRender: false }, i - 0.3)
 					.addLabel(`p${i}`, i);
 			}
 			tl.to({}, { duration: 0.45 });
+			positions = Array.from({ length: n }, (_, i) => tl.labels[`p${i}`] / tl.duration());
 			marquer(0);
 
 			// Les crans mènent directement au palier voulu.
+			// stopPropagation : Lenis (option anchors) écoute les clics sur les liens « #… » au niveau
+			// de la fenêtre et lançait son propre défilement vers l'article, en haut de la scène.
+			let fin = 0;
 			const allerA = (e: Event) => {
 				const i = Number((e.currentTarget as HTMLElement).dataset.cran);
 				const st = tl.scrollTrigger;
 				if (!st) return;
 				e.preventDefault();
-				const y = st.start + (st.end - st.start) * (tl.labels[`p${i}`] / tl.duration());
+				e.stopPropagation();
+				const y = Math.round(st.start + (st.end - st.start) * positions[i]);
+				programme = true;
+				window.clearTimeout(fin);
+				const terminer = () => {
+					window.clearTimeout(fin);
+					fin = window.setTimeout(() => (programme = false), 200);
+				};
 				const lenis = (window as any).lenis;
-				if (lenis?.scrollTo) lenis.scrollTo(y, { duration: 1.2 });
-				else window.scrollTo({ top: y, behavior: 'smooth' });
+				if (lenis?.scrollTo) {
+					lenis.scrollTo(y, { duration: 1.1, force: true, onComplete: terminer });
+					fin = window.setTimeout(() => (programme = false), 2000);
+				} else {
+					window.scrollTo({ top: y, behavior: 'smooth' });
+					fin = window.setTimeout(() => (programme = false), 1200);
+				}
 			};
 			crans.forEach((c) => c.addEventListener('click', allerA));
 
 			return () => {
 				crans.forEach((c) => c.removeEventListener('click', allerA));
 				formules.classList.remove('is-pinned');
+				window.clearTimeout(fin);
 			};
 		});
 	}
@@ -554,34 +687,40 @@ const faq = [
 	}
 
 	// ---------- Méthode : le trait se dessine au fil du défilement ----------
+	// Le trait plein est dévoilé par un masque (clip-path) piloté par la variable --p, de 0 à 1.
+	// (L'ancienne version animait stroke-dashoffset de 1 à 0 avec pathLength="1" : GSAP arrondit
+	// les valeurs en px au pixel près, la valeur passait donc directement de 1 à 0 et le trait
+	// apparaissait d'un coup.)
 	const methode = document.querySelector<HTMLElement>('[data-methode]');
 	if (methode) {
-		const trait = methode.querySelector<SVGPathElement>('[data-trait]');
+		const trait = methode.querySelector<HTMLElement>('[data-trait]');
 		const traitV = methode.querySelector<HTMLElement>('[data-trait-v]');
 		const etapes = Array.from(methode.querySelectorAll<HTMLElement>('[data-etape]'));
-		const piste = methode.querySelector<HTMLElement>('.methode-piste')!;
-		const atteindre = (p: number) => etapes.forEach((e, i) => e.classList.toggle('is-atteint', p >= (i === 0 ? 0.02 : i / (etapes.length - 1)) - 0.04));
+		const piste = methode.querySelector<HTMLElement>('[data-methode-piste]')!;
+		const atteindre = (p: number) => etapes.forEach((e, i) => e.classList.toggle('is-atteint', p >= (i === 0 ? 0.01 : i / (etapes.length - 1) - 0.03)));
 
-		mm.add(MQ.desktop.replace('992', '768'), () => {
-			if (!trait) return;
+		const dessiner = (cible: HTMLElement | null, start: string, end: string) => {
+			if (!cible) return;
 			methode.classList.add('is-anime');
-			gsap.fromTo(trait, { strokeDashoffset: 1 }, {
-				strokeDashoffset: 0,
+			const etat = { p: 0 };
+			const rendre = () => {
+				cible.style.setProperty('--p', etat.p.toFixed(4));
+				atteindre(etat.p);
+			};
+			rendre();
+			gsap.to(etat, {
+				p: 1,
 				ease: 'none',
-				scrollTrigger: { trigger: piste, start: 'top 75%', end: 'bottom 55%', scrub: 0.5, onUpdate: (st) => atteindre(st.progress) },
+				onUpdate: rendre,
+				scrollTrigger: { trigger: piste, start, end, scrub: 0.6 },
 			});
-			return () => methode.classList.remove('is-anime');
-		});
-		mm.add(MQ.mobile.replace('991.98', '767.98'), () => {
-			if (!traitV) return;
-			methode.classList.add('is-anime');
-			gsap.fromTo(traitV, { scaleY: 0 }, {
-				scaleY: 1,
-				ease: 'none',
-				scrollTrigger: { trigger: piste, start: 'top 70%', end: 'bottom 60%', scrub: 0.5, onUpdate: (st) => atteindre(st.progress) },
-			});
-			return () => methode.classList.remove('is-anime');
-		});
+			return () => {
+				methode.classList.remove('is-anime');
+				cible.style.removeProperty('--p');
+			};
+		};
+		mm.add('(min-width: 768px) and (prefers-reduced-motion: no-preference)', () => dessiner(trait, 'top 85%', 'top 25%'));
+		mm.add('(max-width: 767.98px) and (prefers-reduced-motion: no-preference)', () => dessiner(traitV, 'top 75%', 'bottom 55%'));
 	}
 
 	wireScroll();
