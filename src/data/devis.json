@@ -170,10 +170,11 @@
       "id": "mobile-animations",
       "nom": "Version mobile et animations",
       "categorie": "site",
-      "description": "Adaptation au téléphone, menu animé, apparitions au défilement. Premium : parallaxe ; Diamant : animations signature.",
+      "description": "Adaptation au téléphone, menu animé, apparitions au défilement. Premium : parallaxe et bande qui défile ; Diamant : sections qui suivent le défilement.",
       "outils": [
-        "AOS",
-        "Framer Motion"
+        "CSS",
+        "Motion",
+        "GSAP"
       ],
       "formules": {
         "standard": {

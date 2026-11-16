@@ -33,7 +33,7 @@ const repris = p.contenu.filter((c) => !c.nouveau).map((c) => c.service.nom);
 
 // Technologies : chaque outil et les prestations qui l'utilisent.
 // (Les bibliothèques d'animation listées dans devis.json ne sont plus celles du site : on ne les affiche pas.)
-const ecartes = new Set(['AOS', 'Framer Motion', 'Registrar']);
+const ecartes = new Set(['Registrar']);
 const outils = new Map<string, string[]>();
 for (const s of devis.services) {
 	if (!estInclus(s, id)) continue;
