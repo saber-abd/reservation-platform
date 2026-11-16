@@ -1,0 +1,46 @@
+---
+// En-tête des pages intérieures : rubrique numérotée, grand titre monté ligne par ligne,
+// filet puis chapeau et repères techniques ; photo cadrée en option (parallaxe dans son cadre).
+import PremiumPicture from '@/components/premium/PremiumPicture.astro';
+import type { PrestationImage } from '@/components/premium/prestations';
+
+interface Props {
+	rubrique: string;
+	lignes: string[];
+	reperes?: { label: string; valeur: string }[];
+	photo?: PrestationImage;
+	legende?: string;
+}
+
+const { rubrique, lignes, reperes = [], photo, legende } = Astro.props;
+---
+
+<header class="pa-pagehead pa-wrap">
+	<p class="pa-num" data-reveal="fade">{rubrique}</p>
+	<h1 class="pa-title pa-pagehead__title mt-6" data-lines>
+		{lignes.map((l, i) => (
+			<span class="pa-line"><span class:list={[i === lignes.length - 1 && lignes.length > 1 && 'pa-rouge']}>{l}</span></span>
+		))}
+	</h1>
+	<div class="pa-pagehead__bas">
+		<p class="pa-tech" data-reveal="fade">{legende ?? ''}</p>
+		<div class="pa-lead" data-reveal data-reveal-delay="100"><slot /></div>
+		{reperes.length > 0 && (
+			<dl class="grid grid-cols-2 gap-x-6 gap-y-4" data-reveal data-reveal-delay="200">
+				{reperes.map((r) => (
+					<div class="border-t border-[#33373c] pt-3">
+						<dt class="pa-tech">{r.label}</dt>
+						<dd class="mt-1 font-semibold tabular-nums">{r.valeur}</dd>
+					</div>
+				))}
+			</dl>
+		)}
+	</div>
+	{photo && (
+		<div class="pa-clip pa-pagehead__photo">
+			<div class="pa-clip__in pa-cadre pa-cadre--parallaxe h-full">
+				<PremiumPicture {...photo} sizes="(min-width: 1400px) 1300px, 100vw" prioritaire />
+			</div>
+		</div>
+	)}
+</header>

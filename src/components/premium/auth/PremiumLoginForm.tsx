@@ -306,7 +306,7 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 			{error && (
 				<div className="rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs md:text-sm text-rose-800 animate-in fade-in">
 					<div className="font-bold flex items-center gap-2 mb-1 text-rose-900">
-						<ShieldAlert size={16} className="text-rose-600 shrink-0" />
+						<ShieldAlert size={16} className="text-primary shrink-0" />
 						<span>{error.includes('suspendu') || error.includes('refusée') ? 'Accès suspendu' : 'Erreur'}</span>
 					</div>
 					<p className="leading-relaxed">{error}</p>
@@ -328,14 +328,14 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 			<button
 				type="submit"
 				disabled={submitting}
-				className="rounded-xl bg-primary px-4 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-[0_0_15px_rgba(255,50,50,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(255,50,50,0.6)] active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+				className="rounded-[2px] bg-primary px-4 py-3.5 text-[0.9375rem] font-bold text-white transition-colors hover:bg-[#b92017] active:bg-[#9c1a12] disabled:opacity-50"
 			>
-				{submitting ? 'Connexion...' : 'Démarrer'}
+				{submitting ? 'Connexion…' : 'Se connecter'}
 			</button>
 
 			<a
 				href="/demo-premium/apercu/dashboard"
-				className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-center text-sm font-bold text-stone-800 transition-colors hover:bg-stone-50"
+				className="rounded-[2px] border border-[#17181a] bg-transparent px-4 py-3.5 text-center text-[0.9375rem] font-bold text-[#17181a] transition-colors hover:bg-[#17181a] hover:text-white"
 			>
 				Voir un aperçu du tableau de bord
 			</a>

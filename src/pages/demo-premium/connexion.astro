@@ -1,21 +1,23 @@
 ---
-import PremiumAutoLayout from '@/layouts/premium/PremiumLayout.astro';
+import PremiumAuthShell from '@/components/premium/PremiumAuthShell.astro';
 import LoginForm from '@/components/premium/auth/PremiumLoginForm';
 ---
 
-<PremiumAutoLayout title="Connexion" description="Connexion à l'espace premium." noindex>
-	<section class="flex min-h-[80vh] items-center justify-center px-6 py-20 bg-stone-950">
-		<div class="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
-			<div class="text-center">
-				<h1 class="text-3xl font-black text-stone-900 uppercase tracking-widest font-[var(--font-heading)]">Connexion</h1>
-				<p class="mt-2 text-sm text-stone-500">Accédez à votre espace de gestion.</p>
-			</div>
-			<div class="mt-8">
-				<LoginForm basePath="/demo-premium" client:load />
-			</div>
-			<p class="mt-6 text-center text-sm text-stone-500">
-				Nouveau pilote ? <a href="/demo-premium/inscription" class="font-medium text-primary hover:underline uppercase tracking-widest">Créer un compte</a>
-			</p>
-		</div>
-	</section>
-</PremiumAutoLayout>
+<PremiumAuthShell
+	pageTitle="Connexion"
+	description="Connexion à l'espace client et à l'espace professionnel du garage."
+	titre="Connexion"
+	lead="Clients et professionnels utilisent le même formulaire : vous êtes dirigé vers votre espace."
+>
+	<LoginForm basePath="/demo-premium" client:load />
+	<Fragment slot="after">
+		Pas encore de compte ? <a href="/demo-premium/inscription" class="pa-link ml-1">Créer un compte</a>
+	</Fragment>
+	<a slot="visite" href="/demo-premium/apercu/dashboard" class="pa-visite">
+		<span>
+			<b>Visiter l'espace professionnel</b>
+			<span>Aperçu du tableau de bord avec des données fictives, sans compte.</span>
+		</span>
+		<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+	</a>
+</PremiumAuthShell>

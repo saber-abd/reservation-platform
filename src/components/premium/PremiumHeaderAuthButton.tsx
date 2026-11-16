@@ -140,14 +140,14 @@ export default function HeaderAuthButton({ basePath = '' }: { basePath?: string 
 
 	if (loading) {
 		// Skeleton to avoid layout shift
-		return <div className="h-9 w-28 animate-pulse rounded-xl bg-stone-200" />;
+		return <div className="h-[42px] w-28 animate-pulse rounded-[2px] bg-white/10" />;
 	}
 
 	if (!user) {
 		return (
 			<a
 				href={`${effectiveBasePath}/connexion`}
-				className="flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-2 text-sm font-semibold text-stone-700 shadow-sm transition-colors hover:border-rose-300 hover:text-rose-600"
+				className="flex h-[42px] items-center gap-2 rounded-[2px] border border-white/30 px-4 text-sm font-semibold text-[#ecebe6] transition-colors hover:border-[#ecebe6] hover:bg-[#ecebe6] hover:text-[#17181a]"
 			>
 				{/* LogIn icon inline SVG */}
 				<svg
@@ -165,7 +165,7 @@ export default function HeaderAuthButton({ basePath = '' }: { basePath?: string 
 					<polyline points="10 17 15 12 10 7" />
 					<line x1="15" y1="12" x2="3" y2="12" />
 				</svg>
-				Connexion / Inscription
+				Connexion
 			</a>
 		);
 	}
@@ -179,7 +179,7 @@ export default function HeaderAuthButton({ basePath = '' }: { basePath?: string 
 			<button
 				type="button"
 				onClick={() => setMenuOpen((v) => !v)}
-				className="flex items-center gap-2 rounded-xl border border-transparent px-2 py-1.5 text-sm font-medium text-stone-700 transition-colors hover:border-border hover:bg-white"
+				className="flex items-center gap-2 rounded-[2px] border border-transparent px-2 py-1.5 text-sm font-medium text-[#ecebe6] transition-colors hover:border-white/30"
 			>
 				<AvatarDisplay avatarKey={user.avatarKey} size={32} />
 				<span className="hidden sm:block">{firstWord}</span>
@@ -207,7 +207,7 @@ export default function HeaderAuthButton({ basePath = '' }: { basePath?: string 
 					</div>
 					<a
 						href={dashboardHref}
-						className="block px-4 py-2.5 text-sm text-stone-700 hover:bg-rose-50 hover:text-rose-700"
+						className="block px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-100 hover:text-[#b92017]"
 					>
 						Mon espace
 					</a>

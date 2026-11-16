@@ -1,168 +1,126 @@
 ---
-import { Wrench } from 'lucide-react';
+// En-tête du site Premium : transparent sur le héros, fond carbone qui descend au défilement,
+// masqué quand on descend et rappelé quand on remonte. Menu plein écran sous 1100 px.
 import { getSiteConfig } from '@/config/site';
-const siteConfig = await getSiteConfig(Astro.url.pathname);
 import HeaderAuthButton from '@/components/premium/PremiumHeaderAuthButton';
 
-const currentPath = Astro.url.pathname;
-const basePathMatch = currentPath.match(/^\/(demo-[^/]+)/);
-const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
+const siteConfig = await getSiteConfig(Astro.url.pathname);
+const basePath = '/demo-premium';
+const courant = Astro.url.pathname.replace(/\/$/, '');
+const estCourant = (href: string) => courant === `${basePath}${href}`.replace(/\/$/, '');
+const liens = siteConfig.nav;
+const liensBureau = liens.filter((l) => l.href !== '/reservation');
 ---
 
-<header class="sticky top-0 z-50 bg-stone-900/95 backdrop-blur-md border-b border-stone-800">
-	<div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-		<a href={`${basePath}/`} aria-label={siteConfig.business.name} class="flex items-center gap-3">
-			<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-[0_0_15px_rgba(255,50,50,0.3)]">
-				<Wrench size={20} />
-			</span>
-			<span class="text-xl font-black text-white tracking-widest uppercase font-[var(--font-heading)]">{siteConfig.business.name}</span>
+<header class="pa-header" data-header>
+	<div class="pa-wrap pa-header__in">
+		<a href={`${basePath}/`} class="pa-logo" aria-label={`${siteConfig.business.name}, accueil`}>
+			<span class="pa-logo__mark" aria-hidden="true"></span>
+			{siteConfig.business.name}
 		</a>
 
-		<!-- Desktop Nav -->
-		<nav class="hidden items-center gap-8 md:flex">
-			{
-				siteConfig.nav.map((item) => (
-					<a
-						href={`${basePath}${item.href}`}
-						class:list={[
-							'text-sm font-bold uppercase tracking-wider transition-colors hover:text-primary font-[var(--font-heading)]',
-							currentPath.replace(/\/$/, "") === `${basePath}${item.href}`.replace(/\/$/, "") ? 'text-primary' : 'text-stone-300',
-						]}
-					>
-						{item.label}
-					</a>
-				))
-			}
+		<nav class="pa-nav" aria-label="Navigation principale">
+			{liensBureau.map((l) => (
+				<a href={`${basePath}${l.href}`} aria-current={estCourant(l.href) ? 'page' : undefined}>{l.label}</a>
+			))}
 		</nav>
 
-		<div class="flex items-center gap-4">
-			<div class="hidden md:flex items-center gap-4">
-				{basePath && (
-					<a href="/" class="rounded-xl border border-stone-700 px-4 py-2 text-sm font-bold text-stone-300 hover:bg-stone-800 hover:text-white transition-colors uppercase tracking-wider">
-						← Portfolio
-					</a>
-				)}
-				<div class="theme-premium">
-					<HeaderAuthButton client:visible basePath={basePath} />
-				</div>
+		<div class="pa-header__actions">
+			<a href="/" class="pa-header__retour">← Toutes les démos</a>
+			<div class="pa-auth theme-premium">
+				<HeaderAuthButton client:idle basePath={basePath} />
 			</div>
-
-			<!-- Bouton menu mobile : les trois barres se transforment en croix -->
-			<button id="mobile-menu-btn" type="button" class="burger md:hidden" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-nav">
-				<span></span><span></span><span></span>
-			</button>
+			<a href={`${basePath}/reservation`} class="pa-btn pa-header__cta" data-magnetic><span>Réserver</span></a>
 		</div>
-	</div>
 
-	<!-- Mobile Nav -->
-	<div id="mobile-nav" class="mobile-panel border-t border-stone-800 bg-stone-900 md:hidden" data-open="false">
-		<nav class="flex flex-col px-6 py-8 gap-6">
-			{
-				siteConfig.nav.map((item, i) => (
-					<a
-						href={`${basePath}${item.href}`}
-						style={`--i:${i}`}
-						class:list={[
-							'mobile-item text-xl font-black uppercase tracking-widest transition-colors hover:text-primary',
-							currentPath.replace(/\/$/, "") === `${basePath}${item.href}`.replace(/\/$/, "") ? 'text-primary' : 'text-stone-300',
-						]}
-					>
-						{item.label}
-					</a>
-				))
-			}
-			<div class="mobile-item mt-8 pt-8 border-t border-stone-800 flex flex-col gap-4" style={`--i:${siteConfig.nav.length}`}>
-				{basePath && (
-					<a href="/" class="block rounded-xl border border-stone-700 px-4 py-4 text-center text-sm font-bold uppercase tracking-wider text-stone-300 hover:bg-stone-800 hover:text-white">
-						← Retour au Portfolio
-					</a>
-				)}
-				<div class="theme-premium">
-					<HeaderAuthButton client:visible basePath={basePath} />
-				</div>
-			</div>
-		</nav>
+		<button type="button" class="pa-burger" data-burger aria-expanded="false" aria-controls="pa-menu">
+			<span data-burger-label>Menu</span>
+			<span class="pa-burger__bars" aria-hidden="true"><i></i><i></i></span>
+		</button>
 	</div>
 </header>
 
-<script>
-	const btn = document.getElementById('mobile-menu-btn');
-	const nav = document.getElementById('mobile-nav');
+<div id="pa-menu" class="pa-menu" data-open="false" aria-label="Menu" role="dialog" aria-modal="true">
+	<nav class="pa-menu__liens" aria-label="Navigation mobile">
+		{liens.map((l, i) => (
+			<a
+				href={`${basePath}${l.href}`}
+				class="pa-menu__lien pa-menu__item"
+				style={`--i:${i}`}
+				aria-current={estCourant(l.href) ? 'page' : undefined}
+			>
+				<small>{String(i + 1).padStart(2, '0')}</small>{l.label}
+			</a>
+		))}
+	</nav>
+	<div class="pa-menu__bas pa-menu__item" style={`--i:${liens.length}`}>
+		<p class="pa-tech">{siteConfig.business.address}</p>
+		<a href={`tel:${siteConfig.business.phone.replace(/\s/g, '')}`} class="pa-h3">{siteConfig.business.phone}</a>
+		<div class="pa-auth theme-premium">
+			<HeaderAuthButton client:idle basePath={basePath} />
+		</div>
+		<a href="/" class="pa-tech">← Toutes les démos</a>
+	</div>
+</div>
 
-	if (btn && nav) {
-		const setOpen = (open: boolean) => {
-			nav.dataset.open = String(open);
-			btn.setAttribute('aria-expanded', String(open));
-			btn.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
-			document.body.classList.toggle('overflow-hidden', open);
+<script>
+	const header = document.querySelector<HTMLElement>('[data-header]');
+	const burger = document.querySelector<HTMLButtonElement>('[data-burger]');
+	const label = document.querySelector<HTMLElement>('[data-burger-label]');
+	const menu = document.getElementById('pa-menu');
+
+	if (header) {
+		// Fond plein après 40 px ; masqué en descendant au-delà de 480 px, rappelé en remontant.
+		let dernier = window.scrollY;
+		let attente = false;
+		const maj = () => {
+			const y = window.scrollY;
+			header.classList.toggle('is-scrolled', y > 40);
+			if (Math.abs(y - dernier) > 6) {
+				header.classList.toggle('is-hidden', y > dernier && y > 480);
+				dernier = y;
+			}
+			attente = false;
 		};
-		btn.addEventListener('click', () => setOpen(nav.dataset.open !== 'true'));
+		maj();
+		window.addEventListener(
+			'scroll',
+			() => {
+				if (!attente) {
+					attente = true;
+					requestAnimationFrame(maj);
+				}
+			},
+			{ passive: true },
+		);
+		// Un focus clavier dans l'en-tête le fait réapparaître.
+		header.addEventListener('focusin', () => header.classList.remove('is-hidden'));
+	}
+
+	if (header && burger && menu && label) {
+		const lenis = () => (window as unknown as { lenis?: { stop(): void; start(): void } }).lenis;
+		const ouvrir = (ouvert: boolean) => {
+			menu.dataset.open = String(ouvert);
+			burger.setAttribute('aria-expanded', String(ouvert));
+			label.textContent = ouvert ? 'Fermer' : 'Menu';
+			header.classList.toggle('is-open', ouvert);
+			document.documentElement.style.overflow = ouvert ? 'hidden' : '';
+			if (ouvert) {
+				lenis()?.stop();
+				menu.querySelector<HTMLElement>('a')?.focus({ preventScroll: true });
+			} else {
+				lenis()?.start();
+			}
+		};
+		burger.addEventListener('click', () => ouvrir(menu.dataset.open !== 'true'));
 		document.addEventListener('keydown', (e) => {
-			if (e.key === 'Escape') setOpen(false);
+			if (e.key === 'Escape' && menu.dataset.open === 'true') {
+				ouvrir(false);
+				burger.focus();
+			}
 		});
-		window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => {
-			if (e.matches) setOpen(false);
+		window.matchMedia('(min-width: 1100px)').addEventListener('change', (e) => {
+			if (e.matches) ouvrir(false);
 		});
 	}
 </script>
-
-<style>
-	/* Burger -> croix */
-	.burger {
-		position: relative;
-		width: 44px;
-		height: 44px;
-		border-radius: 12px;
-		color: var(--color-stone-300);
-		transition: color 0.2s ease, background-color 0.2s ease;
-	}
-	.burger:hover { color: var(--color-primary); background: rgb(255 255 255 / 0.05); }
-	.burger span {
-		position: absolute;
-		left: 11px;
-		width: 22px;
-		height: 2.5px;
-		border-radius: 2px;
-		background: currentColor;
-		transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease, width 0.35s ease;
-	}
-	.burger span:nth-child(1) { top: 14px; }
-	.burger span:nth-child(2) { top: 21px; width: 16px; }
-	.burger span:nth-child(3) { top: 28px; }
-	.burger[aria-expanded='true'] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-	.burger[aria-expanded='true'] span:nth-child(2) { opacity: 0; transform: translateX(10px); }
-	.burger[aria-expanded='true'] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-	/* Panneau plein écran qui glisse, liens en cascade */
-	.mobile-panel {
-		position: absolute;
-		inset-inline: 0;
-		top: 100%;
-		height: calc(100dvh - 100%);
-		overflow-y: auto;
-		opacity: 0;
-		visibility: hidden;
-		transform: translateY(-12px);
-		transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.4s;
-	}
-	.mobile-panel[data-open='true'] {
-		opacity: 1;
-		visibility: visible;
-		transform: none;
-		transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s;
-	}
-	.mobile-item {
-		opacity: 0;
-		transform: translateX(-16px);
-		transition: opacity 0.3s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-	}
-	.mobile-panel[data-open='true'] .mobile-item {
-		opacity: 1;
-		transform: none;
-		transition-delay: calc(80ms + var(--i, 0) * 55ms);
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.burger span, .mobile-panel, .mobile-item { transition-duration: 0.01ms !important; transition-delay: 0ms !important; }
-	}
-</style>

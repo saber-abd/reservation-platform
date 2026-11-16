@@ -1,0 +1,37 @@
+---
+// Bandeau de grands mots en contour : deux lignes qui glissent en sens opposés pendant le défilement
+// (Motion scroll). Les mots sont les interventions courantes de l'atelier.
+const ligne1 = ['Vidange', 'Freinage', 'Distribution', 'Géométrie', 'Vidange', 'Freinage', 'Distribution', 'Géométrie'];
+const ligne2 = ['Climatisation', 'Embrayage', 'Pneumatiques', 'Diagnostic', 'Climatisation', 'Embrayage', 'Pneumatiques', 'Diagnostic'];
+---
+
+<section class="pa-mots" data-mots aria-label="Interventions courantes">
+	<p class="sr-only">Interventions courantes : vidange, freinage, distribution, géométrie, climatisation, embrayage, pneumatiques, diagnostic.</p>
+	<div class="pa-mots__piste" data-mots-piste="1" aria-hidden="true">
+		{ligne1.map((m, i) => (<><span class:list={[i % 4 === 1 && 'is-plein']}>{m}</span><i></i></>))}
+	</div>
+	<div class="pa-mots__piste pa-mots__piste--2" data-mots-piste="-1" aria-hidden="true">
+		{ligne2.map((m, i) => (<><span class:list={[i % 4 === 2 && 'is-plein']}>{m}</span><i></i></>))}
+	</div>
+</section>
+
+<script>
+	import { scroll } from 'motion';
+	import { prefersReducedMotion } from '@/lib/motion/reveal';
+
+	const section = document.querySelector<HTMLElement>('[data-mots]');
+	if (section && !prefersReducedMotion()) {
+		const pistes = section.querySelectorAll<HTMLElement>('[data-mots-piste]');
+		scroll(
+			(p: number) => {
+				pistes.forEach((piste) => {
+					const sens = Number(piste.dataset.motsPiste);
+					// Ligne 1 part de 0 vers la gauche, ligne 2 arrive de la gauche.
+					const x = sens > 0 ? -p * 30 : -30 + p * 30;
+					piste.style.transform = `translate3d(${x}%, 0, 0)`;
+				});
+			},
+			{ target: section, offset: ['start end', 'end start'] },
+		);
+	}
+</script>

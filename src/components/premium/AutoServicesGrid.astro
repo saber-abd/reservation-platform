@@ -1,0 +1,127 @@
+---
+// Prestations de l'accueil. Bureau (≥ 992 px, mouvement autorisé) : bande horizontale collante qui
+// défile latéralement pendant la descente (position: sticky + Motion scroll). Ailleurs : simple liste.
+// Les prestations viennent de Supabase avec repli statique (prestations.ts), chargées par la page.
+import PremiumPicture from '@/components/premium/PremiumPicture.astro';
+import type { Prestation } from '@/components/premium/prestations';
+
+interface Props {
+	prestations: Prestation[];
+	numero?: string;
+}
+
+const { prestations, numero = '02' } = Astro.props;
+const basePath = '/demo-premium';
+const total = prestations.length + 1;
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<section class="pa-band" data-band aria-labelledby="presta-titre">
+	<div class="pa-band__sticky">
+		<div class="pa-wrap pa-band__tete">
+			<div>
+				<p class="pa-num"><b>{numero}</b> Prestations et tarifs</p>
+				<h2 id="presta-titre" class="pa-h2 mt-5" data-lines>
+					<span class="pa-line"><span>Ce que l'on fait,</span></span>
+					<span class="pa-line"><span>et pour combien.</span></span>
+				</h2>
+			</div>
+			<div class="pa-band__compteur" aria-hidden="true">
+				<span class="pa-tech pa-tech--clair"><span data-band-index>01</span> / {pad(total)}</span>
+				<span class="pa-band__jauge"><i data-band-jauge></i></span>
+			</div>
+		</div>
+
+		<div class="pa-band__viewport" data-band-viewport>
+			<ol class="pa-band__piste" data-band-piste>
+				{prestations.map((p, i) => (
+					<li class:list={['pa-presta', (i === 0 || i === 3) && 'pa-presta--large']}>
+						<div class="pa-presta__haut">
+							<span class="pa-tech pa-tech--clair">{pad(i + 1)}</span>
+							<span class="pa-tech">{p.duree}</span>
+						</div>
+						<div class="pa-presta__img">
+							<PremiumPicture {...p.image} sizes="(min-width: 992px) 36vw, (min-width: 700px) 50vw, 100vw" />
+						</div>
+						<h3 class="pa-h3">{p.nom}</h3>
+						<p class="pa-presta__desc">{p.description}</p>
+						<div class="pa-presta__fiche">
+							<dl class="contents">
+								<dt>Prix</dt>
+								<dd>{p.prix}</dd>
+							</dl>
+							<a href={p.id ? `${basePath}/reservation?service=${p.id}` : `${basePath}/reservation`} class="pa-presta__go" aria-label={`Réserver : ${p.nom}`}>
+								Réserver
+								<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+							</a>
+						</div>
+					</li>
+				))}
+				<li class="pa-presta pa-presta--fin">
+					<div class="pa-presta__haut">
+						<span class="pa-tech pa-tech--clair">{pad(total)}</span>
+						<span class="pa-tech">Sur devis</span>
+					</div>
+					<div>
+						<h3 class="pa-h2">Une intervention qui n'est pas dans la liste&nbsp;?</h3>
+						<p class="pa-presta__desc mt-5">
+							Embrayage, climatisation, préparation au contrôle technique : décrivez le problème,
+							le devis vous revient sous 24 h ouvrées.
+						</p>
+					</div>
+					<div class="flex flex-wrap gap-3">
+						<a href={`${basePath}/contact`} class="pa-btn" data-magnetic><span>Demander un devis</span></a>
+						<a href={`${basePath}/services`} class="pa-btn pa-btn--ghost"><span>Carte complète</span></a>
+					</div>
+				</li>
+			</ol>
+		</div>
+
+		<div class="pa-wrap pa-band__pied">
+			<p class="pa-tech">Prix TTC, pièces comprises sauf mention « sur devis ».</p>
+			<a href={`${basePath}/services`} class="pa-link">
+				Tous les tarifs
+				<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+			</a>
+		</div>
+	</div>
+</section>
+
+<script>
+	import { scroll } from 'motion';
+
+	const section = document.querySelector<HTMLElement>('[data-band]');
+	const piste = section?.querySelector<HTMLElement>('[data-band-piste]');
+	const viewport = section?.querySelector<HTMLElement>('[data-band-viewport]');
+	const index = section?.querySelector<HTMLElement>('[data-band-index]');
+	const jauge = section?.querySelector<HTMLElement>('[data-band-jauge]');
+
+	if (section && piste && viewport) {
+		// Même condition que la règle CSS qui rend la bande collante.
+		const mq = window.matchMedia('(min-width: 992px) and (prefers-reduced-motion: no-preference)');
+		const cartes = piste.children.length;
+		let distance = 0;
+
+		const mesurer = () => {
+			// Bord droit de la dernière carte (scrollWidth compterait un éventuel débordement de texte).
+			const derniere = piste.lastElementChild as HTMLElement | null;
+			const largeur = derniere ? derniere.offsetLeft + derniere.offsetWidth : piste.scrollWidth;
+			distance = mq.matches ? Math.max(0, largeur - viewport.clientWidth) : 0;
+			section.style.setProperty('--pa-band-dist', `${distance}px`);
+			if (!mq.matches) piste.style.transform = '';
+		};
+		mesurer();
+		window.addEventListener('resize', mesurer, { passive: true });
+		mq.addEventListener('change', mesurer);
+
+		scroll(
+			(p: number) => {
+				if (!mq.matches) return;
+				piste.style.transform = `translate3d(${-p * distance}px, 0, 0)`;
+				if (jauge) jauge.style.transform = `scaleX(${p})`;
+				if (index) index.textContent = String(Math.min(cartes, Math.floor(p * cartes) + 1)).padStart(2, '0');
+			},
+			{ target: section, offset: ['start start', 'end end'] },
+		);
+	}
+</script>

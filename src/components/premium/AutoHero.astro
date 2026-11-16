@@ -1,0 +1,98 @@
+---
+// Héros de l'accueil : photo plein cadre avec zoom d'arrivée et parallaxe au défilement,
+// titre monté ligne par ligne, bandeau d'informations pratiques en bas (Motion vanilla).
+import PremiumPicture from '@/components/premium/PremiumPicture.astro';
+import { images } from '@/components/premium/prestations';
+import { getSiteConfig } from '@/config/site';
+
+const siteConfig = await getSiteConfig(Astro.url.pathname);
+const { business } = siteConfig;
+const basePath = '/demo-premium';
+const horaires = business.openingHours[0];
+const lignes = ['Le prix annoncé', 'avant de lever', 'la voiture.'];
+---
+
+<section class="pa-hero" data-hero aria-labelledby="hero-titre">
+	<div class="pa-hero__media" data-hero-media aria-hidden="true">
+		<div class="pa-hero__zoom" data-hero-zoom>
+			<PremiumPicture {...images.cle} alt="" sizes="100vw" prioritaire />
+		</div>
+	</div>
+
+	<div class="pa-wrap pa-hero__corps" data-hero-corps>
+		<h1 id="hero-titre" class="pa-title pa-hero__title" data-lines="hero">
+			{lignes.map((l, i) => (
+				<span class="pa-line"><span class:list={[i === 2 && 'pa-rouge']}>{l}</span></span>
+			))}
+		</h1>
+
+		<div class="pa-hero__bas">
+			<p class="pa-lead" data-hero-fade>
+				Révision, freinage, distribution, pneus et lavage. Chaque intervention commence par un devis écrit,
+				et les pièces remplacées vous sont montrées à la restitution.
+			</p>
+			<div class="pa-hero__cta" data-hero-fade>
+				<a href={`${basePath}/reservation`} class="pa-btn" data-magnetic>
+					<span>
+						Réserver un créneau
+						<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+					</span>
+				</a>
+				<a href={`${basePath}/services`} class="pa-btn pa-btn--ghost" data-magnetic><span>Voir les tarifs</span></a>
+			</div>
+		</div>
+
+		<div class="pa-hero__infos">
+			<div class="pa-hero__info">
+				<span class="pa-tech">Atelier</span>
+				<b>{business.address}</b>
+			</div>
+			<div class="pa-hero__info">
+				<span class="pa-tech">{horaires.day}</span>
+				<b>{horaires.hours}</b>
+			</div>
+			<div class="pa-hero__info">
+				<span class="pa-tech">Téléphone</span>
+				<a href={`tel:${business.phone.replace(/\s/g, '')}`}><b>{business.phone}</b></a>
+			</div>
+			<div class="pa-hero__info">
+				<span class="pa-tech">Rendez-vous</span>
+				<b>En ligne, confirmé par e-mail</b>
+			</div>
+		</div>
+	</div>
+</section>
+
+<script>
+	import { animate, scroll, stagger } from 'motion';
+	import { prefersReducedMotion } from '@/lib/motion/reveal';
+
+	const hero = document.querySelector<HTMLElement>('[data-hero]');
+	if (hero && !prefersReducedMotion()) {
+		const ease = [0.22, 1, 0.36, 1] as const;
+		const zoom = hero.querySelector<HTMLElement>('[data-hero-zoom]');
+		const media = hero.querySelector<HTMLElement>('[data-hero-media]');
+		const corps = hero.querySelector<HTMLElement>('[data-hero-corps]');
+		const lignes = hero.querySelectorAll<HTMLElement>('[data-lines] .pa-line > span');
+		const fondus = hero.querySelectorAll<HTMLElement>('[data-hero-fade]');
+		const infos = hero.querySelectorAll<HTMLElement>('.pa-hero__info');
+
+		// Arrivée : la photo recule doucement, le titre monte ligne par ligne, le reste suit.
+		if (zoom) animate(zoom, { transform: ['scale(1.12)', 'scale(1)'] }, { duration: 2.2, ease });
+		animate(lignes, { transform: ['translateY(110%)', 'translateY(0%)'] }, { duration: 1, delay: stagger(0.11, { startDelay: 0.15 }), ease });
+		animate(fondus, { opacity: [0, 1], transform: ['translateY(18px)', 'translateY(0px)'] }, { duration: 0.9, delay: stagger(0.12, { startDelay: 0.6 }), ease });
+		animate(infos, { opacity: [0, 1], transform: ['translateY(16px)', 'translateY(0px)'] }, { duration: 0.8, delay: stagger(0.08, { startDelay: 0.85 }), ease });
+
+		// Défilement : la photo descend moins vite que la page (parallaxe), le texte s'efface en montant.
+		scroll(
+			(p: number) => {
+				if (media) media.style.transform = `translate3d(0, ${p * 16}%, 0)`;
+				if (corps) {
+					corps.style.transform = `translate3d(0, ${p * -70}px, 0)`;
+					corps.style.opacity = String(Math.max(0, 1 - p * 1.4));
+				}
+			},
+			{ target: hero, offset: ['start start', 'end start'] },
+		);
+	}
+</script>

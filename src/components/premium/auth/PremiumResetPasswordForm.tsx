@@ -52,7 +52,7 @@ export default function ResetPasswordForm({ basePath: propBasePath }: ResetPassw
 		return (
 			<div>
 				<p className="text-sm text-green-700">Votre mot de passe a bien été mis à jour.</p>
-				<a href={`${getEffectiveBasePath()}/connexion`} className="mt-4 inline-block text-sm font-medium text-rose-600 hover:underline">
+				<a href={`${getEffectiveBasePath()}/connexion`} className="mt-4 inline-block text-sm font-medium text-primary hover:underline">
 					Retour à la connexion
 				</a>
 			</div>
@@ -63,12 +63,12 @@ export default function ResetPasswordForm({ basePath: propBasePath }: ResetPassw
 		<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 			<div>
 				<label className="text-sm text-muted-foreground" htmlFor="password">
-					Nouveau mot de passe <span className="text-rose-600">*</span>
+					Nouveau mot de passe <span className="text-primary">*</span>
 				</label>
 				<input
 					id="password"
 					type="password"
-					className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+					className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
 					{...register('password')}
 				/>
 				{errors.password && <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>}
@@ -77,7 +77,7 @@ export default function ResetPasswordForm({ basePath: propBasePath }: ResetPassw
 			<button
 				type="submit"
 				disabled={submitting}
-				className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700 disabled:opacity-50"
+				className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#b92017] disabled:opacity-50"
 			>
 				{submitting ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
 			</button>

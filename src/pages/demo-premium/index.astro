@@ -1,40 +1,26 @@
 ---
-import PremiumAutoLayout from '@/layouts/premium/PremiumLayout.astro';
-import AutoHero from '@/components/premium/AutoHero';
-import AutoStats from '@/components/premium/AutoStats';
-import AutoServicesGrid from '@/components/premium/AutoServicesGrid';
-import { supabase } from '@/lib/supabase';
+import PremiumLayout from '@/layouts/premium/PremiumLayout.astro';
+import AutoHero from '@/components/premium/AutoHero.astro';
+import AutoStats from '@/components/premium/AutoStats.astro';
+import AutoMots from '@/components/premium/AutoMots.astro';
+import AutoServicesGrid from '@/components/premium/AutoServicesGrid.astro';
+import AutoEtapes from '@/components/premium/AutoEtapes.astro';
+import PremiumCta from '@/components/premium/PremiumCta.astro';
+import { chargerPrestations } from '@/components/premium/prestations';
+import { getSiteConfig } from '@/config/site';
 
-// Get base path for links
-const basePath = Astro.url.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '';
+const siteConfig = await getSiteConfig(Astro.url.pathname);
+const prestations = await chargerPrestations();
 ---
 
-<PremiumAutoLayout 
-	title="Accueil" 
-	description="Bienvenue dans l'univers Premium Auto. Des services mécaniques et esthétiques d'exception."
+<PremiumLayout
+	title="Accueil"
+	description={`${siteConfig.business.name} : entretien, diagnostic, mécanique, pneus et lavage. Tarifs affichés, devis écrit avant intervention, réservation en ligne.`}
 >
-	<AutoHero basePath={basePath} client:load />
-	
-	<AutoStats client:visible />
-
-	<AutoServicesGrid basePath={basePath} client:visible />
-
-	{/* Section d'Appel à l'Action finale */}
-	<section class="relative py-24 bg-stone-950 border-t border-stone-800 overflow-hidden">
-		<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-primary/10 via-stone-950 to-stone-950"></div>
-		<div class="relative z-10 max-w-4xl mx-auto px-6 text-center">
-			<h2 class="text-3xl md:text-5xl font-black text-white uppercase font-[var(--font-heading)] mb-6">
-				Prêt à libérer le <span class="text-primary">Potentiel</span> de votre véhicule ?
-			</h2>
-			<p class="text-lg text-stone-400 mb-10 max-w-2xl mx-auto">
-				Rejoignez les clients exigeants qui nous font confiance. Réservez votre créneau en ligne en quelques secondes.
-			</p>
-			<a 
-				href={`${basePath}/reservation`} 
-				class="inline-flex items-center justify-center rounded-xl bg-primary px-10 py-5 text-sm font-bold text-primary-foreground shadow-[0_0_30px_rgba(255,50,50,0.3)] transition-transform hover:scale-105 active:scale-95 uppercase tracking-wider"
-			>
-				Planifier une intervention
-			</a>
-		</div>
-	</section>
-</PremiumAutoLayout>
+	<AutoHero />
+	<AutoStats />
+	<AutoMots />
+	<AutoServicesGrid prestations={prestations} />
+	<AutoEtapes />
+	<PremiumCta numero="04" lignes={['Votre voiture', 'au pont', 'cette semaine ?']} />
+</PremiumLayout>

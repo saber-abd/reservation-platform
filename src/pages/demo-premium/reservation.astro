@@ -1,22 +1,60 @@
 ---
-import PremiumAutoLayout from '@/layouts/premium/PremiumLayout.astro';
+import PremiumLayout from '@/layouts/premium/PremiumLayout.astro';
+import PremiumPageHead from '@/components/premium/PremiumPageHead.astro';
 import ReservationForm from '@/components/premium/PremiumReservationForm';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname);
+const { business } = siteConfig;
+
+const aPrevoir = [
+	{ titre: 'Carte grise', texte: 'Pour identifier le véhicule et commander les bonnes pièces.' },
+	{ titre: 'Écrou antivol de roue', texte: 'Indispensable pour un changement de pneus ou un contrôle des freins.' },
+	{ titre: 'Carnet d’entretien', texte: 'S’il existe : on y note l’intervention et le kilométrage.' },
+];
 ---
 
-<PremiumAutoLayout title="Réserver" description={`Réservez votre prestation en ligne chez ${siteConfig.business.name}.`}>
-	<section class="min-h-screen bg-stone-950 px-6 py-20">
-		<div class="mx-auto max-w-4xl">
-			<h1 class="text-3xl font-bold text-white md:text-4xl text-center font-[var(--font-heading)] uppercase">Prendre <span class="text-primary">Rendez-vous</span></h1>
-			<p class="mt-2 text-stone-400 text-center font-medium">
-				Choisissez votre prestation et votre créneau en quelques clics.
-			</p>
-			
-			<div class="mt-10 rounded-2xl bg-white p-6 md:p-10 shadow-2xl border border-stone-200">
+<PremiumLayout title="Réserver" description={`Réservez une prestation en ligne chez ${business.name} : choix de l'intervention, du jour et de l'heure.`}>
+	<PremiumPageHead rubrique="Réservation" lignes={['Choisir', 'un créneau.']} legende="Confirmation par e-mail">
+		Choisissez la prestation, puis le jour et l'heure de dépôt. Vous recevez la confirmation par e-mail ;
+		le devis détaillé suit le passage sur le pont.
+	</PremiumPageHead>
+
+	<section class="pa-wrap pb-[clamp(64px,9vw,120px)]">
+		<div class="pa-grid items-start">
+			<div class="pa-fiche pa-col-wide" data-reveal>
+				<div class="pa-fiche__tete">
+					<h2 class="pa-h3">Votre rendez-vous</h2>
+					<span class="pa-tech">Étapes 1 à 3</span>
+				</div>
 				<ReservationForm client:load />
 			</div>
+
+			<aside class="pa-col-narrow" aria-labelledby="prevoir-titre" data-reveal data-reveal-delay="120">
+				<h2 id="prevoir-titre" class="pa-num"><b>À prévoir</b> le jour du dépôt</h2>
+				<ol class="pa-rows mt-6">
+					{aPrevoir.map((a, i) => (
+						<li class="pa-row">
+							<span class="pa-row__n">{String(i + 1).padStart(2, '0')}</span>
+							<div>
+								<h3 class="font-semibold">{a.titre}</h3>
+								<p class="pa-text mt-1 text-[0.9375rem]">{a.texte}</p>
+							</div>
+						</li>
+					))}
+				</ol>
+				<table class="pa-horaires mt-10 text-sm">
+					<caption class="pa-tech mb-3 text-left">Horaires de dépôt</caption>
+					<tbody>
+						{business.openingHours.map((h) => (
+							<tr><th scope="row">{h.day}</th><td>{h.hours}</td></tr>
+						))}
+					</tbody>
+				</table>
+				<p class="pa-text mt-6 text-[0.9375rem]">
+					Un empêchement ? Appelez le <a href={`tel:${business.phone.replace(/\s/g, '')}`} class="pa-link">{business.phone}</a>
+				</p>
+			</aside>
 		</div>
 	</section>
-</PremiumAutoLayout>
+</PremiumLayout>

@@ -20,23 +20,28 @@ export interface PrestationImage {
 	alt: string;
 }
 
+// Sources et auteurs : public/images/premium/SOURCES.md
 const IMAGES: Record<string, PrestationImage> = {
-	moteur: { fichier: 'atelier-moteur', largeurs: [800, 1400, 2000], ratio: [4, 3], alt: 'Mains d’un mécanicien serrant une pièce moteur à la clé plate' },
-	courroie: { fichier: 'courroie', largeurs: [600, 1000, 1600], ratio: [16, 9], alt: 'Courroie d’accessoires et galets tendeurs d’un moteur' },
-	chassis: { fichier: 'chassis', largeurs: [600, 1000, 1600], ratio: [3, 2], alt: 'Contrôle du soubassement d’un véhicule sur le pont' },
+	cle: { fichier: 'atelier-moteur', largeurs: [800, 1400, 2000], ratio: [4, 3], alt: 'Mains d’un mécanicien serrant une pièce moteur à la clé plate' },
+	moteur: { fichier: 'courroie', largeurs: [600, 1000, 1600], ratio: [16, 9], alt: 'Courroie d’accessoires et galets tendeurs d’un moteur' },
+	diagnostic: { fichier: 'diagnostic', largeurs: [600, 1000, 1600], ratio: [3, 2], alt: 'Technicien penché sur un compartiment moteur, lampe en main' },
+	chassis: { fichier: 'chassis', largeurs: [600, 1000, 1600], ratio: [3, 2], alt: 'Mains d’un mécanicien sous le soubassement d’un véhicule levé' },
 	pneus: { fichier: 'pneus', largeurs: [600, 1000, 1600], ratio: [3, 2], alt: 'Piles de pneus en stock à l’atelier' },
-	lavage: { fichier: 'lavage', largeurs: [600, 1000, 1500], ratio: [5, 6], alt: 'Carrosserie noire rincée à haute pression' },
-	outils: { fichier: 'outils', largeurs: [600, 1000, 1600], ratio: [3, 2], alt: 'Panneau d’outillage de l’atelier, clés rangées par taille' },
+	lavage: { fichier: 'lavage', largeurs: [600, 1000, 1500], ratio: [2, 3], alt: 'Jante rouge brossée à la mousse pendant un lavage' },
+	detailing: { fichier: 'detailing', largeurs: [600, 1000, 1600], ratio: [16, 9], alt: 'Tableau de bord nettoyé au pinceau par un préparateur ganté' },
+	outils: { fichier: 'outils', largeurs: [600, 1000, 1500], ratio: [2, 3], alt: 'Clés plates et douilles rangées dans un tiroir de servante' },
+	atelier: { fichier: 'atelier', largeurs: [800, 1400, 2000], ratio: [3, 2], alt: 'L’atelier : établi, pont élévateur et roues démontées' },
 };
 
 /** Choisit la photo d'atelier qui correspond le mieux au nom de la prestation. */
 export function imagePourPrestation(nom: string): PrestationImage {
 	const n = nom.toLowerCase();
 	if (/pneu|roue|jante|géométrie|geometrie|parall/.test(n)) return IMAGES.pneus;
-	if (/lavage|detailing|détailing|nettoyage|polissage|céramique|ceramique|intérieur|interieur/.test(n)) return IMAGES.lavage;
-	if (/diagnostic|électronique|electronique|distribution|courroie/.test(n)) return IMAGES.courroie;
+	if (/detailing|détailing|intérieur|interieur|sellerie|cuir/.test(n)) return IMAGES.detailing;
+	if (/lavage|nettoyage|polissage|céramique|ceramique|carrosserie/.test(n)) return IMAGES.lavage;
+	if (/diagnostic|électronique|electronique|valise|voyant/.test(n)) return IMAGES.diagnostic;
 	if (/bilan|contrôle|controle|révision|revision|vidange|entretien|frein/.test(n)) return IMAGES.chassis;
-	if (/moteur|réparation|reparation|mécanique|mecanique|embrayage/.test(n)) return IMAGES.moteur;
+	if (/moteur|distribution|courroie|réparation|reparation|mécanique|mecanique|embrayage/.test(n)) return IMAGES.moteur;
 	return IMAGES.outils;
 }
 

@@ -1,101 +1,80 @@
 ---
-import PremiumAutoLayout from '@/layouts/premium/PremiumLayout.astro';
+import PremiumLayout from '@/layouts/premium/PremiumLayout.astro';
+import PremiumPageHead from '@/components/premium/PremiumPageHead.astro';
 import Map from '@/components/premium/PremiumMap.astro';
 import { getSiteConfig } from '@/config/site';
+
 const siteConfig = await getSiteConfig(Astro.url.pathname);
-const basePath = Astro.url.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '';
+const { business } = siteConfig;
 ---
 
-<PremiumAutoLayout title="Contact" description={`Prenez contact avec le garage ${siteConfig.business.name} pour toute demande.`}>
-	<section class="pt-32 pb-20 bg-stone-950 px-6">
-		<div class="max-w-6xl mx-auto grid gap-12 lg:grid-cols-2">
-			<div data-aos="fade-right">
-				<h1 class="text-4xl font-black text-white md:text-5xl uppercase font-[var(--font-heading)]">
-					Contactez l'<span class="text-primary">Équipe</span>
-				</h1>
-				<p class="mt-4 text-stone-400 font-medium">
-					Notre atelier est ouvert pour l'entretien et la réparation de votre véhicule. N'hésitez pas à nous appeler ou à passer nous voir.
-				</p>
+<PremiumLayout title="Contact" description={`Contacter ${business.name} : téléphone, e-mail, adresse et horaires de l'atelier.`}>
+	<PremiumPageHead rubrique="Contact" lignes={['Une question', 'avant de venir ?']} legende="Réponse sous 24 h ouvrées">
+		Un bruit au freinage, un voyant allumé, une demande de devis : décrivez ce que vous constatez,
+		avec la marque, le modèle et le kilométrage du véhicule.
+	</PremiumPageHead>
 
-				<div class="mt-12 space-y-8">
-					<div class="flex items-start gap-6">
-						<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white border border-stone-200 text-primary shadow-sm">
-							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-						</div>
-						<div>
-							<p class="font-bold text-white tracking-wider uppercase text-sm">Assistance Téléphonique</p>
-							<p class="mt-1 text-stone-400">{siteConfig.business.phone}</p>
-						</div>
+	<section class="pa-wrap pb-[clamp(64px,9vw,120px)]">
+		<div class="pa-grid items-start">
+			<div class="pa-col-half-a lg:pr-10" data-reveal>
+				<h2 class="pa-num"><b>01</b> Coordonnées</h2>
+				<div class="pa-coord mt-6">
+					<div>
+						<span class="pa-tech">Téléphone</span>
+						<a href={`tel:${business.phone.replace(/\s/g, '')}`}>{business.phone}</a>
 					</div>
-
-					<div class="flex items-start gap-6">
-						<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white border border-stone-200 text-primary shadow-sm">
-							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-						</div>
-						<div>
-							<p class="font-bold text-white tracking-wider uppercase text-sm">Email</p>
-							<p class="mt-1 text-stone-400">{siteConfig.business.email}</p>
-						</div>
+					<div>
+						<span class="pa-tech">E-mail</span>
+						<a href={`mailto:${business.email}`}>{business.email}</a>
+					</div>
+					<div class="sm:col-span-2">
+						<span class="pa-tech">Atelier</span>
+						<b>{business.address}</b>
 					</div>
 				</div>
+				<table class="pa-horaires mt-10">
+					<caption class="pa-tech mb-3 text-left">Horaires</caption>
+					<tbody>
+						{business.openingHours.map((h) => (
+							<tr><th scope="row">{h.day}</th><td>{h.hours}</td></tr>
+						))}
+					</tbody>
+				</table>
 			</div>
 
 			<form
 				id="contact-form"
-				data-business-email={siteConfig.business.email}
-				class="flex flex-col gap-6 rounded-2xl border border-stone-200 bg-white p-8 shadow-sm"
-				data-aos="fade-left"
+				data-business-email={business.email}
+				class="pa-fiche pa-col-half-b grid gap-5"
+				data-reveal
+				data-reveal-delay="120"
 			>
-				<div>
-					<label for="name" class="text-xs font-bold text-stone-500 uppercase tracking-widest">Nom complet</label>
-					<input
-						id="name"
-						name="name"
-						type="text"
-						required
-						class="mt-2 w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-					/>
+				<div class="pa-fiche__tete">
+					<h2 class="pa-h3">Écrire à l'atelier</h2>
+					<span class="pa-tech">Tous les champs sont requis</span>
 				</div>
-				<div>
-					<label for="email" class="text-xs font-bold text-stone-500 uppercase tracking-widest">Email</label>
-					<input
-						id="email"
-						name="email"
-						type="email"
-						required
-						class="mt-2 w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-					/>
+				<div class="pa-champ">
+					<label for="name">Nom complet</label>
+					<input id="name" name="name" type="text" autocomplete="name" required />
 				</div>
-				<div>
-					<label for="message" class="text-xs font-bold text-stone-500 uppercase tracking-widest">Message</label>
-					<textarea
-						id="message"
-						name="message"
-						rows="4"
-						required
-						class="mt-2 w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-					></textarea>
+				<div class="pa-champ">
+					<label for="email">E-mail</label>
+					<input id="email" name="email" type="email" autocomplete="email" required />
 				</div>
-				<p id="form-status" class="text-sm hidden"></p>
-				<button
-					id="submit-btn"
-					type="submit"
-					class="mt-2 rounded-xl bg-primary px-4 py-4 text-sm font-bold text-primary-foreground transition-all hover:bg-primary/90 uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] shadow-md"
-				>
-					Envoyer la demande
-				</button>
+				<div class="pa-champ">
+					<label for="message">Message</label>
+					<textarea id="message" name="message" rows="5" required placeholder="Ex. : Clio IV de 2017, 98 000 km, grincement à l'avant gauche au freinage."></textarea>
+				</div>
+				<p id="form-status" class="pa-statut hidden" role="status"></p>
+				<button id="submit-btn" type="submit" class="pa-btn pa-btn--encre pa-btn--bloc mt-1">Envoyer le message</button>
 			</form>
 		</div>
 
-		<div class="max-w-6xl mx-auto h-[400px] overflow-hidden rounded-2xl bg-white border border-stone-200 mt-16 shadow-sm" data-aos="fade-up">
-			<Map 
-				lat={siteConfig.business.lat} 
-				lng={siteConfig.business.lng} 
-				label={siteConfig.business.name}
-			/>
+		<div class="pa-carte mt-16 md:mt-24" data-reveal>
+			<Map lat={business.lat} lng={business.lng} label={business.name} class="h-full" />
 		</div>
 	</section>
-</PremiumAutoLayout>
+</PremiumLayout>
 
 <script>
 	const form = document.getElementById('contact-form') as HTMLFormElement;
@@ -107,17 +86,17 @@ const basePath = Astro.url.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '';
 			e.preventDefault();
 			const formData = new FormData(form);
 			const businessEmail = form.dataset.businessEmail;
-			
+
 			btn.disabled = true;
-			btn.textContent = 'Transmission...';
+			btn.textContent = 'Envoi…';
 			status.classList.add('hidden');
-			
+
 			try {
 				const userEmail = formData.get('email') as string;
 				const userName = formData.get('name') as string;
 				const userMessage = formData.get('message') as string;
 
-				// EmailJS Configuration
+				// Configuration EmailJS
 				const serviceID = 'service_7pvm3br';
 				const templateID = 'template_3j75n8o';
 				const publicKey = '5Jjd71i9EWOeYyzsG';
@@ -139,23 +118,23 @@ const basePath = Astro.url.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '';
 						template_id: templateID,
 						user_id: publicKey,
 						template_params: templateParams,
-					})
+					}),
 				});
 
 				if (response.ok) {
-					status.textContent = 'Message transmis avec succès.';
-					status.className = 'text-sm text-green-500 font-medium';
+					status.textContent = 'Message envoyé. Réponse sous 24 h ouvrées.';
+					status.className = 'pa-statut is-ok';
 					form.reset();
 				} else {
 					const errorText = await response.text();
-					throw new Error(errorText || 'Erreur lors de la transmission');
+					throw new Error(errorText || "Erreur lors de l'envoi");
 				}
 			} catch (err: any) {
 				status.textContent = `Erreur : ${err.message}`;
-				status.className = 'text-sm text-red-500 font-medium';
+				status.className = 'pa-statut is-err';
 			} finally {
 				btn.disabled = false;
-				btn.textContent = 'Envoyer la demande';
+				btn.textContent = 'Envoyer le message';
 				status.classList.remove('hidden');
 			}
 		});

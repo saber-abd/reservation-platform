@@ -1,21 +1,23 @@
 ---
-import Layout from '@/layouts/premium/PremiumLayout.astro';
+import PremiumLayout from '@/layouts/premium/PremiumLayout.astro';
 
 Astro.response.status = 404;
 ---
 
-<Layout title="Page introuvable" noindex>
-	<section class="mx-auto flex max-w-xl flex-col items-center px-6 py-32 text-center">
-		<p class="text-sm font-semibold uppercase tracking-widest text-rose-600">Erreur 404</p>
-		<h1 class="mt-3 text-3xl font-bold text-stone-900 md:text-4xl">Page introuvable</h1>
-		<p class="mt-4 text-stone-500">
-			La page que vous cherchez n'existe pas ou a été déplacée.
-		</p>
-		<a
-			href="/demo-premium/"
-			class="mt-8 inline-block rounded-xl bg-rose-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-rose-700"
-		>
-			Retour à l'accueil
-		</a>
+<PremiumLayout title="Page introuvable" noindex>
+	<section class="pa-404 pa-wrap">
+		<div class="w-full">
+			<p class="pa-404__code" aria-hidden="true">404</p>
+			<div class="mt-8 grid gap-6 border-t border-[#33373c] pt-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+				<div>
+					<h1 class="pa-h2">Page introuvable</h1>
+					<p class="pa-text mt-3">Cette adresse n'existe pas ou a été déplacée. Les tarifs et la réservation restent accessibles depuis l'accueil.</p>
+				</div>
+				<div class="flex flex-wrap gap-3">
+					<a href="/demo-premium/" class="pa-btn"><span>Retour à l'accueil</span></a>
+					<a href="/demo-premium/services" class="pa-btn pa-btn--ghost"><span>Voir les tarifs</span></a>
+				</div>
+			</div>
+		</div>
 	</section>
-</Layout>
+</PremiumLayout>

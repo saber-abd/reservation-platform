@@ -349,11 +349,11 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 			
 			<div>
 				<label className="text-sm text-stone-500" htmlFor="fullName">
-					Nom complet <span className="text-rose-600">*</span>
+					Nom complet <span className="text-primary">*</span>
 				</label>
 				<input
 					id="fullName"
-					className="mt-1 w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-rose-600 transition-colors"
+					className="mt-1 w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
 					{...register('fullName')}
 					maxLength={MAX_NAME_LENGTH}
 				/>
@@ -412,7 +412,7 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 			<button
 				type="submit"
 				disabled={submitting}
-				className="rounded-xl bg-primary px-4 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-[0_0_15px_rgba(255,50,50,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(255,50,50,0.6)] active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+				className="rounded-[2px] bg-primary px-4 py-3.5 text-[0.9375rem] font-bold text-white transition-colors hover:bg-[#b92017] active:bg-[#9c1a12] disabled:opacity-50"
 			>
 				{submitting ? 'Création...' : (existingUser ? 'Terminer mon profil' : 'Rejoindre')}
 			</button>

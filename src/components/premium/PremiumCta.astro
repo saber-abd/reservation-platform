@@ -1,0 +1,54 @@
+---
+// Appel final commun aux pages : grand titre monté ligne par ligne, horaires et deux actions.
+import { getSiteConfig } from '@/config/site';
+
+interface Props {
+	lignes?: string[];
+	numero?: string;
+}
+
+const siteConfig = await getSiteConfig(Astro.url.pathname);
+const { business } = siteConfig;
+const basePath = '/demo-premium';
+const { lignes = ['Un créneau', 'cette semaine ?'], numero } = Astro.props;
+---
+
+<section class="pa-cta" aria-labelledby="cta-titre">
+	<div class="pa-wrap">
+		{numero && <p class="pa-num mb-8"><b>{numero}</b> Rendez-vous</p>}
+		<h2 id="cta-titre" class="pa-title pa-cta__titre" data-lines>
+			{lignes.map((l, i) => (
+				<span class="pa-line"><span class:list={[i === lignes.length - 1 && 'pa-rouge']}>{l}</span></span>
+			))}
+		</h2>
+		<div class="pa-cta__bas">
+			<div class="grid gap-6 sm:grid-cols-2" data-reveal>
+				<div>
+					<p class="pa-tech">Horaires</p>
+					<table class="pa-horaires mt-3 text-sm">
+						<caption class="sr-only">Horaires d'ouverture</caption>
+						<tbody>
+							{business.openingHours.map((h) => (
+								<tr><th scope="row">{h.day}</th><td>{h.hours}</td></tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+				<div>
+					<p class="pa-tech">Dépôt du véhicule</p>
+					<p class="mt-3 font-semibold">{business.address}</p>
+					<a href={`tel:${business.phone.replace(/\s/g, '')}`} class="pa-link mt-3">{business.phone}</a>
+				</div>
+			</div>
+			<div class="pa-cta__actions" data-reveal data-reveal-delay="120">
+				<a href={`${basePath}/reservation`} class="pa-btn" data-magnetic>
+					<span>
+						Réserver en ligne
+						<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+					</span>
+				</a>
+				<a href={`${basePath}/contact`} class="pa-btn pa-btn--ghost" data-magnetic><span>Poser une question</span></a>
+			</div>
+		</div>
+	</div>
+</section>

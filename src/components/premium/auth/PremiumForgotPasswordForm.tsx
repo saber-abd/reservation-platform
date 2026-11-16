@@ -61,12 +61,12 @@ export default function ForgotPasswordForm({ basePath: propBasePath }: ForgotPas
 		<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 			<div>
 				<label className="text-sm text-muted-foreground" htmlFor="email">
-					Email <span className="text-rose-600">*</span>
+					Email <span className="text-primary">*</span>
 				</label>
 				<input
 					id="email"
 					type="email"
-					className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+					className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
 					{...register('email')}
 				/>
 				{errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
@@ -75,7 +75,7 @@ export default function ForgotPasswordForm({ basePath: propBasePath }: ForgotPas
 			<button
 				type="submit"
 				disabled={submitting}
-				className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700 disabled:opacity-50"
+				className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#b92017] disabled:opacity-50"
 			>
 				{submitting ? 'Envoi...' : 'Envoyer le lien de réinitialisation'}
 			</button>

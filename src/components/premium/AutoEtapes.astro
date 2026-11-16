@@ -1,0 +1,88 @@
+---
+// Déroulé d'une intervention : photo collante à gauche (bureau), étapes numérotées à droite.
+// Un trait rouge suit la lecture des étapes (Motion scroll) ; l'étape lue s'allume (Motion inView).
+import PremiumPicture from '@/components/premium/PremiumPicture.astro';
+import { images } from '@/components/premium/prestations';
+
+interface Props {
+	numero?: string;
+}
+const { numero = '03' } = Astro.props;
+
+const etapes = [
+	{ titre: 'Réservation en ligne', texte: 'Vous choisissez la prestation et le créneau. La confirmation arrive par e-mail avec l’adresse de dépôt et ce qu’il faut laisser dans la voiture.', meta: '2 minutes' },
+	{ titre: 'Tour du véhicule avec vous', texte: 'À l’arrivée, on note le kilométrage, les voyants allumés et ce que vous avez remarqué. Rien n’est démonté à ce stade.', meta: '10 minutes au comptoir' },
+	{ titre: 'Diagnostic et devis écrit', texte: 'Le technicien contrôle sur le pont puis vous envoie un devis ligne par ligne. Les travaux ne commencent qu’après votre accord, par SMS ou e-mail.', meta: 'Sous 2 h' },
+	{ titre: 'Intervention et restitution', texte: 'À la remise des clés, on vous montre les pièces remplacées et la facture reprend le devis. Garantie de 12 mois sur la réparation.', meta: 'Le jour annoncé' },
+];
+---
+
+<section class="pa-section pa-section--graphite" aria-labelledby="etapes-titre">
+	<div class="pa-wrap">
+		<div class="pa-grid">
+			<p class="pa-num pa-col-num"><b>{numero}</b> Déroulé</p>
+			<h2 id="etapes-titre" class="pa-h2 pa-col-main" data-lines>
+				<span class="pa-line"><span>Rien ne se fait</span></span>
+				<span class="pa-line"><span>sans votre accord.</span></span>
+			</h2>
+		</div>
+
+		<div class="pa-grid mt-12 md:mt-16">
+			<div class="pa-col-half-a lg:pr-8">
+				<figure class="pa-collant">
+					<div class="pa-cadre pa-cadre--parallaxe aspect-[3/2] lg:aspect-[4/5]">
+						<PremiumPicture {...images.atelier} sizes="(min-width: 992px) 45vw, 100vw" />
+					</div>
+					<figcaption class="pa-legende">
+						<span class="pa-tech">Atelier mécanique, pont n° 2</span>
+						<span class="pa-tech">Photo : Kato Blackmore</span>
+					</figcaption>
+				</figure>
+			</div>
+
+			<div class="pa-col-half-b pa-etapes" data-etapes>
+				<span class="pa-etapes__trait" aria-hidden="true"><i data-etapes-trait></i></span>
+				<ol>
+				{etapes.map((e, i) => (
+					<li class="pa-etape" data-etape>
+						<span class="pa-etape__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+						<h3 class="pa-h3">{e.titre}</h3>
+						<p>{e.texte}</p>
+						<span class="pa-etape__meta pa-tech pa-tech--clair">{e.meta}</span>
+					</li>
+				))}
+				</ol>
+			</div>
+		</div>
+	</div>
+</section>
+
+<script>
+	import { inView, scroll } from 'motion';
+	import { prefersReducedMotion } from '@/lib/motion/reveal';
+
+	const liste = document.querySelector<HTMLElement>('[data-etapes]');
+	if (liste) {
+		const trait = liste.querySelector<HTMLElement>('[data-etapes-trait]');
+		const etapes = liste.querySelectorAll<HTMLElement>('[data-etape]');
+
+		// L'étape au milieu de l'écran s'allume (utile aussi sans animation).
+		etapes.forEach((etape) => {
+			inView(
+				etape,
+				() => {
+					etape.classList.add('is-active');
+					return () => etape.classList.remove('is-active');
+				},
+				{ margin: '-45% 0px -45% 0px' },
+			);
+		});
+
+		if (trait && !prefersReducedMotion()) {
+			scroll(
+				(p: number) => { trait.style.transform = `scaleY(${p})`; },
+				{ target: liste, offset: ['start 70%', 'end 55%'] },
+			);
+		}
+	}
+</script>

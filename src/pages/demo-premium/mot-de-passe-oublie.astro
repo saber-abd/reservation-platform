@@ -1,19 +1,16 @@
 ---
-import Layout from '@/layouts/premium/PremiumLayout.astro';
+import PremiumAuthShell from '@/components/premium/PremiumAuthShell.astro';
 import ForgotPasswordForm from '@/components/premium/auth/PremiumForgotPasswordForm';
 ---
 
-<Layout title="Mot de passe oublié" description="Réinitialisez votre mot de passe." noindex>
-	<section class="mx-auto max-w-md px-6 py-20">
-		<h1 class="text-2xl font-bold text-stone-900">Mot de passe oublié</h1>
-		<p class="mt-2 text-sm text-stone-500">
-			Renseignez votre email, nous vous enverrons un lien pour choisir un nouveau mot de passe.
-		</p>
-		<div class="mt-8">
-			<ForgotPasswordForm basePath="/demo-premium" client:load />
-		</div>
-		<p class="mt-6 text-sm text-stone-500">
-			<a href="/demo-premium/connexion" class="font-medium text-rose-600 hover:underline">Retour à la connexion</a>
-		</p>
-	</section>
-</Layout>
+<PremiumAuthShell
+	pageTitle="Mot de passe oublié"
+	description="Réinitialisez votre mot de passe."
+	titre="Mot de passe oublié"
+	lead="Indiquez l'adresse e-mail du compte : vous recevrez un lien pour choisir un nouveau mot de passe."
+>
+	<ForgotPasswordForm basePath="/demo-premium" client:load />
+	<Fragment slot="after">
+		<a href="/demo-premium/connexion" class="pa-link">Retour à la connexion</a>
+	</Fragment>
+</PremiumAuthShell>

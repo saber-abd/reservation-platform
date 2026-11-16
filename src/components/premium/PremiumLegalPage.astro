@@ -1,0 +1,39 @@
+---
+// Gabarit des pages légales : en-tête, sommaire des trois pages (collant sur bureau), articles numérotés.
+import PremiumLayout from '@/layouts/premium/PremiumLayout.astro';
+import PremiumPageHead from '@/components/premium/PremiumPageHead.astro';
+
+interface Props {
+	title: string;
+	lignes: string[];
+	description: string;
+	updated: string;
+}
+
+const { title, lignes, description, updated } = Astro.props;
+const courant = Astro.url.pathname.replace(/\/$/, '');
+const pages = [
+	{ href: '/demo-premium/mentions-legales', label: 'Mentions légales' },
+	{ href: '/demo-premium/politique-de-confidentialite', label: 'Confidentialité' },
+	{ href: '/demo-premium/conditions-utilisation', label: "Conditions d'utilisation" },
+];
+---
+
+<PremiumLayout title={title} description={description}>
+	<PremiumPageHead rubrique="Informations légales" lignes={lignes} legende={`Mise à jour : ${updated}`}>
+		<slot name="lead" />
+	</PremiumPageHead>
+
+	<section class="pa-wrap pb-[clamp(64px,9vw,120px)]">
+		<div class="pa-grid items-start">
+			<nav class="pa-col-num pa-legal-nav lg:sticky lg:top-24" aria-label="Informations légales">
+				{pages.map((p) => (
+					<a href={p.href} aria-current={courant === p.href ? 'page' : undefined}>{p.label}</a>
+				))}
+			</nav>
+			<div class="pa-col-main pa-legal">
+				<slot />
+			</div>
+		</div>
+	</section>
+</PremiumLayout>

@@ -1,0 +1,59 @@
+---
+// Gabarit des pages de compte (connexion, inscription, mot de passe) :
+// photo d'atelier à gauche (bureau) avec ce que contient l'espace, fiche papier du formulaire à droite.
+import PremiumLayout from '@/layouts/premium/PremiumLayout.astro';
+import PremiumPicture from '@/components/premium/PremiumPicture.astro';
+import { images } from '@/components/premium/prestations';
+
+interface Props {
+	pageTitle: string;
+	description: string;
+	titre: string;
+	lead: string;
+	repere?: string;
+}
+
+const { pageTitle, description, titre, lead, repere = 'Espace client' } = Astro.props;
+
+const contenu = [
+	'Vos rendez-vous passés et à venir',
+	'Les devis et l’historique des interventions',
+	'Vos points de fidélité',
+	'Les messages échangés avec l’atelier',
+];
+---
+
+<PremiumLayout title={pageTitle} description={description} noindex>
+	<section class="pa-auth-shell">
+		<div class="pa-auth-shell__visuel" aria-hidden="true">
+			<PremiumPicture {...images.outils} alt="" sizes="45vw" prioritaire />
+			<div class="pa-auth-shell__texte">
+				<p class="pa-num"><b>{repere}</b></p>
+				<ul class="mt-6 border-t border-[#ecebe6]/20">
+					{contenu.map((c, i) => (
+						<li class="flex gap-4 border-b border-[#ecebe6]/20 py-3">
+							<span class="pa-tech">{String(i + 1).padStart(2, '0')}</span>
+							<span class="font-semibold">{c}</span>
+						</li>
+					))}
+				</ul>
+			</div>
+		</div>
+
+		<div class="pa-auth-shell__form">
+			<div>
+				<h1 class="pa-title text-[clamp(2rem,4.4vw,3.6rem)]" data-lines>
+					<span class="pa-line"><span>{titre}</span></span>
+				</h1>
+				<p class="pa-text mt-4" data-reveal="fade">{lead}</p>
+				<div class="pa-fiche mt-8" data-reveal data-reveal-delay="100">
+					<slot />
+				</div>
+				<div class="mt-6 text-[0.9375rem] text-[#9aa0a6]">
+					<slot name="after" />
+				</div>
+				<slot name="visite" />
+			</div>
+		</div>
+	</section>
+</PremiumLayout>

@@ -12,7 +12,7 @@ const { lat, lng, label = '', zoom = 15, class: className = 'aspect-video' } = A
 ---
 
 <div
-	class:list={['leaflet-mount overflow-hidden rounded-xl border border-border', className]}
+	class:list={['leaflet-mount overflow-hidden', className]}
 	data-lat={lat}
 	data-lng={lng}
 	data-label={label}
@@ -44,9 +44,9 @@ const { lat, lng, label = '', zoom = 15, class: className = 'aspect-video' } = A
 
 		const marker = L.circleMarker([lat, lng], {
 			radius: 10,
-			color: '#e11d48',
+			color: '#dc2b20',
 			weight: 3,
-			fillColor: '#e11d48',
+			fillColor: '#dc2b20',
 			fillOpacity: 1,
 		}).addTo(map);
 

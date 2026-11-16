@@ -1,32 +1,126 @@
 ---
-import PremiumAutoLayout from '@/layouts/premium/PremiumLayout.astro';
-import AutoServicesGrid from '@/components/premium/AutoServicesGrid';
+import PremiumLayout from '@/layouts/premium/PremiumLayout.astro';
+import PremiumPageHead from '@/components/premium/PremiumPageHead.astro';
+import PremiumPicture from '@/components/premium/PremiumPicture.astro';
+import PremiumCta from '@/components/premium/PremiumCta.astro';
+import { chargerPrestations } from '@/components/premium/prestations';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname);
-const basePath = Astro.url.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '';
+const prestations = await chargerPrestations();
+const basePath = '/demo-premium';
+const pad = (n: number) => String(n).padStart(2, '0');
+
+const compris = [
+	{ titre: 'Un devis écrit avant les travaux', texte: 'Ligne par ligne, pièces et main-d’œuvre séparées. Un dépassement de plus de 10 % demande un nouvel accord.' },
+	{ titre: 'Des pièces d’origine ou de qualité équivalente', texte: 'La référence et la marque de chaque pièce figurent sur la facture.' },
+	{ titre: 'Un essai routier après chaque réparation mécanique', texte: 'Sur un parcours de 8 km, avec relevé des codes défaut au retour.' },
+	{ titre: 'Les pièces usagées montrées à la restitution', texte: 'Vous pouvez les reprendre ; sinon elles partent au recyclage agréé.' },
+];
 ---
 
-<PremiumAutoLayout 
-	title="Catalogue des Services" 
-	description="L'arsenal mécanique complet pour votre véhicule. Découvrez nos prestations de pointe."
->
-	<section class="pt-32 pb-16 bg-stone-950 text-center">
-		<h1 class="text-4xl font-black text-white md:text-6xl uppercase tracking-tighter font-[var(--font-heading)]">
-			Catalogue des <span class="text-primary">Services</span>
-		</h1>
-		<p class="mt-6 max-w-2xl mx-auto text-stone-400 font-medium">
-			Du diagnostic électronique à la préparation esthétique complète. Choisissez l'excellence.
-		</p>
+<PremiumLayout title="Prestations et tarifs" description={`Tarifs de ${siteConfig.business.name} : diagnostic, bilan, mécanique, pneus, lavage et detailing. Prix TTC et durées annoncés.`}>
+	<PremiumPageHead
+		rubrique="Prestations"
+		lignes={['La carte', 'des tarifs']}
+		legende="Prix TTC, toutes marques"
+		reperes={[
+			{ label: 'Devis', valeur: 'Écrit, avant travaux' },
+			{ label: 'Garantie', valeur: '12 mois' },
+			{ label: 'Paiement', valeur: 'CB, espèces, virement' },
+			{ label: 'Prestations', valeur: `${prestations.length} au catalogue` },
+		]}
+	>
+		Durées et prix affichés ici sont ceux que vous retrouvez sur la facture. Pour une réparation dont
+		le coût dépend du diagnostic, le prix est annoncé après passage sur le pont, avant de commencer.
+	</PremiumPageHead>
+
+	<section class="pa-wrap pb-[clamp(64px,9vw,120px)]" aria-label="Liste des prestations">
+		<ol class="border-t border-[#33373c]" data-tarifs>
+			{prestations.map((p, i) => (
+				<li class="pa-tarif" data-tarif={i}>
+					<span class="pa-row__n">{pad(i + 1)}</span>
+					<div>
+						<h2 class="pa-tarif__nom">{p.nom}</h2>
+						<p class="pa-tarif__desc">{p.description}</p>
+					</div>
+					<div class="pa-cadre pa-tarif__img">
+						<PremiumPicture {...p.image} sizes="100vw" />
+					</div>
+					<div class="pa-tarif__chiffres">
+						<span class="pa-tech">Durée <b class="ml-2 text-[#ecebe6] normal-case tracking-normal">{p.duree}</b></span>
+						<b>{p.prix}</b>
+						<a href={p.id ? `${basePath}/reservation?service=${p.id}` : `${basePath}/reservation`} class="pa-presta__go" aria-label={`Réserver : ${p.nom}`}>
+							Réserver
+							<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+						</a>
+					</div>
+				</li>
+			))}
+		</ol>
+		<p class="pa-tech mt-6">Votre intervention n'est pas listée ? <a href={`${basePath}/contact`} class="pa-link ml-2 normal-case">Demander un devis</a></p>
 	</section>
 
-	<AutoServicesGrid basePath={basePath} client:load />
+	<!-- Aperçu photo qui suit le pointeur au survol d'une ligne (souris, bureau). -->
+	<div class="pa-apercu" data-apercu aria-hidden="true">
+		<div class="pa-apercu__in">
+			{prestations.map((p) => (
+				<PremiumPicture {...p.image} alt="" sizes="300px" />
+			))}
+		</div>
+	</div>
 
-	<section class="py-20 bg-stone-900 border-t border-stone-800 text-center px-6">
-		<h2 class="text-2xl font-bold text-white mb-4">Une demande sur-mesure ?</h2>
-		<p class="text-stone-400 mb-8 max-w-xl mx-auto">Préparation moteur, covering complet, reprogrammation... Nos experts sont à votre disposition pour vos projets spéciaux.</p>
-		<a href={`${basePath}/contact`} class="inline-flex items-center justify-center rounded-xl border-2 border-primary bg-transparent px-8 py-3 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-white uppercase tracking-wider">
-			Nous contacter pour un devis
-		</a>
+	<section class="pa-section pa-section--graphite" aria-labelledby="compris-titre">
+		<div class="pa-wrap pa-grid">
+			<p class="pa-num pa-col-num"><b>02</b> Compris</p>
+			<div class="pa-col-main">
+				<h2 id="compris-titre" class="pa-h2" data-lines>
+					<span class="pa-line"><span>Dans chaque</span></span>
+					<span class="pa-line"><span>intervention.</span></span>
+				</h2>
+				<ol class="pa-rows mt-10" data-reveal-group>
+					{compris.map((c, i) => (
+						<li class="pa-row pa-row--cols">
+							<span class="pa-row__n">{pad(i + 1)}</span>
+							<h3 class="pa-h3">{c.titre}</h3>
+							<p class="pa-text">{c.texte}</p>
+						</li>
+					))}
+				</ol>
+			</div>
+		</div>
 	</section>
-</PremiumAutoLayout>
+
+	<PremiumCta numero="03" lignes={['Le bon créneau,', 'en deux minutes.']} />
+</PremiumLayout>
+
+<script>
+	import { animate } from 'motion';
+	import { prefersReducedMotion } from '@/lib/motion/reveal';
+
+	const liste = document.querySelector<HTMLElement>('[data-tarifs]');
+	const apercu = document.querySelector<HTMLElement>('[data-apercu]');
+	const fin = window.matchMedia('(min-width: 992px) and (hover: hover) and (pointer: fine)');
+
+	if (liste && apercu && !prefersReducedMotion()) {
+		const images = apercu.querySelectorAll<HTMLElement>('picture');
+		let actif = -1;
+
+		const montrer = (i: number) => {
+			if (i === actif) return;
+			actif = i;
+			images.forEach((img, k) => img.classList.toggle('is-on', k === i));
+			apercu.classList.toggle('is-on', i >= 0);
+		};
+
+		liste.addEventListener('pointermove', (e) => {
+			if (!fin.matches) return;
+			const ligne = (e.target as HTMLElement).closest<HTMLElement>('[data-tarif]');
+			montrer(ligne ? Number(ligne.dataset.tarif) : -1);
+			// L'aperçu suit le pointeur avec un léger retard, décalé pour ne pas masquer le texte.
+			animate(apercu, { x: e.clientX + 32, y: e.clientY - 120 }, { duration: 0.5, ease: [0.22, 1, 0.36, 1] });
+		});
+		liste.addEventListener('pointerleave', () => montrer(-1));
+		window.addEventListener('scroll', () => montrer(-1), { passive: true });
+	}
+</script>

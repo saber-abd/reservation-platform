@@ -1,14 +1,13 @@
 ---
-import Layout from '@/layouts/premium/PremiumLayout.astro';
+import PremiumAuthShell from '@/components/premium/PremiumAuthShell.astro';
 import ResetPasswordForm from '@/components/premium/auth/PremiumResetPasswordForm';
 ---
 
-<Layout title="Réinitialiser le mot de passe" description="Choisissez un nouveau mot de passe." noindex>
-	<section class="mx-auto max-w-md px-6 py-20">
-		<h1 class="text-2xl font-bold text-stone-900">Nouveau mot de passe</h1>
-		<p class="mt-2 text-sm text-stone-500">Choisissez un nouveau mot de passe pour votre compte.</p>
-		<div class="mt-8">
-			<ResetPasswordForm basePath="/demo-premium" client:load />
-		</div>
-	</section>
-</Layout>
+<PremiumAuthShell
+	pageTitle="Nouveau mot de passe"
+	description="Choisissez un nouveau mot de passe."
+	titre="Nouveau mot de passe"
+	lead="Choisissez un nouveau mot de passe pour votre compte."
+>
+	<ResetPasswordForm basePath="/demo-premium" client:load />
+</PremiumAuthShell>

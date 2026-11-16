@@ -106,7 +106,7 @@ export default function CompleteProfileForm({ user, targetDemo, onCompleted }: C
 
 				<div>
 					<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1">
-						Prénom & Nom <span className="text-rose-600">*</span>
+						Prénom & Nom <span className="text-primary">*</span>
 					</label>
 					<div className="relative">
 						<User size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
@@ -139,7 +139,7 @@ export default function CompleteProfileForm({ user, targetDemo, onCompleted }: C
 
 				<div>
 					<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1">
-						Numéro de Téléphone <span className="text-rose-600">*</span>
+						Numéro de Téléphone <span className="text-primary">*</span>
 					</label>
 					<div className="relative">
 						<Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />

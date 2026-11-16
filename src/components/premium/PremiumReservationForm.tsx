@@ -215,7 +215,7 @@ export default function ReservationForm() {
 					<select
 						value={selectedServiceId}
 						onChange={(e) => setSelectedServiceId(e.target.value)}
-						className="w-full rounded-xl border border-border bg-stone-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600 transition-colors text-stone-900"
+						className="w-full rounded-xl border border-border bg-stone-50 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-colors text-stone-900"
 					>
 						<option value="" disabled>Sélectionnez une prestation...</option>
 						{services.map((service) => (
@@ -236,7 +236,7 @@ export default function ReservationForm() {
 				<div className="mt-3 flex flex-wrap items-end gap-3">
 					<div>
 						<label className="text-sm text-stone-700" htmlFor="date">
-							Date <span className="text-rose-600">*</span>
+							Date <span className="text-primary">*</span>
 						</label>
 						<input
 							id="date"
@@ -248,14 +248,14 @@ export default function ReservationForm() {
 								setSlots(null);
 								setSelectedSlot(null);
 							}}
-							className="mt-1 w-full rounded-lg border border-border bg-stone-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600 transition-colors"
+							className="mt-1 w-full rounded-lg border border-border bg-stone-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
 						/>
 					</div>
 					<button
 						type="button"
 						onClick={handleShowAvailabilities}
 						disabled={slotsLoading}
-						className="rounded-xl border border-rose-600 px-4 py-2 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-50 disabled:opacity-50"
+						className="rounded-xl border border-primary px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-[#f6e3e1] disabled:opacity-50"
 					>
 						{slotsLoading ? 'Chargement...' : 'Voir les disponibilités'}
 					</button>
@@ -273,8 +273,8 @@ export default function ReservationForm() {
 									slot.isBooked
 										? 'cursor-not-allowed border-border bg-stone-100 text-stone-400 line-through'
 										: selectedSlot?.start.getTime() === slot.start.getTime()
-											? 'border-rose-600 bg-rose-600 text-white shadow-md'
-											: 'border-border bg-stone-50 hover:bg-stone-100 hover:border-rose-300'
+											? 'border-primary bg-primary text-white'
+											: 'border-border bg-stone-50 hover:bg-stone-100 hover:border-[#e8a19b]'
 								}`}
 							>
 								{formatSlot(slot)}
@@ -295,11 +295,11 @@ export default function ReservationForm() {
 				<div className="mt-3 flex flex-col gap-4">
 					<div>
 						<label className="text-sm text-stone-700" htmlFor="clientName">
-							Nom complet <span className="text-rose-600">*</span>
+							Nom complet <span className="text-primary">*</span>
 						</label>
 						<input
 							id="clientName"
-							className="mt-1 w-full rounded-lg border border-border bg-stone-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600 transition-colors"
+							className="mt-1 w-full rounded-lg border border-border bg-stone-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
 							{...register('clientName')}
 							maxLength={MAX_NAME_LENGTH}
 						/>
@@ -307,12 +307,12 @@ export default function ReservationForm() {
 					</div>
 					<div>
 						<label className="text-sm text-stone-700" htmlFor="clientEmail">
-							Email <span className="text-rose-600">*</span>
+							Email <span className="text-primary">*</span>
 						</label>
 						<input
 							id="clientEmail"
 							type="email"
-							className="mt-1 w-full rounded-lg border border-border bg-stone-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600 transition-colors"
+							className="mt-1 w-full rounded-lg border border-border bg-stone-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
 							{...register('clientEmail')}
 						/>
 						{errors.clientEmail && <p className="mt-1 text-xs text-red-600">{errors.clientEmail.message}</p>}
@@ -323,7 +323,7 @@ export default function ReservationForm() {
 						</label>
 						<input
 							id="clientPhone"
-							className="mt-1 w-full rounded-lg border border-border bg-stone-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600 transition-colors"
+							className="mt-1 w-full rounded-lg border border-border bg-stone-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
 							{...register('clientPhone')}
 						/>
 					</div>
@@ -335,7 +335,7 @@ export default function ReservationForm() {
 			<button
 				type="submit"
 				disabled={!selectedService || !selectedSlot || submitting}
-				className="rounded-xl bg-rose-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+				className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#b92017] disabled:cursor-not-allowed disabled:opacity-50"
 			>
 				{submitting ? 'Confirmation en cours...' : 'Confirmer la réservation'}
 			</button>

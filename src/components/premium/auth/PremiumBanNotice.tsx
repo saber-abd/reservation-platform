@@ -9,7 +9,7 @@ interface Props {
 export default function PremiumBanNotice({ notice, basePath }: Props) {
 	const hasDetails = !!(notice.reason || notice.bannedAt || notice.bannedUntil);
 	return (
-		<div role="alert" className="overflow-hidden rounded-xl border border-primary/40 bg-stone-950 text-white shadow-[0_0_15px_rgba(255,50,50,0.25)]">
+		<div role="alert" className="overflow-hidden rounded-xl border border-primary/40 bg-stone-950 text-white ">
 			<div className="flex items-center gap-2 bg-primary px-4 py-2 text-xs font-black uppercase tracking-widest">
 				<ShieldAlert size={14} className="shrink-0" />
 				Compte suspendu

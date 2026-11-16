@@ -1,6 +1,8 @@
 ---
+// Layout du site public Premium (garage « Premium Auto ») : fond carbone, Archivo à largeur variable,
+// défilement lissé (Lenis) et animations Motion communes à toutes les pages (voir le script plus bas).
+import '@fontsource-variable/archivo/wdth.css';
 import '../../styles/premium.css';
-import 'aos/dist/aos.css';
 import PremiumHeader from '@/components/premium/PremiumHeader.astro';
 import PremiumFooter from '@/components/premium/PremiumFooter.astro';
 import CookieBanner from '@/components/shared/CookieBanner.astro';
@@ -16,17 +18,17 @@ interface Props {
 }
 
 const {
-	title = "Garage Premium Auto",
-	description = "Votre garage automobile de confiance pour l'entretien, le diagnostic et la réparation de votre véhicule.",
+	title = siteConfig.business.name,
+	description = siteConfig.business.description,
 	noindex = false,
 } = Astro.props;
 
-const pageTitle = `${title} — Expertise Automobile`;
+const pageTitle = `${title} — ${siteConfig.business.name}, ${siteConfig.business.activity.toLowerCase()}`;
 const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 ---
 
 <!doctype html>
-<html lang="fr" class="theme-premium">
+<html lang="fr" class="theme-premium site-premium">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -34,26 +36,79 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 		<link rel="canonical" href={canonicalURL} />
 		{noindex && <meta name="robots" content="noindex, nofollow" />}
 		<title>{pageTitle}</title>
-		<meta name="theme-color" content="#1a1c29" />
+		<meta name="theme-color" content="#121315" />
+		<script is:inline>document.documentElement.classList.add('js');</script>
 	</head>
-	<body class="flex min-h-screen flex-col bg-background text-foreground selection:bg-primary selection:text-white">
+	<body class="flex min-h-screen flex-col">
+		<a href="#contenu" class="pa-skip">Aller au contenu</a>
+		<div class="pa-progress" data-progress aria-hidden="true"></div>
 		<PremiumHeader />
-		<main class="flex-1 overflow-x-hidden">
+		<main id="contenu" class="flex-1 overflow-x-clip">
 			<slot />
 		</main>
 		<PremiumFooter />
-		<script>
-			import AOS from 'aos';
-
-			AOS.init({
-				disable: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-				duration: 600,
-				easing: 'ease-out',
-				once: true,
-				offset: 80,
-			});
-		</script>
 		<SmoothScroll />
 		<CookieBanner policyHref="/cookies" />
+		<script>
+			// Animations communes du site public (Motion, API vanilla).
+			import { animate, inView, scroll, stagger } from 'motion';
+			import { initReveal, prefersReducedMotion } from '@/lib/motion/reveal';
+
+			const reduit = prefersReducedMotion();
+			const ease = [0.22, 1, 0.36, 1] as const;
+
+			initReveal();
+
+			// Rideaux d'image (.pa-clip) : découverts à l'entrée dans l'écran.
+			document.querySelectorAll<HTMLElement>('.pa-clip').forEach((el) => {
+				if (reduit) el.classList.add('is-in');
+				else inView(el, () => { el.classList.add('is-in'); }, { amount: 0.15 });
+			});
+
+			// Titres découpés en lignes : chaque ligne monte depuis son masque, en cascade.
+			// Le titre du héros est pris en charge par AutoHero (au chargement, pas à l'entrée dans l'écran).
+			document.querySelectorAll<HTMLElement>('[data-lines]:not([data-lines="hero"])').forEach((titre) => {
+				const lignes = titre.querySelectorAll<HTMLElement>('.pa-line > span');
+				if (reduit) return;
+				inView(
+					titre,
+					() => {
+						animate(lignes, { transform: ['translateY(110%)', 'translateY(0%)'] }, { duration: 0.9, delay: stagger(0.09), ease });
+					},
+					{ amount: 0.3 },
+				);
+			});
+
+			if (!reduit) {
+				// Barre de progression de lecture.
+				const barre = document.querySelector<HTMLElement>('[data-progress]');
+				if (barre) scroll((p: number) => { barre.style.transform = `scaleX(${p})`; });
+
+				// Photos cadrées : légère parallaxe dans leur cadre.
+				document.querySelectorAll<HTMLElement>('.pa-cadre--parallaxe').forEach((cadre) => {
+					const img = cadre.querySelector<HTMLElement>('img');
+					if (!img) return;
+					scroll(
+						(p: number) => { img.style.transform = `translate3d(0, ${(0.5 - p) * 12}%, 0)`; },
+						{ target: cadre, offset: ['start end', 'end start'] },
+					);
+				});
+
+				// Boutons « magnétiques » : ils suivent un peu le pointeur (souris uniquement).
+				if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+					document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((el) => {
+						el.addEventListener('pointermove', (e) => {
+							const r = el.getBoundingClientRect();
+							const x = (e.clientX - r.left - r.width / 2) * 0.28;
+							const y = (e.clientY - r.top - r.height / 2) * 0.38;
+							animate(el, { x, y }, { duration: 0.35, ease });
+						});
+						el.addEventListener('pointerleave', () => {
+							animate(el, { x: 0, y: 0 }, { type: 'spring', stiffness: 260, damping: 14 });
+						});
+					});
+				}
+			}
+		</script>
 	</body>
 </html>
