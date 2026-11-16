@@ -94,7 +94,15 @@ Polices (Fontsource, auto-hébergées) : Standard `Instrument Sans Variable` ; P
 
 ## Reprendre
 
-**Prochaine étape (au 16/11)** : les quatre chantiers graphiques sont terminés, vérifiés et commités. Le propriétaire regarde la page commerciale (http://localhost:4321/). Attendre son retour, puis enchaîner les étapes 3 à 6 de la liste ci-dessous (nettoyage des dépendances et polices, `npm run build`, `npm test` complet, captures de galerie, factorisation, `CLAUDE.md` par démo, compte rendu).
+**Retour du propriétaire (16/11) :** il aime beaucoup les trois démos. La page commerciale ressemble trop à Diamant :
+- **Couleurs** : revenir aux tons d'avant la refonte (`main`, commit `0a4c503` : fond blanc / pierre, encre `stone-900`, section sombre `stone-950`, couleurs de formule sky / rose / violet), sur toutes les pages commerciales.
+- **Accueil** : garder la structure actuelle (il la préfère), mais avec ces couleurs et une présentation un peu différente, pour qu'elle ne rappelle plus Diamant.
+- **Autres pages** (galeries, devis, contact, notre-histoire, légales, authentification) : revenir à leur structure d'avant (celle de `0a4c503`), en remplaçant seulement AOS / framer-motion par les nouveaux outils (CSS, `data-reveal`, Motion, GSAP) et les polices sous licence par Bricolage Grotesque / Geist.
+- **À garder** : la nouvelle barre de menu en pilule et les animations.
+- **Bugs à corriger** : le trait de la méthode (« Comment se passe un projet ») s'affiche d'un coup sans animation ; un clic sur les crans 1 / 2 / 3 des formules avance un peu le défilement puis revient brusquement en arrière, sans changer l'affichage. Revérifier les autres défauts au défilement.
+- **Ensuite (nouveau chantier demandé)** : refonte des espaces professionnels (dashboards) et des espaces clients des démos avec les nouveaux outils. Attendre la fin des corrections commerciales.
+
+**Prochaine étape** : corrections de la page commerciale selon ce retour (agent en cours, commits `wip(commercial)`), vérification, puis présentation au propriétaire ; ensuite dashboards et espaces clients ; puis les étapes 3 à 6 de la liste ci-dessous.
 
 Procédé : relancer un agent avec `brief-commun.md`, la direction du chantier, les leçons ci-dessous et l'autorisation de commiter en `wip(<chantier>)` à chaque étape (ça a permis de reprendre Diamant sans rien perdre). Leçons à transmettre : classes maison dans `@layer components` ; pas d'enfant qui déborde dans un `data-reveal="clip"` ; un `SOURCES.md` des images par démo ; ne pas lire `window`/`localStorage` au rendu d'un composant React.
 
