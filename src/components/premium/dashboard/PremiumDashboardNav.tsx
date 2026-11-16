@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { signOut } from '@/lib/auth';
-import { LayoutDashboard, Scissors, Calendar, Users, BarChart3, UserCircle, LogOut } from 'lucide-react';
+import { LayoutDashboard, Wrench, Calendar, Users, BarChart3, UserCircle, LogOut } from 'lucide-react';
 
+// Libellés alignés sur les titres des pages (l'ancien « Arsenal » / « Pilotes » ne disait pas où l'on allait).
 const links = [
-	{ label: "Arsenal", href: '/dashboard', icon: <LayoutDashboard size={16} /> },
-	{ label: 'Services', href: '/dashboard/services', icon: <Scissors size={16} /> },
+	{ label: 'Rendez-vous', href: '/dashboard', icon: <LayoutDashboard size={16} /> },
+	{ label: 'Prestations', href: '/dashboard/services', icon: <Wrench size={16} /> },
 	{ label: 'Disponibilités', href: '/dashboard/disponibilites', icon: <Calendar size={16} /> },
-	{ label: 'Pilotes', href: '/dashboard/clients', icon: <Users size={16} /> },
+	{ label: 'Clients', href: '/dashboard/clients', icon: <Users size={16} /> },
 	{ label: 'Statistiques', href: '/dashboard/statistiques', icon: <BarChart3 size={16} /> },
-	{ label: 'Mécanicien', href: '/dashboard/profil', icon: <UserCircle size={16} /> },
+	{ label: 'Profil', href: '/dashboard/profil', icon: <UserCircle size={16} /> },
 ];
 
 export default function PremiumDashboardNav({ basePath = '' }: { basePath?: string }) {

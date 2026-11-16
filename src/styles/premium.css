@@ -521,6 +521,10 @@
 .pa-presta__go svg { width: 15px; height: 15px; transition: transform 0.35s var(--pa-ease); }
 .pa-presta__go:hover svg { transform: translateX(4px); }
 .pa-presta--fin { justify-content: space-between; background: var(--pa-carbone); }
+/* Grille (tablette, mouvement réduit) : la carte « sur devis » occupe les colonnes restantes de sa
+ * rangée au lieu de laisser des cases vides (--fin2 / --fin3 posés par AutoServicesGrid). */
+@media (min-width: 700px) { .pa-presta--fin { grid-column: var(--fin2, auto); } }
+@media (min-width: 1100px) { .pa-presta--fin { grid-column: var(--fin3, auto); } }
 .pa-presta--fin h3 { font-size: clamp(1.5rem, 2.2vw, 2.2rem); }
 .pa-band__pied { padding-block: 22px clamp(48px, 6vw, 80px); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
 
@@ -557,7 +561,9 @@
 /* ---------- Images cadrées ---------- */
 .pa-cadre { position: relative; overflow: hidden; background: var(--pa-graphite-2); }
 .pa-cadre img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.pa-cadre--parallaxe img { height: 116%; margin-top: -8%; will-change: transform; }
+/* Image plus haute que son cadre (8 % de marge en haut et en bas, en pourcentage de la hauteur :
+ * un margin-top en % se calculerait sur la largeur et laisserait une bande vide sur les cadres larges). */
+.pa-cadre--parallaxe img { position: absolute; left: 0; top: -8%; height: 116%; will-change: transform; }
 /* Rideau d'image : l'enveloppe est observée (script du layout), l'intérieur est rogné puis découvert.
  * (data-reveal="clip" du socle ne se déclenche pas : un élément rogné à 100 % n'intersecte jamais.) */
 .js .pa-clip__in { clip-path: inset(0 0 100% 0); transition: clip-path 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0.15s; }

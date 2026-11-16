@@ -57,7 +57,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 						</div>
 					</li>
 				))}
-				<li class="pa-presta pa-presta--fin">
+				<li class="pa-presta pa-presta--fin" style={`--fin2: span ${prestations.length % 2 === 0 ? 2 : 1}; --fin3: span ${3 - (prestations.length % 3)};`}>
 					<div class="pa-presta__haut">
 						<span class="pa-tech pa-tech--clair">{pad(total)}</span>
 						<span class="pa-tech">Sur devis</span>
@@ -103,10 +103,12 @@ const pad = (n: number) => String(n).padStart(2, '0');
 		let distance = 0;
 
 		const mesurer = () => {
-			// Bord droit de la dernière carte (scrollWidth compterait un éventuel débordement de texte).
+			// Bord droit de la dernière carte (scrollWidth compterait un éventuel débordement de texte),
+			// plus la même marge qu'à gauche pour que la bande ne finisse pas collée au bord de l'écran.
 			const derniere = piste.lastElementChild as HTMLElement | null;
 			const largeur = derniere ? derniere.offsetLeft + derniere.offsetWidth : piste.scrollWidth;
-			distance = mq.matches ? Math.max(0, largeur - viewport.clientWidth) : 0;
+			const marge = parseFloat(getComputedStyle(piste).paddingLeft) || 0;
+			distance = mq.matches ? Math.max(0, largeur + marge - viewport.clientWidth) : 0;
 			section.style.setProperty('--pa-band-dist', `${distance}px`);
 			if (!mq.matches) piste.style.transform = '';
 		};
