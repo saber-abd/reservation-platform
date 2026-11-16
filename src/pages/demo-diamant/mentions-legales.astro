@@ -1,38 +1,32 @@
 ---
-import DiamantLayout from '@/layouts/diamant/DiamantLayout.astro';
+import DiamantLegalPage from '@/components/diamant/DiamantLegalPage.astro';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
+const { business } = siteConfig;
 ---
 
-<DiamantLayout title="Mentions Légales" description="Mentions légales de la plateforme.">
-	<section class="pt-28 pb-12 bg-[#fff7f1] border-b border-stone-100">
-		<div class="mx-auto max-w-4xl px-6 text-center" data-aos="fade-up">
-			<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-3">Informations</p>
-			<h1 class="text-3xl md:text-4xl font-black text-stone-900 mb-4 tracking-tight">Mentions Légales</h1>
-			<p class="text-lg text-stone-500">Cadre juridique et éditorial de la plateforme.</p>
+<DiamantLegalPage
+	pageTitle="Mentions légales"
+	description={`Mentions légales du site de ${business.name}.`}
+	titre="Mentions légales"
+	lead="Qui édite ce site, où il est hébergé, et à qui écrire."
+>
+	<section>
+		<h2>Éditeur du site</h2>
+		<div>
+			<p><strong>Nom :</strong> {business.name}</p>
+			<p><strong>Adresse :</strong> {business.address}</p>
+			<p><strong>Téléphone :</strong> {business.phone}</p>
+			<p><strong>Email :</strong> {business.email}</p>
 		</div>
 	</section>
-
-	<section class="mx-auto max-w-4xl px-6 py-16 relative z-10" data-aos="fade-up" data-aos-delay="100">
-		<div class="rounded-2xl border border-stone-200 bg-white p-8 md:p-12 shadow-sm card-hover">
-			<div class="space-y-8 text-stone-600 leading-relaxed">
-				<div>
-					<h2 class="text-xl font-bold text-stone-900 mb-3">Éditeur du site</h2>
-					<p><strong class="text-stone-800">Nom :</strong> {siteConfig.business.name}</p>
-					<p><strong class="text-stone-800">Adresse :</strong> {siteConfig.business.address}</p>
-					<p><strong class="text-stone-800">Téléphone :</strong> {siteConfig.business.phone}</p>
-					<p><strong class="text-stone-800">Email :</strong> {siteConfig.business.email}</p>
-				</div>
-				<div class="border-t border-stone-100 pt-6">
-					<h2 class="text-xl font-bold text-stone-900 mb-3">Hébergement</h2>
-					<p>Le site est hébergé par un prestataire professionnel garantissant un haut niveau de sécurité et de disponibilité.</p>
-				</div>
-				<div class="border-t border-stone-100 pt-6">
-					<h2 class="text-xl font-bold text-stone-900 mb-3">Propriété Intellectuelle</h2>
-					<p>L'ensemble de ce site relève des législations française et internationale sur le droit d'auteur et la propriété intellectuelle. Tous les droits de reproduction sont réservés.</p>
-				</div>
-			</div>
-		</div>
+	<section>
+		<h2>Hébergement</h2>
+		<p>Le site est hébergé par un prestataire professionnel qui en assure la disponibilité et la sécurité.</p>
 	</section>
-</DiamantLayout>
+	<section>
+		<h2>Propriété intellectuelle</h2>
+		<p>Les textes, photos et éléments graphiques de ce site relèvent du droit d'auteur. Toute reproduction demande l'accord préalable de l'éditeur.</p>
+	</section>
+</DiamantLegalPage>

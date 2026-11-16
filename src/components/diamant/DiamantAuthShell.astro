@@ -1,0 +1,56 @@
+---
+// Gabarit des pages de compte (connexion, inscription, mot de passe) : photo à gauche (bureau)
+// avec ce que contient l'espace client, formulaire sur un panneau papier à droite.
+import DiamantLayout from '@/layouts/diamant/DiamantLayout.astro';
+import DiamantPicture from '@/components/diamant/DiamantPicture.astro';
+import { images } from '@/components/diamant/images';
+
+interface Props {
+	pageTitle: string;
+	description: string;
+	titre: string;
+	lead: string;
+}
+
+const { pageTitle, description, titre, lead } = Astro.props;
+
+const contenu = [
+	'Vos rendez-vous à venir, à déplacer ou annuler',
+	'L’historique des prestations et des couleurs utilisées',
+	'Vos points de fidélité',
+	'Les messages échangés avec le salon',
+];
+---
+
+<DiamantLayout title={pageTitle} description={description} noindex>
+	<section class="dia-compte">
+		<div class="dia-compte__visuel" aria-hidden="true">
+			<DiamantPicture {...images.coupe} alt="" sizes="45vw" prioritaire />
+			<div class="dia-compte__texte">
+				<p class="dia-num"><b>Espace client</b></p>
+				<ul class="mt-6 border-t border-[#f1e9dd]/20">
+					{contenu.map((c, i) => (
+						<li class="flex gap-4 border-b border-[#f1e9dd]/20 py-3">
+							<span class="font-heading italic text-[#e08a5f]">{String(i + 1).padStart(2, '0')}</span>
+							<span>{c}</span>
+						</li>
+					))}
+				</ul>
+			</div>
+		</div>
+
+		<div class="dia-compte__form">
+			<div>
+				<h1 class="dia-h2" data-split="load">{titre}</h1>
+				<p class="dia-texte mt-4" data-reveal="fade">{lead}</p>
+				<div class="dia-panneau mt-8" data-reveal data-reveal-delay="100">
+					<slot />
+				</div>
+				<div class="mt-6 text-[0.9375rem] text-[#4a3f37]">
+					<slot name="after" />
+				</div>
+				<slot name="visite" />
+			</div>
+		</div>
+	</section>
+</DiamantLayout>

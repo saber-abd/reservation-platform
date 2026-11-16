@@ -1,0 +1,25 @@
+---
+// Appel final des pages intérieures, sur fond sombre : une phrase, deux actions.
+import { getSiteConfig } from '@/config/site';
+
+const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
+const tel = siteConfig.business.phone.replace(/[^\d+]/g, '');
+---
+
+<section class="dia-sombre dia-section" aria-labelledby="cta-titre">
+	<div class="dia-wrap dia-grille items-end">
+		<h2 id="cta-titre" class="dia-h1 dia-col-texte" data-split>
+			Un créneau libre <em>cette semaine&nbsp;?</em>
+		</h2>
+		<div class="dia-col-d lg:col-start-9" data-reveal>
+			<p class="dia-lead">Les disponibilités sont à jour en ligne. Pour une question avant de réserver, appelez le salon.</p>
+			<div class="mt-8 flex flex-wrap gap-3">
+				<a href="/demo-diamant/reservation" class="dia-btn">
+					Réserver
+					<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+				</a>
+				<a href={`tel:${tel}`} class="dia-btn dia-btn--ligne dia-chiffre">{siteConfig.business.phone}</a>
+			</div>
+		</div>
+	</div>
+</section>

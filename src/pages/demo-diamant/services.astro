@@ -1,34 +1,45 @@
 ---
+// Prestations et tarifs : la carte complète en colonne collante (même composant que l'accueil,
+// titre en h1), puis les informations pratiques et l'appel final.
 import DiamantLayout from '@/layouts/diamant/DiamantLayout.astro';
-import ServicesList from '@/components/diamant/DiamantServicesList';
+import DiamantPrestations from '@/components/diamant/DiamantPrestations.astro';
+import DiamantCta from '@/components/diamant/DiamantCta.astro';
+import { chargerPrestations } from '@/components/diamant/prestations';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
+const prestations = await chargerPrestations();
+
+const pratique = [
+	{ titre: 'Le prix est annoncé avant de commencer', texte: 'Au diagnostic, on confirme la prestation et son prix. Un supplément (cheveux très longs, double application de couleur) n’est jamais ajouté sans votre accord.' },
+	{ titre: 'Annulation gratuite jusqu’à 24 h avant', texte: 'Depuis votre espace client ou par téléphone. Passé ce délai, prévenez-nous dès que possible : le créneau peut encore servir.' },
+	{ titre: 'Paiement au salon', texte: 'Carte bancaire, espèces ou paiement sans contact, après la prestation. Rien n’est prélevé à la réservation.' },
+	{ titre: 'Première couleur : test de tolérance', texte: 'Pour une première coloration chez nous, un test est fait 48 h avant, lors d’un court passage au salon.' },
+];
 ---
 
-<DiamantLayout title="Prestations" description={`Découvrez les prestations proposées par ${siteConfig.business.name}.`}>
-	<!-- Hero -->
-	<section class="pt-28 pb-12 bg-[#fff7f1] border-b border-stone-100">
-		<div class="mx-auto max-w-4xl px-6 text-center" data-aos="fade-up">
-			<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-3">Nos Prestations</p>
-			<h1 class="text-3xl md:text-4xl font-black text-stone-900 mb-4 tracking-tight">Services d'exception</h1>
-			<p class="text-lg text-stone-500">
-				Un aperçu de nos services. Contactez-nous pour toute demande sur-mesure.
-			</p>
+<DiamantLayout title="Prestations et tarifs" description={`Tarifs de ${siteConfig.business.name} : coupes, couleur, balayage, soins, coiffage. Durées et prix affichés.`}>
+	<div class="pt-[calc(var(--dia-entete)+8px)]">
+		<DiamantPrestations prestations={prestations} titreH1 avecLienCarte={false} numero="01" />
+	</div>
+
+	<section class="dia-section border-t border-[#d9cfc1]" aria-labelledby="pratique-titre">
+		<div class="dia-wrap dia-grille">
+			<div class="dia-col-g">
+				<p class="dia-num"><b>02</b> Bon à savoir</p>
+				<h2 id="pratique-titre" class="dia-h2 mt-6" data-split>Avant <em>de réserver.</em></h2>
+			</div>
+			<ol class="dia-liste dia-col-d" data-reveal-group>
+				{pratique.map((p, i) => (
+					<li>
+						<span class="dia-liste__n">{String(i + 1).padStart(2, '0')}</span>
+						<h3 class="dia-liste__titre">{p.titre}</h3>
+						<p class="dia-liste__texte">{p.texte}</p>
+					</li>
+				))}
+			</ol>
 		</div>
 	</section>
 
-	<!-- Liste des services -->
-	<section class="section-fade mx-auto max-w-6xl px-6 py-16" data-aos="fade-up" data-aos-delay="100">
-		<ServicesList basePath="/demo-diamant" client:load />
-
-		<!-- CTA -->
-		<div class="section-fade mt-20 rounded-2xl bg-deep-teal-50 border border-deep-teal-100 p-10 text-center" data-aos="fade-up" data-aos-delay="150">
-			<h2 class="text-2xl font-bold text-stone-900 mb-4">Une demande sur-mesure ?</h2>
-			<p class="text-stone-600 text-lg mb-8">Privatisation du salon, événements spéciaux ou demandes particulières. Nous nous adaptons à vos exigences.</p>
-			<a href="/demo-diamant/contact" class="inline-flex items-center justify-center px-8 py-3 rounded-full bg-deep-teal-500 text-white font-bold text-sm hover:bg-deep-teal-400 transition-colors uppercase tracking-widest">
-				Nous contacter
-			</a>
-		</div>
-	</section>
+	<DiamantCta />
 </DiamantLayout>

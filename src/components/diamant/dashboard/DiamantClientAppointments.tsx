@@ -89,11 +89,11 @@ export default function DiamantClientAppointments() {
 			<div className="bg-white rounded-xl border border-stone-200 p-6 mb-6 relative z-10 shadow-sm">
 				<div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
 					<div>
-						<h3 className="text-2xl font-bold text-stone-900 mb-2 font-coolvetica">{appt.services?.name || 'Prestation sur-mesure'}</h3>
+						<h3 className="text-2xl font-bold text-stone-900 mb-2 font-heading">{appt.services?.name || 'Prestation sur-mesure'}</h3>
 						<p className="text-jasmine-700 font-medium">Avec {appt.professionals?.business_name}</p>
 					</div>
 					<div className="text-left md:text-right">
-						<p className="text-3xl font-black text-stone-900 font-coolvetica">{timeString}</p>
+						<p className="text-3xl font-black text-stone-900 font-heading">{timeString}</p>
 						<p className="text-stone-500 uppercase tracking-widest text-sm font-bold">{dateString}</p>
 					</div>
 				</div>

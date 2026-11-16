@@ -1,36 +1,27 @@
 ---
-import DiamantLayout from '@/layouts/diamant/DiamantLayout.astro';
+import DiamantLegalPage from '@/components/diamant/DiamantLegalPage.astro';
 ---
 
-<DiamantLayout title="Politique de Confidentialité" description="Politique de confidentialité de la plateforme.">
-	<section class="pt-28 pb-12 bg-[#fff7f1] border-b border-stone-100">
-		<div class="mx-auto max-w-4xl px-6 text-center" data-aos="fade-up">
-			<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-3">Protection</p>
-			<h1 class="text-3xl md:text-4xl font-black text-stone-900 mb-4 tracking-tight">Politique de Confidentialité</h1>
-			<p class="text-lg text-stone-500">Protection de vos données personnelles et respect de votre vie privée.</p>
-		</div>
+<DiamantLegalPage
+	pageTitle="Politique de confidentialité"
+	description="Données personnelles collectées par le site et vos droits."
+	titre="Confidentialité"
+	lead="Les données que le salon conserve, pourquoi, et comment les faire corriger ou supprimer."
+>
+	<section>
+		<h2>1. Données collectées</h2>
+		<p>Nous collectons les données nécessaires à la gestion de vos rendez-vous et de votre compte : nom, prénom, adresse email, numéro de téléphone.</p>
 	</section>
-
-	<section class="mx-auto max-w-4xl px-6 py-16 relative z-10" data-aos="fade-up" data-aos-delay="100">
-		<div class="rounded-2xl border border-stone-200 bg-white p-8 md:p-12 shadow-sm card-hover">
-			<div class="space-y-8 text-stone-600 leading-relaxed">
-				<div>
-					<h2 class="text-xl font-bold text-stone-900 mb-3">1. Collecte des données</h2>
-					<p>Nous collectons les données nécessaires à la gestion de vos réservations et de votre profil utilisateur. Ces données incluent : nom, prénom, adresse email, numéro de téléphone.</p>
-				</div>
-				<div class="border-t border-stone-100 pt-6">
-					<h2 class="text-xl font-bold text-stone-900 mb-3">2. Utilisation des données</h2>
-					<p>Vos données sont utilisées exclusivement dans le cadre de notre service de réservation et pour vous envoyer des notifications liées à vos rendez-vous.</p>
-				</div>
-				<div class="border-t border-stone-100 pt-6">
-					<h2 class="text-xl font-bold text-stone-900 mb-3">3. Protection des données</h2>
-					<p>Nous mettons en œuvre toutes les mesures de sécurité nécessaires pour protéger vos données personnelles contre tout accès non autorisé.</p>
-				</div>
-				<div class="border-t border-stone-100 pt-6">
-					<h2 class="text-xl font-bold text-stone-900 mb-3">4. Vos droits</h2>
-					<p>Conformément à la réglementation applicable (RGPD), vous disposez d'un droit d'accès, de rectification, d'effacement de vos données personnelles.</p>
-				</div>
-			</div>
-		</div>
+	<section>
+		<h2>2. Utilisation</h2>
+		<p>Ces données servent uniquement à la réservation et à l'envoi des confirmations et rappels liés à vos rendez-vous.</p>
 	</section>
-</DiamantLayout>
+	<section>
+		<h2>3. Protection</h2>
+		<p>Les accès aux données sont limités aux personnes du salon qui en ont besoin et protégés contre tout accès non autorisé.</p>
+	</section>
+	<section>
+		<h2>4. Vos droits</h2>
+		<p>Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et d'effacement de vos données. Écrivez au salon pour l'exercer.</p>
+	</section>
+</DiamantLegalPage>

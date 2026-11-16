@@ -1,6 +1,11 @@
 ---
+// Layout de l'espace pro et de l'espace client Diamant. Il reprend les polices (Fraunces, Hanken Grotesk)
+// et la palette du site public ; la logique (garde de bannissement, nom du salon, tiroir mobile) est inchangée.
+import '@fontsource-variable/fraunces/opsz.css';
+import '@fontsource-variable/fraunces/opsz-italic.css';
+import '@fontsource-variable/hanken-grotesk/index.css';
 import '../../styles/diamant.css';
-import { Scissors, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { getSiteConfig } from '@/config/site';
 
 import DiamantClientBanGuard from '@/components/diamant/dashboard/DiamantClientBanGuard';
@@ -11,7 +16,7 @@ interface Props {
 	title?: string;
 }
 
-const { title = 'Espace Prestige' } = Astro.props;
+const { title = 'Espace' } = Astro.props;
 
 const currentPath = Astro.url.pathname;
 const basePathMatch = currentPath.match(/^\/(demo-[^/]+)/);
@@ -25,8 +30,8 @@ const isClientSpace = currentPath.includes('/espace-client');
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="robots" content="noindex, nofollow" />
-		<title>{title} — Prestige Diamant</title>
-		<meta name="theme-color" content="#fff7f1" />
+		<title>{title} — {siteConfig.business.name}</title>
+		<meta name="theme-color" content="#f5efe6" />
 		<script is:inline>
 			function syncDiamantBusinessName() {
 				try {
@@ -79,23 +84,20 @@ const isClientSpace = currentPath.includes('/espace-client');
 			} catch (e) {}
 		</script>
 	</head>
-	<body class="bg-stone-50 text-stone-800 overflow-hidden font-coolvetica">
+	<body class="bg-[#f5efe6] text-stone-800 overflow-hidden">
 		<div class="flex h-screen relative">
 			{/* Sidebar */}
-			<aside id="dash-drawer" data-open="false" class="dash-drawer w-64 flex-shrink-0 border-r border-stone-200 bg-white flex flex-col shadow-sm z-10 relative" aria-label="Navigation de l’espace">
-				<div class="p-5 border-b border-stone-100 flex items-center gap-3">
+			<aside id="dash-drawer" data-open="false" class="dash-drawer w-64 flex-shrink-0 border-r border-[#e2d8cb] bg-[#fbf8f3] flex flex-col z-10 relative" aria-label="Navigation de l’espace">
+				<div class="p-5 border-b border-[#e2d8cb] flex items-center gap-3">
 					<a href={`${basePath}/`} aria-label="Accueil" class="flex items-center gap-3 group">
-						<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-deep-teal-400 to-deep-teal-600 text-white transition-transform group-hover:scale-105">
-							<Scissors size={18} />
-						</span>
-						<span class="text-base font-bold tracking-widest text-stone-800 uppercase" data-diamant-business-name>{siteConfig.business.name}</span>
+						<span class="font-heading text-[1.5rem] leading-none tracking-[-0.02em] text-[#1f1813] transition-colors group-hover:text-[#a84b25]" data-diamant-business-name>{siteConfig.business.name}</span>
 					</a>
 				</div>
 				<div class="flex-1 overflow-y-auto p-4">
 					<slot name="sidebar" />
 				</div>
-				<div class="p-4 border-t border-stone-100">
-					<a href={`${basePath}/`} class="flex items-center justify-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-stone-500 transition-colors hover:border-deep-teal-300 hover:text-deep-teal-600 hover:bg-deep-teal-50">
+				<div class="p-4 border-t border-[#e2d8cb]">
+					<a href={`${basePath}/`} class="flex items-center justify-center gap-2 rounded-full border border-[#d9cfc1] px-4 py-2.5 text-sm font-semibold text-[#4a3f37] transition-colors hover:border-[#1f1813] hover:text-[#1f1813]">
 						<ArrowLeft size={15} />
 						Retour au site
 					</a>
@@ -103,14 +105,11 @@ const isClientSpace = currentPath.includes('/espace-client');
 			</aside>
 
 			{/* Main Content */}
-			<main class="flex-1 overflow-y-auto bg-stone-50 relative z-10">
+			<main class="flex-1 overflow-y-auto bg-[#f5efe6] relative z-10">
 				{/* Mobile Header */}
-				<header class="md:hidden sticky top-0 z-50 border-b border-stone-200 bg-white px-6 py-4 flex items-center justify-between shadow-sm">
-					<a href={`${basePath}/`} aria-label="Accueil Prestige" class="flex items-center gap-3">
-						<span class="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-deep-teal-400 to-deep-teal-600 text-white">
-							<Scissors size={16} />
-						</span>
-						<span class="text-base font-bold tracking-widest text-stone-800 uppercase" data-diamant-business-name>{siteConfig.business.name}</span>
+				<header class="md:hidden sticky top-0 z-50 border-b border-[#e2d8cb] bg-[#fbf8f3] px-6 py-4 flex items-center justify-between">
+					<a href={`${basePath}/`} aria-label="Retour au site" class="flex items-center gap-3">
+						<span class="font-heading text-[1.35rem] leading-none tracking-[-0.02em] text-[#1f1813]" data-diamant-business-name>{siteConfig.business.name}</span>
 					</a>
 					<button id="dash-menu-btn" type="button" class="dash-burger text-stone-800" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="dash-drawer">
 						<span></span><span></span><span></span>
@@ -152,7 +151,7 @@ const isClientSpace = currentPath.includes('/espace-client');
 			position: fixed;
 			inset: 0;
 			z-index: 55;
-			background: rgb(12 10 9 / 0.5);
+			background: rgb(26 20 17 / 0.5);
 			opacity: 0;
 			visibility: hidden;
 			transition: opacity 0.3s ease, visibility 0s linear 0.3s;

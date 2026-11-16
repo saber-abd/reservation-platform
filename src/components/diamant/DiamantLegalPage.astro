@@ -1,0 +1,28 @@
+---
+// Gabarit des pages légales : en-tête de page, puis sections à filets (titre à gauche, texte à droite).
+import DiamantLayout from '@/layouts/diamant/DiamantLayout.astro';
+import DiamantPageHead from '@/components/diamant/DiamantPageHead.astro';
+
+interface Props {
+	pageTitle: string;
+	description: string;
+	titre: string;
+	lead: string;
+	miseAJour?: string;
+}
+
+const { pageTitle, description, titre, lead, miseAJour = 'novembre 2026' } = Astro.props;
+---
+
+<DiamantLayout title={pageTitle} description={description}>
+	<DiamantPageHead rubrique="Informations légales">
+		<Fragment slot="titre">{titre}</Fragment>
+		{lead}
+	</DiamantPageHead>
+	<div class="dia-wrap pb-[clamp(80px,10vw,140px)]">
+		<div class="dia-legal" data-reveal>
+			<slot />
+		</div>
+		<p class="dia-petit mt-8">Dernière mise à jour : {miseAJour}.</p>
+	</div>
+</DiamantLayout>

@@ -222,7 +222,7 @@ export default function DiamantPerformancePanel() {
 						</span>
 					</div>
 					<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Chiffre d'Affaires</p>
-					<p className="text-2xl font-black text-stone-800 font-coolvetica">
+					<p className="text-2xl font-black text-stone-800 font-heading">
 						{formatEuros(totalCa)}
 					</p>
 				</div>
@@ -238,7 +238,7 @@ export default function DiamantPerformancePanel() {
 						</span>
 					</div>
 					<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Rendez-vous réalisés</p>
-					<p className="text-2xl font-black text-stone-800 font-coolvetica">{rdvCount}</p>
+					<p className="text-2xl font-black text-stone-800 font-heading">{rdvCount}</p>
 				</div>
 
 				{/* Nouveaux Clients (Cliquable !) */}
@@ -256,7 +256,7 @@ export default function DiamantPerformancePanel() {
 						</span>
 					</div>
 					<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Nouveaux Clients</p>
-					<p className="text-2xl font-black text-stone-800 font-coolvetica">{newClientsCount}</p>
+					<p className="text-2xl font-black text-stone-800 font-heading">{newClientsCount}</p>
 				</button>
 
 				{/* Panier Moyen */}
@@ -270,7 +270,7 @@ export default function DiamantPerformancePanel() {
 						</span>
 					</div>
 					<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Panier Moyen</p>
-					<p className="text-2xl font-black text-stone-800 font-coolvetica">
+					<p className="text-2xl font-black text-stone-800 font-heading">
 						{formatEuros(panierMoyen)}
 					</p>
 				</div>
@@ -280,10 +280,10 @@ export default function DiamantPerformancePanel() {
 			<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
 				<div className="flex items-center justify-between mb-6">
 					<div>
-						<h2 className="text-base font-bold text-stone-800 font-coolvetica">Évolution du Chiffre d'Affaires</h2>
+						<h2 className="text-base font-bold text-stone-800 font-heading">Évolution du Chiffre d'Affaires</h2>
 						<p className="text-xs text-stone-400 mt-0.5">Historique des recettes sur : {getRangeLabel(range)}</p>
 					</div>
-					<span className="text-xs font-bold text-deep-teal-600 bg-deep-teal-50 border border-deep-teal-100 px-3 py-1 rounded-full uppercase tracking-wider font-coolvetica">
+					<span className="text-xs font-bold text-deep-teal-600 bg-deep-teal-50 border border-deep-teal-100 px-3 py-1 rounded-full uppercase tracking-wider font-heading">
 						{appointments.length} prestation{appointments.length > 1 ? 's' : ''}
 					</span>
 				</div>
@@ -301,7 +301,7 @@ export default function DiamantPerformancePanel() {
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 				{/* Top prestations */}
 				<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-					<h2 className="text-base font-bold text-stone-800 mb-6 font-coolvetica">Top Prestations ({getRangeLabel(range)})</h2>
+					<h2 className="text-base font-bold text-stone-800 mb-6 font-heading">Top Prestations ({getRangeLabel(range)})</h2>
 					<div className="space-y-5">
 						{topServices.length === 0 ? (
 							<p className="text-sm text-stone-400 py-6 text-center">Aucune prestation sur la période</p>
@@ -311,8 +311,8 @@ export default function DiamantPerformancePanel() {
 									<div className="flex items-center justify-between mb-2">
 										<span className="text-stone-700 text-sm font-medium">{svc.name} ({svc.count}x)</span>
 										<div className="text-right">
-											<span className="text-deep-teal-600 font-bold text-sm font-coolvetica">{svc.percentage}%</span>
-											<span className="text-[11px] text-stone-400 ml-2 font-medium font-coolvetica">({formatEuros(svc.ca)})</span>
+											<span className="text-deep-teal-600 font-bold text-sm font-heading">{svc.percentage}%</span>
+											<span className="text-[11px] text-stone-400 ml-2 font-medium font-heading">({formatEuros(svc.ca)})</span>
 										</div>
 									</div>
 									<div className="w-full bg-stone-100 rounded-full h-2 overflow-hidden">
@@ -329,7 +329,7 @@ export default function DiamantPerformancePanel() {
 
 				{/* Fidélité */}
 				<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-					<h2 className="text-base font-bold text-stone-800 mb-6 font-coolvetica">Fidélité Clientèle</h2>
+					<h2 className="text-base font-bold text-stone-800 mb-6 font-heading">Fidélité Clientèle</h2>
 					<div className="flex items-center justify-center h-48">
 						<div className="relative w-44 h-44 flex items-center justify-center">
 							<svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
@@ -340,14 +340,14 @@ export default function DiamantPerformancePanel() {
 								/>
 							</svg>
 							<div className="text-center z-10">
-								<span className="block text-3xl font-black text-stone-900 font-coolvetica">{retentionRate}%</span>
+								<span className="block text-3xl font-black text-stone-900 font-heading">{retentionRate}%</span>
 								<span className="text-[11px] text-stone-400 uppercase tracking-widest font-bold">Rétention</span>
 							</div>
 						</div>
 					</div>
 					<div className="mt-4 grid grid-cols-2 gap-3">
 						<div className="rounded-xl bg-stone-50 border border-stone-100 p-3 text-center">
-							<p className="text-xl font-black text-stone-900 font-coolvetica">{rdvCount}</p>
+							<p className="text-xl font-black text-stone-900 font-heading">{rdvCount}</p>
 							<p className="text-xs text-stone-400 uppercase tracking-widest mt-0.5">Visites totales</p>
 						</div>
 						<div 
@@ -355,7 +355,7 @@ export default function DiamantPerformancePanel() {
 							className="rounded-xl bg-deep-teal-50 border border-deep-teal-100 p-3 text-center cursor-pointer hover:bg-deep-teal-100/70 transition-colors"
 							title="Cliquer pour voir la liste"
 						>
-							<p className="text-xl font-black text-deep-teal-700 font-coolvetica">+{newClientsCount}</p>
+							<p className="text-xl font-black text-deep-teal-700 font-heading">+{newClientsCount}</p>
 							<p className="text-xs text-deep-teal-500 uppercase tracking-widest mt-0.5 font-bold">Nouveaux clients</p>
 						</div>
 					</div>

@@ -1,103 +1,66 @@
 ---
+// Contact : en-tête, coordonnées et horaires à gauche, formulaire (EmailJS) à droite, carte en dessous.
 import DiamantLayout from '@/layouts/diamant/DiamantLayout.astro';
+import DiamantPageHead from '@/components/diamant/DiamantPageHead.astro';
 import Map from '@/components/diamant/DiamantMap.astro';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
+const { business } = siteConfig;
+const tel = business.phone.replace(/[^\d+]/g, '');
 ---
 
-<DiamantLayout title="Contact" description={`Contactez ${siteConfig.business.name}.`}>
-	<!-- Hero -->
-	<section class="pt-28 pb-12 bg-[#fff7f1] border-b border-stone-100">
-		<div class="mx-auto max-w-4xl px-6 text-center" data-aos="fade-up">
-			<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-3">Contact</p>
-			<h1 class="text-3xl md:text-4xl font-black text-stone-900 mb-4 tracking-tight">Prendre Contact</h1>
-			<p class="text-lg text-stone-500">
-				Une question, une demande particulière ? Notre équipe est à votre entière disposition.
-			</p>
-		</div>
-	</section>
+<DiamantLayout title="Contact" description={`Contacter ${business.name} : adresse, téléphone, horaires et formulaire.`}>
+	<DiamantPageHead rubrique="Contact" numero="01">
+		<Fragment slot="titre">Une question <em>avant de venir&nbsp;?</em></Fragment>
+		Pour un conseil couleur, une demande de mariage ou un groupe, écrivez-nous : réponse sous 24 h
+		ouvrées. Pour un rendez-vous simple, la réservation en ligne est plus rapide.
+	</DiamantPageHead>
 
-	<section class="mx-auto max-w-6xl px-6 py-16">
-		<div class="grid gap-12 md:grid-cols-2">
-			<!-- Coordonnées + Carte -->
-			<div class="section-fade space-y-6" data-aos="fade-right" data-aos-duration="800">
-				<div class="rounded-2xl border border-stone-200 bg-white p-7 shadow-sm card-hover">
-					<p class="font-bold text-deep-teal-600 uppercase tracking-widest text-xs mb-5">Coordonnées</p>
-					<ul class="space-y-5 text-stone-700">
-						<li class="flex items-start gap-4">
-							<div class="w-10 h-10 rounded-xl bg-deep-teal-50 flex items-center justify-center shrink-0 text-deep-teal-500">
-								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-							</div>
-							<span class="mt-2 font-medium">{siteConfig.business.address}</span>
-						</li>
-						<li class="flex items-center gap-4">
-							<div class="w-10 h-10 rounded-xl bg-deep-teal-50 flex items-center justify-center shrink-0 text-deep-teal-500">
-								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-							</div>
-							<span class="font-medium font-coolvetica text-lg tracking-wider">{siteConfig.business.phone}</span>
-						</li>
-						<li class="flex items-center gap-4">
-							<div class="w-10 h-10 rounded-xl bg-deep-teal-50 flex items-center justify-center shrink-0 text-deep-teal-500">
-								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
-							</div>
-							<span class="font-medium">{siteConfig.business.email}</span>
-						</li>
-					</ul>
-				</div>
-
-				<div class="rounded-2xl overflow-hidden border border-stone-200 shadow-sm h-[280px] z-0 relative isolate" data-aos="zoom-in" data-aos-delay="200">
-					<Map lat={siteConfig.business.lat} lng={siteConfig.business.lng} label={siteConfig.business.name} class="w-full h-full" />
-				</div>
+	<section class="dia-wrap pb-[clamp(64px,8vw,112px)]" aria-label="Coordonnées et formulaire">
+		<div class="dia-grille items-start">
+			<div class="dia-col-moitie-g" data-reveal>
+				<p class="dia-acces__adresse">{business.address}</p>
+				<ul class="mt-6 grid gap-2">
+					<li><a href={`tel:${tel}`} class="dia-lien dia-chiffre">{business.phone}</a></li>
+					<li><a href={`mailto:${business.email}`} class="dia-lien">{business.email}</a></li>
+				</ul>
+				<dl class="dia-horaires mt-10 max-w-md">
+					{business.openingHours.map((h) => (
+						<div>
+							<dt>{h.day}</dt>
+							<dd>{h.hours}</dd>
+						</div>
+					))}
+				</dl>
 			</div>
 
-			<!-- Formulaire de contact -->
 			<form
 				id="contact-form"
-				data-business-email={siteConfig.business.email}
-				class="section-fade flex flex-col gap-5 rounded-2xl border border-stone-200 bg-white p-7 shadow-sm"
-				data-aos="fade-left"
-				data-aos-duration="800"
+				data-business-email={business.email}
+				class="dia-panneau dia-col-moitie-d grid gap-5"
+				data-reveal
+				data-reveal-delay="120"
 			>
-				<div>
-					<label for="name" class="text-xs font-bold text-stone-500 uppercase tracking-widest">Nom complet</label>
-					<input
-						id="name"
-						name="name"
-						type="text"
-						required
-						class="mt-2 w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3 text-stone-900 focus:outline-none focus:ring-2 focus:ring-deep-teal-200 focus:border-deep-teal-400 transition-colors"
-					/>
+				<div class="dia-champ">
+					<label for="name">Nom complet</label>
+					<input id="name" name="name" type="text" autocomplete="name" required />
 				</div>
-				<div>
-					<label for="email" class="text-xs font-bold text-stone-500 uppercase tracking-widest">Email</label>
-					<input
-						id="email"
-						name="email"
-						type="email"
-						required
-						class="mt-2 w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3 text-stone-900 focus:outline-none focus:ring-2 focus:ring-deep-teal-200 focus:border-deep-teal-400 transition-colors"
-					/>
+				<div class="dia-champ">
+					<label for="email">Email</label>
+					<input id="email" name="email" type="email" autocomplete="email" required />
 				</div>
-				<div>
-					<label for="message" class="text-xs font-bold text-stone-500 uppercase tracking-widest">Message</label>
-					<textarea
-						id="message"
-						name="message"
-						rows="5"
-						required
-						class="mt-2 w-full rounded-xl border border-stone-300 bg-stone-50 px-4 py-3 text-stone-900 focus:outline-none focus:ring-2 focus:ring-deep-teal-200 focus:border-deep-teal-400 transition-colors resize-none"
-					></textarea>
+				<div class="dia-champ">
+					<label for="message">Message</label>
+					<textarea id="message" name="message" rows="6" required class="resize-none"></textarea>
 				</div>
-				<p id="form-status" class="text-sm hidden"></p>
-				<button
-					id="submit-btn"
-					type="submit"
-					class="mt-2 rounded-xl bg-deep-teal-500 px-6 py-4 text-sm font-bold text-white transition-colors hover:bg-deep-teal-400 uppercase tracking-widest shadow-sm"
-				>
-					Envoyer la demande
-				</button>
+				<p id="form-status" class="hidden text-sm" role="status"></p>
+				<button id="submit-btn" type="submit" class="dia-btn justify-self-start">Envoyer le message</button>
 			</form>
+		</div>
+
+		<div class="dia-carte mt-[clamp(48px,6vw,88px)] aspect-[4/5] sm:aspect-[21/9]" data-reveal="fade">
+			<Map lat={business.lat} lng={business.lng} label={business.name} class="h-full w-full" />
 		</div>
 	</section>
 </DiamantLayout>
@@ -112,11 +75,11 @@ const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 			e.preventDefault();
 			const formData = new FormData(form);
 			const businessEmail = form.dataset.businessEmail;
-			
+
 			btn.disabled = true;
 			btn.textContent = 'Envoi en cours...';
 			status.classList.add('hidden');
-			
+
 			try {
 				const userEmail = formData.get('email');
 				const userName = formData.get('name');
@@ -147,8 +110,8 @@ const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 				});
 
 				if (response.ok) {
-					status.textContent = 'Message envoyé avec succès !';
-					status.className = 'text-sm text-green-600';
+					status.textContent = 'Message envoyé. Le salon vous répond sous 24 h ouvrées.';
+					status.className = 'text-sm text-green-700';
 					form.reset();
 				} else {
 					const errorText = await response.text();
@@ -156,10 +119,10 @@ const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 				}
 			} catch (err) {
 				status.textContent = `Erreur lors de l'envoi : ${err.message}`;
-				status.className = 'text-sm text-red-500';
+				status.className = 'text-sm text-red-700';
 			} finally {
 				btn.disabled = false;
-				btn.textContent = 'Envoyer la demande';
+				btn.textContent = 'Envoyer le message';
 				status.classList.remove('hidden');
 			}
 		});

@@ -1,0 +1,32 @@
+---
+// En-tête des pages intérieures : repère, très grand titre révélé ligne par ligne au chargement
+// (data-split="load", script du layout), chapeau à droite, photo facultative dévoilée par un masque
+// (data-masque : le conteneur est observé, son enfant découvert de haut en bas).
+import DiamantPicture from '@/components/diamant/DiamantPicture.astro';
+import type { DiamantImage } from '@/components/diamant/images';
+
+interface Props {
+	rubrique: string;
+	numero?: string;
+	image?: DiamantImage;
+}
+
+const { rubrique, numero, image } = Astro.props;
+---
+
+<header class="dia-tetepage">
+	<div class="dia-wrap">
+		<p class="dia-num mb-8">{numero && <b>{numero}</b>} {rubrique}</p>
+		<div class="dia-tetepage__grille">
+			<h1 class="dia-h1" data-split="load"><slot name="titre" /></h1>
+			<div class="dia-lead" data-reveal="fade" data-reveal-delay="250"><slot /></div>
+		</div>
+		{image && (
+			<div class="dia-tetepage__img" data-masque>
+				<div class="dia-cadre h-full">
+				<DiamantPicture {...image} sizes="(min-width: 1440px) 1340px, 94vw" prioritaire />
+				</div>
+			</div>
+		)}
+	</div>
+</header>

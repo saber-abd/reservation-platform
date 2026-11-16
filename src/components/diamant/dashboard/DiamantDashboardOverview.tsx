@@ -242,7 +242,7 @@ export default function DiamantDashboardOverview() {
 								<span className="text-xs font-bold text-stone-400 group-hover:text-deep-teal-500 transition-colors flex items-center gap-1">Détails <ArrowUpRight size={12}/></span>
 							</div>
 							<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Chiffre d'Affaires</p>
-							<p className="text-2xl font-black text-stone-800 font-coolvetica">{formatEuros(stats.ca)}</p>
+							<p className="text-2xl font-black text-stone-800 font-heading">{formatEuros(stats.ca)}</p>
 						</a>
 
 						<a href="/demo-diamant/dashboard/disponibilites" className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-jasmine-200 hover:shadow-md transition-all card-hover group">
@@ -253,7 +253,7 @@ export default function DiamantDashboardOverview() {
 								<span className="text-xs font-bold text-stone-400 group-hover:text-jasmine-600 transition-colors flex items-center gap-1">Détails <ArrowUpRight size={12}/></span>
 							</div>
 							<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">RDV de la période</p>
-							<p className="text-2xl font-black text-stone-800 font-coolvetica">{stats.rdv}</p>
+							<p className="text-2xl font-black text-stone-800 font-heading">{stats.rdv}</p>
 						</a>
 
 						<button 
@@ -268,7 +268,7 @@ export default function DiamantDashboardOverview() {
 								<span className="text-xs font-bold text-stone-400 group-hover:text-deep-teal-600 transition-colors flex items-center gap-1">Voir liste <ArrowUpRight size={12}/></span>
 							</div>
 							<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Nouveaux Clients</p>
-							<p className="text-2xl font-black text-stone-800 font-coolvetica">{stats.newClients}</p>
+							<p className="text-2xl font-black text-stone-800 font-heading">{stats.newClients}</p>
 						</button>
 
 						<a href="/demo-diamant/dashboard/statistiques" className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-jasmine-200 hover:shadow-md transition-all card-hover group">
@@ -279,7 +279,7 @@ export default function DiamantDashboardOverview() {
 								<span className="text-xs font-bold text-stone-400 group-hover:text-jasmine-600 transition-colors flex items-center gap-1">Détails <ArrowUpRight size={12}/></span>
 							</div>
 							<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Panier Moyen</p>
-							<p className="text-2xl font-black text-stone-800 font-coolvetica">{formatEuros(stats.panier)}</p>
+							<p className="text-2xl font-black text-stone-800 font-heading">{formatEuros(stats.panier)}</p>
 						</a>
 					</div>
 
@@ -287,7 +287,7 @@ export default function DiamantDashboardOverview() {
 						{/* Chart */}
 						<div className="lg:col-span-2 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
 							<div className="flex items-center justify-between mb-5">
-								<h2 className="text-base font-bold text-stone-800 font-coolvetica">Évolution du CA</h2>
+								<h2 className="text-base font-bold text-stone-800 font-heading">Évolution du CA</h2>
 								<a href="/demo-diamant/dashboard/statistiques" className="text-xs font-bold uppercase tracking-widest text-deep-teal-500 hover:text-deep-teal-400">Rapport complet →</a>
 							</div>
 							{/* On utilise les données dynamiques */}
@@ -304,7 +304,7 @@ export default function DiamantDashboardOverview() {
 						{/* Prochains RDV / Derniers RDV */}
 						<div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
 							<div className="flex items-center justify-between mb-5">
-								<h2 className="text-base font-bold text-stone-800 font-coolvetica">
+								<h2 className="text-base font-bold text-stone-800 font-heading">
 									{displayAppointments.type === 'prochains' ? 'Prochains RDV' : 'Derniers RDV'}
 								</h2>
 								{displayAppointments.type === 'derniers' && (

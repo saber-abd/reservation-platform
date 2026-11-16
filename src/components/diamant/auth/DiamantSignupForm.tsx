@@ -349,11 +349,11 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 			
 			<div>
 				<label className="text-sm text-stone-500" htmlFor="fullName">
-					Nom complet <span className="text-rose-600">*</span>
+					Nom complet <span className="text-primary">*</span>
 				</label>
 				<input
 					id="fullName"
-					className="mt-1 w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-rose-600 transition-colors"
+					className="mt-1 w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
 					{...register('fullName')}
 					maxLength={MAX_NAME_LENGTH}
 				/>
@@ -412,7 +412,7 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 			<button
 				type="submit"
 				disabled={submitting}
-				className="rounded-xl bg-primary px-4 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-[0_0_15px_rgba(255,50,50,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(255,50,50,0.6)] active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+				className="min-h-[52px] rounded-full bg-primary px-5 py-3 text-[0.9875rem] font-semibold text-primary-foreground transition-colors hover:bg-[#8c3d1d] disabled:opacity-50"
 			>
 				{submitting ? 'Création...' : (existingUser ? 'Terminer mon profil' : 'Rejoindre')}
 			</button>
@@ -432,7 +432,7 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 							const basePath = getEffectiveBasePath();
 							await signInWithGoogle(`${window.location.origin}${basePath}/connexion`);
 						}}
-						className="flex w-full items-center justify-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-4 py-2 text-sm font-semibold text-stone-700 transition-colors hover:bg-stone-100"
+						className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition-colors hover:bg-stone-50"
 					>
 						<svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
 							<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />

@@ -225,7 +225,7 @@ export default function DiamantClientHistory() {
 						</div>
 						<div>
 							<p className="text-xs text-stone-500 font-bold uppercase tracking-wider">Prestations honorées</p>
-							<p className="text-2xl font-black text-stone-900 mt-0.5 font-coolvetica">{totalPrestations} visite{totalPrestations > 1 ? 's' : ''}</p>
+							<p className="text-2xl font-black text-stone-900 mt-0.5 font-heading">{totalPrestations} visite{totalPrestations > 1 ? 's' : ''}</p>
 						</div>
 					</div>
 				</div>
@@ -237,7 +237,7 @@ export default function DiamantClientHistory() {
 						</div>
 						<div>
 							<p className="text-xs text-jasmine-800 font-bold uppercase tracking-wider">Points fidélité cumulés</p>
-							<p className="text-2xl font-black text-jasmine-700 mt-0.5 font-coolvetica">+{totalPointsEarned} pts</p>
+							<p className="text-2xl font-black text-jasmine-700 mt-0.5 font-heading">+{totalPointsEarned} pts</p>
 						</div>
 					</div>
 				</div>
@@ -249,7 +249,7 @@ export default function DiamantClientHistory() {
 						</div>
 						<div>
 							<p className="text-xs text-stone-500 font-bold uppercase tracking-wider">Établissement & Coiffeur</p>
-							<p className="text-base font-black text-stone-900 mt-0.5 font-coolvetica">{favoriteStylist}</p>
+							<p className="text-base font-black text-stone-900 mt-0.5 font-heading">{favoriteStylist}</p>
 						</div>
 					</div>
 				</div>
@@ -343,7 +343,7 @@ export default function DiamantClientHistory() {
 									</div>
 									<div>
 										<div className="flex flex-wrap items-center gap-2">
-											<h3 className="font-bold text-stone-900 text-base md:text-lg font-coolvetica">
+											<h3 className="font-bold text-stone-900 text-base md:text-lg font-heading">
 												{appt.serviceName}
 											</h3>
 											<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">

@@ -325,7 +325,7 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 			{error && (
 				<div className="rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs md:text-sm text-rose-800 animate-in fade-in">
 					<div className="font-bold flex items-center gap-2 mb-1 text-rose-900">
-						<ShieldAlert size={16} className="text-rose-600 shrink-0" />
+						<ShieldAlert size={16} className="text-primary shrink-0" />
 						<span>{error.includes('suspendu') || error.includes('refusée') ? 'Accès suspendu' : 'Erreur'}</span>
 					</div>
 					<p className="leading-relaxed">{error}</p>
@@ -347,16 +347,16 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 			<button
 				type="submit"
 				disabled={submitting}
-				className="rounded-xl bg-primary px-4 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-[0_0_15px_rgba(255,50,50,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(255,50,50,0.6)] active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+				className="min-h-[52px] rounded-full bg-primary px-5 py-3 text-[0.9875rem] font-semibold text-primary-foreground transition-colors hover:bg-[#8c3d1d] disabled:opacity-50"
 			>
-				{submitting ? 'Connexion...' : 'Démarrer'}
+				{submitting ? 'Connexion...' : 'Se connecter'}
 			</button>
 
 			<button
 				type="button"
 				onClick={handleDemoLogin}
 				disabled={submitting}
-				className="rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm font-bold text-stone-800 transition-colors hover:bg-stone-50 disabled:opacity-50"
+				className="min-h-[52px] rounded-full border border-stone-800 bg-transparent px-5 py-3 text-[0.9875rem] font-semibold text-stone-900 transition-colors hover:bg-stone-900 hover:text-white disabled:opacity-50"
 			>
 				Accéder à la démo (lecture seule)
 			</button>
@@ -374,7 +374,7 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 					const basePath = getEffectiveBasePath();
 					await signInWithGoogle(`${window.location.origin}${basePath}/connexion`);
 				}}
-				className="flex w-full items-center justify-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-4 py-2 text-sm font-semibold text-stone-700 transition-colors hover:bg-stone-100"
+				className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition-colors hover:bg-stone-50"
 			>
 				<svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
 					<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />

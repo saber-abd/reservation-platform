@@ -78,6 +78,20 @@ const canonicalURL = new URL(Astro.url.pathname, siteConfig.url);
 			initReveal();
 			pauseOffscreen('.marquee, .dia-logo');
 
+			// Photos à masque (data-masque) : découvertes à l'entrée de leur conteneur dans l'écran.
+			const masques = document.querySelectorAll<HTMLElement>('[data-masque]');
+			if ('IntersectionObserver' in window) {
+				document.documentElement.classList.add('dia-anim');
+				const io = new IntersectionObserver((entrees) => {
+					for (const e of entrees) {
+						if (!e.isIntersecting) continue;
+						e.target.classList.add('is-in');
+						io.unobserve(e.target);
+					}
+				}, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+				masques.forEach((m) => io.observe(m));
+			}
+
 			const mm = gsap.matchMedia();
 			mm.add(MQ.motion, () => {
 				document.querySelectorAll<HTMLElement>('[data-split]').forEach((titre) => {

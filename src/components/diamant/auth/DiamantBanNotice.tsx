@@ -9,7 +9,7 @@ interface Props {
 export default function DiamantBanNotice({ notice, basePath }: Props) {
 	return (
 		<div role="alert" className="rounded-2xl border-2 border-rose-200 bg-white p-5 text-center animate-in fade-in">
-			<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100 text-rose-600">
+			<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100 text-primary">
 				<ShieldAlert size={26} />
 			</div>
 			<p className="text-lg font-black tracking-tight text-stone-900">Votre compte a été suspendu</p>

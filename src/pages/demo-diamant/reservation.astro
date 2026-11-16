@@ -1,24 +1,49 @@
 ---
+// Réservation : en-tête, formulaire (îlot React, prestations lues en base ; ?service=<id> présélectionne
+// la prestation) sur un panneau papier, et à côté le déroulé après l'envoi.
 import DiamantLayout from '@/layouts/diamant/DiamantLayout.astro';
+import DiamantPageHead from '@/components/diamant/DiamantPageHead.astro';
 import ReservationForm from '@/components/diamant/DiamantReservationForm';
+import { getSiteConfig } from '@/config/site';
+
+const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
+const tel = siteConfig.business.phone.replace(/[^\d+]/g, '');
+
+const ensuite = [
+	{ titre: 'Le salon confirme', texte: 'La demande arrive dans l’agenda du salon, qui la valide. Vous recevez un email de confirmation.' },
+	{ titre: 'Un rappel la veille', texte: 'Par email, avec l’adresse et l’heure. Vous pouvez annuler gratuitement jusqu’à 24 h avant.' },
+	{ titre: 'Paiement sur place', texte: 'Après la prestation, par carte ou en espèces. Rien n’est prélevé en ligne.' },
+];
 ---
 
-<DiamantLayout title="Réservation" description="Prenez rendez-vous en ligne.">
-	<!-- Hero page -->
-	<section class="pt-28 pb-12 bg-[#fff7f1] border-b border-stone-100">
-		<div class="mx-auto max-w-4xl px-6 text-center" data-aos="fade-up">
-			<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-3">Réservation</p>
-			<h1 class="text-3xl md:text-4xl font-black text-stone-900 mb-4 tracking-tight">Réserver un Moment</h1>
-			<p class="text-lg text-stone-500">
-				Programmez votre prochaine expérience sur-mesure dans notre Maison.
-			</p>
-		</div>
-	</section>
+<DiamantLayout title="Réserver" description={`Réserver un rendez-vous chez ${siteConfig.business.name} : prestation, jour, créneau.`}>
+	<DiamantPageHead rubrique="Réservation" numero="01">
+		<Fragment slot="titre">Choisir <em>son créneau.</em></Fragment>
+		Trois étapes : la prestation, le jour et l'heure, vos coordonnées. Durée et prix s'affichent avant
+		de confirmer.
+	</DiamantPageHead>
 
-	<!-- Formulaire -->
-	<section class="mx-auto max-w-5xl px-6 py-16" data-aos="fade-up" data-aos-delay="150">
-		<div class="rounded-2xl border border-stone-200 bg-white p-6 md:p-10 shadow-sm card-hover">
-			<ReservationForm client:load />
+	<section class="dia-wrap pb-[clamp(80px,10vw,140px)]" aria-label="Formulaire de réservation">
+		<div class="dia-grille items-start">
+			<div class="dia-panneau lg:col-span-7" data-reveal>
+				<ReservationForm client:load />
+			</div>
+			<aside class="lg:col-span-4 lg:col-start-9" aria-labelledby="ensuite-titre" data-reveal data-reveal-delay="120">
+				<h2 id="ensuite-titre" class="dia-h3">Et ensuite&nbsp;?</h2>
+				<ol class="dia-liste mt-6">
+					{ensuite.map((e, i) => (
+						<li>
+							<span class="dia-liste__n">{String(i + 1).padStart(2, '0')}</span>
+							<h3 class="font-semibold">{e.titre}</h3>
+							<p class="dia-liste__texte text-[0.9375rem]">{e.texte}</p>
+						</li>
+					))}
+				</ol>
+				<p class="dia-petit mt-6">
+					Une demande particulière (mariage, groupe) ? Appelez le
+					<a href={`tel:${tel}`} class="dia-lien dia-chiffre">{siteConfig.business.phone}</a>.
+				</p>
+			</aside>
 		</div>
 	</section>
 </DiamantLayout>

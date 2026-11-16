@@ -1,100 +1,90 @@
 ---
+// Le salon : en-tête avec la photo du salon, l'histoire (grand texte), trois photos du poste de
+// travail, les engagements en liste numérotée, les diplômes en tableau, appel final.
 import DiamantLayout from '@/layouts/diamant/DiamantLayout.astro';
+import DiamantPageHead from '@/components/diamant/DiamantPageHead.astro';
+import DiamantPicture from '@/components/diamant/DiamantPicture.astro';
+import DiamantCta from '@/components/diamant/DiamantCta.astro';
+import { images } from '@/components/diamant/images';
 import { getSiteConfig } from '@/config/site';
+
 const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
+const { business, about } = siteConfig;
 ---
 
-<DiamantLayout title="La Maison Prestige" description={`En savoir plus sur ${siteConfig.business.name}.`}>
-	<!-- Hero -->
-	<section class="pt-28 pb-12 bg-[#fff7f1] border-b border-stone-100">
-		<div class="mx-auto max-w-4xl px-6 text-center" data-aos="fade-up">
-			<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-3">Notre Histoire</p>
-			<h1 class="text-3xl md:text-4xl font-black text-stone-900 mb-4 tracking-tight">La Maison Prestige</h1>
-			<p class="text-lg text-stone-500">
-				L'art de la coiffure élevé au rang de l'excellence. Découvrez notre histoire et nos valeurs.
+<DiamantLayout title="Le salon" description={`L'histoire de ${business.name}, l'équipe, ses engagements et ses diplômes.`}>
+	<DiamantPageHead rubrique="Le salon" numero="01" image={images.salon}>
+		<Fragment slot="titre">Un salon, <em>une équipe.</em></Fragment>
+		{business.description}
+	</DiamantPageHead>
+
+	<section class="dia-section pt-0" aria-labelledby="histoire-titre">
+		<div class="dia-wrap dia-grille">
+			<div class="dia-col-g">
+				<p class="dia-num"><b>02</b> Histoire</p>
+				<h2 id="histoire-titre" class="sr-only">Notre histoire</h2>
+			</div>
+			<p class="dia-col-d font-heading text-[clamp(1.5rem,2.6vw,2.4rem)] leading-[1.25] tracking-[-0.02em] [font-weight:350]" data-reveal>
+				{about.story}
 			</p>
 		</div>
 	</section>
 
-	<!-- Vision -->
-	<section class="mx-auto max-w-6xl px-6 py-20">
-		<div class="grid items-center gap-16 md:grid-cols-2">
-			<div class="section-fade" data-aos="fade-right" data-aos-duration="800">
-				<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-4">Notre Vision</p>
-				<h2 class="text-3xl md:text-4xl font-bold text-stone-900 mb-6 leading-tight">Une approche sur-mesure de la beauté</h2>
-				<p class="text-stone-600 text-lg leading-relaxed mb-6">
-					{siteConfig.business.description}
-				</p>
-				<p class="text-stone-600 text-lg leading-relaxed mb-10">
-					Notre équipe d'experts met un point d'honneur à vous offrir un accueil privilégié et des prestations d'exception, dans un cadre confidentiel pensé exclusivement pour votre confort.
-				</p>
-				<a
-					href="/demo-diamant/reservation"
-					class="inline-block rounded-xl bg-deep-teal-500 px-8 py-4 text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-deep-teal-400 shadow-sm"
-				>
-					Prendre Rendez-vous
-				</a>
+	<section class="dia-wrap pb-[clamp(80px,11vw,160px)]" aria-label="Le poste de travail">
+		<div class="grid gap-4 sm:grid-cols-3" data-reveal-group>
+			<figure>
+				<div class="dia-cadre aspect-[3/4]"><DiamantPicture {...images.ciseaux} sizes="(min-width: 640px) 31vw, 92vw" /></div>
+				<figcaption class="dia-legende">Les ciseaux, affûtés tous les deux mois.</figcaption>
+			</figure>
+			<figure class="sm:mt-16">
+				<div class="dia-cadre aspect-[3/4]"><DiamantPicture {...images.peignes} sizes="(min-width: 640px) 31vw, 92vw" /></div>
+				<figcaption class="dia-legende">Peignes et pinces, désinfectés entre chaque client.</figcaption>
+			</figure>
+			<figure>
+				<div class="dia-cadre aspect-[3/4]"><DiamantPicture {...images.outils} sizes="(min-width: 640px) 31vw, 92vw" /></div>
+				<figcaption class="dia-legende">Brosses rondes de trois diamètres pour le brushing.</figcaption>
+			</figure>
+		</div>
+	</section>
+
+	<section class="dia-section border-t border-[#d9cfc1]" aria-labelledby="engagements-titre">
+		<div class="dia-wrap dia-grille">
+			<div class="dia-col-g">
+				<p class="dia-num"><b>03</b> Engagements</p>
+				<h2 id="engagements-titre" class="dia-h2 mt-6" data-split>Ce qu'on <em>s'impose.</em></h2>
 			</div>
-			<div class="section-fade" data-aos="fade-left" data-aos-duration="800">
-				<div class="overflow-hidden rounded-2xl border border-stone-100 aspect-square shadow-md">
-					<img src="/images/about_salon.webp" loading="lazy" decoding="async" alt="Notre équipe" class="h-full w-full object-cover hover:scale-105 transition-transform duration-700" />
-				</div>
+			<ol class="dia-liste dia-col-d" data-reveal-group>
+				{about.objectives.map((o, i) => (
+					<li>
+						<span class="dia-liste__n">{String(i + 1).padStart(2, '0')}</span>
+						<h3 class="dia-liste__titre">{o.title}</h3>
+						<p class="dia-liste__texte">{o.description}</p>
+					</li>
+				))}
+			</ol>
+		</div>
+	</section>
+
+	<section class="dia-section border-t border-[#d9cfc1]" aria-labelledby="diplomes-titre">
+		<div class="dia-wrap dia-grille">
+			<div class="dia-col-g">
+				<p class="dia-num"><b>04</b> Formation</p>
+				<h2 id="diplomes-titre" class="dia-h2 mt-6" data-split>Diplômes <em>et certifications.</em></h2>
+			</div>
+			<div class="dia-col-d overflow-x-auto" data-reveal>
+				<table class="dia-tableau">
+					<thead>
+						<tr><th scope="col">Année</th><th scope="col">Diplôme</th><th scope="col">Organisme</th></tr>
+					</thead>
+					<tbody>
+						{about.diplomas.map((d) => (
+							<tr><td>{d.year}</td><td>{d.title}</td><td>{d.institution}</td></tr>
+						))}
+					</tbody>
+				</table>
 			</div>
 		</div>
 	</section>
 
-	<!-- Notre héritage -->
-	<section class="py-20 bg-deep-teal-50 border-y border-deep-teal-100">
-		<div class="mx-auto max-w-3xl px-6 text-center section-fade" data-aos="fade-up">
-			<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-deep-teal-400 mb-6"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-			<h2 class="text-3xl font-bold text-stone-900 mb-8">Notre héritage</h2>
-			<p class="text-stone-600 text-lg leading-relaxed italic">
-				"{siteConfig.about.story}"
-			</p>
-		</div>
-	</section>
-
-	<!-- Engagements -->
-	<section class="mx-auto max-w-6xl px-6 py-20">
-		<div class="text-center mb-14 section-fade" data-aos="fade-up">
-			<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-2">Exigences</p>
-			<h2 class="text-3xl md:text-4xl font-bold text-stone-900">Nos engagements</h2>
-		</div>
-		<div class="grid gap-6 md:grid-cols-3">
-			{
-				siteConfig.about.objectives.map((objective, index) => (
-					<div class="group rounded-2xl border border-stone-200 bg-white p-7 shadow-sm hover:shadow-lg hover:border-deep-teal-200 transition-all duration-300 section-fade card-hover cursor-pointer" data-aos="fade-up" data-aos-delay={index * 100}>
-						<div class="w-11 h-11 rounded-xl bg-deep-teal-50 border border-deep-teal-100 flex items-center justify-center text-deep-teal-600 mb-5 group-hover:scale-110 group-hover:bg-deep-teal-500 group-hover:text-white transition-all duration-300 shadow-2xs">
-							<span class="font-black text-lg">{index + 1}</span>
-						</div>
-						<p class="font-bold text-stone-900 text-lg mb-3 group-hover:text-deep-teal-600 transition-colors">{objective.title}</p>
-						<p class="text-stone-500 leading-relaxed text-sm">{objective.description}</p>
-					</div>
-				))
-			}
-		</div>
-	</section>
-
-	<!-- Diplômes -->
-	<section class="py-20 bg-stone-50 border-t border-stone-100">
-		<div class="mx-auto max-w-3xl px-6">
-			<div class="text-center mb-14 section-fade" data-aos="fade-up">
-				<p class="text-sm font-bold text-deep-teal-500 uppercase tracking-widest mb-2">Expertise</p>
-				<h2 class="text-3xl md:text-4xl font-bold text-stone-900">Diplômes & Certifications</h2>
-			</div>
-			<ul class="space-y-4">
-				{
-					siteConfig.about.diplomas.map((diploma, index) => (
-						<li class="group flex flex-col md:flex-row md:items-center justify-between rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-deep-teal-300 hover:shadow-md transition-all duration-300 section-fade card-hover cursor-pointer" data-aos="fade-up" data-aos-delay={index * 75}>
-							<div class="mb-3 md:mb-0">
-								<p class="font-bold text-stone-900 group-hover:text-deep-teal-600 transition-colors">{diploma.title}</p>
-								<p class="text-stone-500 text-sm mt-0.5">{diploma.institution}</p>
-							</div>
-							<span class="text-sm font-bold text-deep-teal-600 bg-deep-teal-50 px-4 py-1.5 rounded-full border border-deep-teal-100 self-start md:self-auto group-hover:bg-deep-teal-500 group-hover:text-white group-hover:border-deep-teal-500 transition-all duration-300">{diploma.year}</span>
-						</li>
-					))
-				}
-			</ul>
-		</div>
-	</section>
+	<DiamantCta />
 </DiamantLayout>
