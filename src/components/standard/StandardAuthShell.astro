@@ -1,0 +1,54 @@
+---
+// Gabarit des pages de compte (connexion, inscription, mot de passe) :
+// formulaire à gauche, encadré encre à droite qui rappelle ce que contient l'espace professionnel.
+import Layout from '@/layouts/standard/StandardLayout.astro';
+
+interface Props {
+	title: string;
+	pageTitle: string;
+	description: string;
+	lead: string;
+}
+
+const { title, pageTitle, description, lead } = Astro.props;
+
+const contenu = [
+	{ titre: 'Agenda', texte: 'Les interventions réservées en ligne, jour par jour.' },
+	{ titre: 'Prestations et tarifs', texte: 'Les prix affichés sur le site se modifient ici.' },
+	{ titre: 'Disponibilités', texte: 'Les créneaux ouverts à la réservation.' },
+	{ titre: 'Clients', texte: 'Historique des interventions et messages.' },
+];
+---
+
+<Layout title={pageTitle} description={description} noindex>
+	<section class="st-container py-12 md:py-20">
+		<div class="grid items-start gap-x-16 gap-y-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)]">
+			<div class="w-full max-w-md" data-reveal>
+				<h1 class="st-h2">{title}</h1>
+				<p class="mt-3 text-ink-soft">{lead}</p>
+				<div class="mt-9">
+					<slot />
+				</div>
+				<div class="mt-8 border-t border-rule pt-5 text-sm text-ink-soft">
+					<slot name="after" />
+				</div>
+			</div>
+
+			<aside class="st-auth-aside p-7 md:p-10" aria-label="Contenu de l'espace professionnel" data-reveal data-reveal-delay="150">
+				<h2 class="st-h3 md:text-2xl">L'espace professionnel</h2>
+				<p class="mt-3 max-w-[40ch]">Réservé au technicien : ce que les clients voient sur le site se règle depuis cet espace.</p>
+				<ul class="mt-8">
+					{contenu.map((c, i) => (
+						<li class="grid grid-cols-[2rem_minmax(0,1fr)] gap-x-2 py-4">
+							<span class="st-num text-sm font-semibold text-[#8fa8f0]">0{i + 1}</span>
+							<div>
+								<p class="font-semibold text-paper">{c.titre}</p>
+								<p class="mt-1 text-sm">{c.texte}</p>
+							</div>
+						</li>
+					))}
+				</ul>
+			</aside>
+		</div>
+	</section>
+</Layout>

@@ -1,64 +1,149 @@
 ---
 import StandardLayout from '@/layouts/standard/StandardLayout.astro';
+import StandardPageHeader from '@/components/standard/StandardPageHeader.astro';
+import StandardCta from '@/components/standard/StandardCta.astro';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname);
+const { services } = siteConfig;
+
+const formatDuration = (min: number) =>
+	min < 60 ? `${min} min` : min % 60 === 0 ? `${min / 60} h` : `${Math.floor(min / 60)} h ${min % 60}`;
+
+// Questions fréquentes (texte d'habillage, cohérent avec les CGU de la démo).
+const questions = [
+	{
+		q: 'Le prix affiché comprend-il la pièce ?',
+		a: "Oui pour les forfaits : la pièce standard, la main-d'œuvre et le test final sont compris. Pour les interventions « sur devis » (écran, dalle de téléviseur), le prix dépend du modèle et vous est annoncé avant la commande de la pièce.",
+	},
+	{
+		q: 'Et si je refuse le devis ?',
+		a: "Vous ne payez que le diagnostic s'il a été réservé comme tel. Le technicien remonte l'appareil dans l'état où il l'a trouvé.",
+	},
+	{
+		q: 'Mes fichiers sont-ils conservés ?',
+		a: "Pour une réparation matérielle, les données ne sont pas touchées. Avant une réinstallation du système, le technicien copie vos dossiers personnels sur un support externe si vous en avez un. Faites une sauvegarde quand c'est possible.",
+	},
+	{
+		q: 'Comment se fait le paiement ?',
+		a: "À la fin de l'intervention, par carte bancaire ou en espèces. Une facture vous est envoyée par email ; elle sert de justificatif pour la garantie d'un an.",
+	},
+];
 ---
 
-<StandardLayout title="Nos Tarifs" description="Découvrez la grille tarifaire de nos prestations de dépannage informatique.">
-	<div class="bg-slate-900 py-16 md:py-24">
-		<div class="mx-auto max-w-4xl px-6 text-center">
-			<h1 class="text-3xl font-black text-white md:text-5xl mb-6">Grille Tarifaire</h1>
-			<p class="text-lg text-slate-400 max-w-2xl mx-auto">
-				Des tarifs transparents pour toutes nos interventions informatiques. Déplacement inclus dans un rayon de 20km.
-			</p>
-		</div>
-	</div>
+<StandardLayout title="Tarifs" description="Grille tarifaire des dépannages informatiques à domicile et en atelier : durées, prix, conditions.">
+	<StandardPageHeader
+		crumb="Tarifs"
+		title="Tarifs des interventions"
+		lead="Prix TTC, pièce standard et main-d'œuvre comprises. Les durées sont celles d'une intervention courante : le technicien vous prévient sur place si la panne demande plus de temps."
+	>
+		<dl class="st-kv st-num" slot="aside">
+			<div><dt>Déplacement jusqu'à 20&nbsp;km</dt><dd>Offert</dd></div>
+			<div><dt>Devis sur place</dt><dd>Gratuit</dd></div>
+			<div><dt>Garantie pièces et main-d'œuvre</dt><dd>1 an</dd></div>
+			<div><dt>Paiement</dt><dd>Carte ou espèces</dd></div>
+		</dl>
+	</StandardPageHeader>
 
-	<section class="py-20 bg-slate-50">
-		<div class="mx-auto max-w-5xl px-6">
-			<div class="grid gap-6 md:grid-cols-2">
-				{
-					siteConfig.services.map((service, index) => (
-						<div 
-							class="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-8 shadow-sm transition-all hover:border-blue-200 hover:shadow-xl group" 
-							data-aos="fade-up" 
-							data-aos-delay={index * 50}
-						>
-							<div>
-								<div class="flex items-start justify-between gap-4 mb-4">
-									<h2 class="text-xl font-bold text-slate-900">{service.name}</h2>
-									<span class="rounded-full bg-blue-50 px-3 py-1 text-sm font-bold text-blue-700 whitespace-nowrap border border-blue-100">
-										{service.price > 0 ? `${service.price} €` : 'Sur devis'}
-									</span>
-								</div>
-								<p class="text-slate-600 mb-6">{service.description}</p>
-							</div>
-							
-							<div class="flex items-center justify-between border-t border-slate-100 pt-6">
-								<div class="flex items-center gap-2 text-sm text-slate-500 font-medium">
-									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-									~ {service.durationMinutes} min
-								</div>
-								<a
-									href="/demo-standard/reservation"
-									class="text-sm font-semibold text-blue-600 hover:text-blue-700 group-hover:underline flex items-center gap-1"
-								>
-									Réserver <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-								</a>
-							</div>
-						</div>
-					))
-				}
+	<!-- Grille complète -->
+	<section class="st-container st-section">
+		<div class="st-prices st-prices--action" role="table" aria-label="Tarifs de toutes les interventions">
+			<div class="st-prices-head" role="row">
+				<span role="columnheader">N°</span>
+				<span role="columnheader">Intervention</span>
+				<span role="columnheader">Durée</span>
+				<span role="columnheader">Prix</span>
+				<span role="columnheader"><span class="sr-only">Réserver</span></span>
 			</div>
-			
-			<div class="mt-16 bg-blue-50 border border-blue-100 rounded-2xl p-8 text-center" data-aos="fade-up">
-				<h3 class="text-lg font-bold text-blue-900 mb-2">Une panne complexe ?</h3>
-				<p class="text-blue-700 mb-6">Pour toute intervention hors forfait, un technicien réalise un diagnostic complet et vous propose un devis gratuit.</p>
-				<a href="/demo-standard/contact" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow hover:bg-blue-700 transition-colors">
-					Demander un devis
-				</a>
+			<div role="rowgroup" data-reveal-group style="--reveal-stagger: 60ms">
+				{services.map((service, i) => (
+					<div class="st-price" role="row">
+						<span class="st-price-index st-num" role="cell" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+						<div class="st-price-main" role="cell">
+							<p class="st-price-name">{service.name}</p>
+							<p class="st-price-desc">{service.description}</p>
+						</div>
+						<p class="st-price-time st-num" role="cell">{formatDuration(service.durationMinutes)}</p>
+						{service.price > 0
+							? <p class="st-price-amount st-num" role="cell">{service.price}&nbsp;€</p>
+							: <p class="st-price-amount" data-devis role="cell">Sur devis</p>}
+						<p class="st-price-action" role="cell">
+							<a href="/demo-standard/reservation" class="st-link" aria-label={`Réserver : ${service.name}`}>Réserver</a>
+						</p>
+					</div>
+				))}
+			</div>
+		</div>
+		<p class="st-note mt-5">Les prix « sur devis » dépendent du modèle de l'appareil et de la pièce disponible.</p>
+	</section>
+
+	<!-- Hors forfait -->
+	<section class="st-rule-top bg-surface">
+		<div class="st-container st-section">
+			<div class="grid items-center gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+				<figure>
+					<div class="st-frame aspect-[3/2]" data-reveal="fade" data-clip>
+						<picture>
+							<source
+								type="image/avif"
+								srcset="/images/standard/disque-dur-480.avif 480w, /images/standard/disque-dur-800.avif 800w, /images/standard/disque-dur-1280.avif 1280w"
+								sizes="(min-width: 1024px) 40vw, 100vw"
+							/>
+							<img
+								src="/images/standard/disque-dur-800.webp"
+								srcset="/images/standard/disque-dur-480.webp 480w, /images/standard/disque-dur-800.webp 800w, /images/standard/disque-dur-1280.webp 1280w"
+								sizes="(min-width: 1024px) 40vw, 100vw"
+								width="1280"
+								height="853"
+								alt="Disque dur ouvert, plateau et tête de lecture visibles"
+								loading="lazy"
+								decoding="async"
+							/>
+						</picture>
+					</div>
+					<figcaption class="st-caption">
+						<span>Disque dur ouvert à l'atelier pour une récupération de données.</span>
+					</figcaption>
+				</figure>
+				<div data-reveal-group>
+					<h2 class="st-h2">Une panne qui n'est pas dans la grille</h2>
+					<p class="st-lead mt-5 max-w-[46ch]">
+						Carte mère, dégât des eaux, disque qui ne monte plus, ordinateur qui s'éteint sans prévenir : le technicien commence par un diagnostic, puis vous remet un devis écrit.
+					</p>
+					<p class="mt-4 max-w-[52ch] leading-relaxed text-ink-soft">
+						Vous décidez ensuite, sans engagement. Si la réparation coûte plus cher que l'appareil ne vaut, il vous le dit.
+					</p>
+					<div class="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
+						<a href="/demo-standard/contact" class="st-btn">
+							Décrire la panne
+							<svg class="st-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
+						</a>
+						<a href="/demo-standard/reservation" class="st-link st-link--on font-semibold text-ink">Réserver un diagnostic</a>
+					</div>
+				</div>
 			</div>
 		</div>
 	</section>
+
+	<!-- Questions fréquentes -->
+	<section class="st-rule-top">
+		<div class="st-container st-section">
+			<div class="grid gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+				<h2 class="st-h2 max-w-[14ch]" data-reveal>Avant de réserver</h2>
+				<div class="st-faq" data-reveal>
+					{questions.map((item, i) => (
+						<details open={i === 0}>
+							<summary>
+								{item.q}
+								<span class="st-faq-icon" aria-hidden="true"></span>
+							</summary>
+							<p class="st-faq-body">{item.a}</p>
+						</details>
+					))}
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<StandardCta />
 </StandardLayout>

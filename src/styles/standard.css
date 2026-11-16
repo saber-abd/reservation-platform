@@ -130,6 +130,11 @@
     text-wrap: balance;
 }
 
+/*
+ * Composants de la démo, dans la couche « components » de Tailwind : les utilitaires
+ * (hidden, text-brand, mt-6…) posés à côté d'une classe st-… restent prioritaires.
+ */
+@layer components {
 /* ---------- Structure ---------- */
 
 .st-container {
@@ -197,7 +202,6 @@
 .st-link {
     position: relative;
     display: inline-block;
-    color: inherit;
     text-decoration: none;
 }
 .st-link::after {
@@ -377,6 +381,7 @@ a:hover > .st-logo-mark { background: var(--color-brand); }
     transform: translateY(8px);
     transition: opacity 0.35s ease, transform 0.45s var(--st-ease);
 }
+.st-mobile-nav a[aria-current='page'] { color: var(--color-brand); }
 .st-mobile-nav.is-open li {
     opacity: 1;
     transform: none;
@@ -431,31 +436,32 @@ a:hover > .st-logo-mark { background: var(--color-brand); }
     color: var(--color-ink-mute);
 }
 
-/* Fiche d'infos pratiques (horaires, zone) */
+/* Fiche d'infos pratiques : une ligne par information, intitulé à gauche */
 .st-facts {
     display: grid;
     border-top: 1px solid var(--color-ink);
 }
 .st-facts > div {
-    padding-block: 0.95rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.15rem 1.5rem;
+    padding-block: 0.8rem;
     border-bottom: 1px solid var(--color-rule);
 }
 @media (min-width: 640px) {
-    .st-facts { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr) minmax(0, 1fr); }
-    .st-facts > div { padding-right: 1.25rem; border-bottom: 0; }
-    .st-facts > div + div { padding-left: 1.25rem; border-left: 1px solid var(--color-rule); }
+    .st-facts > div { grid-template-columns: 9.5rem minmax(0, 1fr); align-items: baseline; }
 }
 .st-facts dt {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     color: var(--color-ink-mute);
-    margin-bottom: 0.3rem;
 }
 .st-facts dd {
     font-size: 0.95rem;
     font-weight: 550;
-    line-height: 1.4;
+    line-height: 1.45;
     color: var(--color-ink);
 }
+.st-facts dd .st-sep { color: var(--color-ink-mute); }
 
 /* ---------- Bandeau défilant ---------- */
 
@@ -539,6 +545,7 @@ a:hover > .st-logo-mark { background: var(--color-brand); }
 @media (min-width: 768px) {
     .st-row { grid-template-columns: 3.5rem minmax(0, 1fr) minmax(0, 1.25fr); align-items: baseline; }
     .st-row--two { grid-template-columns: 3.5rem minmax(0, 1fr); }
+    .st-row--year { grid-template-columns: 6rem minmax(0, 1fr) minmax(0, 0.7fr); }
 }
 .st-row-index {
     font-size: 0.875rem;
@@ -638,10 +645,9 @@ a:hover > .st-logo-mark { background: var(--color-brand); }
     position: relative;
     display: grid;
     gap: 2.75rem;
-    padding-left: 4rem;
 }
 @media (min-width: 768px) {
-    .st-steps { gap: 4rem; padding-left: 5.5rem; }
+    .st-steps { gap: 4rem; }
 }
 .st-steps-line {
     position: absolute;
@@ -660,10 +666,18 @@ a:hover > .st-logo-mark { background: var(--color-brand); }
     background: var(--color-brand);
     transform-origin: top;
 }
-.st-step { position: relative; }
+/*
+ * La pastille reste dans la boîte de l'étape : l'apparition (data-reveal) pose un
+ * clip-path sur l'étape, qui rognerait tout ce qui dépasse.
+ */
+.st-step { position: relative; padding-left: 4rem; }
+@media (min-width: 768px) {
+    .st-step { padding-left: 5.5rem; }
+}
 .st-step-num {
     position: absolute;
-    left: -4rem;
+    z-index: 1;
+    left: 0;
     top: -0.35rem;
     display: grid;
     place-items: center;
@@ -675,9 +689,6 @@ a:hover > .st-logo-mark { background: var(--color-brand); }
     color: var(--color-ink-mute);
     font-weight: 650;
     font-size: 1rem;
-}
-@media (min-width: 768px) {
-    .st-step-num { left: -5.5rem; }
 }
 /* Pastille pleine superposée : visible par défaut, révélée par le défilement quand c'est possible */
 .st-step-num::after {
@@ -856,3 +867,154 @@ a:hover > .st-logo-mark { background: var(--color-brand); }
     .st-price-index { display: block; }
     .st-price-main { grid-column: auto; }
 }
+
+/* ---------- En-tête des pages intérieures ---------- */
+
+.st-pagehead {
+    padding-block: 3rem 3.5rem;
+    border-bottom: 1px solid var(--color-rule);
+}
+@media (min-width: 768px) {
+    .st-pagehead { padding-block: 4.5rem 5rem; }
+}
+.st-crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    color: var(--color-ink-mute);
+}
+.st-crumbs li + li::before {
+    content: '/';
+    margin-right: 0.5rem;
+    color: var(--color-rule);
+}
+.st-crumbs a:hover { color: var(--color-ink); }
+
+/* Petite liste « intitulé / valeur » alignée, réutilisée dans les colonnes latérales */
+.st-kv { border-top: 1px solid var(--color-ink); }
+.st-kv > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding-block: 0.8rem;
+    border-bottom: 1px solid var(--color-rule);
+}
+.st-kv dt { color: var(--color-ink-soft); }
+.st-kv dd { font-weight: 600; color: var(--color-ink); text-align: right; }
+
+/* ---------- Questions fréquentes (details / summary) ---------- */
+
+.st-faq { border-top: 1px solid var(--color-ink); }
+.st-faq details { border-bottom: 1px solid var(--color-rule); }
+.st-faq summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    padding-block: 1.3rem;
+    cursor: pointer;
+    list-style: none;
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    color: var(--color-ink);
+}
+.st-faq summary::-webkit-details-marker { display: none; }
+.st-faq summary:hover { color: var(--color-brand); }
+/* Croix dessinée en CSS : la barre verticale se couche à l'ouverture */
+.st-faq-icon {
+    position: relative;
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+}
+.st-faq-icon::before,
+.st-faq-icon::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1.5px;
+    margin-top: -0.75px;
+    background: currentColor;
+    transition: transform 0.35s var(--st-ease);
+}
+.st-faq-icon::after { transform: rotate(90deg); }
+.st-faq details[open] .st-faq-icon::after { transform: rotate(0deg); }
+.st-faq-body {
+    max-width: 62ch;
+    padding-bottom: 1.5rem;
+    line-height: 1.65;
+    color: var(--color-ink-soft);
+}
+.st-faq details[open] .st-faq-body { animation: st-faq-in 0.45s var(--st-ease); }
+@keyframes st-faq-in {
+    from { opacity: 0; transform: translateY(-6px); }
+}
+
+/* ---------- Liste de liens à flèche (404, pages légales) ---------- */
+
+.st-linklist { border-top: 1px solid var(--color-ink); }
+.st-linklist a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--color-rule);
+    font-weight: 600;
+    color: var(--color-ink);
+    transition: color 0.2s ease, padding 0.35s var(--st-ease);
+}
+.st-linklist a:hover { color: var(--color-brand); padding-left: 0.5rem; }
+.st-linklist a[aria-current='page'] { color: var(--color-brand); }
+
+.st-404 {
+    font-size: clamp(7rem, 4rem + 14vw, 15rem);
+    line-height: 0.82;
+    letter-spacing: -0.06em;
+    font-weight: 700;
+    color: var(--color-ink);
+}
+.st-404 span { color: var(--color-brand); }
+
+/* ---------- Pages de connexion / inscription ---------- */
+
+.st-auth-aside {
+    background: var(--color-ink);
+    color: #c9cfdc;
+    border-radius: 6px;
+}
+.st-auth-aside h2 { color: var(--color-paper); }
+.st-auth-aside li { border-top: 1px solid rgb(255 255 255 / 0.14); }
+
+/* Encadré des étapes de la page de réservation */
+.st-mini-steps { counter-reset: st-mini; border-top: 1px solid var(--color-ink); }
+.st-mini-steps li {
+    counter-increment: st-mini;
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: 0.25rem 0.5rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--color-rule);
+}
+.st-mini-steps li::before {
+    content: counter(st-mini, decimal-leading-zero);
+    grid-row: span 2;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-brand);
+    font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .st-faq-icon::before,
+    .st-faq-icon::after,
+    .st-linklist a { transition: none; }
+    .st-faq details[open] .st-faq-body { animation: none; }
+}
+} /* fin @layer components */

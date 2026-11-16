@@ -1,19 +1,16 @@
 ---
-import Layout from '@/layouts/standard/StandardLayout.astro';
+import StandardAuthShell from '@/components/standard/StandardAuthShell.astro';
 import SignupForm from '@/components/standard/auth/StandardSignupForm';
 ---
 
-<Layout title="Inscription" description="Créer votre espace professionnel." noindex>
-	<section class="mx-auto max-w-md px-6 py-20">
-		<h1 class="text-2xl font-bold text-stone-900">Créer votre espace professionnel</h1>
-		<p class="mt-2 text-sm text-stone-500">
-			Configurez votre profil, vos prestations et vos disponibilités.
-		</p>
-		<div class="mt-8">
-			<SignupForm basePath="/demo-standard" client:load />
-		</div>
-		<p class="mt-6 text-sm text-stone-500">
-			Déjà un compte ? <a href="/demo-standard/connexion" class="font-medium text-rose-600 hover:underline">Se connecter</a>
-		</p>
-	</section>
-</Layout>
+<StandardAuthShell
+	pageTitle="Inscription"
+	title="Créer votre espace professionnel"
+	description="Créer votre espace professionnel."
+	lead="Configurez votre profil, vos prestations et vos disponibilités."
+>
+	<SignupForm basePath="/demo-standard" client:load />
+	<p slot="after">
+		Déjà un compte&nbsp;? <a href="/demo-standard/connexion" class="st-link st-link--on font-semibold text-brand">Se connecter</a>
+	</p>
+</StandardAuthShell>

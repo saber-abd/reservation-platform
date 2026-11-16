@@ -2,20 +2,37 @@
 import Layout from '@/layouts/standard/StandardLayout.astro';
 
 Astro.response.status = 404;
+
+const liens = [
+	{ href: '/demo-standard/', label: "Revenir à l'accueil" },
+	{ href: '/demo-standard/services', label: 'Consulter les tarifs' },
+	{ href: '/demo-standard/reservation', label: 'Réserver une intervention' },
+	{ href: '/demo-standard/contact', label: "Écrire à l'atelier" },
+];
 ---
 
 <Layout title="Page introuvable" noindex>
-	<section class="mx-auto flex max-w-xl flex-col items-center px-6 py-32 text-center">
-		<p class="text-sm font-semibold uppercase tracking-widest text-rose-600">Erreur 404</p>
-		<h1 class="mt-3 text-3xl font-bold text-stone-900 md:text-4xl">Page introuvable</h1>
-		<p class="mt-4 text-stone-500">
-			La page que vous cherchez n'existe pas ou a été déplacée.
-		</p>
-		<a
-			href="/demo-standard/"
-			class="mt-8 inline-block rounded-xl bg-rose-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-rose-700"
-		>
-			Retour à l'accueil
-		</a>
+	<section class="st-container st-section">
+		<div class="grid items-end gap-x-14 gap-y-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+			<div data-reveal-group>
+				<p class="st-404 st-num" aria-hidden="true">4<span>0</span>4</p>
+				<h1 class="st-h1 st-h1--page mt-8 max-w-[16ch]">Cette page n'existe pas, ou plus.</h1>
+				<p class="st-lead mt-5 max-w-[46ch]">
+					L'adresse est peut-être mal saisie, ou la page a été déplacée. Les rubriques du site sont juste à côté.
+				</p>
+			</div>
+			<nav aria-label="Rubriques du site" data-reveal data-reveal-delay="200">
+				<ul class="st-linklist">
+					{liens.map((l) => (
+						<li>
+							<a href={l.href}>
+								{l.label}
+								<svg class="st-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
+							</a>
+						</li>
+					))}
+				</ul>
+			</nav>
+		</div>
 	</section>
 </Layout>

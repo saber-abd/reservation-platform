@@ -1,0 +1,35 @@
+---
+// En-tête commun des pages intérieures : fil d'Ariane, grand titre calé à gauche,
+// chapeau, et une colonne libre à droite (slot « aside ») pour les infos pratiques.
+interface Props {
+	title: string;
+	crumb: string;
+	lead?: string;
+}
+
+const { title, crumb, lead } = Astro.props;
+const hasAside = Astro.slots.has('aside');
+---
+
+<header class="st-pagehead">
+	<div class="st-container">
+		<div class:list={['grid gap-x-14 gap-y-10', hasAside && 'lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:items-end']}>
+			<div data-reveal-group>
+				<nav aria-label="Fil d'Ariane">
+					<ol class="st-crumbs">
+						<li><a href="/demo-standard/">Accueil</a></li>
+						<li aria-current="page" class="text-ink-soft">{crumb}</li>
+					</ol>
+				</nav>
+				<h1 class="st-h1 st-h1--page max-w-[18ch]">{title}</h1>
+				{lead && <p class="st-lead mt-6 max-w-[54ch]">{lead}</p>}
+				<slot />
+			</div>
+			{hasAside && (
+				<div data-reveal data-reveal-delay="200">
+					<slot name="aside" />
+				</div>
+			)}
+		</div>
+	</div>
+</header>

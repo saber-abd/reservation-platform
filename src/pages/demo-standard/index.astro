@@ -1,6 +1,7 @@
 ---
 import StandardLayout from '@/layouts/standard/StandardLayout.astro';
 import Map from '@/components/standard/StandardMap.astro';
+import StandardCta from '@/components/standard/StandardCta.astro';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname);
@@ -10,7 +11,6 @@ const formatDuration = (min: number) =>
 	min < 60 ? `${min} min` : min % 60 === 0 ? `${min / 60} h` : `${Math.floor(min / 60)} h ${min % 60}`;
 
 const diagnostic = services.find((s) => /diagnostic/i.test(s.name));
-const phoneHref = `tel:${business.phone.replace(/\s+/g, '')}`;
 
 // Familles d'appareils pris en charge (texte d'habillage).
 const domaines = [
@@ -46,12 +46,13 @@ const etapes = [
 ];
 
 const [avisPrincipal, ...autresAvis] = testimonials;
+const openDays = business.openingHours.filter((slot) => !/ferm/i.test(slot.hours));
 ---
 
 <StandardLayout>
 	<!-- Héros : titre à gauche, photo d'atelier à droite -->
 	<section class="st-container pb-14 pt-10 md:pb-20 md:pt-16">
-		<div class="grid items-start gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+		<div class="grid grid-cols-1 items-start gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
 			<div data-reveal-group>
 				<p class="st-note mb-5 text-ink-soft">
 					{business.activity} à domicile et en atelier, Paris 11<sup>e</sup>
@@ -76,8 +77,11 @@ const [avisPrincipal, ...autresAvis] = testimonials;
 					<div>
 						<dt>Horaires</dt>
 						<dd class="st-num">
-							{business.openingHours.map((slot) => (
-								<span class="block">{slot.day.replace(' - ', ' – ')}&nbsp;: {slot.hours.replace(' - ', ' – ')}</span>
+							{openDays.map((slot, i) => (
+								<>
+									{i > 0 && <> <span class="st-sep" aria-hidden="true">/</span> </>}
+									<span class="whitespace-nowrap">{slot.day.replace(' - ', ' – ')}&nbsp;: {slot.hours.replace(' - ', ' – ')}</span>
+								</>
 							))}
 						</dd>
 					</div>
@@ -201,7 +205,7 @@ const [avisPrincipal, ...autresAvis] = testimonials;
 					))}
 				</ol>
 				<p class="mt-8 text-ink-soft" data-reveal>
-					Votre appareil n'est pas dans la liste&nbsp;?
+					Votre appareil n'est pas dans la liste&nbsp;?{' '}
 					<a href="/demo-standard/contact" class="st-link st-link--on font-semibold text-ink">Décrivez la panne</a>, la réponse arrive dans la journée.
 				</p>
 			</div>
@@ -338,22 +342,5 @@ const [avisPrincipal, ...autresAvis] = testimonials;
 	</section>
 
 	<!-- Appel final -->
-	<section class="st-cta">
-		<div class="st-container grid items-end gap-10 py-16 md:py-24 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-			<div data-reveal>
-				<h2 class="st-h2 max-w-[16ch]">Une panne aujourd'hui&nbsp;? Le prochain créneau libre est dans l'agenda.</h2>
-			</div>
-			<div class="flex flex-col items-start gap-6 lg:items-end" data-reveal data-reveal-delay="120">
-				<a href="/demo-standard/reservation" class="st-btn st-btn--light">
-					Voir les disponibilités
-					<svg class="st-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
-				</a>
-				<p class="text-[#b9c0d0] lg:text-right">
-					ou par téléphone<br />
-					<a href={phoneHref} class="st-link st-cta-phone st-num mt-2">{business.phone}</a>
-				</p>
-				<a href="/demo-standard/contact" class="st-link st-link--on text-sm font-semibold text-paper">Nous écrire</a>
-			</div>
-		</div>
-	</section>
+	<StandardCta />
 </StandardLayout>

@@ -1,55 +1,41 @@
 ---
-import StandardLayout from '@/layouts/standard/StandardLayout.astro';
+import StandardLegalPage from '@/components/standard/StandardLegalPage.astro';
+import { getSiteConfig } from '@/config/site';
+
+const { business } = await getSiteConfig(Astro.url.pathname);
 ---
 
-<StandardLayout title="Conditions Générales d'Utilisation" description="CGU de Tech Express - Dépannage Informatique.">
-	<section class="mx-auto max-w-4xl px-6 py-24">
-		<h1 class="text-3xl font-black text-oxford-navy md:text-5xl uppercase tracking-tight mb-4">Conditions Générales d'Utilisation</h1>
-		<p class="text-xl text-cerulean font-bold mb-12">Dernière mise à jour : 17 Septembre 2026</p>
-		
-		<div class="mt-8 space-y-10 text-oxford-navy-800 text-lg leading-relaxed">
-			<div>
-				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">1. Objet</h2>
-				<p>
-					Les présentes Conditions Générales d'Utilisation (CGU) encadrent l'accès et l'utilisation du site internet de Tech Express, ainsi que les services de réservation de dépannage informatique en ligne qui y sont proposés.
-				</p>
-			</div>
-			
-			<div>
-				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">2. Description des services</h2>
-				<p>
-					Le site permet aux utilisateurs de :
-				</p>
-				<ul class="list-disc pl-6 mt-4 space-y-2 font-medium">
-					<li>Consulter nos offres de dépannage (ordinateur, téléphone, imprimante, etc.)</li>
-					<li>Réserver une intervention à domicile ou en atelier.</li>
-					<li>Nous contacter pour obtenir un devis personnalisé.</li>
-				</ul>
-				<p class="mt-4">
-					Toutes les interventions sont soumises à la disponibilité de nos techniciens.
-				</p>
-			</div>
-			
-			<div>
-				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">3. Obligations de l'utilisateur</h2>
-				<p>
-					L'utilisateur s'engage à fournir des informations exactes lors de la réservation (adresse, type d'appareil, description de la panne) pour permettre à nos techniciens d'intervenir dans les meilleures conditions. En cas d'informations erronées entraînant un déplacement inutile, des frais de déplacement pourront être facturés.
-				</p>
-			</div>
-			
-			<div>
-				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">4. Tarifs et Paiement</h2>
-				<p>
-					Les tarifs indiqués sur le site sont à titre indicatif pour les pannes classiques. Un devis final sera validé par le technicien avant toute intervention majeure. Le paiement s'effectue à l'issue de l'intervention, par carte bancaire ou espèces.
-				</p>
-			</div>
-			
-			<div>
-				<h2 class="text-2xl font-bold text-oxford-navy uppercase mb-4">5. Responsabilité</h2>
-				<p>
-					Tech Express s'engage à mettre en œuvre tous les moyens nécessaires pour réparer votre matériel. Toutefois, notre responsabilité ne saurait être engagée en cas de perte de données. Il incombe à l'utilisateur de sauvegarder ses données avant toute intervention.
-				</p>
-			</div>
-		</div>
-	</section>
-</StandardLayout>
+<StandardLegalPage
+	title="Conditions générales d'utilisation"
+	description={`Conditions générales d'utilisation du site de ${business.name}.`}
+	updated="17 septembre 2026"
+>
+	<h2>1. Objet</h2>
+	<p>
+		Les présentes Conditions Générales d'Utilisation (CGU) encadrent l'accès et l'utilisation du site internet de {business.name}, ainsi que les services de réservation de dépannage informatique en ligne qui y sont proposés.
+	</p>
+
+	<h2>2. Description des services</h2>
+	<p>Le site permet aux utilisateurs de :</p>
+	<ul>
+		<li>Consulter nos offres de dépannage (ordinateur, téléphone, imprimante, etc.).</li>
+		<li>Réserver une intervention à domicile ou en atelier.</li>
+		<li>Nous contacter pour obtenir un devis personnalisé.</li>
+	</ul>
+	<p>Toutes les interventions sont soumises à la disponibilité de nos techniciens.</p>
+
+	<h2>3. Obligations de l'utilisateur</h2>
+	<p>
+		L'utilisateur s'engage à fournir des informations exactes lors de la réservation (adresse, type d'appareil, description de la panne) pour permettre à nos techniciens d'intervenir dans les meilleures conditions. En cas d'informations erronées entraînant un déplacement inutile, des frais de déplacement pourront être facturés.
+	</p>
+
+	<h2>4. Tarifs et paiement</h2>
+	<p>
+		Les tarifs indiqués sur le site sont à titre indicatif pour les pannes classiques. Un devis final sera validé par le technicien avant toute intervention majeure. Le paiement s'effectue à l'issue de l'intervention, par carte bancaire ou espèces.
+	</p>
+
+	<h2>5. Responsabilité</h2>
+	<p>
+		{business.name} s'engage à mettre en œuvre tous les moyens nécessaires pour réparer votre matériel. Toutefois, notre responsabilité ne saurait être engagée en cas de perte de données. Il incombe à l'utilisateur de sauvegarder ses données avant toute intervention.
+	</p>
+</StandardLegalPage>

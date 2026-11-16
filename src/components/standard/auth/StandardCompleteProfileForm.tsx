@@ -173,7 +173,7 @@ export default function CompleteProfileForm({ user, targetDemo, onCompleted }: C
 				<button
 					type="submit"
 					disabled={submitting}
-					className="w-full mt-2 py-3 px-5 rounded-xl bg-rose-600 text-white font-bold text-xs uppercase tracking-widest hover:bg-rose-700 active:scale-[0.99] transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+					className="w-full mt-2 py-3.5 px-5 rounded-md bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 active:translate-y-px transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
 				>
 					{submitting ? (
 						<span>Enregistrement en cours...</span>

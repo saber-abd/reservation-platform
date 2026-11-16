@@ -24,8 +24,8 @@ Branche locale **`refonte-graphique`** (créée depuis `main` à jour avec `orig
 | Analyse de l'existant et de la documentation | fait |
 | Recherche des outils d'animation et étude de wisprflow.ai | fait (résumé plus bas) |
 | Socle d'animation commun, polices libres, outils de capture | fait, commité (`5210612`) |
-| Suite de tests Playwright + faux backend Supabase | écrite, 42 tests sur 56 passent sur les dashboards, 14 échecs non encore analysés |
-| Refonte Standard | **en cours, interrompue** : en-tête, pied de page, layout, accueil et `standard.css` réécrits ; autres pages publiques non faites ; rien de vérifié par capture |
+| Suite de tests Playwright + faux backend Supabase | fait (`npm test`). Dashboards : tout passe (16/11). Échecs triés : 4 venaient des tests (corrigés), 3 défauts Diamant antérieurs corrigés (graphique au rendu serveur, hydratation de `DiamantClientNav`). Diamant sans session affichait le dashboard au lieu de renvoyer à la connexion : corrigé dans `DiamantDashboardNav.tsx` (règle confirmée par le propriétaire, voir « Accès visiteur » plus bas) |
+| Refonte Standard | **fait** (16/11) : toutes les pages publiques, dashboard et espace client rhabillés ; tests pages bureau 14/14, mobile 14/14, dashboards 16/16. Reste : URL source des 4 photos de `public/images/standard/` inconnues (à retrouver ou remplacer avant mise en ligne) ; `StandardTestimonialsCarousel.tsx` n'est plus utilisé (à supprimer au tri) |
 | Refonte Premium | **à peine commencée** : `premium.css` réécrit, `PremiumPicture.astro` et `prestations.ts` créés, images téléchargées ; pages et composants pas encore touchés |
 | Refonte Diamant | **non commencée côté code** : seules des images ont été téléchargées dans `public/images/diamant/` |
 | Refonte page commerciale | **en cours, interrompue** : `CommercialLayout.astro` et `commercial.css` réécrits, composants `CadreNavigateur.astro` et `Capture.astro` créés ; `index.astro` pas encore refait |
@@ -37,6 +37,14 @@ Branche locale **`refonte-graphique`** (créée depuis `main` à jour avec `orig
 | Compte rendu | à faire |
 
 **Attention : le dernier commit de la branche est un état intermédiaire.** Des fichiers à moitié migrés cohabitent avec des pages encore dans l'ancien style (par exemple la page commerciale : nouveau layout, ancien `index.astro`). Au moment de la pause, toutes les pages renvoyaient une erreur 500 « fetch failed » sur le serveur de dev : ce n'était pas le code, mais le processus `workerd` du serveur de dev mort après des heures de fonctionnement. Remède : `npx astro dev stop` puis `npx astro dev --port 4321`. Ne pas fusionner dans `main` avant la fin de la refonte et un `npm run build` réussi.
+
+## Accès visiteur à l'espace pro (règle du propriétaire, 16/11/2026)
+
+- Sans session, le tableau de bord de chaque démo renvoie vers la page de connexion de la démo.
+- **Premium** : la page de connexion propose un lien vers l'aperçu à données fictives (`/demo-premium/apercu/dashboard`).
+- **Diamant** : la page de connexion propose un bouton qui connecte au compte de démonstration en lecture seule (`demo@example.com`, rôle `demo` en base, `DiamantLoginForm.tsx`).
+- **Standard** : aucun accès visiteur, la formule n'intègre pas ce type de fonctionnalité d'espace pro.
+- Couvert par `tests/dashboards.spec.ts`. À préserver pendant la refonte des pages de connexion et à reporter dans les `CLAUDE.md` par démo.
 
 ## Constats faits pendant l'analyse
 

@@ -1,19 +1,46 @@
 ---
 import StandardLayout from '@/layouts/standard/StandardLayout.astro';
+import StandardPageHeader from '@/components/standard/StandardPageHeader.astro';
 import { getSiteConfig } from '@/config/site';
-const siteConfig = await getSiteConfig(Astro.url.pathname);
 import StandardReservationForm from '@/components/standard/StandardReservationForm';
+
+const siteConfig = await getSiteConfig(Astro.url.pathname);
+const { business } = siteConfig;
+const phoneHref = `tel:${business.phone.replace(/\s+/g, '')}`;
 ---
 
-<StandardLayout title="Réservation" description={`Réservez votre intervention avec ${siteConfig.business.name}.`}>
-	<section class="mx-auto max-w-3xl px-6 py-20 text-center">
-		<h1 class="text-3xl font-black text-slate-900 md:text-5xl mb-4">Réserver une intervention</h1>
-		<p class="text-lg text-slate-600">Choisissez la prestation dont vous avez besoin, sélectionnez un créneau disponible, et nous interviendrons chez vous.</p>
+<StandardLayout title="Réservation" description={`Réservez votre intervention avec ${business.name}.`}>
+	<StandardPageHeader
+		crumb="Réservation"
+		title="Réserver une intervention"
+		lead="Choisissez l'intervention, puis un créneau libre dans l'agenda. Le technicien vient chez vous ou vous attend à l'atelier."
+	/>
 
-		<div class="mt-12 text-left">
-			<div class="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 md:p-10">
+	<section class="st-container st-section">
+		<div class="grid items-start gap-x-14 gap-y-12 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.65fr)]">
+			<div class="st-panel p-5 sm:p-8 md:p-10" data-reveal>
 				<StandardReservationForm client:load />
 			</div>
+
+			<aside class="lg:sticky lg:top-24" aria-label="Déroulement" data-reveal data-reveal-delay="150">
+				<h2 class="st-h3">Après votre réservation</h2>
+				<ol class="st-mini-steps mt-5">
+					<li>
+						<p class="font-semibold text-ink">Confirmation par email</p>
+						<p class="st-note">Avec la date, l'heure et l'intervention choisie.</p>
+					</li>
+					<li>
+						<p class="font-semibold text-ink">Diagnostic et prix annoncé</p>
+						<p class="st-note">Rien n'est réparé sans votre accord.</p>
+					</li>
+					<li>
+						<p class="font-semibold text-ink">Réparation garantie un an</p>
+						<p class="st-note">La facture sert de justificatif.</p>
+					</li>
+				</ol>
+				<p class="mt-8 text-ink-soft">Un doute sur l'intervention à choisir&nbsp;? Appelez l'atelier&nbsp;:</p>
+				<p class="mt-1"><a href={phoneHref} class="st-link st-num text-xl font-semibold text-ink">{business.phone}</a></p>
+			</aside>
 		</div>
 	</section>
 </StandardLayout>

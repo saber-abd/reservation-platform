@@ -412,7 +412,7 @@ export default function SignupForm({ basePath: propBasePath }: SignupFormProps =
 			<button
 				type="submit"
 				disabled={submitting}
-				className="rounded-xl bg-primary px-4 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-[0_0_15px_rgba(255,50,50,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(255,50,50,0.6)] active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+				className="rounded-md bg-primary px-4 py-3.5 text-[0.95rem] font-semibold text-white transition-colors hover:bg-blue-700 active:translate-y-px disabled:opacity-50"
 			>
 				{submitting ? 'Création...' : (existingUser ? 'Terminer mon profil' : 'Rejoindre')}
 			</button>

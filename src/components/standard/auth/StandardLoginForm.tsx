@@ -303,9 +303,9 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 			</div>
 			{ban && <BanNoticeStandard notice={ban} basePath={getEffectiveBasePath()} />}
 			{error && (
-				<div className="rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs md:text-sm text-rose-800 animate-in fade-in">
-					<div className="font-bold flex items-center gap-2 mb-1 text-rose-900">
-						<ShieldAlert size={16} className="text-rose-600 shrink-0" />
+				<div className="rounded-md bg-red-50 border border-red-200 p-4 text-xs md:text-sm text-red-800 animate-in fade-in">
+					<div className="font-bold flex items-center gap-2 mb-1 text-red-900">
+						<ShieldAlert size={16} className="text-red-600 shrink-0" />
 						<span>{error.includes('suspendu') || error.includes('refusée') ? 'Accès suspendu' : 'Erreur'}</span>
 					</div>
 					<p className="leading-relaxed">{error}</p>
@@ -327,9 +327,9 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 			<button
 				type="submit"
 				disabled={submitting}
-				className="rounded-xl bg-primary px-4 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-[0_0_15px_rgba(255,50,50,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(255,50,50,0.6)] active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+				className="rounded-md bg-primary px-4 py-3.5 text-[0.95rem] font-semibold text-white transition-colors hover:bg-blue-700 active:translate-y-px disabled:opacity-50"
 			>
-				{submitting ? 'Connexion...' : 'Démarrer'}
+				{submitting ? 'Connexion…' : 'Se connecter'}
 			</button>
 
 			<div className="relative my-4 flex items-center py-2">

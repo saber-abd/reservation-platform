@@ -1,0 +1,46 @@
+---
+// Gabarit des pages légales : en-tête, sommaire des trois pages à gauche, texte à droite.
+import StandardLayout from '@/layouts/standard/StandardLayout.astro';
+import StandardPageHeader from '@/components/standard/StandardPageHeader.astro';
+
+interface Props {
+	title: string;
+	description: string;
+	updated: string;
+}
+
+const { title, description, updated } = Astro.props;
+const current = Astro.url.pathname.replace(/\/$/, '');
+
+const pages = [
+	{ href: '/demo-standard/mentions-legales', label: 'Mentions légales' },
+	{ href: '/demo-standard/politique-de-confidentialite', label: 'Politique de confidentialité' },
+	{ href: '/demo-standard/conditions-utilisation', label: "Conditions générales d'utilisation" },
+];
+---
+
+<StandardLayout title={title} description={description}>
+	<StandardPageHeader crumb={title} title={title}>
+		<p class="st-note st-num mt-5">Dernière mise à jour : {updated}</p>
+	</StandardPageHeader>
+
+	<section class="st-container st-section">
+		<div class="grid gap-x-16 gap-y-12 lg:grid-cols-[minmax(0,0.6fr)_minmax(0,1.4fr)]">
+			<nav class="lg:sticky lg:top-24 lg:self-start" aria-label="Informations légales">
+				<ul class="st-linklist">
+					{pages.map((p) => (
+						<li>
+							<a href={p.href} aria-current={current === p.href ? 'page' : undefined}>
+								{p.label}
+								<svg class="st-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
+							</a>
+						</li>
+					))}
+				</ul>
+			</nav>
+			<div class="st-prose max-w-[68ch] [&>h2:first-child]:mt-0 [&>h2:first-child]:border-0 [&>h2:first-child]:pt-0">
+				<slot />
+			</div>
+		</div>
+	</section>
+</StandardLayout>

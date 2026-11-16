@@ -1,14 +1,16 @@
 ---
-import Layout from '@/layouts/standard/StandardLayout.astro';
+import StandardAuthShell from '@/components/standard/StandardAuthShell.astro';
 import ResetPasswordForm from '@/components/standard/auth/StandardResetPasswordForm';
 ---
 
-<Layout title="Réinitialiser le mot de passe" description="Choisissez un nouveau mot de passe." noindex>
-	<section class="mx-auto max-w-md px-6 py-20">
-		<h1 class="text-2xl font-bold text-stone-900">Nouveau mot de passe</h1>
-		<p class="mt-2 text-sm text-stone-500">Choisissez un nouveau mot de passe pour votre compte.</p>
-		<div class="mt-8">
-			<ResetPasswordForm basePath="/demo-standard" client:load />
-		</div>
-	</section>
-</Layout>
+<StandardAuthShell
+	pageTitle="Réinitialiser le mot de passe"
+	title="Nouveau mot de passe"
+	description="Choisissez un nouveau mot de passe."
+	lead="Choisissez un nouveau mot de passe pour votre compte."
+>
+	<ResetPasswordForm basePath="/demo-standard" client:load />
+	<p slot="after">
+		<a href="/demo-standard/connexion" class="st-link st-link--on font-semibold text-brand">Retour à la connexion</a>
+	</p>
+</StandardAuthShell>

@@ -1,100 +1,101 @@
 ---
 import StandardLayout from '@/layouts/standard/StandardLayout.astro';
+import StandardPageHeader from '@/components/standard/StandardPageHeader.astro';
+import StandardCta from '@/components/standard/StandardCta.astro';
 import { getSiteConfig } from '@/config/site';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname);
+const { business, about } = siteConfig;
 ---
 
-<StandardLayout title="À Propos" description={`Découvrez l'histoire et les engagements de ${siteConfig.business.name}.`}>
-	<!-- Hero Section -->
-	<section class="bg-slate-900 py-20 md:py-28 text-center relative overflow-hidden">
-		<!-- Decorative elements -->
-		<div class="absolute inset-0 z-0 opacity-10">
-			<div class="absolute top-0 right-10 w-64 h-64 bg-blue-500 rounded-full blur-[100px]"></div>
-			<div class="absolute bottom-0 left-10 w-64 h-64 bg-cyan-400 rounded-full blur-[100px]"></div>
-		</div>
-		<div class="relative z-10 max-w-3xl mx-auto px-6">
-			<h1 class="text-3xl font-black text-white md:text-5xl mb-6">Notre Histoire</h1>
-			<p class="text-lg text-slate-300">
-				La passion de l'informatique au service de votre quotidien.
-			</p>
-		</div>
-	</section>
+<StandardLayout title="À propos" description={`L'atelier ${business.name}, ses engagements et les formations de son technicien.`}>
+	<StandardPageHeader
+		crumb="À propos"
+		title="Un atelier dans le 11e, et la plupart des réparations chez vous"
+		lead={`${business.name} répare ordinateurs, téléphones, tablettes, imprimantes et téléviseurs. Les interventions courantes se font à domicile ; les réparations longues partent à l'atelier, ${business.address}.`}
+	/>
 
-	<!-- Story Section -->
-	<section class="mx-auto max-w-5xl px-6 py-20">
-		<div class="grid items-center gap-16 md:grid-cols-2">
-			<div class="order-2 md:order-1" data-aos="fade-right">
-				<h2 class="text-3xl font-bold text-slate-900 mb-6">Qui sommes-nous ?</h2>
-				<p class="text-lg text-slate-600 leading-relaxed mb-8">
-					{siteConfig.about.story}
-				</p>
-				<div class="bg-blue-50 border-l-4 border-blue-600 p-6 rounded-r-xl">
-					<p class="text-blue-900 italic font-medium">"Notre mission est de rendre la technologie accessible à tous, sans jargon technique et avec une transparence totale."</p>
+	<!-- Histoire -->
+	<section class="st-container st-section">
+		<div class="grid items-start gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+			<figure>
+				<div class="st-frame aspect-[4/3]" data-reveal="fade" data-clip>
+					<picture>
+						<source
+							type="image/avif"
+							srcset="/images/standard/depannage-tour-pc-480.avif 480w, /images/standard/depannage-tour-pc-800.avif 800w, /images/standard/depannage-tour-pc-1280.avif 1280w"
+							sizes="(min-width: 1024px) 40vw, 100vw"
+						/>
+						<img
+							src="/images/standard/depannage-tour-pc-800.webp"
+							srcset="/images/standard/depannage-tour-pc-480.webp 480w, /images/standard/depannage-tour-pc-800.webp 800w, /images/standard/depannage-tour-pc-1280.webp 1280w"
+							sizes="(min-width: 1024px) 40vw, 100vw"
+							width="1280"
+							height="853"
+							alt="Un technicien débranche une carte graphique dans une tour d'ordinateur ouverte"
+							loading="lazy"
+							decoding="async"
+						/>
+					</picture>
 				</div>
-			</div>
-			<div class="order-1 md:order-2 overflow-hidden rounded-2xl shadow-xl border border-slate-200" data-aos="fade-left">
-				<img src="/images/technicien_pc.webp" loading="lazy" decoding="async" alt="Technicien réparant un PC" class="h-full w-full object-cover aspect-[4/3] hover:scale-105 transition-transform duration-700" />
+				<figcaption class="st-caption">
+					<span>Remplacement d'une carte graphique dans une tour.</span>
+				</figcaption>
+			</figure>
+
+			<div data-reveal-group>
+				<h2 class="st-h2">Pourquoi un dépanneur à domicile</h2>
+				<p class="mt-6 max-w-[60ch] text-lg leading-relaxed text-ink-soft">{about.story}</p>
+				<blockquote class="mt-10 max-w-[34ch] border-l-2 border-brand pl-6 text-2xl font-[550] leading-snug tracking-[-0.02em] text-ink">
+					On vous dit ce qui est cassé et ce que ça coûte. Ensuite, c'est vous qui décidez.
+				</blockquote>
 			</div>
 		</div>
 	</section>
 
-	<!-- Objectives Section -->
-	<section class="bg-slate-50 py-24 border-y border-slate-200">
-		<div class="mx-auto max-w-6xl px-6">
-			<div class="text-center mb-16" data-aos="fade-up">
-				<h2 class="text-3xl font-bold text-slate-900 md:text-4xl">Nos Engagements</h2>
-			</div>
-
-			<div class="grid gap-8 md:grid-cols-3">
-				{
-					siteConfig.about.objectives.map((obj, index) => (
-						<div 
-							class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm transition-all hover:border-blue-300 hover:shadow-xl hover:-translate-y-1 group" 
-							data-aos="fade-up" 
-							data-aos-delay={index * 100}
-						>
-							<div class="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-								<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-									<path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>
-								</svg>
+	<!-- Engagements -->
+	<section class="st-rule-top bg-surface">
+		<div class="st-container st-section">
+			<div class="grid gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+				<div class="lg:sticky lg:top-24 lg:self-start" data-reveal>
+					<h2 class="st-h2 max-w-[14ch]">Ce sur quoi on s'engage</h2>
+					<p class="st-lead mt-5 max-w-[38ch]">Trois règles appliquées à chaque intervention, écrites ici pour que vous puissiez nous les rappeler.</p>
+				</div>
+				<ol class="st-rows" data-reveal-group>
+					{about.objectives.map((obj, i) => (
+						<li class="st-row st-row--two">
+							<span class="st-row-index st-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+							<div>
+								<h3 class="st-h3 md:text-2xl">{obj.title}</h3>
+								<p class="mt-2.5 max-w-[56ch] leading-relaxed text-ink-soft">{obj.description}</p>
 							</div>
-							<h3 class="mb-4 text-xl font-bold text-slate-900">{obj.title}</h3>
-							<p class="text-slate-600 leading-relaxed">{obj.description}</p>
-						</div>
-					))
-				}
+						</li>
+					))}
+				</ol>
 			</div>
 		</div>
 	</section>
 
-	<!-- Diplomas / Certifications Section -->
-	<section class="mx-auto max-w-4xl px-6 py-24">
-		<div class="text-center mb-16" data-aos="fade-up">
-			<h2 class="text-3xl font-bold text-slate-900 md:text-4xl">Certifications & Formations</h2>
-			<p class="mt-4 text-lg text-slate-500">Un savoir-faire reconnu et mis à jour continuellement.</p>
-		</div>
-
-		<div class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
-			{
-				siteConfig.about.diplomas.map((diploma, index) => (
-					<div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active" data-aos="fade-up" data-aos-delay={index * 100}>
-						<!-- Icon -->
-						<div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-blue-500 text-slate-50 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
-							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-						</div>
-						
-						<!-- Card -->
-						<div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-							<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
-								<h3 class="font-bold text-slate-900 text-lg">{diploma.title}</h3>
-								<time class="font-mono text-sm font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md self-start sm:self-auto mt-2 sm:mt-0">{diploma.year}</time>
-							</div>
-							<p class="text-slate-600 font-medium">{diploma.institution}</p>
-						</div>
-					</div>
-				))
-			}
+	<!-- Formations -->
+	<section class="st-rule-top">
+		<div class="st-container st-section">
+			<div class="grid gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+				<div data-reveal>
+					<h2 class="st-h2 max-w-[14ch]">Formations et certifications</h2>
+					<p class="st-lead mt-5 max-w-[38ch]">Le parcours du technicien qui se déplace chez vous.</p>
+				</div>
+				<ol class="st-rows" data-reveal-group>
+					{about.diplomas.map((d) => (
+						<li class="st-row st-row--year">
+							<span class="st-num text-3xl font-semibold tracking-[-0.03em] text-brand md:text-4xl">{d.year}</span>
+							<h3 class="st-h3">{d.title}</h3>
+							<p class="text-ink-soft md:text-right">{d.institution}</p>
+						</li>
+					))}
+				</ol>
+			</div>
 		</div>
 	</section>
+
+	<StandardCta title="Un appareil à faire regarder ? Choisissez un créneau." />
 </StandardLayout>

@@ -1,0 +1,32 @@
+---
+// Bloc d'appel final (fond encre) : agenda à gauche, téléphone à droite.
+import { getSiteConfig } from '@/config/site';
+
+interface Props {
+	title?: string;
+}
+
+const siteConfig = await getSiteConfig(Astro.url.pathname);
+const { business } = siteConfig;
+const phoneHref = `tel:${business.phone.replace(/\s+/g, '')}`;
+const { title = "Une panne aujourd'hui ? Le prochain créneau libre est dans l'agenda." } = Astro.props;
+---
+
+<section class="st-cta">
+	<div class="st-container grid items-end gap-10 py-16 md:py-24 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+		<div data-reveal>
+			<h2 class="st-h2 max-w-[17ch]">{title}</h2>
+		</div>
+		<div class="flex flex-col items-start gap-6 lg:items-end" data-reveal data-reveal-delay="120">
+			<a href="/demo-standard/reservation" class="st-btn st-btn--light">
+				Voir les disponibilités
+				<svg class="st-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
+			</a>
+			<p class="text-[#b9c0d0] lg:text-right">
+				ou par téléphone<br />
+				<a href={phoneHref} class="st-link st-cta-phone st-num mt-2">{business.phone}</a>
+			</p>
+			<a href="/demo-standard/contact" class="st-link st-link--on text-sm font-semibold text-paper">Nous écrire</a>
+		</div>
+	</div>
+</section>
