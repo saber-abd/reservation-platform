@@ -36,8 +36,9 @@
   opacity: 1;
   translate: none;
   scale: 1;
-  clip-path: inset(0 0 0 0);
 }
+/* Seule la variante clip garde un masque une fois révélée : ailleurs, un clip-path rognerait ombres et débordements. */
+.js [data-reveal='clip'].is-revealed { clip-path: inset(0 0 0 0); }
 
 /* Cascade : chaque enfant direct reçoit --i (posé par reveal.ts) */
 .js [data-reveal-group] > * {
