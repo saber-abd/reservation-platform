@@ -1,0 +1,34 @@
+---
+// Téléphone dessiné en CSS (styles .cadre-tel dans commercial.css) autour d'une capture mobile
+// (public/images/commercial/<file>-390|780, 390 × 844).
+interface Props {
+	file: string;
+	alt: string;
+	sizes?: string;
+	prioritaire?: boolean;
+	class?: string;
+}
+
+const { file, alt, sizes = '(min-width: 992px) 200px, 34vw', prioritaire = false, class: className = '' } = Astro.props;
+const base = `/images/commercial/${file}`;
+const srcset = (ext: string) => `${base}-390.${ext} 390w, ${base}-780.${ext} 780w`;
+---
+
+<span class:list={['cadre-tel', className]}>
+	<span class="cadre-tel-ecran">
+		<picture>
+			<source type="image/avif" srcset={srcset('avif')} sizes={sizes} />
+			<img
+				src={`${base}-390.webp`}
+				srcset={srcset('webp')}
+				sizes={sizes}
+				width="390"
+				height="844"
+				alt={alt}
+				loading={prioritaire ? 'eager' : 'lazy'}
+				decoding="async"
+				fetchpriority={prioritaire ? 'high' : undefined}
+			/>
+		</picture>
+	</span>
+</span>

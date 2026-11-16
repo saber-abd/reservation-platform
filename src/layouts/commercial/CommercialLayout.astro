@@ -52,7 +52,11 @@ const legal = [
 		<title>{title}</title>
 		<meta name="theme-color" content="#f4efe6" />
 		<!-- Active les apparitions au défilement uniquement si le JS tourne (sinon tout reste visible). -->
-		<script is:inline>document.documentElement.classList.add('js');</script>
+		<!-- Filet de sécurité : si les animations d'entrée n'ont pas démarré après 3,5 s, tout s'affiche. -->
+		<script is:inline>
+			document.documentElement.classList.add('js');
+			setTimeout(function () { document.documentElement.classList.add('cm-secours'); }, 3500);
+		</script>
 	</head>
 	<body class="commercial-page flex min-h-screen flex-col">
 		<a href="#contenu" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-encre focus:px-4 focus:py-2 focus:text-papier">Aller au contenu</a>

@@ -3,7 +3,8 @@
 import Capture from './Capture.astro';
 
 interface Props {
-	demo: 'standard' | 'premium' | 'diamant';
+	/** Captures de la galerie ; absent = captures de public/images/commercial. */
+	demo?: 'standard' | 'premium' | 'diamant';
 	file: string;
 	alt: string;
 	/** Texte de la barre d'adresse (décoratif). */

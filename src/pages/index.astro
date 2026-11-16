@@ -1,693 +1,606 @@
 ---
+// Accueil de SaberWeb.dev. Les prix, durées et contenus des formules viennent de src/data/devis.json
+// (via components/commercial/offre.ts) ; les captures sont celles des démos refaites.
+// Animations : GSAP (ScrollTrigger, SplitText) dans le <script> en bas de page, toutes dans
+// gsap.matchMedia() ; épinglage des formules et colonne collante au-dessus de 992 px seulement.
 import CommercialLayout from '@/layouts/commercial/CommercialLayout.astro';
 import Avatar from '@/components/commercial/Avatar.astro';
 import BrandIcon from '@/components/commercial/BrandIcon.astro';
+import CadreNavigateur from '@/components/commercial/CadreNavigateur.astro';
+import CadreTelephone from '@/components/commercial/CadreTelephone.astro';
 import { membres } from '@/components/commercial/equipe';
 import { contact } from '@/components/commercial/contact';
-import {
-	Mail,
-	Phone,
-	CalendarCheck,
-	ShieldCheck,
-	Gem,
-	ArrowRight,
-	Check,
-	X,
-	MessagesSquare,
-	PenTool,
-	Rocket,
-	Smartphone,
-	Zap,
-	Lock,
-	LineChart,
-	Users,
-	Gift,
-	Search,
-	ChevronDown,
-} from 'lucide-react';
+import { paliers, devis, descriptionService, formulesIncluant } from '@/components/commercial/offre';
+import { formatEuros } from '@/lib/devis';
+import { ArrowRight, ArrowUpRight, Phone } from 'lucide-react';
 
-// Classes littérales par formule (Tailwind ne génère que ce qu'il lit dans les sources).
-const formules = [
+const [standard, premium, diamant] = paliers;
+const pad = (n: number) => String(n).padStart(2, '0');
+
+// Bandeau : ce que contiennent les formules, dans l'ordre où elles l'ajoutent.
+const bandeau = diamant.contenu.map((c) => c.service.nom);
+
+// Colonne collante : une ligne par outil, avec la capture correspondante.
+type Fonction = { id: string; titre: string; texte: string; formules: string; capture: { demo?: 'premium' | 'diamant'; file: string; url: string } };
+const fonctions: Fonction[] = [
 	{
-		id: 'standard',
-		nom: 'Standard',
-		icon: CalendarCheck,
-		accroche: 'Sans base de données',
-		prix: 'Sur devis',
-		prixNote: 'Hébergement ~0 € / mois',
-		description:
-			"L'essentiel pour démarrer : un site vitrine ultra-rapide relié en direct à votre Google Agenda, sans base de données à administrer.",
-		forces: [
-			['Vitesse et référencement', 'score PageSpeed > 95'],
-			['Zéro base de données', 'hébergement ~0 € / mois'],
-			['Google Agenda en direct', 'les RDV arrivent dans votre agenda'],
-			['E-mails de confirmation', 'envoyés automatiquement'],
-			['Carte interactive', 'votre zone d’intervention'],
-		],
-		limites: [
-			'Pas d’espace client avec compte',
-			'Pas de suivi du chiffre d’affaires',
-			'Pas de fidélité ni de messagerie',
-		],
-		demo: '/demo-standard/',
-		detail: '/galerie/standard',
-		style: {
-			card: 'border border-stone-200 bg-white',
-			icon: 'bg-sky-100 text-sky-700',
-			check: 'bg-sky-100 text-sky-700',
-			spot: '14 165 233',
-			primary: 'btn-dark',
-			secondary: 'btn-outline',
-		},
+		id: 'reservation',
+		titre: 'Réservation en ligne',
+		texte: `${descriptionService('resa-agenda')} En Premium et Diamant, les créneaux suivent vos disponibilités et les doubles réservations sont bloquées.`,
+		formules: 'Toutes les formules',
+		capture: { file: 'standard-reservation', url: 'demo-standard/reservation' },
 	},
-	{
-		id: 'premium',
-		nom: 'Premium',
-		icon: ShieldCheck,
-		accroche: 'Avec espace client',
-		prix: 'Sur devis',
-		prixNote: 'Infrastructure 0 à 25 € / mois',
-		description:
-			'Une plateforme complète avec base de données : idéale pour les ateliers, garages et PME qui veulent suivre leur clientèle et piloter leur activité.',
-		forces: [
-			['Base de données sécurisée', 'chaque client ne voit que ses données'],
-			['Espace client dédié', 'suivi et report des rendez-vous'],
-			['Statistiques', 'chiffre d’affaires et prestations phares'],
-			['Fiches clients et notes privées', 'par client ou véhicule'],
-			['Messagerie pro ↔ client', 'intégrée au site'],
-			['Programme de fidélité', 'points et avantages'],
-			['Version mobile soignée', 'menus et transitions animés'],
-		],
-		limites: [
-			'Pas de gestion d’équipe multi-rôles',
-			'Pas de modération des clients abusifs',
-			'Pas de recherche unifiée multi-critères',
-		],
-		demo: '/demo-premium/',
-		detail: '/galerie/premium',
-		highlight: true,
-		style: {
-			card: 'bg-white',
-			icon: 'bg-rose-100 text-rose-600',
-			check: 'bg-rose-100 text-rose-600',
-			spot: '225 29 72',
-			primary: 'btn-rose',
-			secondary: 'btn-rose-outline',
-		},
-	},
-	{
-		id: 'diamant',
-		nom: 'Diamant',
-		icon: Gem,
-		accroche: 'Sur cahier des charges',
-		prix: 'Dès 3 000 €',
-		prixNote: 'Sur cahier des charges',
-		description:
-			"L'écosystème complet pour les établissements exigeants : gestion d'équipe, modération des abus et design signature exclusif.",
-		forces: [
-			['Tout Premium', 'avec une architecture sur mesure'],
-			['Équipe et rôles', 'administrateur, employé, démo'],
-			['Protection anti-absences', 'bannissement avec motif'],
-			['Recherche unifiée', 'instantanée, multi-critères'],
-			['Fidélité VIP à 4 paliers', 'de Cristal à Diamant'],
-			['Double synchronisation', 'base de données + Google Agenda'],
-			['Version mobile soignée', 'menus et transitions animés'],
-			['Design signature', 'et logo 3D animé'],
-		],
-		limites: ['Conception sur cahier des charges préalable', 'Investissement initial plus élevé'],
-		demo: '/demo-diamant/',
-		detail: '/galerie/diamant',
-		style: {
-			card: 'border border-stone-200 bg-white',
-			icon: 'bg-violet-100 text-violet-600',
-			check: 'bg-violet-100 text-violet-600',
-			spot: '124 58 237',
-			primary: 'btn-violet',
-			secondary: 'btn-violet-outline',
-		},
-	},
+	{ id: 'dashboard', titre: 'Tableau de bord', texte: descriptionService('dashboard'), formules: formulesIncluant('dashboard'), capture: { file: 'premium-tableau', url: 'demo-premium/dashboard' } },
+	{ id: 'statistiques', titre: 'Statistiques', texte: descriptionService('statistiques'), formules: formulesIncluant('statistiques'), capture: { file: 'premium-stats', url: 'demo-premium/dashboard/statistiques' } },
+	{ id: 'espace-client', titre: 'Espace client', texte: descriptionService('espace-client'), formules: formulesIncluant('espace-client'), capture: { demo: 'premium', file: 'espace-client', url: 'demo-premium/espace-client' } },
+	{ id: 'messagerie', titre: 'Messagerie', texte: descriptionService('messagerie'), formules: formulesIncluant('messagerie'), capture: { demo: 'diamant', file: 'messagerie', url: 'demo-diamant/dashboard/messages' } },
+	{ id: 'fidelite', titre: 'Fidélité', texte: descriptionService('fidelite'), formules: formulesIncluant('fidelite'), capture: { demo: 'diamant', file: 'fidelite-client', url: 'demo-diamant/espace-client/fidelite' } },
+	{ id: 'equipe-droits', titre: 'Équipe et droits', texte: descriptionService('equipe-droits'), formules: formulesIncluant('equipe-droits'), capture: { demo: 'diamant', file: 'permissions', url: 'demo-diamant/dashboard/droits' } },
+	{ id: 'moderation', titre: 'Modération des clients', texte: descriptionService('moderation'), formules: formulesIncluant('moderation'), capture: { demo: 'diamant', file: 'moderation-clients', url: 'demo-diamant/dashboard/clients' } },
 ];
 
-const mots = ['sur mesure.', 'rapide.', 'à votre image.', 'prête à réserver.'];
-
-const bandeau = [
-	{ icon: CalendarCheck, label: 'Réservation en ligne' },
-	{ icon: Zap, label: 'Pages ultra-rapides' },
-	{ icon: Smartphone, label: 'Pensé pour le mobile' },
-	{ icon: Lock, label: 'Données sécurisées' },
-	{ icon: LineChart, label: 'Statistiques claires' },
-	{ icon: Users, label: 'Espace client' },
-	{ icon: Gift, label: 'Fidélité intégrée' },
-	{ icon: Search, label: 'Bien référencé' },
-];
-
-const chiffres = [
-	{ valeur: 3, suffixe: '', label: 'formules, du vitrine à la suite complète' },
-	{ valeur: 95, suffixe: '+', label: 'score PageSpeed visé sur chaque page' },
-	{ valeur: 0, suffixe: ' €', label: 'd’hébergement mensuel en Standard' },
-	{ valeur: 100, suffixe: ' %', label: 'responsive, du téléphone au grand écran' },
-];
+const maintenance = devis.services.find((s) => s.id === 'maintenance');
+const maintenanceMin = maintenance?.formules.standard?.mensuel?.min;
 
 const etapes = [
-	{ icon: MessagesSquare, titre: 'On échange', texte: 'Un appel pour comprendre votre métier, vos clients et vos contraintes. Gratuit et sans engagement.' },
-	{ icon: PenTool, titre: 'On conçoit', texte: 'Maquette, choix de la formule et devis détaillé. Vous validez chaque étape avant la suite.' },
-	{ icon: Rocket, titre: 'On lance', texte: 'Mise en ligne, prise en main accompagnée, puis suivi et évolutions selon vos besoins.' },
+	{
+		titre: 'On en parle',
+		texte: 'Un appel pour comprendre votre métier, vos prestations et la façon dont vous prenez les rendez-vous aujourd’hui. Vous repartez avec la formule qui vous convient et un devis détaillé, ligne par ligne.',
+		meta: 'Gratuit, sans engagement',
+	},
+	{
+		titre: 'On construit',
+		texte: 'Maquette des pages principales, validée avec vous, puis développement du site et des outils de la formule. Vos textes et vos photos sont intégrés au fur et à mesure.',
+		meta: `${standard.jours} de travail en Standard, ${diamant.jours} en Diamant`,
+	},
+	{
+		titre: 'On met en ligne',
+		texte: `${descriptionService('recette')} Le site tourne ensuite sur votre nom de domaine et vos propres comptes.`,
+		meta: maintenanceMin !== undefined ? `Maintenance en option, dès ${formatEuros(maintenanceMin)} par mois` : 'Maintenance en option',
+	},
 ];
 
 const faq = [
-	{ q: 'Combien de temps faut-il pour avoir mon site ?', r: 'Cela dépend de la formule et de vos contenus : quelques semaines pour un site Standard, davantage pour une plateforme Diamant sur cahier des charges. Le planning est fixé dans le devis.' },
-	{ q: 'Est-ce que je pourrai modifier mes prestations et horaires moi-même ?', r: 'Oui. Les formules Premium et Diamant incluent un tableau de bord pour gérer prestations, disponibilités et clients. En Standard, vos rendez-vous arrivent directement dans votre Google Agenda.' },
-	{ q: 'Le site fonctionne-t-il bien sur téléphone ?', r: 'Oui, toutes les pages sont pensées d’abord pour le mobile, avec des menus et des transitions animés qui restent légers même sur un téléphone modeste.' },
-	{ q: 'Quels sont les frais après la mise en ligne ?', r: 'L’hébergement est quasi gratuit en Standard, et de 0 à 25 € par mois en Premium selon le volume. Le nom de domaine coûte environ 15 € par an. Tout est détaillé dans les pages de chaque formule.' },
-];
-
-const vitrines = [
-	{ demo: 'diamant', alt: 'Aperçu du site vitrine de la démo Diamant' },
-	{ demo: 'premium', alt: 'Aperçu du site vitrine de la démo Premium' },
-	{ demo: 'standard', alt: 'Aperçu du site vitrine de la démo Standard' },
+	{
+		volet: 'Avant le projet',
+		questions: [
+			{
+				q: 'Combien de temps faut-il pour avoir mon site ?',
+				r: `Le devis compte ${standard.jours} de travail pour un site Standard, ${premium.jours} pour Premium et ${diamant.jours} pour Diamant, hors options. Le calendrier dépend surtout de la date à laquelle vos textes et vos photos sont prêts ; il est fixé avec vous au moment du devis.`,
+			},
+			{
+				q: 'Dois-je fournir les textes et les photos ?',
+				r: 'Oui, par défaut : vous connaissez votre métier mieux que nous. Si vous préférez, la rédaction des textes à partir d’un entretien existe en option dans le simulateur de devis.',
+			},
+			{
+				q: 'Quelle formule choisir ?',
+				r: 'Standard si vous voulez un site et des rendez-vous qui arrivent dans votre agenda Google. Premium si vos clients doivent avoir un compte, un historique et des points de fidélité. Diamant si vous travaillez à plusieurs et devez répartir les accès. En cas de doute, le premier appel sert à ça.',
+			},
+		],
+	},
+	{
+		volet: 'Après la mise en ligne',
+		questions: [
+			{
+				q: 'Quels sont les frais une fois le site en ligne ?',
+				r: `Hébergement, nom de domaine et services tiers : environ ${standard.frais} en Standard, ${premium.frais} en Premium et ${diamant.frais} en Diamant. Ils sont payés sur vos propres comptes ou refacturés à l’identique, sans marge.`,
+			},
+			{
+				q: 'Pourrai-je modifier mes prestations et mes horaires ?',
+				r: 'En Premium et Diamant, oui : le tableau de bord gère les prestations, les prix, les photos et les disponibilités. En Standard, les rendez-vous arrivent dans votre Google Agenda et les modifications du site passent par nous.',
+			},
+			{
+				q: 'Qui s’occupe des mises à jour ?',
+				r: `Nous, si vous prenez l’option maintenance : ${descriptionService('maintenance').replace(/^./, (c) => c.toLowerCase())} Elle coûte ${standard.maintenance} en Standard et jusqu’à ${diamant.maintenance} en Diamant.`,
+			},
+		],
+	},
 ];
 ---
 
-<CommercialLayout footerCta={false} title="Création de Sites Web & Plateformes sur mesure" description="Duo technique et business proposant des solutions web allant du site vitrine à la plateforme de réservation sur mesure.">
+<CommercialLayout
+	footerCta={false}
+	title="SaberWeb.dev | Sites vitrines et réservation en ligne pour indépendants"
+	description="Sites vitrines avec prise de rendez-vous en ligne pour les commerces et les indépendants : trois formules, de l’agenda Google à la plateforme avec espace client et gestion d’équipe."
+>
+	<!-- HÉROS -->
+	<section id="presentation" class="hero" data-hero aria-labelledby="hero-titre">
+		<div class="conteneur">
+			<h1 id="hero-titre" class="hero-titre" data-hero-titre>
+				Un site qui prend les rendez-vous <span class="accent">pour vous.</span>
+			</h1>
 
-	<!-- HERO -->
-	<section id="presentation" class="hero relative overflow-hidden bg-stone-950 text-white">
-		<div class="hero-aurora" aria-hidden="true">
-			<span class="blob blob-1"></span>
-			<span class="blob blob-2"></span>
-			<span class="blob blob-3"></span>
-		</div>
-		<div class="hero-grid" aria-hidden="true"></div>
-
-		<div class="relative mx-auto grid max-w-6xl items-center gap-14 px-4 pb-20 pt-16 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:pb-28 lg:pt-24">
-			<div>
-				<h1 class=text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl" data-aos="fade-up" data-aos-delay="100">
-					Votre solution digitale,
-					<span class="word-rotator mt-1 block" aria-live="off">
-						<span class="sr-only">{mots[0]}</span>
-						<span class="word-track" aria-hidden="true">
-							{mots.map((m, i) => <span class:list={['word', { 'is-active': i === 0 }]}>{m}</span>)}
-						</span>
-					</span>
-				</h1>
-				<p class="mt-6 max-w-xl text-lg leading-8 text-stone-300" data-aos="fade-up" data-aos-delay="200">
-					Un profil technique et un profil business vous accompagnent dans la digitalisation de votre activité. Du site vitrine à la plateforme de réservation complète, choisissez parmi nos trois formules.
-				</p>
-				<div class="mt-9 flex flex-col gap-3 sm:flex-row" data-aos="fade-up" data-aos-delay="300">
-					<a href="#tarification" class="btn btn-rose btn-lg justify-center">
-						Voir les formules <ArrowRight size={18} class="btn-arrow" />
-					</a>
-					<a href="/contact" class="btn btn-ghost-dark btn-lg justify-center">
-						<Phone size={18} /> Contactez-nous
-					</a>
-				</div>
-				<div class="mt-10 flex items-center gap-4" data-aos="fade-up" data-aos-delay="400">
-					<div class="flex -space-x-3">
-						{membres.map((m) => (
-							<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={44} class="ring-2 ring-stone-950" />
-						))}
-					</div>
-					<p class="text-sm text-stone-400"><span class="font-semibold text-white">{membres.map((m) => m.prenom).join(' & ')}</span><br />deux interlocuteurs directs, de l’idée à la mise en ligne</p>
-				</div>
-			</div>
-
-			<!-- Éventail de captures des trois démos, légère inclinaison au pointeur (ordinateur uniquement) -->
-			<div class="fan-wrap" data-aos="fade-left" data-aos-delay="200">
-				<div class="fan" data-tilt>
-					{vitrines.map((v, i) => (
-						<a href={`/galerie/${v.demo}`} class={`fan-card fan-card-${i + 1}`} aria-label={`Voir la formule ${v.demo}`}>
-							<span class="fan-bar" aria-hidden="true"><i></i><i></i><i></i></span>
-							<picture>
-								<source type="image/avif" srcset={`/images/galerie/${v.demo}/site-vitrine-960.avif`} />
-								<img src={`/images/galerie/${v.demo}/site-vitrine-960.webp`} alt={v.alt} width="960" height="600" decoding="async" loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : 'low'} />
-							</picture>
+			<div class="hero-grille">
+				<div class="hero-texte">
+					<p class="chapo" data-hero-fade>
+						Nous construisons des sites vitrines avec réservation en ligne pour les coiffeurs, les garages,
+						les dépanneurs et les autres indépendants. Trois formules, de l’agenda Google à la plateforme
+						avec espace client et équipe. Les trois démos sont en ligne : vous pouvez les essayer.
+					</p>
+					<div class="hero-actions" data-hero-fade>
+						<a href="#tarification" class="btn btn-dark btn-lg">
+							Voir les formules <ArrowRight size={17} class="btn-arrow" />
 						</a>
-					))}
+						<a href="/devis" class="btn btn-outline btn-lg">Simuler un devis</a>
+					</div>
+					<a href="#histoire" class="hero-duo" data-hero-fade>
+						<span class="hero-duo-photos">
+							{membres.map((m) => (
+								<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={52} class="ring-[3px] ring-papier" />
+							))}
+						</span>
+						<span>
+							<span class="block font-medium text-encre">{membres.map((m) => m.prenom).join(' et ')}</span>
+							<span class="block text-sm text-gris">Vos deux interlocuteurs, du premier appel à la mise en ligne.</span>
+						</span>
+					</a>
+				</div>
+
+				<div class="hero-visuel" data-hero-visuel>
+					<a href="/galerie/premium" class="hero-cadre hero-cadre-premium" data-hero-cadre aria-label="Formule Premium : voir le détail">
+						<CadreNavigateur file="premium-accueil" alt="Accueil de la démo Premium, un garage" url="saberweb.dev/demo-premium" sizes="(min-width: 992px) 34vw, 60vw" sombre />
+					</a>
+					<a href="/galerie/diamant" class="hero-cadre hero-cadre-diamant" data-hero-cadre aria-label="Formule Diamant : voir le détail">
+						<CadreNavigateur file="diamant-accueil" alt="Accueil de la démo Diamant, un salon de coiffure" url="saberweb.dev/demo-diamant" sizes="(min-width: 992px) 46vw, 86vw" prioritaire />
+					</a>
+					<a href="/galerie/standard" class="hero-cadre hero-tel" data-hero-cadre aria-label="Formule Standard : voir le détail">
+						<CadreTelephone file="standard-mobile" alt="La démo Standard, un dépanneur informatique, sur téléphone" sizes="(min-width: 992px) 13vw, 30vw" />
+					</a>
+					<ul class="hero-legendes" data-hero-fade aria-hidden="true">
+						<li><b>Standard</b> dépannage informatique</li>
+						<li><b>Premium</b> garage</li>
+						<li><b>Diamant</b> salon de coiffure</li>
+					</ul>
 				</div>
 			</div>
 		</div>
 	</section>
 
 	<!-- BANDEAU DÉFILANT -->
-	<div class="marquee border-y border-stone-200 bg-white py-5" aria-label="Ce que nous proposons">
+	<div class="bandeau marquee" aria-label="Ce que contiennent les formules">
 		<div class="marquee-track">
-			{[0, 1].map((copy) => (
-				<ul class="marquee-group" aria-hidden={copy === 1 ? 'true' : undefined}>
-					{bandeau.map((b) => (
-						<li class="flex items-center gap-2.5 whitespace-nowrap text-sm font-semibold text-stone-600">
-							<b.icon size={18} class="text-rose-600" /> {b.label}
-						</li>
-					))}
+			{[0, 1].map((copie) => (
+				<ul class="bandeau-groupe" aria-hidden={copie === 1 ? 'true' : undefined}>
+					{bandeau.map((nom) => <li>{nom}</li>)}
 				</ul>
 			))}
 		</div>
 	</div>
 
-	<!-- CHIFFRES -->
-	<section class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-		<dl class="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
-			{chiffres.map((c, i) => (
-				<div class="text-center lg:text-left" data-aos="fade-up" data-aos-delay={i * 100}>
-					<dt class="sr-only">{c.label}</dt>
-					<dd>
-						<span class="block text-4xl font-extrabold text-stone-900 sm:text-5xl"><span data-count={c.valeur}>{c.valeur}</span>{c.suffixe}</span>
-						<span class="mt-2 block text-sm text-stone-500">{c.label}</span>
-					</dd>
-				</div>
-			))}
-		</dl>
-	</section>
+	<!-- TROIS FORMULES : section épinglée sur bureau -->
+	<section id="tarification" class="formules" data-formules aria-labelledby="formules-titre">
+		<div class="conteneur formules-intro">
+			<h2 id="formules-titre" class="titre-xl" data-reveal>Trois formules. Chacune reprend la précédente et y ajoute des outils.</h2>
+			<p class="chapo" data-reveal data-reveal-delay="100">
+				Les prix ci-dessous sont la main d’œuvre des prestations incluses, sans option. Les frais de
+				fonctionnement (hébergement, nom de domaine, e-mails) sont à votre nom et sans marge.
+			</p>
+		</div>
 
-	<!-- FORMULES -->
-	<section id="tarification" class="relative scroll-mt-20 bg-stone-100/70 py-24">
-		<div class="mx-auto max-w-6xl px-4 sm:px-6">
-			<div class="mx-auto max-w-2xl text-center">
-				<h2 class="text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up" data-aos-delay="100">Une formule pour chaque étape de votre activité</h2>
-				<p class="mt-4 text-stone-600" data-aos="fade-up" data-aos-delay="200">Testez chaque démo en conditions réelles, puis comparez le détail des fonctionnalités et des coûts.</p>
-			</div>
+		<div class="formules-scene" data-formules-scene>
+			<nav class="formules-crans conteneur" aria-label="Aller à une formule">
+				<span class="formules-piste" aria-hidden="true"><span class="formules-barre" data-formules-barre></span></span>
+				{paliers.map((p, i) => (
+					<a href={`#formule-${p.id}`} class:list={['formules-cran', { 'is-actif': i === 0 }]} data-cran={i}>
+						<span class="num">{pad(i + 1)}</span> {p.nom}
+					</a>
+				))}
+			</nav>
 
-			<div class="mt-16 grid items-start gap-8 lg:grid-cols-3">
-				{formules.map((f, i) => (
-					<div data-aos="fade-up" data-aos-delay={i * 120} class={f.highlight ? 'lg:-mt-4' : ''}>
-						<article class={`plan group relative flex h-full flex-col rounded-3xl p-7 sm:p-8 ${f.style.card} ${f.highlight ? 'plan-highlight' : ''}`} style={`--spot:${f.style.spot}`} data-spotlight>
-							{f.highlight && (
-								<span class="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-rose-600 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-md">Recommandé</span>
-							)}
-							<div class="flex items-center justify-between">
-								<span class={`flex h-12 w-12 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6 ${f.style.icon}`}>
-									<f.icon size={24} />
-								</span>
-								<span class="text-sm text-stone-500">{f.accroche}</span>
+			<div class="formules-paliers conteneur">
+				{paliers.map((p, i) => (
+					<article id={`formule-${p.id}`} class:list={['palier', { 'is-actif': i === 0 }]} data-palier aria-labelledby={`palier-${p.id}`}>
+						<div class="palier-ecran" data-palier-ecran>
+							<CadreNavigateur file={`${p.id}-accueil`} alt={`Accueil de la démo ${p.nom}`} url={`saberweb.dev/demo-${p.id}`} sizes="(min-width: 992px) 52vw, 92vw" sombre={p.id === 'premium'} />
+						</div>
+						<div class="palier-texte">
+							<div class="palier-tete" data-palier-tete>
+								<p class="repere num">{pad(i + 1)} / {pad(paliers.length)}</p>
+								<h3 id={`palier-${p.id}`} class="palier-nom">{p.nom}</h3>
+								<p class="palier-accroche">{p.accroche}</p>
+								<p class="palier-prix">
+									<span class="palier-montant num">dès {p.prixBase}</span>
+									<span class="palier-frais">puis {p.frais} de frais de fonctionnement</span>
+								</p>
 							</div>
-							<h3 class="mt-6 text-2xl font-bold text-stone-900">Formule {f.nom}</h3>
-							<p class="mt-2 text-sm leading-relaxed text-stone-600">{f.description}</p>
-
-							<div class="mt-6 flex items-end justify-between gap-3 rounded-2xl bg-stone-50 px-4 py-3">
-								<span class="whitespace-nowrap text-2xl font-extrabold text-stone-900">{f.prix}</span>
-								<span class="text-right text-xs text-stone-500">{f.prixNote}</span>
-							</div>
-
-							<ul class="mt-6 space-y-3 text-sm">
-								{f.forces.map(([titre, detail]) => (
-									<li class="flex items-start gap-3">
-										<span class={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${f.style.check}`}><Check size={13} strokeWidth={3} /></span>
-										<span class="text-stone-700"><strong class="font-semibold text-stone-900">{titre}</strong> <span class="text-stone-500">· {detail}</span></span>
-									</li>
+							{i > 0 && <p class="palier-herite">Tout {paliers[i - 1].nom}, plus :</p>}
+							<ul class="palier-liste">
+								{p.contenu.map((c) => (
+									<li class:list={['palier-item', c.nouveau ? 'est-nouveau' : 'est-herite']} data-service={c.service.id}>{c.service.nom}</li>
 								))}
 							</ul>
-
-							<details class="plan-limits mt-5 rounded-2xl border border-stone-200">
-								<summary class="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-xs font-bold uppercase tracking-wider text-stone-500">
-									{f.id === 'diamant' ? 'Spécificités' : 'Non inclus'}
-									<ChevronDown size={16} class="plan-chevron transition-transform duration-300" />
-								</summary>
-								<ul class="space-y-2 px-4 pb-4 text-sm text-stone-500">
-									{f.limites.map((l) => (
-										<li class="flex items-start gap-2.5"><X size={15} class="mt-0.5 shrink-0 text-stone-300" />{l}</li>
-									))}
-								</ul>
-							</details>
-
-							<div class="mt-auto flex flex-col gap-3 pt-8">
-								<a href={f.demo} class={`btn ${f.style.primary} justify-center`}>
-									Voir la démo {f.nom} <ArrowRight size={16} class="btn-arrow" />
-								</a>
-								<a href={f.detail} class={`btn ${f.style.secondary} justify-center`}>
-									Détail de l’offre {f.nom}
-								</a>
-								<a href={`/devis?formule=${f.id}`} class="self-center rounded text-sm font-semibold text-stone-600 underline decoration-stone-300 underline-offset-4 transition-colors hover:text-stone-900 hover:decoration-stone-900">
-									Simuler un devis
-								</a>
-							</div>
-						</article>
-					</div>
-				))}
-			</div>
-		</div>
-	</section>
-
-	<!-- MÉTHODE -->
-	<section class="mx-auto max-w-6xl px-4 py-24 sm:px-6">
-		<div class="mx-auto max-w-2xl text-center">
-			<h2 class="text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up">Comment nous travaillons</h2>
-		</div>
-		<ol class="steps relative mt-16 grid gap-10 md:grid-cols-3">
-			{etapes.map((e, i) => (
-				<li class="relative text-center" data-aos="fade-up" data-aos-delay={i * 150}>
-					<span class="relative z-10 mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-900 text-white shadow-lg">
-						<e.icon size={26} />
-						<span class="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-600 text-xs font-bold">{i + 1}</span>
-					</span>
-					<h3 class="mt-6 text-xl font-bold text-stone-900">{e.titre}</h3>
-					<p class="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-stone-600">{e.texte}</p>
-				</li>
-			))}
-		</ol>
-	</section>
-
-	<!-- QUI SOMMES-NOUS -->
-	<section id="histoire" class="bg-white py-24">
-		<div class="mx-auto max-w-5xl px-4 sm:px-6">
-			<div class="text-center">
-				<h2 class="text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up" data-aos-delay="100">Qui sommes-nous ?</h2>
-				<p class="mx-auto mt-4 max-w-2xl text-lg text-stone-600" data-aos="fade-up" data-aos-delay="200">
-					Un profil technique et un profil business, un objectif commun : rendre des outils digitaux sur mesure accessibles aux petites et moyennes entreprises.
-				</p>
-			</div>
-			<div class="mt-12 grid gap-6 md:grid-cols-2">
-				{membres.map((m, i) => (
-					<div data-aos="fade-up" data-aos-delay={i * 120}>
-						<div class="flex h-full flex-col gap-5 rounded-3xl border border-stone-200 bg-stone-50 p-6 transition duration-300 hover:-translate-y-1 hover:border-stone-300 hover:shadow-xl sm:flex-row sm:items-start">
-							<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={80} class="shrink-0 ring-4 ring-white shadow-md" />
-							<div>
-								<div class="flex items-center gap-2">
-									<h3 class="text-xl font-bold text-stone-900">{m.prenom}</h3>
-									<a href={m.linkedin} target="_blank" rel="noopener noreferrer" class="text-[#0A66C2] transition-transform hover:scale-110" aria-label={`Profil LinkedIn de ${m.prenom}`}>
-										<BrandIcon name="linkedin" size={18} />
-									</a>
-								</div>
-								<p class="text-xs font-semibold uppercase tracking-wider text-rose-600">{m.role}</p>
-								<p class="mt-3 text-sm leading-relaxed text-stone-600">{m.accroche}</p>
-								<ul class="mt-4 flex flex-wrap gap-1.5">
-									{m.competences.slice(0, 4).map((c) => (
-										<li class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-stone-700 ring-1 ring-stone-200">{c}</li>
-									))}
-								</ul>
+							<div class="palier-actions" data-palier-actions>
+								<a href={p.demo} class="btn btn-dark">Voir la démo <ArrowUpRight size={16} class="btn-arrow" /></a>
+								<a href={p.detail} class="btn btn-outline">Le détail de {p.nom}</a>
+								<a href={p.devisHref} class="lien">Demander un devis <ArrowRight size={15} /></a>
 							</div>
 						</div>
+					</article>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<!-- FONCTIONNALITÉS : colonne collante -->
+	<section id="fonctionnalites" class="fonctions" data-fonctions aria-labelledby="fonctions-titre">
+		<div class="conteneur fonctions-grille">
+			<div class="fonctions-visuel" aria-hidden="true">
+				<div class="fonctions-collant">
+					<div class="fonctions-pile">
+						{fonctions.map((f, i) => (
+							<div class:list={['fonctions-img', { 'is-actif': i === 0 }]} data-fonction-img>
+								<CadreNavigateur demo={f.capture.demo} file={f.capture.file} alt="" url={`saberweb.dev/${f.capture.url}`} sizes="(min-width: 1312px) 640px, 48vw" />
+							</div>
+						))}
+					</div>
+					<p class="fonctions-legende"><span data-fonction-legende>{fonctions[0].titre}</span> <span class="num" data-fonction-num>01 / {pad(fonctions.length)}</span></p>
+				</div>
+			</div>
+
+			<div>
+				<h2 id="fonctions-titre" class="titre-xl" data-split>Ce que voient vos clients, et ce que vous gérez.</h2>
+				<p class="chapo mt-6 max-w-xl" data-reveal>
+					Les écrans ci-contre viennent des démos. Chaque outil indique les formules qui l’incluent ;
+					le reste existe en option dans le simulateur de devis.
+				</p>
+				<ol class="fonctions-liste" data-fonctions-liste>
+					{fonctions.map((f, i) => (
+						<li class:list={['fonction', { 'is-actif': i === 0 }]} data-fonction data-titre={f.titre}>
+							<span class="repere num">{pad(i + 1)}</span>
+							<div>
+								<h3 class="fonction-titre">{f.titre}</h3>
+								<p class="fonction-texte">{f.texte}</p>
+								<p class="fonction-formules">{f.formules}</p>
+								<div class="fonction-capture">
+									<CadreNavigateur demo={f.capture.demo} file={f.capture.file} alt={`Capture : ${f.titre}`} sizes="92vw" petit />
+								</div>
+							</div>
+						</li>
+					))}
+				</ol>
+			</div>
+		</div>
+	</section>
+
+	<!-- MÉTHODE : trois étapes, trait qui se dessine -->
+	<section class="methode" data-methode aria-labelledby="methode-titre">
+		<div class="conteneur">
+			<div class="methode-tete">
+				<h2 id="methode-titre" class="titre-xl" data-split>Comment se passe un projet.</h2>
+				<p class="chapo" data-reveal>Trois étapes, avec les mêmes deux personnes du début à la fin.</p>
+			</div>
+			<div class="methode-piste">
+				<svg class="methode-trait" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true">
+					<path d="M0 30 C 150 4, 300 56, 450 30 S 750 4, 900 30 S 1110 50, 1200 30" pathLength="1" data-trait />
+				</svg>
+				<span class="methode-trait-v" aria-hidden="true"><span data-trait-v></span></span>
+				<ol class="methode-etapes">
+					{etapes.map((e, i) => (
+						<li class="etape" data-etape>
+							<span class="etape-point" aria-hidden="true"></span>
+							<p class="repere num">{pad(i + 1)}</p>
+							<h3 class="etape-titre">{e.titre}</h3>
+							<p class="etape-texte">{e.texte}</p>
+							<p class="etape-meta">{e.meta}</p>
+						</li>
+					))}
+				</ol>
+			</div>
+		</div>
+	</section>
+
+	<!-- QUI SOMMES-NOUS : fond sombre -->
+	<section id="histoire" class="equipe sur-nuit" aria-labelledby="equipe-titre">
+		<div class="conteneur">
+			<div class="equipe-tete">
+				<h2 id="equipe-titre" class="titre-xl" data-split>
+					{membres.map((m) => m.prenom).join(' et ')}. L’un construit l’outil, l’autre vérifie qu’il sert votre activité.
+				</h2>
+			</div>
+			<div class="equipe-grille" data-reveal-group>
+				{membres.map((m, i) => (
+					<article class="membre">
+						<div class="membre-tete">
+							<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={112} class="shrink-0" />
+							<div>
+								<p class="repere num">{pad(i + 1)}</p>
+								<h3 class="titre-l">{m.prenom}</h3>
+								<p class="text-stone-400">{m.role}</p>
+							</div>
+						</div>
+						<p class="membre-texte">{m.accroche}</p>
+						<ul class="membre-competences">
+							{m.competences.slice(0, 5).map((c) => <li>{c}</li>)}
+						</ul>
+						<a href={m.linkedin} target="_blank" rel="noopener noreferrer" class="lien" aria-label={`Profil LinkedIn de ${m.prenom}`}>
+							<BrandIcon name="linkedin" size={15} /> LinkedIn
+						</a>
+					</article>
+				))}
+			</div>
+			<p class="mt-14" data-reveal>
+				<a href="/notre-histoire" class="btn btn-ghost-dark btn-lg">Notre histoire <ArrowRight size={17} class="btn-arrow" /></a>
+			</p>
+		</div>
+	</section>
+
+	<!-- FAQ : deux volets -->
+	<section class="faq" aria-labelledby="faq-titre">
+		<div class="conteneur">
+			<div class="faq-tete">
+				<h2 id="faq-titre" class="titre-xl" data-reveal>Questions fréquentes</h2>
+				<p class="chapo" data-reveal data-reveal-delay="100">Une autre question ? <a href="/contact" class="lien">Écrivez-nous</a>, ou appelez le <a href={contact.telephoneHref} class="lien num">{contact.telephone}</a>.</p>
+			</div>
+			<div class="faq-volets">
+				{faq.map((v) => (
+					<div class="faq-volet" data-reveal>
+						<h3 class="faq-volet-titre">{v.volet}</h3>
+						{v.questions.map((item) => (
+							<details class="faq-item">
+								<summary>
+									{item.q}
+									<span class="faq-plus" aria-hidden="true"></span>
+								</summary>
+								<p>{item.r}</p>
+							</details>
+						))}
 					</div>
 				))}
 			</div>
-			<div class="mt-12 text-center" data-aos="fade-up">
-				<a href="/notre-histoire" class="btn btn-dark btn-lg">
-					Découvrir notre histoire <ArrowRight size={18} class="btn-arrow" />
-				</a>
-			</div>
 		</div>
 	</section>
 
-	<!-- FAQ -->
-	<section class="mx-auto max-w-3xl px-4 py-24 sm:px-6">
-		<h2 class="text-center text-3xl font-bold text-stone-900 sm:text-4xl" data-aos="fade-up">Questions fréquentes</h2>
-		<div class="mt-12 space-y-3">
-			{faq.map((item, i) => (
-				<details class="faq group rounded-2xl border border-stone-200 bg-white px-5 transition-colors open:border-stone-300 open:shadow-sm" data-aos="fade-up" data-aos-delay={i * 80}>
-					<summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-semibold text-stone-900">
-						{item.q}
-						<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-stone-100 transition-transform duration-300 group-open:rotate-45">
-							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-						</span>
-					</summary>
-					<p class="pb-5 text-sm leading-relaxed text-stone-600">{item.r}</p>
-				</details>
-			))}
-		</div>
-	</section>
-
-	<!-- CONTACT -->
-	<section id="contact" class="scroll-mt-20 px-4 pb-24 sm:px-6">
-		<div class="contact-card relative mx-auto max-w-5xl overflow-hidden rounded-[2rem] bg-stone-950 px-6 py-16 text-center text-white sm:px-12" data-aos="fade-up">
-			<div class="hero-aurora opacity-70" aria-hidden="true">
-				<span class="blob blob-1"></span>
-				<span class="blob blob-3"></span>
-			</div>
-			<div class="relative">
-				<h2 class="text-3xl font-bold sm:text-4xl">Un projet en tête ? Discutons-en.</h2>
-				<p class="mx-auto mt-4 max-w-xl text-stone-300">
-					Site vitrine ou application complète : appelez-nous, écrivez-nous sur WhatsApp ou laissez-nous un message, nous vous répondons rapidement.
+	<!-- APPEL FINAL -->
+	<section id="contact" class="final" aria-labelledby="final-titre">
+		<div class="conteneur">
+			<h2 id="final-titre" class="titre-geant" data-split>Parlons de votre activité.</h2>
+			<div class="final-bas">
+				<p class="chapo" data-reveal>
+					Un premier appel suffit en général pour savoir quelle formule vous convient.
+					Vous pouvez aussi estimer le prix vous-même avec le <a href="/devis" class="lien">simulateur de devis</a>.
 				</p>
-				<div class="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-					<a href="/contact" class="btn btn-light btn-lg justify-center">
-						<MessagesSquare size={18} /> Nous écrire
-					</a>
-					<a href={contact.telephoneHref} class="btn btn-ghost-dark btn-lg justify-center">
-						<Phone size={18} /> {contact.telephone}
-					</a>
-					<a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg justify-center">
-						<BrandIcon name="whatsapp" size={20} /> Écrire sur WhatsApp
-					</a>
-					{contact.email && (
-						<a href={`mailto:${contact.email}`} class="btn btn-ghost-dark btn-lg justify-center">
-							<Mail size={18} /> Par e-mail
-						</a>
-					)}
+				<div class="final-actions" data-reveal data-reveal-delay="100">
+					<a href="/contact" class="btn btn-accent btn-lg">Nous écrire <ArrowRight size={17} class="btn-arrow" /></a>
+					<a href={contact.telephoneHref} class="btn btn-outline btn-lg num"><Phone size={16} /> {contact.telephone}</a>
+					<a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp btn-lg"><BrandIcon name="whatsapp" size={18} /> WhatsApp</a>
 				</div>
 			</div>
 		</div>
 	</section>
 </CommercialLayout>
 
-<style>
-	/* ---------- Hero ---------- */
-	.hero-aurora {
-		position: absolute;
-		inset: 0;
-		overflow: hidden;
-		pointer-events: none;
-	}
-	/* Halos flous dessinés en dégradé radial (pas de filter: blur, coûteux en GPU) ;
-	   seule leur position bouge, via transform. */
-	.blob {
-		position: absolute;
-		width: 46rem;
-		height: 46rem;
-		border-radius: 9999px;
-		animation: derive 22s ease-in-out infinite alternate;
-	}
-	.blob-1 { top: -22rem; right: -14rem; background: radial-gradient(closest-side, rgb(225 29 72 / 0.35), transparent); }
-	.blob-2 { bottom: -26rem; left: -16rem; background: radial-gradient(closest-side, rgb(124 58 237 / 0.3), transparent); animation-duration: 26s; }
-	.blob-3 { top: 30%; left: 40%; width: 30rem; height: 30rem; background: radial-gradient(closest-side, rgb(14 165 233 / 0.18), transparent); animation-duration: 30s; }
-	@keyframes derive {
-		to { transform: translate3d(-6rem, 4rem, 0) scale(1.1); }
-	}
-	.hero-grid {
-		position: absolute;
-		inset: 0;
-		background-image: linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
-		background-size: 48px 48px;
-		mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 75%);
-		pointer-events: none;
-	}
-	.is-offscreen .blob { animation-play-state: paused; }
-
-	/* Mot qui change dans le titre */
-	.word-rotator { height: 1.15em; overflow: hidden; }
-	.word-track { position: relative; display: block; height: 100%; }
-	.word {
-		position: absolute;
-		inset: 0;
-		background: linear-gradient(90deg, #fb7185, #f472b6 45%, #a78bfa);
-		-webkit-background-clip: text;
-		background-clip: text;
-		color: transparent;
-		white-space: nowrap;
-		opacity: 0;
-		transform: translateY(100%);
-		transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
-	}
-	.word.is-active { opacity: 1; transform: none; }
-	.word.is-leaving { opacity: 0; transform: translateY(-100%); }
-
-	/* Éventail des trois captures.
-	   Anti-clignotement : la zone survolée (.fan-card) ne bouge jamais au survol, seul
-	   son contenu (.fan-inner) se soulève ; l'inclinaison est pilotée depuis .fan-wrap,
-	   qui reste fixe ; pas de preserve-3d (cartes coplanaires = z-fighting). */
-	.fan-wrap { perspective: 1400px; }
-	.fan {
-		position: relative;
-		aspect-ratio: 16 / 13;
-		width: 100%;
-		max-width: 34rem;
-		margin-inline: auto;
-		transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-		transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-	}
-	.fan-card {
-		position: absolute;
-		display: block;
-		width: 78%;
-		border-radius: 14px;
-	}
-	.fan-inner {
-		display: block;
-		border-radius: inherit;
-		overflow: hidden;
-		background: #1c1917;
-		border: 1px solid rgb(255 255 255 / 0.12);
-		box-shadow: 0 30px 60px -25px rgb(0 0 0 / 0.8);
-		transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
-	}
-	.fan-card img { display: block; width: 100%; height: auto; }
-	.fan-bar { display: flex; gap: 5px; padding: 8px 10px; background: #292524; }
-	.fan-bar i { width: 8px; height: 8px; border-radius: 9999px; background: rgb(255 255 255 / 0.25); }
-	.fan-card-1 { top: 0; left: 0; transform: rotate(-6deg); z-index: 1; }
-	.fan-card-2 { top: 18%; left: 11%; transform: rotate(1deg); z-index: 2; }
-	.fan-card-3 { top: 36%; left: 22%; transform: rotate(6deg); z-index: 3; }
-	.fan-card:hover, .fan-card:focus-visible { z-index: 4; }
-	.fan-card:hover .fan-inner, .fan-card:focus-visible .fan-inner {
-		transform: translateY(-12px) scale(1.03);
-		box-shadow: 0 40px 80px -25px rgb(225 29 72 / 0.55);
-	}
-
-	/* ---------- Bandeau défilant ---------- */
-	.marquee { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
-	.marquee-track { display: flex; width: max-content; animation: defiler 40s linear infinite; }
-	.marquee:hover .marquee-track, .marquee.is-offscreen .marquee-track { animation-play-state: paused; }
-	.marquee-group { display: flex; gap: 3rem; padding-right: 3rem; }
-	@keyframes defiler { to { transform: translateX(-50%); } }
-
-	/* ---------- Cartes formules ---------- */
-	.plan {
-		transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease;
-		box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
-		isolation: isolate;
-	}
-	.plan:hover { transform: translateY(-6px); box-shadow: 0 30px 60px -30px rgb(var(--spot) / 0.45); }
-	/* Halo qui suit le pointeur (variables mises à jour en JS, aucun re-rendu) */
-	.plan::before {
-		content: '';
-		position: absolute;
-		inset: 0;
-		z-index: -1;
-		border-radius: inherit;
-		background: radial-gradient(420px circle at var(--mx, 50%) var(--my, -20%), rgb(var(--spot) / 0.1), transparent 45%);
-		opacity: 0;
-		transition: opacity 0.3s ease;
-	}
-	.plan:hover::before { opacity: 1; }
-	.plan-highlight {
-		border: 2px solid transparent;
-		background:
-			linear-gradient(#fff, #fff) padding-box,
-			linear-gradient(135deg, #e11d48, #f472b6 50%, #a78bfa) border-box;
-		box-shadow: 0 25px 50px -30px rgb(225 29 72 / 0.6);
-	}
-	.plan-limits[open] .plan-chevron { transform: rotate(180deg); }
-	.plan-limits summary::-webkit-details-marker, .faq summary::-webkit-details-marker { display: none; }
-
-	/* Ouverture animée des <details> (navigateurs récents ; ailleurs, ouverture instantanée) */
-	@supports (interpolate-size: allow-keywords) {
-		.plan-limits, .faq { interpolate-size: allow-keywords; }
-		.plan-limits::details-content, .faq::details-content {
-			height: 0;
-			overflow: clip;
-			transition: height 0.35s cubic-bezier(0.22, 1, 0.36, 1), content-visibility 0.35s allow-discrete;
-		}
-		.plan-limits[open]::details-content, .faq[open]::details-content { height: auto; }
-	}
-
-	/* ---------- Méthode : trait qui relie les étapes ---------- */
-	@media (min-width: 768px) {
-		.steps::before {
-			content: '';
-			position: absolute;
-			top: 2rem;
-			left: 16.66%;
-			right: 16.66%;
-			height: 2px;
-			background: repeating-linear-gradient(90deg, var(--color-stone-300) 0 8px, transparent 8px 16px);
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.blob, .marquee-track { animation: none; }
-		.word, .fan, .fan-inner, .plan { transition: none; }
-		.plan:hover { transform: none; }
-	}
-</style>
-
 <script>
-	const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	import { gsap, ScrollTrigger, SplitText, MQ, wireScroll } from '@/lib/motion/gsap';
 
-	// Les animations continues (halos, bandeau) s'arrêtent hors de l'écran.
-	if ('IntersectionObserver' in window) {
-		const io = new IntersectionObserver((entries) => {
-			for (const e of entries) e.target.classList.toggle('is-offscreen', !e.isIntersecting);
-		});
-		document.querySelectorAll('.hero, .marquee, .contact-card').forEach((el) => io.observe(el));
-	}
+	const racine = document.documentElement;
+	const mm = gsap.matchMedia();
 
-	// Mot changeant du titre
-	const words = Array.from(document.querySelectorAll<HTMLElement>('.word'));
-	const hero = document.querySelector('.hero');
-	if (words.length > 1 && !reduceMotion) {
-		let index = 0;
-		window.setInterval(() => {
-			if (document.hidden || hero?.classList.contains('is-offscreen')) return;
-			const current = words[index];
-			index = (index + 1) % words.length;
-			current.classList.remove('is-active');
-			current.classList.add('is-leaving');
-			words[index].classList.remove('is-leaving');
-			words[index].classList.add('is-active');
-			window.setTimeout(() => current.classList.remove('is-leaving'), 650);
-		}, 2600);
-	}
+	// ---------- Héros : titre ligne par ligne, cadres qui montent, parallaxe au défilement ----------
+	const hero = document.querySelector<HTMLElement>('[data-hero]');
+	mm.add(MQ.motion, () => {
+		if (!hero) return;
+		const titre = hero.querySelector<HTMLElement>('[data-hero-titre]')!;
+		const fades = hero.querySelectorAll('[data-hero-fade]');
+		const cadres = Array.from(hero.querySelectorAll<HTMLElement>('[data-hero-cadre]'));
+		const visuel = hero.querySelector<HTMLElement>('[data-hero-visuel]')!;
 
-	const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-
-	// Inclinaison 3D de l'éventail : on écoute le conteneur fixe (.fan-wrap), jamais
-	// l'élément incliné, sinon sa zone de survol bouge sous la souris et l'effet clignote.
-	const fanWrap = document.querySelector<HTMLElement>('.fan-wrap');
-	const fan = fanWrap?.querySelector<HTMLElement>('[data-tilt]');
-	if (fanWrap && fan && finePointer && !reduceMotion) {
-		let frame = 0;
-		let px = 0;
-		let py = 0;
-		fanWrap.addEventListener('pointermove', (e) => {
-			px = e.clientX;
-			py = e.clientY;
-			if (frame) return;
-			frame = requestAnimationFrame(() => {
-				frame = 0;
-				const r = fanWrap.getBoundingClientRect();
-				const x = Math.max(-0.5, Math.min(0.5, (px - r.left) / r.width - 0.5));
-				const y = Math.max(-0.5, Math.min(0.5, (py - r.top) / r.height - 0.5));
-				fan.style.setProperty('--ry', `${(x * 8).toFixed(2)}deg`);
-				fan.style.setProperty('--rx', `${(-y * 6).toFixed(2)}deg`);
-			});
-		}, { passive: true });
-		fanWrap.addEventListener('pointerleave', () => {
-			if (frame) cancelAnimationFrame(frame);
-			frame = 0;
-			fan.style.setProperty('--ry', '0deg');
-			fan.style.setProperty('--rx', '0deg');
-		});
-	}
-
-	// Halo des cartes formules qui suit le pointeur
-	if (finePointer) {
-		document.querySelectorAll<HTMLElement>('[data-spotlight]').forEach((card) => {
-			card.addEventListener('pointermove', (e) => {
-				const r = card.getBoundingClientRect();
-				card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-				card.style.setProperty('--my', `${e.clientY - r.top}px`);
-			});
-		});
-	}
-
-	// Compteurs animés : Motion (déjà dans le projet) n'est chargé qu'à l'arrivée des chiffres à l'écran.
-	const counters = document.querySelectorAll<HTMLElement>('[data-count]');
-	if (counters.length && !reduceMotion && 'IntersectionObserver' in window) {
-		counters.forEach((el) => (el.textContent = '0'));
-		const io = new IntersectionObserver(
-			async (entries) => {
-				const visible = entries.filter((e) => e.isIntersecting);
-				if (!visible.length) return;
-				const { animate } = await import('framer-motion/dom');
-				for (const entry of visible) {
-					const el = entry.target as HTMLElement;
-					io.unobserve(el);
-					const target = Number(el.dataset.count);
-					animate(0, target, {
-						duration: 1.6,
-						ease: [0.22, 1, 0.36, 1],
-						onUpdate: (v) => (el.textContent = String(Math.round(v))),
-					});
-				}
+		SplitText.create(titre, {
+			type: 'lines',
+			mask: 'lines',
+			autoSplit: true,
+			onSplit: (self) => {
+				titre.classList.add('is-split');
+				return gsap.from(self.lines, { yPercent: 112, duration: 1.2, ease: 'power4.out', stagger: 0.1, delay: 0.05 });
 			},
-			{ threshold: 0.6 },
-		);
-		counters.forEach((el) => io.observe(el));
+		});
+		gsap.fromTo(fades, { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 0.9, ease: 'power3.out', stagger: 0.08, delay: 0.45 });
+		gsap.fromTo(cadres, { autoAlpha: 0, y: 80 }, { autoAlpha: 1, y: 0, duration: 1.4, ease: 'expo.out', stagger: 0.12, delay: 0.3 });
+		racine.classList.add('cm-hero-ok');
+
+		// Les trois cadres glissent à des vitesses différentes (1 ScrollTrigger).
+		const [cPremium, cDiamant, cTel] = cadres;
+		gsap.timeline({ scrollTrigger: { trigger: visuel, start: 'top 60%', end: 'bottom top', scrub: true } })
+			.to(cPremium, { yPercent: -14, ease: 'none' }, 0)
+			.to(cDiamant, { yPercent: -5, ease: 'none' }, 0)
+			.to(cTel, { yPercent: -22, ease: 'none' }, 0);
+
+		// Titres de section révélés ligne par ligne (un ScrollTrigger chacun, joué une fois).
+		document.querySelectorAll<HTMLElement>('[data-split]').forEach((el) => {
+			SplitText.create(el, {
+				type: 'lines',
+				mask: 'lines',
+				autoSplit: true,
+				onSplit: (self) => {
+					el.classList.add('is-split');
+					return gsap.from(self.lines, {
+						yPercent: 110,
+						duration: 1.1,
+						ease: 'power4.out',
+						stagger: 0.09,
+						scrollTrigger: { trigger: el, start: 'top 85%', once: true },
+					});
+				},
+			});
+		});
+
+		return () => racine.classList.remove('cm-hero-ok');
+	});
+
+	// ---------- Trois formules : section épinglée (bureau) ----------
+	const formules = document.querySelector<HTMLElement>('[data-formules]');
+	if (formules) {
+		const scene = formules.querySelector<HTMLElement>('[data-formules-scene]')!;
+		const barre = formules.querySelector<HTMLElement>('[data-formules-barre]');
+		const crans = Array.from(formules.querySelectorAll<HTMLAnchorElement>('[data-cran]'));
+		const articles = Array.from(formules.querySelectorAll<HTMLElement>('[data-palier]'));
+		const n = articles.length;
+
+		mm.add(MQ.desktop, () => {
+			formules.classList.add('is-pinned');
+			const parts = articles.map((el) => ({
+				el,
+				tete: Array.from(el.querySelectorAll<HTMLElement>('[data-palier-tete] > *')),
+				items: Array.from(el.querySelectorAll<HTMLElement>('.palier-item')),
+				herites: Array.from(el.querySelectorAll<HTMLElement>('.palier-item.est-herite')),
+				nouveaux: Array.from(el.querySelectorAll<HTMLElement>('.palier-item.est-nouveau')),
+				actions: el.querySelector<HTMLElement>('[data-palier-actions]')!,
+				ecran: el.querySelector<HTMLElement>('[data-palier-ecran]')!,
+				img: el.querySelector<HTMLElement>('[data-palier-ecran] img'),
+			}));
+
+			let courant = -1;
+			const marquer = (i: number) => {
+				if (i === courant) return;
+				courant = i;
+				articles.forEach((a, j) => a.classList.toggle('is-actif', j === i));
+				crans.forEach((c, j) => {
+					c.classList.toggle('is-actif', j === i);
+					if (j === i) c.setAttribute('aria-current', 'step');
+					else c.removeAttribute('aria-current');
+				});
+			};
+
+			// Masques toujours animés avec fromTo et des chaînes complètes (le navigateur abrège la valeur relue).
+			const cache = 'inset(100.000% 0.000% 0.000% 0.000% round 14px)';
+			const visible = 'inset(0.000% 0.000% 0.000% 0.000% round 14px)';
+			parts.slice(1).forEach((p) => {
+				gsap.set([...p.tete, ...p.items, p.actions], { autoAlpha: 0 });
+				gsap.set(p.ecran, { clipPath: cache });
+			});
+			if (barre) gsap.set(barre, { scaleX: 0 });
+
+			const tl = gsap.timeline({
+				defaults: { ease: 'none' },
+				scrollTrigger: {
+					trigger: scene,
+					pin: true,
+					start: 'top top',
+					end: () => `+=${n * window.innerHeight}`,
+					scrub: 0.6,
+					anticipatePin: 1,
+					invalidateOnRefresh: true,
+					snap: { snapTo: 'labelsDirectional', duration: { min: 0.25, max: 0.8 }, delay: 0.12, ease: 'power2.inOut', inertia: false },
+					onUpdate: () => marquer(Math.max(0, Math.min(n - 1, Math.round(tl.time())))),
+				},
+			});
+			tl.addLabel('p0', 0);
+			if (barre) tl.fromTo(barre, { scaleX: 0 }, { scaleX: 1, duration: n - 1, immediateRender: false }, 0);
+
+			for (let i = 1; i < n; i++) {
+				const a = parts[i - 1];
+				const b = parts[i];
+				const garde = new Set(b.items.map((x) => x.dataset.service));
+				const partants = a.items.filter((x) => !garde.has(x.dataset.service));
+				tl.to([...a.tete, a.actions], { autoAlpha: 0, y: -22, duration: 0.3, stagger: 0.02 }, i - 0.8)
+					.to(partants, { autoAlpha: 0, x: 12, duration: 0.2 }, i - 0.8)
+					.fromTo(b.ecran, { clipPath: cache }, { clipPath: visible, duration: 0.7, ease: 'power2.inOut', immediateRender: false }, i - 0.8);
+				if (b.img) tl.fromTo(b.img, { scale: 1.08 }, { scale: 1, duration: 0.8, ease: 'power2.out', immediateRender: false }, i - 0.8);
+				// La liste s'allonge : les lignes reprises restent en place, les nouvelles arrivent une à une.
+				tl.set(a.items, { autoAlpha: 0 }, i - 0.5)
+					.set(b.herites, { autoAlpha: 1 }, i - 0.5)
+					.fromTo(b.tete, { autoAlpha: 0, y: 22 }, { autoAlpha: 1, y: 0, duration: 0.35, stagger: 0.03, immediateRender: false }, i - 0.5)
+					.fromTo(b.nouveaux, { autoAlpha: 0, x: -14 }, { autoAlpha: 1, x: 0, duration: 0.25, stagger: 0.035, immediateRender: false }, i - 0.45)
+					.fromTo(b.actions, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.3, immediateRender: false }, i - 0.3)
+					.addLabel(`p${i}`, i);
+			}
+			tl.to({}, { duration: 0.45 });
+			marquer(0);
+
+			// Les crans mènent directement au palier voulu.
+			const allerA = (e: Event) => {
+				const i = Number((e.currentTarget as HTMLElement).dataset.cran);
+				const st = tl.scrollTrigger;
+				if (!st) return;
+				e.preventDefault();
+				const y = st.start + (st.end - st.start) * (tl.labels[`p${i}`] / tl.duration());
+				const lenis = (window as any).lenis;
+				if (lenis?.scrollTo) lenis.scrollTo(y, { duration: 1.2 });
+				else window.scrollTo({ top: y, behavior: 'smooth' });
+			};
+			crans.forEach((c) => c.addEventListener('click', allerA));
+
+			return () => {
+				crans.forEach((c) => c.removeEventListener('click', allerA));
+				formules.classList.remove('is-pinned');
+			};
+		});
 	}
+
+	// ---------- Fonctionnalités : la capture collante suit la ligne au milieu de l'écran (bureau) ----------
+	const fonctions = document.querySelector<HTMLElement>('[data-fonctions]');
+	if (fonctions) {
+		const liste = fonctions.querySelector<HTMLElement>('[data-fonctions-liste]')!;
+		const lignes = Array.from(fonctions.querySelectorAll<HTMLElement>('[data-fonction]'));
+		const images = Array.from(fonctions.querySelectorAll<HTMLElement>('[data-fonction-img]'));
+		const legende = fonctions.querySelector<HTMLElement>('[data-fonction-legende]');
+		const numero = fonctions.querySelector<HTMLElement>('[data-fonction-num]');
+		const total = String(lignes.length).padStart(2, '0');
+
+		mm.add('(min-width: 992px)', () => {
+			let actif = 0;
+			const activer = (i: number) => {
+				if (i === actif) return;
+				actif = i;
+				lignes.forEach((l, j) => l.classList.toggle('is-actif', j === i));
+				images.forEach((im, j) => im.classList.toggle('is-actif', j === i));
+				if (legende) legende.textContent = lignes[i].dataset.titre ?? '';
+				if (numero) numero.textContent = `${String(i + 1).padStart(2, '0')} / ${total}`;
+			};
+			fonctions.classList.add('is-js');
+			const suivre = () => {
+				const milieu = window.innerHeight / 2;
+				let meilleure = 0;
+				let ecart = Infinity;
+				lignes.forEach((l, i) => {
+					const r = l.getBoundingClientRect();
+					const d = Math.abs(r.top + r.height / 2 - milieu);
+					if (d < ecart) {
+						ecart = d;
+						meilleure = i;
+					}
+				});
+				activer(meilleure);
+			};
+			ScrollTrigger.create({ trigger: liste, start: 'top 60%', end: 'bottom 40%', onUpdate: suivre, onToggle: suivre });
+			const surLigne = (e: Event) => activer(lignes.indexOf(e.currentTarget as HTMLElement));
+			lignes.forEach((l) => l.addEventListener('focusin', surLigne));
+			return () => {
+				lignes.forEach((l) => l.removeEventListener('focusin', surLigne));
+				fonctions.classList.remove('is-js');
+			};
+		});
+	}
+
+	// ---------- Méthode : le trait se dessine au fil du défilement ----------
+	const methode = document.querySelector<HTMLElement>('[data-methode]');
+	if (methode) {
+		const trait = methode.querySelector<SVGPathElement>('[data-trait]');
+		const traitV = methode.querySelector<HTMLElement>('[data-trait-v]');
+		const etapes = Array.from(methode.querySelectorAll<HTMLElement>('[data-etape]'));
+		const piste = methode.querySelector<HTMLElement>('.methode-piste')!;
+		const atteindre = (p: number) => etapes.forEach((e, i) => e.classList.toggle('is-atteint', p >= (i === 0 ? 0.02 : i / (etapes.length - 1)) - 0.04));
+
+		mm.add(MQ.desktop.replace('992', '768'), () => {
+			if (!trait) return;
+			methode.classList.add('is-anime');
+			gsap.fromTo(trait, { strokeDashoffset: 1 }, {
+				strokeDashoffset: 0,
+				ease: 'none',
+				scrollTrigger: { trigger: piste, start: 'top 75%', end: 'bottom 55%', scrub: 0.5, onUpdate: (st) => atteindre(st.progress) },
+			});
+			return () => methode.classList.remove('is-anime');
+		});
+		mm.add(MQ.mobile.replace('991.98', '767.98'), () => {
+			if (!traitV) return;
+			methode.classList.add('is-anime');
+			gsap.fromTo(traitV, { scaleY: 0 }, {
+				scaleY: 1,
+				ease: 'none',
+				scrollTrigger: { trigger: piste, start: 'top 70%', end: 'bottom 60%', scrub: 0.5, onUpdate: (st) => atteindre(st.progress) },
+			});
+			return () => methode.classList.remove('is-anime');
+		});
+	}
+
+	wireScroll();
 </script>
