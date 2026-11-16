@@ -37,9 +37,9 @@ export interface Palier {
 	nom: string;
 	accroche: string;
 	description: string;
-	/** Main d'œuvre des prestations incluses, sans option : « 2 775 € ». */
+	/** Main d'œuvre des prestations incluses, sans option (formatEuros). */
 	prixBase: string;
-	/** Frais de fonctionnement estimés : « 1 à 32 € / mois ». */
+	/** Frais de fonctionnement estimés par mois (formatFourchette). */
 	frais: string;
 	jours: string;
 	maintenance?: string;
