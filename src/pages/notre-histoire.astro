@@ -7,120 +7,193 @@ import { ArrowRight } from 'lucide-react';
 
 const chapitres = [
 	{
+		numero: '01',
 		titre: 'Deux profils complémentaires',
 		texte:
 			"D'un côté les réseaux, la sécurité et le développement, de l'autre l'ingénierie d'affaires et la relation client. L'un construit l'outil, l'autre s'assure qu'il répond au vrai besoin.",
 	},
 	{
+		numero: '02',
 		titre: 'Un constat de terrain',
 		texte:
 			'Beaucoup de commerces et de petites entreprises gèrent encore leurs rendez-vous à la main, ou paient cher des outils trop génériques.',
 	},
 	{
+		numero: '03',
 		titre: 'Une plateforme en trois formules',
 		texte:
-			'Nous avons conçu trois niveaux de solution, du site vitrine relié à Google Agenda à la plateforme avec gestion d’équipe, pour que chacun trouve la sienne.',
+			'Nous avons conçu trois niveaux de solution, du site vitrine relié à Google Agenda à la suite complète de gestion d’équipe, pour que chacun trouve la sienne.',
 	},
 ];
-const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<CommercialLayout title="Notre histoire | SaberWeb.dev" description="Qui sommes-nous ? Saber et Nadir, un profil technique et un profil commercial, conçoivent des sites vitrines et des plateformes de réservation.">
-	<!-- EN-TÊTE -->
-	<section class="conteneur entete-page">
-		<p class="repere num">Notre histoire</p>
-		<div class="mt-4 grid gap-10 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)] lg:items-end">
-			<h1 class="titre-geant max-w-[13ch]" data-split>Deux parcours, un même projet.</h1>
-			<div class="flex items-center gap-4" data-reveal>
-				<span class="flex">
-					{membres.map((m, i) => (
-						<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={88} class={`ring-4 ring-papier ${i > 0 ? '-ml-5' : ''}`} />
-					))}
-				</span>
-				<span class="text-sm text-gris">{membres.map((m) => m.prenom).join(' et ')}</span>
+<CommercialLayout title="Notre histoire | SaberWeb.dev" description="Qui sommes-nous ? Un duo technique et business qui conçoit des sites et plateformes de réservation sur mesure.">
+	<!-- HERO : fond sombre, deux photos flottantes -->
+	<section class="relative overflow-hidden bg-stone-900 text-white">
+		<div class="hero-glow" aria-hidden="true"></div>
+		<div class="relative mx-auto grid max-w-6xl items-center gap-12 px-6 pb-20 pt-32 lg:grid-cols-2 lg:pb-28 lg:pt-40">
+			<div>
+				<h1 class="text-4xl font-extrabold leading-tight sm:text-5xl" data-reveal data-reveal-delay="100">
+					Deux parcours,<br /><span class="text-rose-400">un même projet.</span>
+				</h1>
+				<p class="mt-6 max-w-lg text-lg text-stone-300" data-reveal data-reveal-delay="200">
+					Nous sommes {membres.map((m) => m.prenom).join(' et ')}. Un profil technique, un profil business : nous mettons nos parcours au service des professionnels qui veulent des outils simples, rapides et vraiment à eux.
+				</p>
+			</div>
+
+			<div class="relative mx-auto h-80 w-full max-w-sm sm:h-96" >
+				{membres.map((m, i) => (
+					<figure class={`floater absolute ${i === 0 ? 'left-0 top-0' : 'bottom-0 right-0'}`} style={`--delay:${i * -3}s`}>
+						<div class="rounded-full p-1.5 ring-1 ring-white/20 bg-white/5 shadow-2xl">
+							<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={176} />
+						</div>
+						<figcaption class="mt-3 text-center text-sm font-semibold text-stone-200">{m.prenom}</figcaption>
+					</figure>
+				))}
+				<div class="absolute left-1/2 top-1/2 h-px w-40 -translate-x-1/2 -translate-y-1/2 rotate-[-35deg] bg-gradient-to-r from-transparent via-rose-400/60 to-transparent" aria-hidden="true"></div>
 			</div>
 		</div>
-		<p class="chapo mt-10 max-w-2xl" data-reveal>
-			Nous sommes {membres.map((m) => m.prenom).join(' et ')}. Un profil technique, un profil commercial&nbsp;: nous construisons pour
-			les indépendants des sites rapides et des outils de réservation qu’ils gèrent eux-mêmes.
-		</p>
 	</section>
 
-	<!-- CHAPITRES -->
-	<section class="conteneur pb-20 lg:pb-28" aria-labelledby="debut-titre">
-		<h2 id="debut-titre" class="sr-only">Comment tout a commencé</h2>
-		<ol class="grid border-t border-encre md:grid-cols-3 md:gap-10" data-reveal-group>
+	<!-- CHAPITRES : frise verticale -->
+	<section class="mx-auto max-w-3xl px-6 py-24">
+		<h2 class="text-3xl font-bold text-stone-900" data-reveal>Comment tout a commencé</h2>
+		<ol class="mt-12 space-y-12 border-l-2 border-stone-200 pl-8">
 			{chapitres.map((c, i) => (
-				<li class="border-b border-filet py-8 md:border-b-0">
-					<p class="repere num">{pad(i + 1)}</p>
-					<h3 class="titre-m mt-3">{c.titre}</h3>
-					<p class="mt-3 text-gris">{c.texte}</p>
+				<li class="relative" data-reveal data-reveal-delay={i * 100}>
+					<span class="absolute -left-[3.15rem] top-0 flex h-10 w-10 items-center justify-center rounded-full bg-rose-600 text-sm font-bold text-white shadow-md">{c.numero}</span>
+					<h3 class="text-xl font-bold text-stone-900">{c.titre}</h3>
+					<p class="mt-2 leading-relaxed text-stone-600">{c.texte}</p>
 				</li>
 			))}
 		</ol>
 	</section>
 
-	<!-- PROFILS -->
-	<section class="sur-nuit py-20 lg:py-28" aria-labelledby="profils-titre">
-		<div class="conteneur">
-			<h2 id="profils-titre" class="titre-xl" data-split>Qui sommes-nous</h2>
-			<div class="mt-14 grid gap-14 md:grid-cols-2 md:gap-12">
+	<!-- PROFILS : en zigzag -->
+	<section class="bg-white py-24">
+		<div class="mx-auto max-w-6xl px-6">
+			<h2 class="text-center text-3xl font-bold text-stone-900" data-reveal>Qui sommes-nous ?</h2>
+			<div class="mt-16 space-y-20">
 				{membres.map((m, i) => (
-					<article class="flex flex-col gap-6 border-t border-white/15 pt-8" data-reveal data-reveal-delay={String(i * 120)}>
-						<div class="flex items-center gap-5">
-							<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={112} class="shrink-0" />
-							<div>
-								<h3 class="titre-l">{m.prenom}</h3>
-								<p class="mt-1 text-stone-400">{m.role}</p>
+					<article class={`flex flex-col items-center gap-10 md:flex-row ${i % 2 ? 'md:flex-row-reverse' : ''}`}>
+						<div class="shrink-0" data-reveal={i % 2 ? 'left' : 'right'}>
+							<div class="floater rounded-full bg-gradient-to-br from-rose-200 to-stone-200 p-2" style={`--delay:${i * -2}s`}>
+								<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={200} />
 							</div>
 						</div>
-						<p class="text-[#cfc6b6]">{m.accroche}</p>
-						<ul class="space-y-2 text-[0.9375rem] text-stone-300">
-							{m.parcours.map((p) => (
-								<li class="flex gap-3"><span class="text-accent-clair" aria-hidden="true">—</span><span>{p}</span></li>
-							))}
-						</ul>
-						<p class="text-sm text-stone-400">{m.competences.join(' · ')}</p>
-						<a href={m.linkedin} target="_blank" rel="noopener noreferrer" class="lien self-start" aria-label={`Profil LinkedIn de ${m.prenom}`}>
-							<BrandIcon name="linkedin" size={15} /> LinkedIn
-						</a>
+						<div class="flex-1 rounded-3xl border border-stone-200 bg-stone-50 p-8" data-reveal>
+							<div class="flex flex-wrap items-baseline justify-between gap-3">
+								<h3 class="text-2xl font-bold text-stone-900">{m.prenom}</h3>
+								<a href={m.linkedin} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm font-semibold text-stone-500 transition-colors hover:text-rose-600">
+									<BrandIcon name="linkedin" size={16} class="text-[#0A66C2]" /> LinkedIn
+								</a>
+							</div>
+							<p class="mt-1 text-sm font-semibold uppercase tracking-wider text-rose-600">{m.role}</p>
+							<p class="mt-4 text-stone-700">{m.accroche}</p>
+							<ul class="mt-5 space-y-2 text-sm text-stone-600">
+								{m.parcours.map((p) => (
+									<li class="flex gap-2"><span class="text-rose-600">▸</span><span>{p}</span></li>
+								))}
+							</ul>
+							<ul class="mt-6 flex flex-wrap gap-2">
+								{m.competences.map((c) => (
+									<li class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-stone-700 ring-1 ring-stone-200">{c}</li>
+								))}
+							</ul>
+						</div>
 					</article>
 				))}
 			</div>
 		</div>
 	</section>
 
-	<!-- PROJETS -->
-	<section class="conteneur py-20 lg:py-28" aria-labelledby="projets-titre">
-		<h2 id="projets-titre" class="titre-xl max-w-[16ch]" data-split>Ce que nous construisons</h2>
-		<ol class="mt-12 border-t border-encre">
+	<!-- PROJETS : grille asymétrique -->
+	<section class="mx-auto max-w-6xl px-6 py-24">
+		<h2 class="text-3xl font-bold text-stone-900" data-reveal>Ce que nous construisons</h2>
+		<div class="mt-12 grid gap-6 md:grid-cols-3">
 			{projets.map((p, i) => (
-				<li class="grid gap-3 border-b border-filet py-8 lg:grid-cols-[3rem_minmax(0,4fr)_minmax(0,6fr)_minmax(0,3fr)] lg:gap-8" data-reveal>
-					<span class="repere num">{pad(i + 1)}</span>
-					<h3 class="titre-m">{p.titre}</h3>
-					<p class="text-gris">{p.texte}</p>
-					<p class="text-sm text-stone-500">{p.tags.join(' · ')}</p>
-				</li>
+				<div class={i === 0 ? 'md:col-span-2 md:row-span-2' : ''} data-reveal data-reveal-delay={i * 100}>
+				<div class={`group h-full rounded-3xl p-8 transition duration-500 ease-out hover:-translate-y-2 hover:shadow-2xl ${i === 0 ? 'bg-stone-900 text-white' : 'border border-stone-200 bg-white'}`}>
+					<h3 class={`font-bold ${i === 0 ? 'text-2xl' : 'text-lg text-stone-900'}`}>{p.titre}</h3>
+					<p class={`mt-3 leading-relaxed ${i === 0 ? 'text-stone-300' : 'text-sm text-stone-600'}`}>{p.texte}</p>
+					<ul class="mt-6 flex flex-wrap gap-2">
+						{p.tags.map((t) => (
+							<li class={`rounded-full px-3 py-1 text-xs font-semibold ${i === 0 ? 'bg-white/10 text-white' : 'bg-stone-100 text-stone-700'}`}>{t}</li>
+						))}
+					</ul>
+					{i === 0 && (
+						<a href="/#tarification" class="btn btn-rose mt-8">
+							Voir les formules <ArrowRight size={16} class="btn-arrow" />
+						</a>
+					)}
+				</div>
+				</div>
 			))}
-		</ol>
-		<p class="mt-10" data-reveal>
-			<a href="/#tarification" class="btn btn-dark btn-lg">Voir les formules <ArrowRight size={17} class="btn-arrow" /></a>
-		</p>
+		</div>
 	</section>
 
 	<!-- VALEURS -->
-	<section class="bg-sable py-20 lg:py-24" aria-labelledby="valeurs-titre">
-		<div class="conteneur">
-			<h2 id="valeurs-titre" class="sr-only">Notre façon de travailler</h2>
-			<div class="grid gap-10 md:grid-cols-3" data-reveal-group>
-				{valeurs.map((v, i) => (
-					<div class="border-t border-encre pt-6">
-						<p class="repere num">{pad(i + 1)}</p>
-						<h3 class="titre-m mt-3">{v.titre}</h3>
-						<p class="mt-3 text-gris">{v.texte}</p>
-					</div>
-				))}
-			</div>
+	<section class="bg-rose-50 py-20">
+		<div class="mx-auto grid max-w-6xl gap-10 px-6 md:grid-cols-3">
+			{valeurs.map((v, i) => (
+				<div data-reveal data-reveal-delay={i * 100}>
+					<p class="text-5xl font-extrabold text-rose-200">0{i + 1}</p>
+					<h3 class="mt-2 text-xl font-bold text-stone-900">{v.titre}</h3>
+					<p class="mt-2 text-stone-600">{v.texte}</p>
+				</div>
+			))}
+		</div>
+	</section>
+
+	<!-- CTA -->
+	<section class="mx-auto max-w-3xl px-6 py-24 text-center">
+		<h2 class="text-3xl font-bold text-stone-900" data-reveal>Écrivons la suite ensemble.</h2>
+		<p class="mt-4 text-stone-600" data-reveal data-reveal-delay="100">Parlez-nous de votre activité, nous vous proposerons la formule adaptée.</p>
+		<div class="mt-8" data-reveal data-reveal-delay="200">
+			<a href="/contact" class="btn btn-dark btn-lg">
+				Nous contacter <ArrowRight size={18} class="btn-arrow" />
+			</a>
 		</div>
 	</section>
 </CommercialLayout>
+
+<style>
+	/* Halo fixe (aucune animation de flou, coûteuse en GPU). */
+	.hero-glow {
+		position: absolute;
+		inset: 0;
+		background:
+			radial-gradient(40% 50% at 80% 30%, rgb(225 29 72 / 0.25), transparent 70%),
+			radial-gradient(35% 45% at 10% 90%, rgb(120 113 108 / 0.35), transparent 70%);
+		pointer-events: none;
+	}
+
+	/* Effet flottant : uniquement transform, mis en pause hors écran. */
+	.floater {
+		animation: flotter 6s ease-in-out infinite;
+		animation-delay: var(--delay, 0s);
+		will-change: transform;
+	}
+	.floater.is-paused {
+		animation-play-state: paused;
+	}
+	@keyframes flotter {
+		0%, 100% { transform: translateY(0) rotate(0deg); }
+		50% { transform: translateY(-14px) rotate(1.5deg); }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.floater { animation: none; will-change: auto; }
+	}
+</style>
+
+<script>
+	// Les animations flottantes ne tournent que lorsque l'élément est visible.
+	const floaters = document.querySelectorAll<HTMLElement>('.floater');
+	if ('IntersectionObserver' in window) {
+		const observer = new IntersectionObserver((entries) => {
+			for (const entry of entries) entry.target.classList.toggle('is-paused', !entry.isIntersecting);
+		});
+		floaters.forEach((el) => observer.observe(el));
+	}
+</script>

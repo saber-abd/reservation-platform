@@ -113,6 +113,10 @@
 .commercial-page :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; border-radius: 4px; }
 .commercial-page .sur-nuit :focus-visible { outline-color: var(--color-accent-clair); }
 
+/* Le socle (motion.css) laisse clip-path: inset(0) sur tout élément révélé : cela rognait les
+   pastilles débordantes, les ombres et les cartes soulevées au survol. Seule la variante « clip » en a besoin. */
+.commercial-page [data-reveal]:not([data-reveal='clip']).is-revealed { clip-path: none; }
+
 /* Couleur de formule portée par une classe : --f, --f-fonce, --f-pale, --f-fond */
 .f-standard { --f: var(--color-f-standard); --f-fonce: var(--color-f-standard-fonce); --f-pale: var(--color-f-standard-pale); --f-fond: var(--color-f-standard-fond); }
 .f-premium { --f: var(--color-f-premium); --f-fonce: var(--color-f-premium-fonce); --f-pale: var(--color-f-premium-pale); --f-fond: var(--color-f-premium-fond); }

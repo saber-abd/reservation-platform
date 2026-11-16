@@ -1,7 +1,84 @@
 ---
-import FormuleDetail from '@/components/commercial/FormuleDetail.astro';
-import type { GalleryShot } from '@/components/commercial/FormulaGallery.astro';
-import { paliers } from '@/components/commercial/offre';
+import CommercialLayout from '@/layouts/commercial/CommercialLayout.astro';
+import FormulaGallery, { type GalleryShot } from '@/components/commercial/FormulaGallery.astro';
+import { paliers, fraisDe, descriptionService } from '@/components/commercial/offre';
+import {
+	Code2,
+	Paintbrush, 
+	Rocket, 
+	Blocks, 
+	KeySquare, 
+	MonitorSmartphone, 
+	Euro, 
+	HeartHandshake,
+	Users,
+	ShieldAlert,
+	Search,
+	MessageSquare,
+	Award,
+	LineChart,
+	CalendarCheck,
+	Check,
+} from 'lucide-react';
+
+const code = (name: string) => `<code class="text-jasmine-400 text-xs">${name}</code>`;
+
+const features = [
+	{
+		icon: Users,
+		tag: 'RBAC avancé',
+		title: 'Équipe et rôles',
+		description: `Gestion complète des profils (Admin, Employé, Démo). Verrouillage physique des zones sensibles (${code('DiamantAdminOnlyGuard')}), assignation personnalisée des prestations et plannings dédiés par praticien.`,
+		benefit: 'Chacun ne voit que ce qui le concerne',
+	},
+	{
+		icon: ShieldAlert,
+		tag: 'Anti-no-show',
+		title: 'Modération et bannissement',
+		description: `Protection active contre les abus : bannissement immédiat en 1 clic avec motif consigné, révocation instantanée des sessions (${code('banned_until')}) et blocage préventif à la réservation.`,
+		benefit: 'Un planning respecté',
+	},
+	{
+		icon: Search,
+		tag: 'Recherche',
+		title: 'Recherche unifiée',
+		description: "Sur l'ensemble de votre base : retrouvez n'importe quel rendez-vous, historique ou fiche client en tapant son nom, son numéro de téléphone, son adresse e-mail ou sa prestation.",
+		benefit: 'Une seule barre de recherche',
+	},
+	{
+		icon: MessageSquare,
+		tag: 'Messagerie salon',
+		title: 'Messagerie avec chaque client',
+		description: "Canal de communication direct et confidentiel pro ↔ client intégré à l'application. Compteur de messages non lus, accusés de lecture et centralisation des échanges préparatoires ou demandes particulières.",
+		benefit: 'Les échanges restent dans l’outil',
+	},
+	{
+		icon: Award,
+		tag: 'Fidélité prestige',
+		title: 'Fidélité à quatre niveaux',
+		description: "Programme de fidélité à quatre niveaux : <em>Cristal</em>, <em>Argent</em>, <em>Or</em> et <em>Diamant</em>. Calcul automatique selon l'assiduité avec badge visible et avantages qui se débloquent.",
+		benefit: 'Une raison de revenir',
+	},
+	{
+		icon: LineChart,
+		tag: 'Pilotage & suivi',
+		title: 'Statistiques et notes privées',
+		description: `Graphiques d'activité interactifs (Recharts) analysant taux de réservation et tendances, couplés à un carnet technique confidentiel (${code('client_notes')}) consignant formules, colorimétrie et sensibilités.`,
+		benefit: 'Chaque client retrouvé tel qu’il est',
+	},
+	{
+		icon: MonitorSmartphone,
+		tag: 'Mobile first',
+		title: 'Version mobile animée',
+		description: "Site vitrine et espaces de gestion pensés pour le téléphone : menu qui se déplie en douceur, tableau de bord dans un tiroir latéral animé et transitions légères qui respectent les préférences d'accessibilité.",
+		benefit: 'Le même site, sur téléphone',
+		wide: true,
+	},
+];
+
+// Prix et frais : src/data/devis.json (via offre.ts), jamais écrits à la main.
+const p = paliers[2];
+const frais = fraisDe('diamant');
 
 const galleryShots: GalleryShot[] = [
 	{ file: 'tableau-de-bord', title: 'Tableau de bord', caption: 'Chiffre d’affaires, rendez-vous, nouveaux clients, panier moyen et prochains rendez-vous en un coup d’œil.' },
@@ -16,12 +93,241 @@ const galleryShots: GalleryShot[] = [
 ];
 ---
 
-<FormuleDetail
-	id="diamant"
-	titre="Une plateforme pour travailler à plusieurs."
-	chapo={`${paliers[2].description} Le projet commence par un cahier des charges écrit et validé avec vous. La démo met en scène un salon de coiffure fictif ; un compte de démonstration en lecture seule ouvre le tableau de bord.`}
-	technique="Même socle que Premium, avec des droits vérifiés par la base pour chaque rôle de l’équipe, des fonctions sécurisées pour la modération et une synchronisation des rendez-vous avec Google Agenda."
-	shots={galleryShots}
-	galerieTitre="Les écrans de la démo Diamant"
-	galerieIntro="Le pilotage, la gestion d’équipe et l’espace client de la démo Diamant."
-/>
+<CommercialLayout title="Formule Diamant | SaberWeb.dev" description="La formule Diamant en détail : gestion d’équipe et des droits, modération, recherche unifiée, fidélité VIP et design dessiné pour le métier. Écrans, technologies et coûts.">
+	
+	<!-- Hero Section with Advanced Parallax and Glassmorphism -->
+	<section class="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-stone-950">
+		<!-- Dynamic animated background -->
+		<div class="absolute inset-0 z-0">
+			<!-- Layer 1: Base dark gradient -->
+			<div class="absolute inset-0 bg-gradient-to-b from-deep-teal-950 to-stone-950 pointer-events-none"></div>
+			<!-- Layer 2: Static glow blobs (radial gradients, no filter) -->
+			<div class="absolute top-0 left-1/4 w-[400px] h-[400px] bg-[radial-gradient(closest-side,var(--color-deep-teal-600)_25%,transparent)] opacity-15 pointer-events-none"></div>
+			<div class="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[radial-gradient(closest-side,var(--color-jasmine-600)_25%,transparent)] opacity-10 pointer-events-none"></div>
+			<!-- Layer 3: Glassmorphism grid -->
+			<div class="absolute inset-0 pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgwem0yMCAyMGMwIDExLjA0Ni04Ljk1NCAyMC0yMCAyMFMtMjAgMzEuMDQ2LTIwIDIwIC0xMS4wNDYgMCAwIDBzMjAgOC45NTQgMjAgMjB6IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=')]"></div>
+		</div>
+		
+		<div class="relative z-10 mx-auto max-w-7xl px-6 flex flex-col items-center text-center pt-32 pb-40 md:pb-32">
+			
+			<h1 class="text-5xl md:text-8xl font-black text-deep-teal-500 tracking-tighter mb-8 leading-tight" data-reveal data-reveal-delay="100">
+				Une plateforme <br/> <span class="font-sans italic font-light text-white">construite pour votre métier.</span>
+			</h1>
+			
+			<p class="text-xl md:text-2xl text-stone-300 max-w-3xl mx-auto leading-relaxed mb-12 font-light" data-reveal data-reveal-delay="200">
+				Tout Premium, avec la gestion d’une équipe et de ses droits, la modération des clients, une recherche unifiée et un site dessiné pour votre maison.
+			</p>
+			
+			<div class="flex flex-col sm:flex-row gap-6 mb-24" data-reveal data-reveal-delay="300">
+				<a href="/demo-diamant/" target="_blank" class="group relative px-8 py-4 bg-deep-teal-600 text-stone-900 rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-[0_20px_40px_-10px_rgba(112,141,129,0.4)] overflow-hidden">
+					<div class="absolute inset-0 bg-gradient-to-r from-deep-teal-400 to-deep-teal-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+					<span class="relative flex items-center gap-2">Visiter la démo <Rocket size={20} /></span>
+				</a>
+				<a href="#fonctionnalites" class="px-8 py-4 bg-white/5 backdrop-blur-lg border border-white/10 text-white rounded-2xl font-bold text-lg hover:bg-white/10 transition-colors">
+					Explorer les fonctionnalités
+				</a>
+			</div>
+		</div>
+
+		<!-- Scroll indicator -->
+		<div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50 animate-bounce motion-reduce:animate-none">
+			<span class="text-xs text-white uppercase tracking-widest">Scroll</span>
+			<div class="w-[1px] h-12 bg-gradient-to-b from-white to-transparent"></div>
+		</div>
+	</section>
+
+	<!-- Section Philosophie (Glass Cards overlapping) -->
+	<section id="philosophie" class="py-32 bg-stone-950 relative overflow-hidden">
+		<!-- Parallax elements -->
+		<div class="absolute right-0 top-1/4 w-96 h-96 bg-[radial-gradient(closest-side,var(--color-jasmine-600)_30%,transparent)] opacity-10 transform translate-x-1/2"></div>
+		<div class="absolute left-0 bottom-1/4 w-96 h-96 bg-[radial-gradient(closest-side,var(--color-deep-teal-600)_30%,transparent)] opacity-10 transform -translate-x-1/2"></div>
+		
+		<div class="mx-auto max-w-6xl px-6 relative z-10">
+			<div class="text-center mb-24" data-reveal>
+				<h2 class="text-4xl md:text-5xl font-bold text-white mb-6">L’approche Diamant</h2>
+				<p class="text-xl text-stone-400 max-w-2xl mx-auto font-light">Un outil conçu à partir de votre façon de travailler, pas d’un modèle générique.</p>
+			</div>
+
+			<div class="grid md:grid-cols-3 gap-8">
+				<!-- Card 1 -->
+				<div data-reveal data-reveal-delay="0" class="md:mt-12">
+					<div class="group h-full bg-white/[0.07] border border-white/10 p-10 rounded-3xl transform hover:-translate-y-2 hover:bg-white/10 transition-all duration-500 ease-out">
+						<Paintbrush className="w-12 h-12 text-jasmine-400 mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6 group-hover:text-white" />
+						<h3 class="text-2xl font-bold text-white mb-4">Design sur mesure</h3>
+						<p class="text-stone-300 leading-relaxed">
+							Couleurs, typographies et mise en page dessinées pour votre maison, sans modèle préconçu, avec un logo animé.
+						</p>
+					</div>
+				</div>
+				<!-- Card 2 -->
+				<div data-reveal data-reveal-delay="100" class="z-10 relative">
+					<div class="group h-full bg-gradient-to-b from-deep-teal-900/50 to-deep-teal-950/50 border border-deep-teal-500/20 p-10 rounded-3xl shadow-[0_20px_40px_-12px_rgba(112,141,129,0.15)] transform hover:-translate-y-2 hover:border-deep-teal-400/50 transition-all duration-500 ease-out">
+						<Code2 className="w-12 h-12 text-deep-teal-300 mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:text-white" />
+						<h3 class="text-2xl font-bold text-white mb-4">Fonctionnalités sur mesure</h3>
+						<p class="text-stone-200 leading-relaxed">
+							Des règles propres à votre métier : répartition des prestations par praticien, plannings, droits par rôle.
+						</p>
+					</div>
+				</div>
+				<!-- Card 3 -->
+				<div data-reveal data-reveal-delay="200" class="md:mt-12">
+					<div class="group h-full bg-white/[0.07] border border-white/10 p-10 rounded-3xl transform hover:-translate-y-2 hover:bg-white/10 transition-all duration-500 ease-out">
+						<Blocks className="w-12 h-12 text-jasmine-400 mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6 group-hover:text-white" />
+						<h3 class="text-2xl font-bold text-white mb-4">Intégrations</h3>
+						<p class="text-stone-300 leading-relaxed">
+							Connexion à vos logiciels internes (ERP, CRM) ou intégrations sur mesure sur devis.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Section Fonctionnalités Exclusives Diamant -->
+	<section id="fonctionnalites" class="py-32 bg-stone-950 border-t border-white/5 relative overflow-hidden">
+		<!-- Glowing ambient blobs -->
+		<div class="absolute left-1/4 top-1/3 w-[500px] h-[500px] bg-[radial-gradient(closest-side,var(--color-deep-teal-600)_10%,transparent)] opacity-10 pointer-events-none"></div>
+		<div class="absolute right-1/4 bottom-10 w-[450px] h-[450px] bg-[radial-gradient(closest-side,var(--color-jasmine-600)_10%,transparent)] opacity-10 pointer-events-none"></div>
+		
+		<div class="mx-auto max-w-6xl px-6 relative z-10">
+			<div class="text-center mb-20" data-reveal>
+				<h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Ce que la formule Diamant ajoute</h2>
+				<p class="text-xl text-stone-400 max-w-3xl mx-auto font-light leading-relaxed">
+					En plus de tout ce que contient Premium, la démo Diamant intègre des outils pour travailler à plusieurs, protéger le planning et suivre chaque client.
+				</p>
+			</div>
+
+			<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+				{features.map((feature, i) => (
+					<div data-reveal data-reveal-delay={(i % 3) * 100} class:list={[{ 'md:col-span-2 lg:col-span-3': feature.wide }]}>
+					<div class="group h-full bg-white/[0.07] border border-white/10 p-8 rounded-3xl hover:-translate-y-1 hover:bg-white/10 hover:border-white/20 transition-all duration-300 flex flex-col justify-between">
+						<div>
+							<feature.icon className="w-10 h-10 text-jasmine-400 mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:text-white" />
+							<h3 class="text-2xl font-bold text-white mb-3">{feature.title}</h3>
+							<p class="text-stone-300 leading-relaxed text-sm" set:html={feature.description} />
+						</div>
+						<div class="mt-6 pt-4 border-t border-white/10">
+							<p class="text-[11px] uppercase tracking-widest font-bold text-stone-500">{feature.tag}</p>
+							<p class="mt-1 text-sm text-stone-200 font-medium">{feature.benefit}</p>
+						</div>
+					</div>
+					</div>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<!-- Galerie de captures -->
+	<FormulaGallery demo="diamant" shots={galleryShots} title="Les écrans de la démo Diamant" intro="Les outils de pilotage, de gestion d’équipe et d’expérience client de la démo Diamant." />
+
+	<!-- Section Technologies -->
+	<section id="technologies" class="py-32 bg-stone-50">
+		<div class="mx-auto max-w-6xl px-6">
+			<div class="flex flex-col-reverse md:flex-row items-center gap-16">
+				<div class="flex-1 w-full" data-reveal="right">
+					<!-- Visual Tech Stack Representation -->
+					<div class="relative w-full aspect-square">
+						<div class="absolute inset-0 border-2 border-dashed border-stone-200 rounded-full animate-[spin_60s_linear_infinite] motion-reduce:animate-none"></div>
+						<div class="absolute inset-4 border border-deep-teal-100 rounded-full animate-[spin_40s_linear_infinite_reverse] motion-reduce:animate-none"></div>
+						
+						<!-- Center Core -->
+						<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-deep-teal-600 rounded-full shadow-2xl flex items-center justify-center text-white font-bold text-xl z-20">
+							Astro
+						</div>
+						
+						<!-- Satellites -->
+						<div class="absolute top-[10%] left-[50%] -translate-x-1/2 w-16 h-16 bg-white border border-stone-200 rounded-full shadow-lg flex items-center justify-center z-10 text-stone-900 font-bold text-xs">
+							React
+						</div>
+						<div class="absolute bottom-[20%] left-[15%] w-20 h-20 bg-stone-900 rounded-full shadow-lg flex items-center justify-center z-10 text-white font-bold text-sm">
+							Supabase
+						</div>
+						<div class="absolute top-[40%] right-[10%] w-24 h-24 bg-jasmine-500 rounded-full shadow-lg flex items-center justify-center z-10 text-stone-900 font-bold text-sm">
+							Tailwind
+						</div>
+					</div>
+				</div>
+				
+				<div class="flex-1" data-reveal="left">
+					<h2 class="text-4xl font-bold text-stone-900 mb-6">Technologies adaptées au projet</h2>
+					<p class="text-lg text-stone-600 mb-8 leading-relaxed">
+						La formule Diamant part des mêmes outils que Premium et y ajoute ce que le projet demande : animations pilotées par le défilement (GSAP), synchronisation avec Google Agenda, intégrations.
+					</p>
+					
+					<div class="space-y-6">
+						<div class="flex gap-4 items-start">
+							<MonitorSmartphone className="w-8 h-8 text-deep-teal-400 shrink-0 mt-1" />
+							<div>
+								<h4 class="font-bold text-xl text-stone-900">Pages rapides</h4>
+								<p class="text-stone-600 mt-2">Les pages sont servies depuis le réseau Cloudflare ; les parties interactives (réservation, tableau de bord) sont des composants React.</p>
+							</div>
+						</div>
+						<div class="flex gap-4 items-start">
+							<KeySquare className="w-8 h-8 text-deep-teal-400 shrink-0 mt-1" />
+							<div>
+								<h4 class="font-bold text-xl text-stone-900">Sécurité et droits par rôle</h4>
+								<p class="text-stone-600 mt-2">Authentification sécurisée, Row Level Security (RLS) PostgreSQL, isolation des rôles employé vs admin et outils d'aide à la conformité RGPD.</p>
+							</div>
+						</div>
+						<div class="flex gap-4 items-start">
+							<CalendarCheck className="w-8 h-8 text-deep-teal-400 shrink-0 mt-1" />
+							<div>
+								<h4 class="font-bold text-xl text-stone-900">Double synchronisation</h4>
+								<p class="text-stone-600 mt-2">Chaque rendez-vous est enregistré dans la base et envoyé dans Google Agenda (compte de service Google) : le planning reste à jour des deux côtés.</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Section Coûts & Processus -->
+	<section id="couts" class="py-32 bg-stone-50 text-stone-900 relative">
+		<!-- Background decorative -->
+		<div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-stone-200 to-transparent"></div>
+		
+		<div class="mx-auto max-w-5xl px-6">
+			<div class="text-center mb-20" data-reveal>
+				<h2 class="text-4xl font-bold mb-4 text-stone-900">Coûts et accompagnement</h2>
+				<p class="text-lg text-stone-600 font-light">Un suivi dans la durée, après la mise en ligne.</p>
+			</div>
+
+			<div class="grid md:grid-cols-2 gap-12">
+				<div class="bg-white border border-stone-200 shadow-sm rounded-3xl p-10 hover:shadow-md transition-shadow" data-reveal>
+					<Euro className="w-10 h-10 text-deep-teal-400 mb-6" />
+					<h3 class="text-2xl font-bold mb-4 text-stone-900">Développement initial</h3>
+					<p class="text-stone-600 mb-8 leading-relaxed">
+						Chaque projet Diamant part d'un cahier des charges écrit et validé. Le prix ci-dessous correspond aux prestations incluses, sans option ; les intégrations sur mesure s'ajoutent sur devis.
+					</p>
+					<p class="text-sm text-stone-500">Main d’œuvre, sans option</p>
+					<div class="mt-1 text-3xl font-black text-deep-teal-300 tabular-nums">dès {p.prixBase}</div>
+					<p class="text-sm text-stone-500 mt-2">Environ {p.jours} de travail. Frais de fonctionnement : {p.frais}.</p>
+				</div>
+
+				<div class="bg-white border border-stone-200 shadow-sm rounded-3xl p-10 hover:shadow-md transition-shadow" data-reveal data-reveal-delay="100">
+					<HeartHandshake className="w-10 h-10 text-deep-teal-400 mb-6" />
+					<h3 class="text-2xl font-bold mb-4 text-stone-900">Maintenance et évolutions</h3>
+					<p class="text-stone-600 mb-8 leading-relaxed">
+						Les frais d’infrastructure dépendent de l’usage réel et sont payés sur vos propres comptes. L’option maintenance couvre le suivi après la mise en ligne : {descriptionService('maintenance').replace(/^./, (c) => c.toLowerCase())}
+					</p>
+					<ul class="space-y-3 text-sm text-stone-600 font-medium">
+						{frais.map((f) => (
+							<li class="flex items-start justify-between gap-4 border-b border-stone-100 pb-2"><span class="flex items-center gap-2"><Check size={15} class="text-deep-teal-400 shrink-0" />{f.nom}</span><span class="tabular-nums text-stone-900 text-right">{f.montant}</span></li>
+						))}
+						{p.maintenance && (
+							<li class="flex items-start justify-between gap-4"><span class="flex items-center gap-2"><Check size={15} class="text-deep-teal-400 shrink-0" />Maintenance (option)</span><span class="tabular-nums text-stone-900 text-right">{p.maintenance}</span></li>
+						)}
+					</ul>
+				</div>
+			</div>
+			
+			<div class="mt-16 text-center" data-reveal>
+				<a href="/contact" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-deep-teal-600 text-stone-900 rounded-full font-bold text-lg hover:bg-deep-teal-700 transition-colors shadow-lg hover:shadow-xl">
+					Discuter de votre projet
+				</a>
+			</div>
+		</div>
+	</section>
+
+</CommercialLayout>

@@ -17,20 +17,80 @@ const devisPrefill = JSON.stringify({
 ---
 
 <CommercialLayout footerCta={false} title="Contact | SaberWeb.dev" description="Contactez Saber et Nadir par téléphone, WhatsApp, e-mail ou via le formulaire pour parler de votre projet de site.">
-		<section class="conteneur entete-page">		<p class="repere num">Contact</p>		<h1 class="titre-geant mt-4 max-w-[12ch]" data-split>Parlons de votre projet.</h1>		<p class="chapo mt-8 max-w-xl" data-reveal>			Un appel, un message ou quelques lignes dans le formulaire&nbsp;: nous revenons vers vous rapidement, sans engagement.		</p>	</section>	<section class="conteneur pb-24">		<div class="grid gap-12 border-t border-encre pt-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">			<!-- Coordonnées -->			<div class="flex flex-col gap-12">				<div data-reveal>					<h2 class="titre-m">Nous joindre directement</h2>					<ul class="mt-5 border-t border-filet">						<li>							<a href={contact.telephoneHref} class="channel">								<span class="channel-icon"><Phone size={18} /></span>								<span class="flex-1"><span class="block text-sm text-gris">Téléphone</span><span class="num font-medium text-encre">{contact.telephone}</span></span>							</a>						</li>						<li>							<a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" class="channel">								<span class="channel-icon"><BrandIcon name="whatsapp" size={18} /></span>								<span class="flex-1"><span class="block text-sm text-gris">WhatsApp</span><span class="font-medium text-encre">Écrire un message</span></span>							</a>						</li>						{contact.email && (							<li>								<a href={`mailto:${contact.email}`} class="channel">									<span class="channel-icon"><Mail size={18} /></span>									<span class="flex-1"><span class="block text-sm text-gris">E-mail</span><span class="break-all font-medium text-encre">{contact.email}</span></span>								</a>							</li>						)}					</ul>					<p class="mt-5 flex items-center gap-2 text-sm text-gris"><Clock size={16} /> Réponse en général sous 24&nbsp;h ouvrées.</p>				</div>				<div data-reveal>					<h2 class="titre-m">Vos interlocuteurs</h2>					<ul class="mt-5 space-y-5">						{membres.map((m) => (							<li class="flex items-center gap-4">								<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={56} class="shrink-0" />								<div class="min-w-0 flex-1">									<p class="font-medium text-encre">{m.prenom}</p>									<p class="text-sm text-gris">{m.role}</p>								</div>								<a href={m.linkedin} target="_blank" rel="noopener noreferrer" class="lien shrink-0 text-sm" aria-label={`Profil LinkedIn de ${m.prenom}`}>									<BrandIcon name="linkedin" size={14} /> LinkedIn								</a>							</li>						))}					</ul>				</div>			</div>			<!-- Formulaire -->
+	<section class="relative overflow-hidden bg-stone-950 text-white">
+		<div class="contact-glow" aria-hidden="true"></div>
+		<div class="relative mx-auto max-w-6xl px-4 pb-28 pt-32 sm:px-6 lg:pt-36">
+			<h1 class="max-w-2xl text-4xl font-extrabold leading-tight sm:text-5xl" data-reveal>Parlons de votre projet</h1>
+			<p class="mt-5 max-w-xl text-lg text-stone-300" data-reveal data-reveal-delay="100">
+				Un appel, un message ou quelques lignes dans le formulaire : nous revenons vers vous rapidement, sans engagement.
+			</p>
+		</div>
+	</section>
+
+	<section class="relative mx-auto -mt-16 max-w-6xl px-4 pb-24 sm:px-6">
+		<div class="grid gap-6 lg:grid-cols-[1fr_1.35fr]">
+			<!-- Coordonnées -->
+			<div class="flex flex-col gap-6">
+				<div class="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" data-reveal>
+					<h2 class="text-lg font-bold text-stone-900">Nous joindre directement</h2>
+					<ul class="mt-5 space-y-3">
+						<li>
+							<a href={contact.telephoneHref} class="channel group">
+								<span class="channel-icon bg-stone-900 text-white"><Phone size={18} /></span>
+								<span><span class="block text-xs text-stone-500">Téléphone</span><span class="font-semibold text-stone-900">{contact.telephone}</span></span>
+							</a>
+						</li>
+						<li>
+							<a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" class="channel group">
+								<span class="channel-icon bg-[#25D366] text-[#052e16]"><BrandIcon name="whatsapp" size={18} /></span>
+								<span><span class="block text-xs text-stone-500">WhatsApp</span><span class="font-semibold text-stone-900">Écrire un message</span></span>
+							</a>
+						</li>
+						{contact.email && (
+							<li>
+								<a href={`mailto:${contact.email}`} class="channel group">
+									<span class="channel-icon bg-rose-600 text-white"><Mail size={18} /></span>
+									<span><span class="block text-xs text-stone-500">E-mail</span><span class="font-semibold text-stone-900 break-all">{contact.email}</span></span>
+								</a>
+							</li>
+						)}
+					</ul>
+					<p class="mt-6 flex items-center gap-2 text-sm text-stone-500"><Clock size={16} /> Réponse en général sous 24 h ouvrées.</p>
+				</div>
+
+				<div class="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" data-reveal data-reveal-delay="100">
+					<h2 class="text-lg font-bold text-stone-900">Vos interlocuteurs</h2>
+					<ul class="mt-5 space-y-4">
+						{membres.map((m) => (
+							<li class="flex items-center gap-4">
+								<Avatar photo={m.photo} initiales={m.initiales} prenom={m.prenom} size={52} class="shrink-0 ring-2 ring-stone-100" />
+								<div class="min-w-0 flex-1">
+									<p class="font-semibold text-stone-900">{m.prenom}</p>
+									<p class="truncate text-sm text-stone-500">{m.role}</p>
+								</div>
+								<a href={m.linkedin} target="_blank" rel="noopener noreferrer" class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-stone-200 px-3 py-1.5 text-sm font-semibold text-stone-700 transition-colors hover:border-[#0A66C2] hover:text-[#0A66C2]" aria-label={`Profil LinkedIn de ${m.prenom}`}>
+									<BrandIcon name="linkedin" size={15} class="text-[#0A66C2]" /> LinkedIn
+								</a>
+							</li>
+						))}
+					</ul>
+				</div>
+			</div>
+
+			<!-- Formulaire -->
 			<form
 				id="contact-form"
-				class="rounded-2xl border border-filet bg-carte p-6 sm:p-8"
-data-service={emailjs.serviceId}
+				class="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8"
+				data-service={emailjs.serviceId}
 				data-template={emailjs.templateId}
 				data-key={emailjs.publicKey}
 				data-devis={devisPrefill}
 				data-reveal
-data-reveal-delay="100"
+				data-reveal-delay="150"
 				novalidate
 			>
-				<h2 class="titre-m">Envoyer un message</h2>
-				<p class="mt-1 text-sm text-gris">Les champs marqués d’un astérisque sont obligatoires.</p>
+				<h2 class="text-lg font-bold text-stone-900">Envoyer un message</h2>
+				<p class="mt-1 text-sm text-stone-500">Les champs marqués d’un astérisque sont obligatoires.</p>
 
 				<div class="mt-6 grid gap-5 sm:grid-cols-2">
 					<div>
@@ -66,13 +126,13 @@ const devisPrefill = JSON.stringify({
 					</div>
 				</div>
 
-				<p class="mt-5 text-xs leading-relaxed text-gris">
+				<p class="mt-5 text-xs leading-relaxed text-stone-500">
 					Vos coordonnées servent uniquement à répondre à votre demande. Voir notre <a href="/confidentialite" class="underline hover:text-stone-900">politique de confidentialité</a>.
 				</p>
 
 				<p id="cf-status" class="mt-4 hidden rounded-xl px-4 py-3 text-sm" role="status" aria-live="polite"></p>
 
-				<button id="cf-submit" type="submit" class="btn btn-accent btn-lg mt-6 w-full justify-center sm:w-auto">
+				<button id="cf-submit" type="submit" class="btn btn-rose btn-lg mt-6 w-full justify-center sm:w-auto">
 					<Send size={18} /> <span>Envoyer le message</span>
 				</button>
 			</form>
@@ -81,13 +141,24 @@ const devisPrefill = JSON.stringify({
 </CommercialLayout>
 
 <style>
+	.contact-glow {
+		position: absolute;
+		inset: 0;
+		background:
+			radial-gradient(40rem 24rem at 85% -10%, rgb(225 29 72 / 0.3), transparent 70%),
+			radial-gradient(36rem 22rem at 0% 110%, rgb(124 58 237 / 0.25), transparent 70%);
+		pointer-events: none;
+	}
 	.channel {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
-		border-bottom: 1px solid var(--color-filet);
-		padding-block: 0.9rem;
+		gap: 0.9rem;
+		border-radius: 1rem;
+		border: 1px solid var(--color-stone-200);
+		padding: 0.75rem 1rem;
+		transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 	}
+	.channel:hover { border-color: var(--color-stone-400); background: var(--color-stone-50); transform: translateX(3px); }
 	.channel-icon {
 		display: flex;
 		height: 2.5rem;
@@ -95,13 +166,25 @@ const devisPrefill = JSON.stringify({
 		flex-shrink: 0;
 		align-items: center;
 		justify-content: center;
-		border-radius: 9999px;
-		border: 1px solid var(--color-filet);
-		transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+		border-radius: 0.75rem;
 	}
-	.channel:hover .channel-icon { background: var(--color-encre); border-color: var(--color-encre); color: var(--color-papier); }
+	.field-label { display: block; font-size: 0.875rem; font-weight: 600; color: var(--color-stone-800); }
+	.field {
+		margin-top: 0.4rem;
+		width: 100%;
+		border-radius: 0.75rem;
+		border: 1px solid var(--color-stone-200);
+		background: var(--color-stone-50);
+		padding: 0.7rem 0.9rem;
+		font-size: 0.95rem;
+		color: var(--color-stone-900);
+		transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+	}
+	.field:focus { outline: none; background: #fff; border-color: var(--color-rose-500); box-shadow: 0 0 0 3px rgb(244 63 94 / 0.15); }
+	.field[aria-invalid='true'] { border-color: var(--color-red-500); }
 	@media (prefers-reduced-motion: reduce) {
-		.channel-icon { transition: none; }
+		.channel { transition: none; }
+		.channel:hover { transform: none; }
 	}
 </style>
 

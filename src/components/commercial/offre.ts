@@ -10,6 +10,7 @@ import {
 	formatEuros,
 	formatFourchette,
 	formatJours,
+	libellesFrais,
 	tarifDe,
 } from '@/lib/devis';
 
@@ -100,3 +101,10 @@ export const fr = (texte: string) => texte.replace(/ ([:;?!])/g, ' $1');
 
 export const descriptionService = (id: string) => fr(service(id)?.description ?? '');
 export const nomService = (id: string) => service(id)?.nom ?? '';
+
+/** Frais de fonctionnement d'une formule, ligne par ligne (pages galerie, section « Coûts »). */
+export function fraisDe(id: FormuleId): { nom: string; montant: string; note?: string }[] {
+	return calculerDevis(devis, id, [])
+		.lignes.filter((l) => libellesFrais(l.tarif).length > 0)
+		.map((l) => ({ nom: l.service.nom, montant: libellesFrais(l.tarif).join(' ; '), note: l.tarif.note ? fr(l.tarif.note) : undefined }));
+}

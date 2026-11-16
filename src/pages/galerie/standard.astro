@@ -1,7 +1,13 @@
 ---
-import FormuleDetail from '@/components/commercial/FormuleDetail.astro';
-import type { GalleryShot } from '@/components/commercial/FormulaGallery.astro';
-import { paliers } from '@/components/commercial/offre';
+import CommercialLayout from '@/layouts/commercial/CommercialLayout.astro';
+import FormulaGallery, { type GalleryShot } from '@/components/commercial/FormulaGallery.astro';
+import { paliers, fraisDe } from '@/components/commercial/offre';
+import { Calendar, Zap, LayoutDashboard, Database, Server, CheckCircle2, Euro } from 'lucide-react';
+
+// Prix et frais : src/data/devis.json (via offre.ts), jamais écrits à la main.
+const p = paliers[0];
+const frais = fraisDe('standard');
+const notes = frais.filter((f) => f.note);
 
 const galleryShots: GalleryShot[] = [
 	{ file: 'site-vitrine', commercial: 'standard-accueil', title: 'Accueil', caption: 'Une page d’accueil claire et rapide qui présente votre activité et met la réservation en avant.' },
@@ -12,12 +18,222 @@ const galleryShots: GalleryShot[] = [
 ];
 ---
 
-<FormuleDetail
-	id="standard"
-	titre="Un site rapide, des rendez-vous dans votre agenda."
-	chapo={`${paliers[0].description} La démo met en scène un dépanneur informatique fictif.`}
-	technique="Un site rendu sur le réseau de Cloudflare, sans base de données : les rendez-vous sont écrits directement dans votre agenda Google, les e-mails partent par EmailJS."
-	shots={galleryShots}
-	galerieTitre="Les écrans de la démo Standard"
-	galerieIntro="Les pages du site, telles que vos clients les verront."
-/>
+<CommercialLayout title="Formule Standard | SaberWeb.dev" description="La formule Standard en détail : site vitrine rapide, réservation dans Google Agenda, écrans de la démo, technologies et coûts.">
+	
+	<!-- Hero Section with Parallax Effect -->
+	<section class="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-prussian-blue-900">
+		<div class="absolute inset-0 z-0">
+			<!-- Abstract dynamic background (optimized) -->
+			<div class="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-[radial-gradient(closest-side,var(--color-prussian-blue-500)_25%,transparent)] opacity-20 pointer-events-none"></div>
+			<div class="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-[radial-gradient(closest-side,var(--color-prussian-blue-400)_15%,transparent)] opacity-10 pointer-events-none"></div>
+			<picture class="absolute inset-0 opacity-[0.07] pointer-events-none">
+					<source type="image/avif" srcset="/images/commercial/galerie-standard-fond-1600.avif" />
+					<img src="/images/commercial/galerie-standard-fond-1600.webp" alt="" width="1600" height="1068" fetchpriority="high" decoding="async" class="h-full w-full object-cover" />
+				</picture>
+		</div>
+		
+		<div class="relative z-10 mx-auto max-w-5xl px-6 text-center pt-32 pb-32 md:pb-24">
+			<h1 class="text-5xl md:text-7xl font-black text-prussian-blue-500 tracking-tight mb-6" data-reveal data-reveal-delay="100">
+				Un site rapide, des rendez-vous <span class="text-prussian-blue-600">dans votre agenda.</span>
+			</h1>
+			<p class="text-xl text-prussian-blue-100 max-w-2xl mx-auto leading-relaxed" data-reveal data-reveal-delay="200">
+				Un site vitrine rapide, avec une prise de rendez-vous qui écrit directement dans votre Google Agenda.
+			</p>
+			
+			<div class="mt-10 flex flex-col sm:flex-row flex-wrap justify-center items-center gap-6" data-reveal data-reveal-delay="300">
+				<a href="/demo-standard/" target="_blank" class="px-8 py-4 bg-white text-prussian-blue-600 rounded-xl font-bold text-lg hover:bg-prussian-blue-50 transition-colors shadow-xl">
+					Voir la démo en direct
+				</a>
+				<a href="#couts" class="px-8 py-4 bg-prussian-blue-600 border border-prussian-blue-600 text-white rounded-xl font-bold text-lg hover:bg-prussian-blue-500 transition-colors">
+					Voir les tarifs
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<!-- Section Fonctionnalités (Superimposed Cards) -->
+	<section id="fonctionnalites" class="py-24 bg-stone-50">
+		<div class="mx-auto max-w-6xl px-6">
+			<div class="text-center mb-20" data-reveal>
+				<h2 class="text-4xl font-bold text-stone-900 mb-4">Ce que comprend la formule</h2>
+				<p class="text-lg text-stone-600 max-w-2xl mx-auto">Conçu pour les professionnels qui souhaitent une présence en ligne sans gestion complexe.</p>
+			</div>
+
+			<div class="relative max-w-4xl mx-auto space-y-12">
+				<!-- Card 1 -->
+				<div data-reveal>
+					<div class="group relative bg-white rounded-3xl p-8 md:p-12 shadow-md border border-stone-200 overflow-hidden transition-all duration-300 ease-out hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] transform hover:-translate-y-2">
+						<div class="absolute -right-20 -top-20 w-64 h-64 bg-prussian-blue-50 rounded-full blur-3xl group-hover:bg-prussian-blue-100 transition-colors pointer-events-none"></div>
+						<div class="relative z-10 flex flex-col md:flex-row gap-8 items-center">
+							<div class="flex-1">
+								<div class="w-14 h-14 bg-prussian-blue-100 text-prussian-blue-600 rounded-2xl flex items-center justify-center mb-6">
+									<Calendar size={28} />
+								</div>
+								<h3 class="text-2xl font-bold text-stone-900 mb-4">Prise de rendez-vous intégrée</h3>
+								<p class="text-stone-600 leading-relaxed mb-6">
+									Fini les appels pendant vos prestations. Vos clients réservent en ligne et le rendez-vous s'ajoute automatiquement dans votre <strong>Google Agenda</strong>.
+								</p>
+								<ul class="space-y-3">
+									<li class="flex items-center gap-3 text-sm font-medium text-stone-700"><CheckCircle2 size={18} class="text-prussian-blue-500" /> Synchronisation temps réel</li>
+									<li class="flex items-center gap-3 text-sm font-medium text-stone-700"><CheckCircle2 size={18} class="text-prussian-blue-500" /> Pas de double réservation</li>
+								</ul>
+							</div>
+							<div class="flex-1 w-full relative">
+								<div class="aspect-video bg-stone-100 rounded-xl overflow-hidden border border-stone-200 shadow-inner">
+									<img src="/images/technicien_pc.webp" loading="lazy" decoding="async" alt="Illustration RDV" class="w-full h-full object-cover" />
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Card 2 -->
+				<div data-reveal data-reveal-delay="100">
+					<div class="group relative bg-white rounded-3xl p-8 md:p-12 shadow-md border border-stone-200 overflow-hidden transition-all duration-300 ease-out hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] transform hover:-translate-y-2">
+						<div class="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-50 rounded-full blur-3xl group-hover:bg-blue-100 transition-colors pointer-events-none"></div>
+						<div class="relative z-10 flex flex-col md:flex-row-reverse gap-8 items-center">
+							<div class="flex-1">
+								<div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
+									<Zap size={28} />
+								</div>
+								<h3 class="text-2xl font-bold text-stone-900 mb-4">Vitesse et référencement</h3>
+								<p class="text-stone-600 leading-relaxed mb-6">
+									Les pages sont préparées à l'avance et servies depuis le réseau Cloudflare : elles s'affichent vite, sur téléphone comme sur ordinateur, et Google les lit sans difficulté.
+								</p>
+								<ul class="space-y-3">
+									<li class="flex items-center gap-3 text-sm font-medium text-stone-700"><CheckCircle2 size={18} class="text-blue-500" /> Balises, plan du site, images optimisées</li>
+									<li class="flex items-center gap-3 text-sm font-medium text-stone-700"><CheckCircle2 size={18} class="text-blue-500" /> Navigation fluide sans rechargement</li>
+								</ul>
+							</div>
+							<div class="flex-1 w-full relative">
+								<div class="aspect-video bg-stone-900 rounded-xl overflow-hidden shadow-2xl p-4 border border-stone-800">
+									<!-- Pseudo code block for visual -->
+									<div class="flex gap-2 mb-4">
+										<div class="w-3 h-3 rounded-full bg-red-500"></div>
+										<div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+										<div class="w-3 h-3 rounded-full bg-green-500"></div>
+									</div>
+									<div class="font-mono text-sm text-green-400">
+										<p>> astro build</p>
+										<p class="text-stone-400">✓ Completed in 120ms.</p>
+										<p class="text-blue-400 mt-2">Deploying to Global Edge Network...</p>
+										<p class="text-green-400">Success! Site is live.</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Galerie de captures -->
+	<FormulaGallery demo="standard" shots={galleryShots} title="Les écrans de la démo Standard" intro="Les pages du site, telles que vos clients les verront." />
+
+	<!-- Section Technologies -->
+	<section id="technologies" class="py-24 bg-stone-50 text-stone-900 relative overflow-hidden">
+		<!-- Interactive Mouse Background Script -->
+		<div id="cursor-glow" class="absolute top-0 left-0 -ml-[300px] -mt-[300px] w-[600px] h-[600px] bg-[radial-gradient(closest-side,var(--color-prussian-blue-200)_20%,transparent)] opacity-50 pointer-events-none will-change-transform transition-transform duration-500 ease-out motion-reduce:transition-none"></div>
+		
+		<div class="relative z-10 mx-auto max-w-6xl px-6">
+			<div class="text-center mb-16" data-reveal>
+				<h2 class="text-4xl font-bold mb-4 text-stone-900">Technologies utilisées</h2>
+				<p class="text-lg text-stone-600">Les outils sur lesquels repose le site.</p>
+			</div>
+
+			<div class="grid md:grid-cols-3 gap-8">
+				<div class="bg-white border border-stone-200 shadow-sm p-8 rounded-3xl hover:shadow-md transition-shadow" data-reveal data-reveal-delay="0">
+					<LayoutDashboard class="w-12 h-12 text-prussian-blue-600 mb-6" />
+					<h3 class="text-xl font-bold mb-3 text-stone-900">Astro & React</h3>
+					<p class="text-stone-600 text-sm leading-relaxed">
+						L'interface est construite avec Astro pour des pages légères et React pour les composants interactifs (comme le formulaire de réservation).
+					</p>
+				</div>
+				<div class="bg-white border border-stone-200 shadow-sm p-8 rounded-3xl hover:shadow-md transition-shadow" data-reveal data-reveal-delay="100">
+					<Database className="w-12 h-12 text-prussian-blue-600 mb-6" />
+					<h3 class="text-xl font-bold mb-3 text-stone-900">Pas de base de données</h3>
+					<p class="text-stone-600 text-sm leading-relaxed">
+						Aucune base de données complexe à maintenir. Les informations sont stockées dans des fichiers de configuration sécurisés et directement dans votre agenda.
+					</p>
+				</div>
+				<div class="bg-white border border-stone-200 shadow-sm p-8 rounded-3xl hover:shadow-md transition-shadow" data-reveal data-reveal-delay="200">
+					<Server class="w-12 h-12 text-prussian-blue-600 mb-6" />
+					<h3 class="text-xl font-bold mb-3 text-stone-900">Hébergement Cloudflare</h3>
+					<p class="text-stone-600 text-sm leading-relaxed">
+						Déployé sur Cloudflare Workers. Votre site est distribué sur des centaines de serveurs dans le monde entier pour un accès immédiat.
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Section Coûts -->
+	<section id="couts" class="py-24 bg-white">
+		<div class="mx-auto max-w-4xl px-6">
+			<div class="text-center mb-16" data-reveal>
+				<h2 class="text-4xl font-bold text-stone-900 mb-4">Coûts</h2>
+				<p class="text-lg text-stone-600">La formule la plus économique sur le long terme.</p>
+			</div>
+
+			<div class="bg-stone-50 rounded-3xl p-8 md:p-12 border border-stone-200 shadow-sm" data-reveal>
+				<div class="flex flex-col md:flex-row gap-12 items-center justify-between border-b border-stone-200 pb-8 mb-8">
+					<div>
+						<h3 class="text-2xl font-bold text-stone-900 mb-2">Création initiale</h3>
+						<p class="text-stone-500">Design, développement, intégration de vos contenus et configuration de l’agenda. Environ {p.jours} de travail.</p>
+					</div>
+					<div class="shrink-0 text-right">
+						<span class="block whitespace-nowrap text-sm text-stone-500">Main d’œuvre, sans option</span>
+						<span class="whitespace-nowrap text-4xl font-black text-prussian-blue-600 tabular-nums">dès {p.prixBase}</span>
+					</div>
+				</div>
+
+				<div>
+					<h4 class="text-lg font-bold text-stone-900 mb-6 flex items-center gap-2">
+						<Euro size={20} class="text-stone-400" />
+						Frais fixes mensuels (Infrastructure)
+					</h4>
+					<div class="space-y-4">
+						{frais.map((f) => (
+							<div class="flex justify-between items-center gap-4 bg-white p-4 rounded-xl border border-stone-100">
+								<span class="font-medium text-stone-700">{f.nom}{f.note && ' *'}</span>
+								<span class="text-stone-900 font-bold tabular-nums text-right">{f.montant}</span>
+							</div>
+						))}
+					</div>
+					<p class="mt-4 text-sm font-semibold text-stone-700">Total estimé : {p.frais}, payés sur vos propres comptes.</p>
+					{notes.map((f) => (
+						<p class="mt-3 text-xs text-stone-400 italic">* {f.nom} : {f.note}</p>
+					))}
+					<div class="mt-8 flex flex-wrap gap-3">
+						<a href={p.devisHref} class="btn btn-dark">Simuler un devis Standard</a>
+						<a href="/galerie/premium" class="btn btn-outline">Voir la formule Premium</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<script>
+		// Cursor glow effect logic
+		const cursorGlow = document.getElementById('cursor-glow');
+		const techSection = document.getElementById('technologies');
+
+		if (cursorGlow && techSection) {
+			// translate3d (composité, pas de reflow) + au plus une mise à jour par frame
+			let frame = 0;
+			let x = 0;
+			let y = 0;
+			techSection.addEventListener('mousemove', (e) => {
+				x = e.clientX;
+				y = e.clientY;
+				if (frame) return;
+				frame = requestAnimationFrame(() => {
+					frame = 0;
+					const rect = techSection.getBoundingClientRect();
+					cursorGlow.style.transform = `translate3d(${x - rect.left}px, ${y - rect.top}px, 0)`;
+				});
+			}, { passive: true });
+		}
+	</script>
+</CommercialLayout>
