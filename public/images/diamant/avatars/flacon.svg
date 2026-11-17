@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Flacon de soin">
+<title>Flacon de soin</title>
+<defs><clipPath id="r"><circle cx="48" cy="48" r="48"/></clipPath></defs>
+<g clip-path="url(#r)">
+<rect width="96" height="96" fill="#f5efe6"/>
+<g fill="none" stroke="#1f1813" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+
+<path d="M44 20 H54 V27 H44 Z M49 20 V15 H60"/>
+<path d="M40 31 C40 29 42 27 44 27 H54 C56 27 58 29 58 31 V74 C58 77 56 79 53 79 H45 C42 79 40 77 40 74 Z"/>
+<path d="M40 44 H58 M40 64 H58" stroke="#b5a898"/>
+<path d="M45 53 c2-3 6-3 8 0" stroke="#a84b25"/>
+<circle cx="66" cy="34" r="1.6" fill="#a84b25" stroke="none"/>
+<circle cx="70" cy="42" r="1.1" fill="#a84b25" stroke="none"/>
+
+</g>
+</g>
+</svg>

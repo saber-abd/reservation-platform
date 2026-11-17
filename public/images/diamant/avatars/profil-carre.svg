@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Profil au carré">
+<title>Profil au carré</title>
+<defs><clipPath id="r"><circle cx="48" cy="48" r="48"/></clipPath></defs>
+<g clip-path="url(#r)">
+<rect width="96" height="96" fill="#f4e6dc"/>
+<g fill="none" stroke="#1f1813" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+
+<path d="M39 35 C37.5 24 45.5 16.5 56 16.5 C67.5 16.5 74.5 25.5 74.5 38 C74.5 47 72.5 55 73.5 64.5 L57 64.5 C58 57 57.5 50 54.5 45 C50 41 44 39 39 35 Z" fill="#a84b25" stroke="none"/>
+<path d="M47 22 C53 21 60 23 64 28 M50 19.5 C57 19 64 21.5 69 27" stroke="#f4e6dc" stroke-width="1.2"/>
+<path d="M39 35 C37 37.5 36.5 39.5 37 42 L32.5 50.5 C32 52 33.2 52.8 35.2 53.2 L34.8 56 C35.8 56.8 36.6 57.4 36 58.4 L35.2 60.4 C35.4 63.4 37 65.8 39.6 66.8 C42.6 67.8 45 69 46 72 L46.5 96"/>
+<path d="M39.6 42.2 q2.4 1.5 4.8 0"/>
+<path d="M57 64.5 C57.5 72 57.5 82 58 96"/>
+<path d="M46.5 86 C38 87 30 90 24 96 M58.5 84 C68 85 76 89 82 96" stroke="#4a3f37" opacity=".45"/>
+
+</g>
+</g>
+</svg>

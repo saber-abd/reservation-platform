@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Ciseaux">
+<title>Ciseaux</title>
+<defs><clipPath id="r"><circle cx="48" cy="48" r="48"/></clipPath></defs>
+<g clip-path="url(#r)">
+<rect width="96" height="96" fill="#f4e6dc"/>
+<g fill="none" stroke="#1f1813" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+
+<g transform="translate(-3 2) rotate(-32 50 48)">
+<circle cx="25" cy="39" r="8.5"/>
+<circle cx="25" cy="57" r="8.5"/>
+<path d="M33 52.5 L48 49.4 L79 59 C80.8 59.3 81.2 57.4 79.8 56.6 L50 45.6" fill="#f1e9dd"/>
+<path d="M33 43.5 L48 46.6 L79 37 C80.8 36.7 81.2 38.6 79.8 39.4 L50 50.4 Z" fill="#f1e9dd"/>
+<circle cx="48.5" cy="48" r="2.1" fill="#a84b25" stroke="none"/>
+</g>
+<path d="M22 80 C32 75 38 82 48 77" stroke="#a84b25"/>
+
+</g>
+</g>
+</svg>

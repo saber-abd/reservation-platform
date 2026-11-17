@@ -254,7 +254,7 @@ export function Segments<T extends string>({
 /* Couche flottante : portail + Échap + focus                          */
 /* ------------------------------------------------------------------ */
 
-function usePortail() {
+export function usePortail() {
 	const [cible, setCible] = useState<HTMLElement | null>(null);
 	useEffect(() => setCible(document.body), []);
 	return cible;
@@ -263,7 +263,8 @@ function usePortail() {
 // Pile des couches ouvertes : seule la plus haute réagit à Échap et au piège de focus.
 const pileCouches: symbol[] = [];
 
-function useCouche(ouvert: boolean, onClose: () => void, ref: React.RefObject<HTMLElement | null>) {
+/** Couche modale : Échap ferme, Tab reste dans la couche, focus rendu à la fermeture. */
+export function useCouche(ouvert: boolean, onClose: () => void, ref: React.RefObject<HTMLElement | null>) {
 	const fermer = useRef(onClose);
 	fermer.current = onClose;
 	useEffect(() => {

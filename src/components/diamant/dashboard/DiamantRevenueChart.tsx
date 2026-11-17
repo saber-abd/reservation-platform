@@ -1,17 +1,14 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import type { Appointment } from '@/lib/queries';
-import { formatEuros, roundMoney } from '@/lib/money';
+import { formatEuros } from '@/lib/money';
 import { useReducedMotion } from 'motion/react';
 import { EtatVide } from './kit/primitives';
 
-type AppointmentWithService = Appointment & {
-	services: { name: string; duration_minutes: number; price: number } | null;
-};
+import type { PointSerie } from './kit/periode';
 
 interface Props {
-	appointments?: AppointmentWithService[];
-	range?: 'week' | 'month' | 'year' | 'custom';
+	/** Un point par jour (ou par mois) de la période, zéros compris : voir kit/periode.ts. */
+	serie?: PointSerie[];
 }
 
 // Couleurs de l'espace Diamant (voir diamant.css, section « Espaces connectés »)
@@ -34,38 +31,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 	return null;
 };
 
-export default function DiamantRevenueChart({ appointments = [], range = 'month' }: Props) {
+export default function DiamantRevenueChart({ serie = [] }: Props) {
 	const reduit = useReducedMotion();
-	const data = useMemo(() => {
-		if (appointments.length === 0) return [];
+	const data = serie;
+	const vide = data.every((p) => p.rdv === 0);
 
-		// Sort base appointments chronologically
-		const sortedAppointments = [...appointments].sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
-
-		const orderedGrouped: Record<string, { ca: number; rdv: number }> = {};
-		sortedAppointments.forEach(app => {
-			const date = new Date(app.start_time);
-			let key = '';
-			if (range === 'year') {
-				key = date.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' });
-			} else {
-				key = date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
-			}
-			if (!orderedGrouped[key]) {
-				orderedGrouped[key] = { ca: 0, rdv: 0 };
-			}
-			orderedGrouped[key].rdv += 1;
-			orderedGrouped[key].ca += app.services?.price || 0;
-		});
-
-		return Object.entries(orderedGrouped).map(([name, values]) => ({
-			name,
-			ca: roundMoney(values.ca),
-			rdv: values.rdv
-		}));
-	}, [appointments, range]);
-
-	if (data.length === 0) {
+	if (data.length === 0 || vide) {
 		return (
 			<div className="flex h-[300px] w-full items-center justify-center rounded-xl border border-dashed border-dx-filet-fort">
 				<EtatVide dessin="releve" titre="Aucune donnée sur la période" texte="Les recettes apparaîtront ici dès qu'un rendez-vous sera enregistré." />
@@ -94,6 +65,7 @@ export default function DiamantRevenueChart({ appointments = [], range = 'month'
 						tickLine={false}
 						dy={10}
 						minTickGap={18}
+						interval="preserveStartEnd"
 					/>
 					<YAxis
 						tick={{ fill: GRIS, fontSize: 11, fontWeight: 500 }}

@@ -1345,8 +1345,18 @@ textarea.dx-champ { min-height: 88px; line-height: 1.5; resize: vertical; }
     position: relative;
 }
 .dx-agenda__tete { position: sticky; top: 0; z-index: 3; background: var(--dx-carte); border-bottom: 1px solid var(--dx-filet); padding: 10px 6px; text-align: center; }
-.dx-agenda__heure { position: relative; height: var(--dx-heure); font-size: 0.6875rem; color: var(--dx-gris); text-align: right; padding-right: 8px; transform: translateY(-0.55em); font-variant-numeric: tabular-nums; }
-.dx-agenda__col { position: relative; border-left: 1px solid var(--dx-filet); background-image: linear-gradient(to bottom, var(--dx-filet) 1px, transparent 1px); background-size: 100% var(--dx-heure); }
+.dx-agenda__heure { position: relative; height: var(--dx-heure); font-size: 0.6875rem; line-height: 1; color: var(--dx-gris); text-align: right; padding-right: 8px; font-variant-numeric: tabular-nums; }
+/* Libellé centré sur la ligne de l'heure (haut de la rangée) */
+.dx-agenda__heure > span { display: block; transform: translateY(-50%); }
+/* Ligne pleine à chaque heure, ligne pâle à la demi-heure */
+.dx-agenda__col {
+    position: relative;
+    border-left: 1px solid var(--dx-filet);
+    background-image:
+        linear-gradient(to bottom, var(--dx-filet) 1px, transparent 1px),
+        linear-gradient(to bottom, transparent calc(var(--dx-heure) / 2), rgb(226 216 203 / 0.55) calc(var(--dx-heure) / 2), rgb(226 216 203 / 0.55) calc(var(--dx-heure) / 2 + 1px), transparent calc(var(--dx-heure) / 2 + 1px));
+    background-size: 100% var(--dx-heure);
+}
 .dx-agenda__col[data-aujourdhui='true'] { background-color: rgb(244 230 220 / 0.35); }
 .dx-agenda__bloc {
     position: absolute;

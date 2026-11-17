@@ -35,7 +35,9 @@ const tabLabels: Record<Tab, string> = {
 
 type Vue = 'semaine' | 'jour';
 
-const HAUTEUR_HEURE = 56;
+// Hauteur d'une heure de grille : une demi-heure = 32 px.
+const HAUTEUR_HEURE = 64;
+const PX_MINUTE = HAUTEUR_HEURE / 60;
 
 function debutSemaine(d: Date) {
 	const x = new Date(d);
@@ -49,11 +51,14 @@ function memeJour(a: Date, b: Date) {
 	return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
+// Durée affichée dans l'agenda : celle de la prestation (services.duration_minutes). L'heure de fin
+// enregistrée peut couvrir tout un créneau de disponibilité ; elle ne sert qu'en l'absence de prestation.
 function dureeMinutes(a: AppointmentWithService) {
+	if (a.services?.duration_minutes && a.services.duration_minutes > 0) return a.services.duration_minutes;
 	const fin = a.end_time ? new Date(a.end_time).getTime() : NaN;
 	const debut = new Date(a.start_time).getTime();
 	const parFin = Number.isFinite(fin) && fin > debut ? (fin - debut) / 60000 : 0;
-	return parFin || a.services?.duration_minutes || 45;
+	return parFin > 0 && parFin <= 8 * 60 ? parFin : 30;
 }
 
 /* ------------------------------------------------------------------ */
@@ -122,7 +127,7 @@ function Agenda({
 
 	const ligneMaintenant =
 		maintenant && maintenant.getHours() >= hDebut && maintenant.getHours() < hFin
-			? ((maintenant.getHours() - hDebut) * 60 + maintenant.getMinutes()) * (HAUTEUR_HEURE / 60)
+			? ((maintenant.getHours() - hDebut) * 60 + maintenant.getMinutes()) * PX_MINUTE
 			: null;
 
 	return (
@@ -156,7 +161,7 @@ function Agenda({
 				<div className="pt-0">
 					{heures.map((h) => (
 						<div key={h} className="dx-agenda__heure">
-							{h > hDebut ? `${String(h).padStart(2, '0')}:00` : ''}
+							{h > hDebut && <span>{`${String(h).padStart(2, '0')}:00`}</span>}
 						</div>
 					))}
 				</div>
@@ -174,8 +179,10 @@ function Agenda({
 						>
 							{res.map(({ a, c }, i) => {
 								const d = new Date(a.start_time);
-								const top = ((d.getHours() - hDebut) * 60 + d.getMinutes()) * (HAUTEUR_HEURE / 60);
-								const h = Math.max(dureeMinutes(a) * (HAUTEUR_HEURE / 60) - 3, 26);
+								// Le bloc commence sur sa ligne horaire et sa hauteur suit la durée de la prestation
+								// (1 px de marge en haut et en bas pour séparer deux rendez-vous qui se suivent).
+								const top = ((d.getHours() - hDebut) * 60 + d.getMinutes()) * PX_MINUTE;
+								const h = Math.max(dureeMinutes(a) * PX_MINUTE - 2, 14);
 								const largeur = 100 / total;
 								return (
 									<motion.button
@@ -186,6 +193,7 @@ function Agenda({
 										className="dx-agenda__bloc"
 										style={{
 											top: top + 1,
+											padding: h < 30 ? '2px 8px' : undefined,
 											height: h,
 											left: `calc(${c * largeur}% + 4px)`,
 											right: 'auto',
@@ -196,7 +204,7 @@ function Agenda({
 										transition={{ duration: 0.4, ease: EASE, delay: Math.min(i * 0.04 + iJour * 0.03, 0.4) }}
 										aria-label={`${a.client_name}, ${a.services?.name ?? 'prestation'}, ${formatDate(a.start_time)}`}
 									>
-										{h < 40 ? (
+										{h < 44 ? (
 											<span className="flex items-baseline gap-1.5 truncate">
 												<span className="dx-tabulaire text-[0.6875rem] font-semibold" style={{ color: 'inherit' }}>{heure(a.start_time)}</span>
 												<b className="truncate font-semibold">{a.client_name}</b>
@@ -207,7 +215,7 @@ function Agenda({
 													{heure(a.start_time)}
 												</span>
 												<b className="block truncate font-semibold">{a.client_name}</b>
-												{h > 52 && <span className="dx-meta block truncate !text-[0.6875rem]">{a.services?.name ?? '—'}</span>}
+												{h > 58 && <span className="dx-meta block truncate !text-[0.6875rem]">{a.services?.name ?? '—'}</span>}
 											</>
 										)}
 									</motion.button>

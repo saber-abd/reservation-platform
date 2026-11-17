@@ -1,7 +1,7 @@
-import React, { lazy, Suspense, useState, useEffect, useMemo } from 'react';
-import { supabase } from '@/lib/supabase';
-import { getPrimaryProfessional, getDemoTag, type Appointment } from '@/lib/queries';
-import { generateDiamantDemoAppointments, DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
+import React, { lazy, Suspense, useState, useEffect, useMemo, useRef } from 'react';
+import type { Appointment } from '@/lib/queries';
+import { DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
+import { bornesPeriode, chargerRdvPeriode, libellePeriode, serieParCase } from './kit/periode';
 import DiamantNewClientsModal, { type PeriodClientDetail } from './DiamantNewClientsModal';
 import { ArrowUpRight } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
@@ -33,63 +33,20 @@ export default function DiamantPerformancePanel() {
 		fetchData();
 	}, [range, customStart, customEnd]);
 
-	function getRangeLabel(r: TimeRange): string {
-		switch (r) {
-			case 'week': return '7 derniers jours';
-			case 'month': return '30 derniers jours';
-			case 'year': return '1 an';
-			case 'custom': return 'Période personnalisée';
-		}
-	}
+	const getRangeLabel = libellePeriode;
+	// Bornes de la période choisie (aujourd'hui compris) et un point par jour / par mois pour la courbe.
+	const bornes = useMemo(() => bornesPeriode(range, customStart, customEnd), [range, customStart, customEnd]);
+	const serie = useMemo(() => serieParCase(appointments, bornes), [appointments, bornes]);
+	// Numéro de la dernière requête : une réponse arrivée après un changement de période est ignorée.
+	const requete = useRef(0);
 
 	async function fetchData() {
+		const n = ++requete.current;
 		try {
 			setLoading(true);
-			const tag = getDemoTag();
-			const pro = await getPrimaryProfessional(tag);
-
-			let startDate = new Date();
-			let endDate = new Date();
-			const now = new Date();
-
-			if (range === 'week') {
-				startDate.setDate(now.getDate() - 7);
-			} else if (range === 'month') {
-				startDate.setMonth(now.getMonth() - 1);
-			} else if (range === 'year') {
-				startDate.setFullYear(now.getFullYear() - 1);
-			} else if (range === 'custom' && customStart && customEnd) {
-				startDate = new Date(customStart);
-				endDate = new Date(customEnd);
-			}
-			startDate.setHours(0, 0, 0, 0);
-			endDate.setHours(23, 59, 59, 999);
-
-			let periodData: AppointmentWithService[] | null = null;
-
-			if (pro) {
-				const { data, error } = await supabase
-					.from('appointments')
-					.select('*, services(name, duration_minutes, price)')
-					.eq('professional_id', pro.id)
-					.eq('tag_bd', tag)
-					.gte('start_time', startDate.toISOString())
-					.lte('start_time', endDate.toISOString());
-				if (!error && data && data.length > 0) {
-					periodData = data as AppointmentWithService[];
-				}
-			}
-
-			// Fallback données réalistes
-			const allDemoAppointments = generateDiamantDemoAppointments();
-			const rdvs = (periodData && periodData.length > 0)
-				? periodData
-				: allDemoAppointments.filter(app => {
-					const t = new Date(app.start_time).getTime();
-					return t >= startDate.getTime() && t <= endDate.getTime();
-				});
-
-			const completed = rdvs.filter(r => r.status !== 'cancelled');
+			// Rendez-vous non annulés de la période (base, ou démonstration si la base n'en a aucun)
+			const { rdvs: completed } = await chargerRdvPeriode(bornes);
+			if (n !== requete.current) return;
 			setAppointments(completed);
 
 			// Clients de la période
@@ -113,8 +70,10 @@ export default function DiamantPerformancePanel() {
 		} catch (err) {
 			console.error(err);
 		} finally {
-			setLoading(false);
-			setPret(true);
+			if (n === requete.current) {
+				setLoading(false);
+				setPret(true);
+			}
 		}
 	}
 
@@ -182,17 +141,8 @@ export default function DiamantPerformancePanel() {
 				transition: { duration: 0.6, ease: EASE, delay: 0.05 * i },
 			};
 
-	// Courbe du chiffre d'affaires (vue calculée sur les rendez-vous déjà chargés)
-	const courbe = useMemo(() => {
-		const tri = [...appointments].sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
-		const groupes = new Map<string, number>();
-		for (const a of tri) {
-			const d = new Date(a.start_time);
-			const cle = range === 'year' ? `${d.getFullYear()}-${d.getMonth()}` : d.toDateString();
-			groupes.set(cle, (groupes.get(cle) || 0) + (a.services?.price || 0));
-		}
-		return Array.from(groupes.values());
-	}, [appointments, range]);
+	// Petite courbe : les mêmes points que le graphique (zéros compris).
+	const courbe = useMemo(() => serie.map((p) => p.ca), [serie]);
 
 	const ARC = 2 * Math.PI * 38;
 
@@ -301,7 +251,7 @@ export default function DiamantPerformancePanel() {
 						{/* Graphique chargé à la demande : jamais pendant le rendu serveur (pret y vaut false). */}
 						<div className={loading ? 'opacity-50 transition-opacity' : 'transition-opacity'}>
 							<Suspense fallback={<Squelette className="h-[300px] w-full !rounded-xl" />}>
-								<DiamantRevenueChart appointments={appointments} range={range} />
+								<DiamantRevenueChart serie={serie} />
 							</Suspense>
 						</div>
 					</motion.section>

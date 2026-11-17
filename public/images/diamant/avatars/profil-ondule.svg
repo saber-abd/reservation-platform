@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Profil aux cheveux ondulés">
+<title>Profil aux cheveux ondulés</title>
+<defs><clipPath id="r"><circle cx="48" cy="48" r="48"/></clipPath></defs>
+<g clip-path="url(#r)">
+<rect width="96" height="96" fill="#1a1411"/>
+<g fill="none" stroke="#f1e9dd" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+
+<path d="M41 33 C40 24 47 18 56 18 C66 18 71.5 26 71 36 C70.5 44 74 50 72 57 C70 64 74 70 72 77 C70.5 83 73 89 72 96"/>
+<path d="M45 22 C53 22.5 61 26 64 34 C66.5 41 64 48 66 55 C68 62 65 69 66.5 76 C68 83 66 90 66.5 96" stroke="#e08a5f"/>
+<path d="M50 19.5 C58 21 66 26 67.5 35 C68.5 42 68 48 69 54" stroke="#e08a5f" opacity=".7"/>
+<path d="M41 33 C37.5 36 36.5 39 37 42 L32.5 50.5 C32 52 33.2 52.8 35.2 53.2 L34.8 56 C35.8 56.8 36.6 57.4 36 58.4 L35.2 60.4 C35.4 63.4 37 65.8 39.6 66.8 C42.6 67.8 45 69 46 72 L46.5 96"/>
+<path d="M39.6 42.2 q2.4 1.5 4.8 0"/>
+<path d="M46.5 86 C38 87 30 90 24 96" opacity=".5"/>
+
+</g>
+</g>
+</svg>

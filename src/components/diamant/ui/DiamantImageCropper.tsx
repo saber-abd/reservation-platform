@@ -1,6 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Cropper from 'react-easy-crop';
 import type { Area, Point } from 'react-easy-crop';
+import { useCouche, usePortail } from '@/components/diamant/dashboard/kit/primitives';
 
 // Helper to create an HTML Image
 const createImage = (url: string): Promise<HTMLImageElement> =>
@@ -76,6 +78,11 @@ export default function ImageCropper({ imageSrc, onCropComplete, onCancel }: Ima
 	const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
 	const [zoom, setZoom] = useState(1);
 	const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+	// Rendue dans <body> et inscrite dans la pile des couches : elle passe au-dessus d'un panneau
+	// latéral ouvert, Échap ne ferme qu'elle et le focus y reste.
+	const ref = useRef<HTMLDivElement>(null);
+	const cible = usePortail();
+	useCouche(true, onCancel, ref);
 
 	const handleCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
 		setCroppedAreaPixels(croppedAreaPixels);
@@ -93,8 +100,9 @@ export default function ImageCropper({ imageSrc, onCropComplete, onCancel }: Ima
 		}
 	};
 
-	return (
-		<div className="fixed inset-0 z-[80] flex items-center justify-center bg-dx-nuit/70 p-4" role="dialog" aria-modal="true" aria-labelledby="dx-recadrage-titre">
+	if (!cible) return null;
+	return createPortal(
+		<div ref={ref} className="fixed inset-0 z-[80] flex items-center justify-center bg-dx-nuit/70 p-4" role="dialog" aria-modal="true" aria-labelledby="dx-recadrage-titre">
 			<div className="relative flex w-full max-w-lg flex-col rounded-[18px] bg-dx-carte p-6 shadow-[0_30px_80px_-30px_rgb(26_20_17/0.6)]">
 				<h3 id="dx-recadrage-titre" className="dx-h2">Recadrer la photo</h3>
 				<p className="mb-4 mt-1 text-sm text-dx-gris">Ajustez l'image (déplacez et zoomez) pour qu'elle s'intègre parfaitement dans le carré.</p>
@@ -134,6 +142,7 @@ export default function ImageCropper({ imageSrc, onCropComplete, onCancel }: Ima
 					</button>
 				</div>
 			</div>
-		</div>
+		</div>,
+		cible
 	);
 }

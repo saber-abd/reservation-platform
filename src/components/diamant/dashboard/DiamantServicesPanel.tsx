@@ -1,15 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion, useReducedMotion } from 'motion/react';
-import { Clock, ImagePlus, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { Clock, ImagePlus, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
 import { isRoleReadOnly } from '@/lib/permissions';
 import { createService, deleteService, getAllServices, updateService, uploadServiceImage, type Service } from '@/lib/queries';
 import { getServiceImageFallback } from '@/lib/serviceImages';
 import ImageCropper from '@/components/diamant/ui/DiamantImageCropper';
-import { EASE, EnChargement, EtatVide, MenuActions, Squelette, cx } from './kit/primitives';
+import { EASE, EnChargement, EtatVide, MenuActions, Panneau, Squelette, cx } from './kit/primitives';
 import { avertirLectureSeule, confirmer, signalerErreur } from './kit/notifier';
 
 const schema = z.object({
@@ -30,7 +30,10 @@ export default function ServicesPanel() {
 	const [croppingImageSrc, setCroppingImageSrc] = useState<string | null>(null);
 	const [uploading, setUploading] = useState(false);
 	const [editingId, setEditingId] = useState<string | null>(null);
-	const formRef = useRef<HTMLFormElement>(null);
+	// Le formulaire vit dans un panneau latéral : « Nouvelle prestation » l'ouvre vide, « Modifier » prérempli.
+	const [panneauOuvert, setPanneauOuvert] = useState(false);
+	// Titre gardé pendant la fermeture du panneau (editingId repasse à null avant la fin de l'animation).
+	const [modeEdition, setModeEdition] = useState(false);
 	const reduit = useReducedMotion();
 
 	const {
@@ -57,10 +60,18 @@ export default function ServicesPanel() {
 		e.target.value = '';
 	}
 
-	// Amène le formulaire à l'écran (utile sur mobile, où il passe sous la liste) et place le curseur.
-	function montrerFormulaire() {
-		formRef.current?.scrollIntoView({ behavior: reduit ? 'auto' : 'smooth', block: 'nearest' });
-		window.setTimeout(() => setFocus('name'), reduit ? 0 : 250);
+	// Ouvre le panneau du formulaire et place le curseur sur le nom.
+	function montrerFormulaire(edition: boolean) {
+		setModeEdition(edition);
+		setPanneauOuvert(true);
+		window.setTimeout(() => setFocus('name'), reduit ? 80 : 320);
+	}
+
+	function fermerFormulaire() {
+		setPanneauOuvert(false);
+		setFormError(null);
+		setEditingId(null);
+		setImageFile(null);
 	}
 
 	function handleEdit(service: Service) {
@@ -74,7 +85,7 @@ export default function ServicesPanel() {
 			durationMinutes: service.duration_minutes,
 			price: service.price,
 		});
-		montrerFormulaire();
+		montrerFormulaire(true);
 	}
 
 	function handleCancelEdit() {
@@ -86,7 +97,7 @@ export default function ServicesPanel() {
 	function nouvellePrestation() {
 		handleCancelEdit();
 		setFormError(null);
-		montrerFormulaire();
+		montrerFormulaire(false);
 	}
 
 	async function onSubmit(values: FormValues) {
@@ -131,6 +142,7 @@ export default function ServicesPanel() {
 			}
 			reset();
 			setImageFile(null);
+			setPanneauOuvert(false);
 		} catch (err: any) {
 			console.error(err);
 			setFormError(err?.message || "Erreur lors de l'enregistrement.");
@@ -170,8 +182,8 @@ export default function ServicesPanel() {
 
 	if (loading) {
 		return (
-			<EnChargement className="grid gap-6 lg:grid-cols-12">
-				<div className="dx-carte divide-y divide-dx-filet overflow-hidden lg:col-span-8">
+			<EnChargement>
+				<div className="dx-carte divide-y divide-dx-filet overflow-hidden">
 					{[0, 1, 2, 3].map((i) => (
 						<div key={i} className="flex items-center gap-4 p-4">
 							<Squelette className="h-14 w-14 !rounded-xl" />
@@ -183,7 +195,6 @@ export default function ServicesPanel() {
 						</div>
 					))}
 				</div>
-				<Squelette className="h-[520px] !rounded-[14px] lg:col-span-4" />
 			</EnChargement>
 		);
 	}
@@ -192,9 +203,9 @@ export default function ServicesPanel() {
 	const actives = services.filter((s) => s.is_active).length;
 
 	return (
-		<div className="grid items-start gap-6 lg:grid-cols-12">
-			{/* Carte des prestations */}
-			<section className="lg:col-span-8">
+		<div>
+			{/* Carte des prestations, sur toute la largeur */}
+			<section>
 				<div className="mb-4 flex flex-wrap items-end justify-between gap-3">
 					<div>
 						<h2 className="dx-h2">Mes prestations</h2>
@@ -284,31 +295,32 @@ export default function ServicesPanel() {
 				</div>
 			</section>
 
-			{/* Formulaire : ajout ou modification */}
-			<form
-				ref={formRef}
-				onSubmit={handleSubmit(onSubmit)}
-				className={cx('dx-carte scroll-mt-24 p-5 sm:p-6 lg:sticky lg:top-24 lg:col-span-4', editingId && 'ring-2 ring-dx-terre/40')}
-			>
-				<div className="mb-5 flex items-start justify-between gap-3">
-					<div>
-						<p className="text-sm text-dx-gris">{editingId ? 'Modification' : 'Nouvelle entrée'}</p>
-						<h2 className="dx-h2">{editingId ? 'Modifier la prestation' : 'Ajouter une prestation'}</h2>
-					</div>
-					{editingId && (
-						<button type="button" onClick={handleCancelEdit} className="dx-icone-btn" aria-label="Annuler la modification">
-							<X size={17} />
+			{/* Formulaire : ajout ou modification, dans un panneau latéral */}
+			<Panneau
+				ouvert={panneauOuvert}
+				onClose={fermerFormulaire}
+				largeur={520}
+				entete={<p className="mb-1 text-sm text-dx-gris">{modeEdition ? 'Modification' : 'Nouvelle entrée'}</p>}
+				titre={modeEdition ? 'Modifier la prestation' : 'Ajouter une prestation'}
+				pied={
+					<div className="flex flex-wrap items-center gap-3">
+						<button type="submit" form="dx-form-prestation" disabled={uploading} className="dx-btn">
+							{uploading ? 'Envoi de la photo...' : modeEdition ? 'Enregistrer les modifications' : 'Ajouter'}
 						</button>
-					)}
-				</div>
-
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-					<div className="sm:col-span-2 lg:col-span-1 xl:col-span-2">
+						<button type="button" onClick={fermerFormulaire} className="dx-btn dx-btn--fantome">
+							{modeEdition ? 'Annuler la modification' : 'Annuler'}
+						</button>
+					</div>
+				}
+			>
+			<form id="dx-form-prestation" onSubmit={handleSubmit(onSubmit)} noValidate>
+				<div className="grid gap-4 sm:grid-cols-2">
+					<div className="sm:col-span-2">
 						<label className="dx-champ-label" htmlFor="name">Nom</label>
 						<input id="name" className="dx-champ" placeholder="Ex : Coupe et brushing" {...register('name')} />
 						{errors.name && <p className="dx-champ-erreur">{errors.name.message}</p>}
 					</div>
-					<div className="sm:col-span-2 lg:col-span-1 xl:col-span-2">
+					<div className="sm:col-span-2">
 						<label className="dx-champ-label" htmlFor="category">Catégorie</label>
 						<select id="category" className="dx-champ" {...register('category')}>
 							<option value="Femmes">Femmes</option>
@@ -327,11 +339,11 @@ export default function ServicesPanel() {
 						<input id="price" type="number" step="0.01" inputMode="decimal" className="dx-champ dx-tabulaire" {...register('price')} />
 						{errors.price && <p className="dx-champ-erreur">{errors.price.message}</p>}
 					</div>
-					<div className="sm:col-span-2 lg:col-span-1 xl:col-span-2">
+					<div className="sm:col-span-2">
 						<label className="dx-champ-label" htmlFor="description">Description</label>
 						<textarea id="description" rows={3} className="dx-champ" placeholder="Ce qui est compris, pour qui, combien de temps." {...register('description')} />
 					</div>
-					<div className="sm:col-span-2 lg:col-span-1 xl:col-span-2">
+					<div className="sm:col-span-2">
 						<span className="dx-champ-label">Photo (optionnelle)</span>
 						{imageFile ? (
 							<div className="flex items-center gap-4 rounded-xl border border-dx-filet bg-dx-ivoire p-3">
@@ -354,18 +366,8 @@ export default function ServicesPanel() {
 				</div>
 
 				{formError && <p className="dx-bandeau mt-4 !text-sm" data-ton="alerte">{formError}</p>}
-
-				<div className="mt-6 flex flex-wrap items-center gap-3">
-					<button type="submit" disabled={uploading} className="dx-btn">
-						{uploading ? 'Envoi de la photo...' : editingId ? 'Enregistrer les modifications' : 'Ajouter'}
-					</button>
-					{editingId && (
-						<button type="button" onClick={handleCancelEdit} className="dx-btn dx-btn--fantome">
-							Annuler la modification
-						</button>
-					)}
-				</div>
 			</form>
+			</Panneau>
 
 			{croppingImageSrc && (
 				<ImageCropper
