@@ -16,6 +16,7 @@ import {
 } from '@/lib/queries';
 import { isRoleReadOnly } from '@/lib/permissions';
 import MessageThread from '@/components/premium/ui/PremiumMessageThread';
+import { AvatarDisplay, resolveAvatarKey } from '@/components/premium/ui/PremiumAvatarPicker';
 import { LECTURE_SEULE } from '@/components/premium/ui/PremiumToaster';
 import { Phone, Mail, Search, Pencil, Check, ChevronRight, X } from 'lucide-react';
 import { MAX_NAME_LENGTH } from '@/lib/limits';
@@ -24,6 +25,10 @@ import { SidePanel } from './kit/Interactive';
 
 function Initiale({ client, size = 40 }: { client: Client; size?: number }) {
 	const hasPhoto = client.avatar_url && client.avatar_url.startsWith('http');
+	// Avatar prédéfini choisi par le client dans son profil : affiché à la place de l'initiale.
+	if (!hasPhoto && resolveAvatarKey(client.avatar_url)) {
+		return <AvatarDisplay avatarKey={client.avatar_url} size={size} />;
+	}
 	return (
 		<span
 			className="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[2px] bg-pe-encre font-extrabold text-pe-blanc [font-stretch:115%]"

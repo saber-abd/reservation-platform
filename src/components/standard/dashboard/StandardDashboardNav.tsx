@@ -1,12 +1,10 @@
-import { BarChart3, CalendarCheck, Clock, UserRound, Users, Wrench } from 'lucide-react';
+import { UserRound, Wrench } from 'lucide-react';
 import StandardSpaceNav, { type SpaceLink } from '@/components/standard/ui/StandardSpaceNav';
 
+// Formule Standard (sans base de données) : les rendez-vous arrivent dans Google Agenda,
+// l'espace pro se limite au catalogue des prestations et aux informations du professionnel.
 const links: SpaceLink[] = [
-	{ label: "Vue d'ensemble", href: '/dashboard', icon: CalendarCheck },
-	{ label: 'Services', href: '/dashboard/services', icon: Wrench },
-	{ label: 'Disponibilités', href: '/dashboard/disponibilites', icon: Clock },
-	{ label: 'Clients', href: '/dashboard/clients', icon: Users },
-	{ label: 'Statistiques', href: '/dashboard/statistiques', icon: BarChart3 },
+	{ label: 'Prestations', href: '/dashboard/services', icon: Wrench },
 	{ label: 'Profil', href: '/dashboard/profil', icon: UserRound },
 ];
 

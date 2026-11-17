@@ -12,10 +12,11 @@ import ImageCropper from '@/components/premium/ui/PremiumImageCropper';
 import { LECTURE_SEULE } from '@/components/premium/ui/PremiumToaster';
 import { EmptyState, EUROS, PageHead, PageSkeleton, Rolling } from './kit/Base';
 import { ActionMenu, SidePanel } from './kit/Interactive';
+import { CATEGORIES, CATEGORIE_PAR_DEFAUT, libelleCategorie, optionsCategorie } from './categories';
 
 const schema = z.object({
 	name: z.string().min(2, 'Nom trop court'),
-	category: z.enum(['Femmes', 'Hommes', 'Enfants']),
+	category: z.string().trim().min(1, 'Choisissez une catégorie'),
 	description: z.string().optional(),
 	durationMinutes: z.coerce.number().int().positive('Doit être positif'),
 	price: z.coerce.number().nonnegative('Doit être positif ou nul'),
@@ -42,6 +43,9 @@ export default function ServicesPanel() {
 	const [uploading, setUploading] = useState(false);
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [panelOpen, setPanelOpen] = useState(false);
+	// Catégorie enregistrée de la prestation modifiée : gardée dans le menu même hors liste.
+	const [categorieInitiale, setCategorieInitiale] = useState<string | null>(null);
+	const [filtre, setFiltre] = useState<string | null>(null);
 
 	const {
 		register,
@@ -64,6 +68,22 @@ export default function ServicesPanel() {
 		return { actives: actives.length, min: prix.length ? Math.min(...prix) : 0, max: prix.length ? Math.max(...prix) : 0, duree };
 	}, [services]);
 
+	// Filtre par catégorie, calculé sur les prestations déjà chargées (ordre du garage, puis les autres).
+	const categoriesPresentes = useMemo(() => {
+		const compte = new Map<string, number>();
+		for (const s of services) {
+			const c = libelleCategorie(s.category);
+			compte.set(c, (compte.get(c) ?? 0) + 1);
+		}
+		const ordre = (c: string) => {
+			const i = (CATEGORIES as readonly string[]).indexOf(c);
+			return i === -1 ? CATEGORIES.length : i;
+		};
+		return [...compte.entries()].sort((a, b) => ordre(a[0]) - ordre(b[0]) || a[0].localeCompare(b[0], 'fr'));
+	}, [services]);
+	const filtreActif = filtre && categoriesPresentes.some(([c]) => c === filtre) ? filtre : null;
+	const servicesAffiches = filtreActif ? services.filter((s) => libelleCategorie(s.category) === filtreActif) : services;
+
 	function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const file = e.target.files?.[0];
 		if (!file) return;
@@ -79,7 +99,8 @@ export default function ServicesPanel() {
 		setEditingId(null);
 		setImageFile(null);
 		setFormError(null);
-		reset({ name: '', category: 'Femmes', description: '', durationMinutes: undefined, price: undefined });
+		setCategorieInitiale(null);
+		reset({ name: '', category: CATEGORIE_PAR_DEFAUT, description: '', durationMinutes: undefined, price: undefined });
 		setPanelOpen(true);
 	}
 
@@ -87,9 +108,10 @@ export default function ServicesPanel() {
 		setEditingId(service.id);
 		setImageFile(null);
 		setFormError(null);
+		setCategorieInitiale(service.category);
 		reset({
 			name: service.name,
-			category: (service.category as 'Femmes' | 'Hommes' | 'Enfants') || 'Femmes',
+			category: service.category?.trim() || CATEGORIE_PAR_DEFAUT,
 			description: service.description ?? '',
 			durationMinutes: service.duration_minutes,
 			price: service.price,
@@ -101,7 +123,7 @@ export default function ServicesPanel() {
 		setEditingId(null);
 		setImageFile(null);
 		setPanelOpen(false);
-		reset({ name: '', category: 'Femmes', description: '', durationMinutes: undefined, price: undefined });
+		reset({ name: '', category: CATEGORIE_PAR_DEFAUT, description: '', durationMinutes: undefined, price: undefined });
 	}
 
 	async function onSubmit(values: FormValues) {
@@ -228,6 +250,27 @@ export default function ServicesPanel() {
 					<h2 className="pe-h2">Catalogue</h2>
 					<span className="pe-tech hidden md:block">L’interrupteur masque une prestation sans la supprimer</span>
 				</div>
+				{!loadingServices && categoriesPresentes.length > 1 && (
+					<div className="flex flex-wrap gap-2 border-b border-pe-filet px-4 py-3 md:px-[22px]" role="group" aria-label="Filtrer par catégorie">
+						{([[null, services.length], ...categoriesPresentes] as [string | null, number][]).map(([c, n]) => {
+							const actif = filtreActif === c;
+							return (
+								<button
+									key={c ?? 'toutes'}
+									type="button"
+									aria-pressed={actif}
+									onClick={() => setFiltre(c)}
+									className={`inline-flex items-center gap-2 rounded-[2px] border px-3 py-1.5 text-sm font-semibold transition-colors ${
+										actif ? 'border-pe-encre bg-pe-encre text-pe-blanc' : 'border-pe-filet-fort bg-white text-pe-encre hover:border-pe-encre'
+									}`}
+								>
+									{c ?? 'Toutes'}
+									<span className={`text-xs tabular-nums ${actif ? 'text-pe-acier-clair' : 'text-pe-acier'}`}>{n}</span>
+								</button>
+							);
+						})}
+					</div>
+				)}
 				{loadingServices ? (
 					<div className="grid gap-4 p-5" aria-busy="true">
 						<span className="sr-only" role="status">Chargement…</span>
@@ -249,7 +292,7 @@ export default function ServicesPanel() {
 					/>
 				) : (
 					<ul className="pe-rows">
-						{services.map((service, i) => (
+						{servicesAffiches.map((service, i) => (
 							<li
 								key={service.id}
 								className="grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 px-4 py-4 transition-colors hover:bg-white md:grid-cols-[28px_64px_minmax(0,1fr)_90px_110px_150px_auto] md:px-[22px]"
@@ -267,7 +310,7 @@ export default function ServicesPanel() {
 								<div className="min-w-0">
 									<p className={`pe-h3 break-words ${service.is_active ? '' : 'text-pe-acier'}`}>{service.name}</p>
 									<p className="mt-1 truncate text-sm text-pe-acier">
-										{service.category || 'Femmes'}
+										{libelleCategorie(service.category)}
 										{service.description ? ` · ${service.description}` : ''}
 									</p>
 								</div>
@@ -330,9 +373,11 @@ export default function ServicesPanel() {
 							Catégorie
 						</label>
 						<select id="category" className="pe-input" {...register('category')}>
-							<option value="Femmes">Femmes</option>
-							<option value="Hommes">Hommes</option>
-							<option value="Enfants">Enfants</option>
+							{optionsCategorie(categorieInitiale).map((c) => (
+								<option key={c} value={c}>
+									{(CATEGORIES as readonly string[]).includes(c) ? c : `${c} (ancienne catégorie)`}
+								</option>
+							))}
 						</select>
 						{errors.category && <p className="pe-erreur">{errors.category.message}</p>}
 					</div>

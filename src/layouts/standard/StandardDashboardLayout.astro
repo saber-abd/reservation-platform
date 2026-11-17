@@ -1,5 +1,5 @@
 ---
-// Layout des espaces authentifiés (dashboard pro + espace client) de la démo Standard.
+// Layout de l'espace professionnel de la démo Standard (et de son aperçu à données fictives).
 // Distinct du layout public : pas d'en-tête ni de pied de page vitrine, mais une coque
 // d'application (barre latérale sur bureau, barre du haut sur mobile).
 // La navigation (îlot React) est passée par chaque page dans le slot « nav ».
@@ -18,8 +18,10 @@ const { title = 'Espace' } = Astro.props;
 const currentPath = Astro.url.pathname;
 const basePathMatch = currentPath.match(/^\/(demo-[^/]+)/);
 const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
-const space = currentPath.includes('/espace-client') ? 'client' : 'pro';
-const home = space === 'client' ? `${basePath}/espace-client` : `${basePath}/dashboard`;
+// Aperçu à données fictives (/demo-standard/apercu/dashboard/…) : lecture seule, sans compte.
+const isPreview = /^\/demo-[^/]+\/apercu(\/|$)/.test(currentPath);
+// Formule Standard : pas d'espace client, le tableau de bord se limite aux prestations et au profil.
+const home = `${basePath}${isPreview ? '/apercu' : ''}/dashboard/services`;
 ---
 
 <!doctype html>
@@ -33,19 +35,25 @@ const home = space === 'client' ? `${basePath}/espace-client` : `${basePath}/das
 	<body class="sa-body min-h-screen font-sans">
 		<div class="sa-shell">
 			<aside class="sa-side">
-				<a href={home} class="sa-brand" aria-label={`${siteConfig.business.name}, ${space === 'client' ? 'espace client' : 'espace pro'}`}>
+				<a href={home} class="sa-brand" aria-label={`${siteConfig.business.name}, espace pro`}>
 					<span class="st-logo-mark" aria-hidden="true">
 						<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6.2" /><path d="M8 4.6v6.8M4.6 8h6.8" /></svg>
 					</span>
 					<span class="min-w-0">
 						<span class="sa-brand-name">{siteConfig.business.name}</span>
-						<span class="sa-brand-space">{space === 'client' ? 'Espace client' : 'Espace pro'}</span>
+						<span class="sa-brand-space">{isPreview ? 'Aperçu' : 'Espace pro'}</span>
 					</span>
 				</a>
 				<slot name="nav" />
 			</aside>
 			<main class="sa-main">
-				<div class="sa-content" data-space={space}>
+				{isPreview && (
+					<div role="status" class="sa-preview">
+						<p>Aperçu avec des données fictives : lecture seule, aucune modification n'est enregistrée.</p>
+						<a href={`${basePath}/connexion`}>Se connecter</a>
+					</div>
+				)}
+				<div class="sa-content" data-space="pro">
 					<slot />
 				</div>
 			</main>

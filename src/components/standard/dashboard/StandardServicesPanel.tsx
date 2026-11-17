@@ -10,10 +10,11 @@ import { createService, deleteService, getAllServices, updateService, uploadServ
 import { getServiceImageFallback } from '@/lib/serviceImages';
 import ImageCropper from '@/components/standard/ui/StandardImageCropper';
 import { Busy, EmptyState, PageHeader, PageSkeleton, Panel, TableSkeleton } from '@/components/standard/ui/StandardKit';
+import { CATEGORIES, CATEGORIE_PAR_DEFAUT, libelleCategorie, optionsCategorie } from './categories';
 
 const schema = z.object({
 	name: z.string().min(2, 'Nom trop court'),
-	category: z.enum(['Femmes', 'Hommes', 'Enfants']),
+	category: z.string().trim().min(1, 'Choisissez une catégorie'),
 	description: z.string().optional(),
 	durationMinutes: z.coerce.number().int().positive('Doit être positif'),
 	price: z.coerce.number().nonnegative('Doit être positif ou nul'),
@@ -42,6 +43,8 @@ export default function ServicesPanel() {
 	const [croppingImageSrc, setCroppingImageSrc] = useState<string | null>(null);
 	const [uploading, setUploading] = useState(false);
 	const [editingId, setEditingId] = useState<string | null>(null);
+	// Catégorie enregistrée de la prestation modifiée : gardée dans le menu même hors liste.
+	const [categorieInitiale, setCategorieInitiale] = useState<string | null>(null);
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const {
@@ -50,7 +53,7 @@ export default function ServicesPanel() {
 		reset,
 		setFocus,
 		formState: { errors },
-	} = useForm<FormValues>({ resolver: zodResolver(schema) });
+	} = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { category: CATEGORIE_PAR_DEFAUT } });
 
 	useEffect(() => {
 		if (!professional) return;
@@ -79,9 +82,10 @@ export default function ServicesPanel() {
 		setEditingId(service.id);
 		setImageFile(null);
 		setFormError(null);
+		setCategorieInitiale(service.category);
 		reset({
 			name: service.name,
-			category: (service.category as 'Femmes' | 'Hommes' | 'Enfants') || 'Femmes',
+			category: service.category?.trim() || CATEGORIE_PAR_DEFAUT,
 			description: service.description ?? '',
 			durationMinutes: service.duration_minutes,
 			price: service.price,
@@ -92,7 +96,8 @@ export default function ServicesPanel() {
 	function handleCancelEdit() {
 		setEditingId(null);
 		setImageFile(null);
-		reset({ name: '', category: 'Femmes', description: '', durationMinutes: undefined, price: undefined });
+		setCategorieInitiale(null);
+		reset({ name: '', category: CATEGORIE_PAR_DEFAUT, description: '', durationMinutes: undefined, price: undefined });
 	}
 
 	async function onSubmit(values: FormValues) {
@@ -134,7 +139,8 @@ export default function ServicesPanel() {
 				setServices((prev) => [...prev, created]);
 				toast.success(`« ${values.name} » a été ajoutée.`);
 			}
-			reset();
+			reset({ name: '', category: CATEGORIE_PAR_DEFAUT, description: '', durationMinutes: undefined, price: undefined });
+			setCategorieInitiale(null);
 			setImageFile(null);
 		} catch (err: any) {
 			console.error(err);
@@ -235,12 +241,12 @@ export default function ServicesPanel() {
 													<span className="mt-0.5 block max-w-[34ch] truncate text-xs text-ink-mute max-md:hidden">{service.description}</span>
 												)}
 												<span className="sa-num mt-0.5 block text-xs text-ink-mute md:hidden">
-													{service.category || 'Femmes'} · {service.duration_minutes} min
+													{libelleCategorie(service.category)} · {service.duration_minutes} min
 												</span>
 											</span>
 										</span>
 									</td>
-									<td data-cell="hide">{service.category || 'Femmes'}</td>
+									<td data-cell="hide">{libelleCategorie(service.category)}</td>
 									<td data-cell="hide" className="sa-cell-end sa-num">
 										{service.duration_minutes} min
 									</td>
@@ -302,9 +308,11 @@ export default function ServicesPanel() {
 							Catégorie
 						</label>
 						<select id="category" className="sa-input" {...register('category')}>
-							<option value="Femmes">Femmes</option>
-							<option value="Hommes">Hommes</option>
-							<option value="Enfants">Enfants</option>
+							{optionsCategorie(categorieInitiale).map((c) => (
+								<option key={c} value={c}>
+									{(CATEGORIES as readonly string[]).includes(c) ? c : `${c} (ancienne catégorie)`}
+								</option>
+							))}
 						</select>
 						{errors.category && <p className="sa-error">{errors.category.message}</p>}
 					</div>

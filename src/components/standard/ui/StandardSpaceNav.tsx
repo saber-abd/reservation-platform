@@ -35,6 +35,9 @@ export default function StandardSpaceNav({ basePath = '', currentPath = '', link
 	const reduce = useReducedMotion();
 	const buttonRef = useRef<HTMLButtonElement>(null);
 	const effectiveBasePath = basePath || (path.match(/^\/(demo-[^/]+)/)?.[0] ?? '');
+	// Aperçu à données fictives : basePath se termine par /apercu ; le site public est à la racine de la démo.
+	const isPreview = effectiveBasePath.endsWith('/apercu');
+	const siteBasePath = effectiveBasePath.replace(/\/apercu$/, '');
 
 	useEffect(() => {
 		setPath(normalize(window.location.pathname));
@@ -53,6 +56,10 @@ export default function StandardSpaceNav({ basePath = '', currentPath = '', link
 	}, [open]);
 
 	async function handleSignOut() {
+		if (isPreview) {
+			window.location.href = `${siteBasePath || '/demo-standard'}/`;
+			return;
+		}
 		await signOut();
 		window.location.href = effectiveBasePath ? `${effectiveBasePath}/connexion` : '/demo-standard/connexion';
 	}
@@ -78,7 +85,7 @@ export default function StandardSpaceNav({ basePath = '', currentPath = '', link
 
 	const footer = (
 		<div className="sa-side-foot">
-			<a href={`${effectiveBasePath}/`}>
+			<a href={`${siteBasePath}/`}>
 				<ArrowLeft size={16} strokeWidth={1.7} aria-hidden="true" />
 				Retour au site
 			</a>
@@ -88,7 +95,7 @@ export default function StandardSpaceNav({ basePath = '', currentPath = '', link
 			</a>
 			<button type="button" onClick={handleSignOut}>
 				<LogOut size={16} strokeWidth={1.7} aria-hidden="true" />
-				Se déconnecter
+				{isPreview ? "Quitter l'aperçu" : 'Se déconnecter'}
 			</button>
 		</div>
 	);

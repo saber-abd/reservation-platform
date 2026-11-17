@@ -1,14 +1,5 @@
 import { supabase } from './supabase';
-import {
-	isPreviewMode,
-	assertNotPreview,
-	previewProfessional,
-	previewServices,
-	previewAppointments,
-	previewAvailabilityRules,
-	previewClients,
-	previewMessagesFor,
-} from './preview';
+import { isPreviewMode, assertNotPreview, getPreviewData } from './preview';
 import { clampName } from './limits';
 
 /** Helper pour extraire le tag de la démo depuis l'URL côté client ou via paramètre. */
@@ -159,7 +150,7 @@ export interface Appointment {
 }
 
 export async function getPrimaryProfessional(tag = getDemoTag()): Promise<Professional | null> {
-	if (isPreviewMode()) return previewProfessional;
+	if (isPreviewMode()) return getPreviewData().professional;
 	const { data, error } = await supabase.from('professionals').select('*').eq('tag_bd', tag).limit(1).maybeSingle();
 	if (error) throw error;
 	return data;
@@ -172,7 +163,7 @@ export async function getProfessionalByUserId(userId: string, tag = getDemoTag()
 }
 
 export async function getProfessionalById(id: string, tag = getDemoTag()): Promise<Professional | null> {
-	if (isPreviewMode()) return previewProfessional;
+	if (isPreviewMode()) return getPreviewData().professional;
 	const { data, error } = await supabase.from('professionals').select('*').eq('id', id).eq('tag_bd', tag).maybeSingle();
 	if (error) throw error;
 	return data;
@@ -192,7 +183,7 @@ export async function updateProfessional(id: string, changes: Partial<Profession
 }
 
 export async function getServices(professionalId: string, tag = getDemoTag()): Promise<Service[]> {
-	if (isPreviewMode()) return previewServices;
+	if (isPreviewMode()) return getPreviewData().services;
 	const { data, error } = await supabase
 		.from('services')
 		.select('*')
@@ -206,7 +197,7 @@ export async function getServices(professionalId: string, tag = getDemoTag()): P
 }
 
 export async function getAllServices(professionalId: string, tag = getDemoTag()): Promise<Service[]> {
-	if (isPreviewMode()) return previewServices;
+	if (isPreviewMode()) return getPreviewData().services;
 	const { data, error } = await supabase
 		.from('services')
 		.select('*')
@@ -316,7 +307,7 @@ export async function createAppointment(appointment: {
 export async function getAppointmentsForProfessional(
 	professionalId: string, tag = getDemoTag()
 ): Promise<(Appointment & { services: { name: string; duration_minutes: number; price: number } | null })[]> {
-	if (isPreviewMode()) return previewAppointments;
+	if (isPreviewMode()) return getPreviewData().appointments;
 	const { data, error } = await supabase
 		.from('appointments')
 		.select('*, services(name, duration_minutes, price)')
@@ -330,7 +321,7 @@ export async function getAppointmentsForProfessional(
 }
 
 export async function getAppointmentsForDate(professionalId: string, date: string, tag = getDemoTag()): Promise<Appointment[]> {
-	if (isPreviewMode()) return previewAppointments.filter((a) => new Date(a.start_time).toLocaleDateString('sv') === date && a.status !== 'cancelled');
+	if (isPreviewMode()) return getPreviewData().appointments.filter((a) => new Date(a.start_time).toLocaleDateString('sv') === date && a.status !== 'cancelled');
 	const { data, error } = await supabase
 		.from('appointments')
 		.select('*')
@@ -344,7 +335,7 @@ export async function getAppointmentsForDate(professionalId: string, date: strin
 }
 
 export async function getAvailabilityRules(professionalId: string, tag = getDemoTag()): Promise<AvailabilityRule[]> {
-	if (isPreviewMode()) return previewAvailabilityRules;
+	if (isPreviewMode()) return getPreviewData().availabilityRules;
 	const { data, error } = await supabase
 		.from('availability_rules')
 		.select('*')
@@ -371,7 +362,7 @@ export async function deleteAvailabilityRule(id: string, tag = getDemoTag()) {
 }
 
 export async function getRegisteredClients(professionalId: string, tag = getDemoTag()): Promise<Client[]> {
-	if (isPreviewMode()) return previewClients;
+	if (isPreviewMode()) return getPreviewData().clients;
 	const { data, error } = await supabase
 		.from('appointments')
 		.select('clients(id, full_name, phone, avatar_url, created_at, tag_bd)')
@@ -394,7 +385,7 @@ export async function getAllClients(
 	tag = getDemoTag(),
 	extraClients: Client[] = []
 ): Promise<Client[]> {
-	if (isPreviewMode()) return previewClients;
+	if (isPreviewMode()) return getPreviewData().clients;
 	const clientsMap = new Map<string, Client>();
 
 	// 1. Clients directly from clients table (filtrés strictement pour cette démo)
@@ -587,7 +578,7 @@ export async function upsertClientNote(professionalId: string, clientId: string,
 }
 
 export async function getMessages(professionalId: string, clientId: string, tag = getDemoTag()): Promise<Message[]> {
-	if (isPreviewMode()) return previewMessagesFor(clientId);
+	if (isPreviewMode()) return getPreviewData().messagesFor(clientId);
 	try {
 		const { data, error } = await supabase
 			.from('messages')
@@ -959,7 +950,7 @@ export async function updateClient(id: string, changes: Partial<Client>, tag = g
 }
 
 export async function getAppointmentsForClient(clientId: string, tag = getDemoTag()): Promise<(Appointment & { services: { name: string } | null })[]> {
-	if (isPreviewMode()) return previewAppointments.filter((a) => a.client_id === clientId);
+	if (isPreviewMode()) return getPreviewData().appointments.filter((a) => a.client_id === clientId);
 	const { data, error } = await supabase
 		.from('appointments')
 		.select('*, services(name)')

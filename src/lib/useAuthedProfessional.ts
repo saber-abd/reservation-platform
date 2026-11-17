@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { getSession } from '@/lib/auth';
 import { getClientById, getProfessionalById, getDemoTag, type Professional } from '@/lib/queries';
 import { loadProContext } from '@/lib/permissions';
-import { isPreviewMode, previewProfessional } from '@/lib/preview';
+import { isPreviewMode, getPreviewData } from '@/lib/preview';
 
 interface AuthedProfessionalState {
 	loading: boolean;
@@ -27,7 +27,7 @@ export function useAuthedProfessional(): AuthedProfessionalState {
 
 		async function load() {
 			if (isPreviewMode()) {
-				if (!cancelled) setState({ loading: false, professional: previewProfessional, error: null });
+				if (!cancelled) setState({ loading: false, professional: getPreviewData().professional, error: null });
 				return;
 			}
 			try {

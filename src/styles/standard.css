@@ -2072,3 +2072,29 @@ select.sa-input { padding-right: 2rem; }
 .sa-privacy h2 { font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; color: var(--color-ink); }
 .sa-privacy button { border-radius: 5px; font-size: 0.875rem; }
 .sa-privacy input { border-radius: 5px; }
+
+/* ---------- Aperçu à données fictives (/demo-standard/apercu/dashboard/…) ---------- */
+
+.sa-preview {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1.25rem;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--sa-line);
+    background: var(--color-brand-tint);
+    font-size: 0.875rem;
+    color: var(--color-ink);
+}
+.sa-preview p { margin: 0; }
+.sa-preview a {
+    font-weight: 600;
+    color: var(--color-brand);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.sa-preview a:hover { text-decoration-thickness: 2px; }
+@media (min-width: 768px) {
+    .sa-preview { padding-inline: 2.5rem; }
+}
