@@ -69,7 +69,7 @@ for (const demo of DEMOS) {
 		test.beforeEach(async ({ page }) => {
 			await mockSupabase(page, { demo });
 		});
-		for (const p of PUBLIC_PAGES) {
+		for (const p of PUBLIC_PAGES[demo]) {
 			test(`/demo-${demo}/${p}`, async ({ page }) => {
 				await checkPage(page, `/demo-${demo}/${p}`);
 			});

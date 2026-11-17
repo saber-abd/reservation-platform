@@ -1,16 +1,4 @@
 ---
-import StandardAuthShell from '@/components/standard/StandardAuthShell.astro';
-import SignupForm from '@/components/standard/auth/StandardSignupForm';
+// Formule Standard : pas d'inscription en ligne. Les clients réservent sans compte et le compte du professionnel est créé à la mise en service ; l'ancienne page d'inscription renvoie vers la connexion.
+return Astro.redirect('/demo-standard/connexion');
 ---
-
-<StandardAuthShell
-	pageTitle="Inscription"
-	title="Créer votre espace professionnel"
-	description="Créer votre espace professionnel."
-	lead="Configurez votre profil, vos prestations et vos disponibilités."
->
-	<SignupForm basePath="/demo-standard" client:load />
-	<p slot="after">
-		Déjà un compte&nbsp;? <a href="/demo-standard/connexion" class="st-link st-link--on font-semibold text-brand">Se connecter</a>
-	</p>
-</StandardAuthShell>

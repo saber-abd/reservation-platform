@@ -1,5 +1,5 @@
 ---
-// Gabarit des pages de compte (connexion, inscription, mot de passe) :
+// Gabarit des pages de compte (connexion, mot de passe) :
 // formulaire à gauche, encadré encre à droite qui rappelle ce que contient l'espace professionnel.
 import Layout from '@/layouts/standard/StandardLayout.astro';
 
@@ -12,11 +12,11 @@ interface Props {
 
 const { title, pageTitle, description, lead } = Astro.props;
 
+// Formule Standard : deux pages (prestations, profil) ; les rendez-vous arrivent dans Google Agenda.
 const contenu = [
-	{ titre: 'Agenda', texte: 'Les interventions réservées en ligne, jour par jour.' },
-	{ titre: 'Prestations et tarifs', texte: 'Les prix affichés sur le site se modifient ici.' },
-	{ titre: 'Disponibilités', texte: 'Les créneaux ouverts à la réservation.' },
-	{ titre: 'Clients', texte: 'Historique des interventions et messages.' },
+	{ titre: 'Prestations et tarifs', texte: 'Les interventions et les prix affichés sur le site se modifient ici.' },
+	{ titre: 'Profil', texte: 'Nom, coordonnées et présentation de votre activité.' },
+	{ titre: 'Rendez-vous', texte: 'Chaque réservation arrive directement dans votre agenda Google.' },
 ];
 ---
 

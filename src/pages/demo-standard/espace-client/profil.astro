@@ -1,15 +1,4 @@
 ---
-import DashboardLayout from '@/layouts/standard/StandardDashboardLayout.astro';
-import ClientNav from '@/components/standard/client/StandardClientNav';
-import ClientProfilePanel from '@/components/standard/client/StandardClientProfilePanel';
-import AccountPrivacyActions from '@/components/shared/AccountPrivacyActions';
+// Formule Standard : pas de comptes clients (réservation sans compte, dans Google Agenda). Ancienne adresse de l'espace client, renvoyée vers l'accueil.
+return Astro.redirect('/demo-standard/');
 ---
-
-<DashboardLayout title="Mon profil">
-	<ClientNav slot="nav" basePath="/demo-standard" currentPath={Astro.url.pathname} client:load />
-	<ClientProfilePanel client:load />
-	<div class="sa-privacy">
-		<AccountPrivacyActions basePath="/demo-standard" client:idle />
-	</div>
-</DashboardLayout>
-

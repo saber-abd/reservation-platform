@@ -1,11 +1,4 @@
 ---
-import DashboardLayout from '@/layouts/standard/StandardDashboardLayout.astro';
-import DashboardNav from '@/components/standard/dashboard/StandardDashboardNav';
-import ClientsPanel from '@/components/standard/dashboard/StandardClientsPanel';
+// Formule Standard : le tableau de bord se limite aux prestations et au profil (les rendez-vous arrivent dans Google Agenda).
+return Astro.redirect('/demo-standard/dashboard/services');
 ---
-
-<DashboardLayout title="Mes clients">
-	<DashboardNav slot="nav" basePath="/demo-standard" currentPath={Astro.url.pathname} client:load />
-	<ClientsPanel client:load />
-</DashboardLayout>
-

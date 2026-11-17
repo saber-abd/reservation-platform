@@ -3,12 +3,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { resendConfirmationEmail, signIn, getSession, getUser } from '@/lib/auth';
-import { getAccountType, createProfessional, enrollClientInDemo, getDemoTag } from '@/lib/queries';
-import { supabase } from '@/lib/supabase';
+import { getAccountType, createProfessional, getDemoTag } from '@/lib/queries';
 import { getBannedClientRecord, checkIsClientBannedInDb, loadProContext } from '@/lib/permissions';
 import { clearRejectedSession, consumeBanErrorFromUrl, fetchBanNotice, isBannedAuthError, takeStoredBanNotice, type BanNotice } from '@/lib/ban';
 import BanNoticeStandard from '@/components/standard/auth/StandardBanNotice';
-import CompleteProfileForm from '@/components/standard/auth/StandardCompleteProfileForm';
 import { ShieldAlert } from 'lucide-react';
 
 const schema = z.object({
@@ -34,8 +32,6 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 	const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
 	const [resendStatus, setResendStatus] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
-	const [pendingUser, setPendingUser] = useState<any | null>(null);
-	const [showCompletion, setShowCompletion] = useState(false);
 	const {
 		register,
 		handleSubmit,
@@ -103,7 +99,8 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 							setBan((await fetchBanNotice(user.email, user.id)) ?? toNotice(ban));
 							return;
 						}
-						await routeUser(user);
+						// Session déjà ouverte : seul un compte professionnel est redirigé vers le tableau de bord.
+						await routeUser(user, false);
 					}
 				}
 			} catch (e) {
@@ -113,9 +110,14 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 		checkExisting();
 	}, []);
 
-	async function routeUser(user: any) {
+	/**
+	 * Formule Standard : pas de comptes clients (les rendez-vous se prennent sans compte et arrivent
+	 * dans Google Agenda). Seul le professionnel se connecte ; un autre compte reçoit un message.
+	 */
+	async function routeUser(user: any, showErrors = true) {
 		const basePath = getEffectiveBasePath();
 		const currentTag = getDemoTag(basePath);
+		const dashboard = `${basePath}/dashboard/services`;
 
 		// Save user email to cache & map for consistent ban and pro lookup
 		if (typeof window !== 'undefined' && user.email) {
@@ -127,42 +129,16 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 			} catch (e) {}
 		}
 
-		// Compte professionnel (propriétaire ou collaborateur) : le rôle vient de la base.
+		// Compte professionnel : le rôle vient de la base.
 		const proContext = await loadProContext();
 		if (proContext) {
-			window.location.href = proContext.role === 'employee'
-				? `${basePath}/dashboard/disponibilites`
-				: `${basePath}/dashboard`;
+			window.location.href = dashboard;
 			return;
 		}
 
 		const accountType = await getAccountType(user.id, currentTag);
 		if (accountType === 'professional') {
-			window.location.href = `${basePath}/dashboard`;
-			return;
-		}
-
-		// Client ban check (Local + BDD Supabase)
-		let ban = getBannedClientRecord(
-			user.id,
-			user.email,
-			user.user_metadata?.full_name || user.user_metadata?.name
-		);
-		if (!ban) {
-			const dbBan = await checkIsClientBannedInDb(user.id, user.email);
-			if (dbBan) {
-				ban = {
-					clientId: user.id,
-					clientName: user.user_metadata?.full_name || user.user_metadata?.name || 'Client',
-					clientEmail: user.email,
-					reason: dbBan.reason || 'Compte suspendu par l’établissement',
-					bannedAt: new Date().toISOString()
-				};
-			}
-		}
-		if (ban) {
-			await clearRejectedSession('standard');
-			setBan((await fetchBanNotice(user.email, user.id)) ?? toNotice(ban));
+			window.location.href = dashboard;
 			return;
 		}
 
@@ -173,32 +149,15 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 				business_name: meta.business_name || 'Mon activité',
 				email: user.email!,
 			}, currentTag);
-			window.location.href = `${basePath}/dashboard`;
+			window.location.href = dashboard;
 			return;
 		}
 
-		// Vérifier si le client a déjà complété ses coordonnées (téléphone présent en BD)
-		const { data: existingClient } = await supabase
-			.from('clients')
-			.select('id, phone, full_name')
-			.eq('id', user.id)
-			.maybeSingle();
-
-		const isAlreadyComplete = !!(existingClient?.phone && existingClient.phone.trim() !== '');
-
-		if (!isAlreadyComplete) {
-			setPendingUser(user);
-			setShowCompletion(true);
-			return;
+		if (showErrors) {
+			setError(
+				"Cet espace est réservé au professionnel. Pour prendre rendez-vous, aucun compte n'est nécessaire : passez par la page Réservation.",
+			);
 		}
-
-		await enrollClientInDemo(user.id, currentTag, {
-			full_name: existingClient.full_name || meta?.full_name || meta?.name || 'Client',
-			email: user.email || null,
-			phone: existingClient.phone
-		});
-
-		window.location.href = `${basePath}/espace-client`;
 	}
 
 	async function onSubmit(values: FormValues) {
@@ -260,18 +219,6 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 		}
 	}
 
-	if (showCompletion && pendingUser) {
-		return (
-			<CompleteProfileForm 
-				user={pendingUser} 
-				targetDemo={getEffectiveBasePath()} 
-				onCompleted={() => {
-					window.location.href = `${getEffectiveBasePath()}/espace-client`;
-				}}
-			/>
-		);
-	}
-
 	return (
 		<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 			<div>
@@ -331,6 +278,13 @@ export default function LoginForm({ basePath: propBasePath }: LoginFormProps = {
 			>
 				{submitting ? 'Connexion…' : 'Se connecter'}
 			</button>
+
+			<a
+				href="/demo-standard/apercu/dashboard/services"
+				className="rounded-md border border-primary bg-transparent px-4 py-3.5 text-center text-[0.95rem] font-semibold text-primary transition-colors hover:bg-primary hover:text-white"
+			>
+				Voir un aperçu du tableau de bord
+			</a>
 
 			<div className="relative my-4 flex items-center py-2">
 				<div className="flex-grow border-t border-stone-200"></div>

@@ -1,11 +1,4 @@
 ---
-import DashboardLayout from '@/layouts/standard/StandardDashboardLayout.astro';
-import ClientNav from '@/components/standard/client/StandardClientNav';
-import AppointmentsClientPanel from '@/components/standard/client/StandardAppointmentsClientPanel';
+// Formule Standard : pas de comptes clients (réservation sans compte, dans Google Agenda). Ancienne adresse de l'espace client, renvoyée vers l'accueil.
+return Astro.redirect('/demo-standard/');
 ---
-
-<DashboardLayout title="Mes rendez-vous">
-	<ClientNav slot="nav" basePath="/demo-standard" currentPath={Astro.url.pathname} client:load />
-	<AppointmentsClientPanel client:load />
-</DashboardLayout>
-

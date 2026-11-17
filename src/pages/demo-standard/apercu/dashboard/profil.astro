@@ -1,0 +1,11 @@
+---
+// Aperçu à données fictives (src/lib/preview.ts), sans compte et en lecture seule.
+import DashboardLayout from '@/layouts/standard/StandardDashboardLayout.astro';
+import DashboardNav from '@/components/standard/dashboard/StandardDashboardNav';
+import ProfilePanel from '@/components/standard/dashboard/StandardProfilePanel';
+---
+
+<DashboardLayout title="Mon profil (aperçu)">
+	<DashboardNav slot="nav" basePath="/demo-standard/apercu" currentPath={Astro.url.pathname} client:load />
+	<ProfilePanel client:load />
+</DashboardLayout>
