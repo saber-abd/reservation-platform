@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Save, RefreshCw, Upload, Check } from 'lucide-react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { Save, RefreshCw, Camera, Check } from 'lucide-react';
 import { EnChargement, Squelette } from './kit/primitives';
-import { confirmer } from './kit/notifier';
+import { confirmer, signalerErreur } from './kit/notifier';
+import { AvatarDisplay } from '@/components/diamant/ui/DiamantAvatarPicker';
+import AvatarPicker from '@/components/diamant/ui/DiamantAvatarChoix';
 import { supabase } from '@/lib/supabase';
 
 export default function DiamantClientProfile() {
 	const [saving, setSaving] = useState(false);
 	const [loading, setLoading] = useState(true);
-	const reduit = useReducedMotion();
 	const [successMsg, setSuccessMsg] = useState('');
 	const [showAvatarSelector, setShowAvatarSelector] = useState(false);
-	const [selectedAvatarSeed, setSelectedAvatarSeed] = useState('Client');
+	// Valeur de clients.avatar_url : avatar dessiné, photo importée ou ancienne URL (voir DiamantAvatarPicker).
+	const [avatar, setAvatar] = useState<string | null>(null);
 
 	// Données du formulaire réelles (sans données factices)
 	const [firstName, setFirstName] = useState('');
@@ -60,11 +61,7 @@ export default function DiamantClientProfile() {
 
 				// Avatar
 				const avatar = clientData?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
-				if (avatar) {
-					setSelectedAvatarSeed(avatar);
-				} else if (rawName) {
-					setSelectedAvatarSeed(rawName);
-				}
+				setAvatar(avatar);
 
 				// Membre depuis
 				const createdAtStr = clientData?.created_at || user.created_at;
@@ -101,13 +98,6 @@ export default function DiamantClientProfile() {
 		fetchProfile();
 	}, []);
 
-	function generateAvatar(seed: string) {
-		if (!seed) return `https://api.dicebear.com/7.x/avataaars/svg?seed=Client&backgroundColor=f08080,f8ad9d,ffdab9`;
-		if (seed.startsWith('http')) return seed;
-		const encoded = encodeURIComponent(seed);
-		return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encoded}&backgroundColor=f08080,f8ad9d,ffdab9`;
-	}
-
 	async function handleSave(e: React.FormEvent) {
 		e.preventDefault();
 		setSaving(true);
@@ -118,13 +108,15 @@ export default function DiamantClientProfile() {
 			if (!session?.user) return;
 
 			const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
-			const avatarUrl = generateAvatar(selectedAvatarSeed);
+			const avatarUrl = avatar;
+			// Champ avatar envoyé seulement s'il y en a un (ne pas effacer une valeur existante).
+			const champAvatar = avatarUrl ? { avatar_url: avatarUrl } : {};
 
 			// Mise à jour locale immédiate
 			try {
-				localStorage.setItem('diamant_client_avatar', avatarUrl);
+				if (avatarUrl) localStorage.setItem('diamant_client_avatar', avatarUrl);
 				localStorage.setItem(`diamant_pref_${session.user.id}`, preferences);
-				window.dispatchEvent(new CustomEvent('diamant:avatar-changed', { detail: { avatarUrl } }));
+				if (avatarUrl) window.dispatchEvent(new CustomEvent('diamant:avatar-changed', { detail: { avatarUrl } }));
 			} catch {}
 
 			// Mise à jour dans Supabase (table clients)
@@ -134,7 +126,7 @@ export default function DiamantClientProfile() {
 					.update({
 						full_name: fullName || 'Client',
 						phone: phone.trim() || null,
-						avatar_url: avatarUrl,
+						...champAvatar,
 						preferences: preferences.trim() || null
 					})
 					.eq('id', session.user.id);
@@ -145,7 +137,7 @@ export default function DiamantClientProfile() {
 					.update({
 						full_name: fullName || 'Client',
 						phone: phone.trim() || null,
-						avatar_url: avatarUrl
+						...champAvatar
 					})
 					.eq('id', session.user.id);
 			}
@@ -160,36 +152,31 @@ export default function DiamantClientProfile() {
 		}
 	}
 
-	async function handleAvatarSelect(seed: string) {
-		setSelectedAvatarSeed(seed);
-		setShowAvatarSelector(false);
-		const avatarUrl = generateAvatar(seed);
-
+	// Même enregistrement qu'avant la refonte : cache local, événement pour l'en-tête, colonne clients.avatar_url.
+	async function handleAvatarSelect(avatarUrl: string) {
+		const precedent = avatar;
+		setAvatar(avatarUrl);
 		try {
 			localStorage.setItem('diamant_client_avatar', avatarUrl);
 			window.dispatchEvent(new CustomEvent('diamant:avatar-changed', { detail: { avatarUrl } }));
 
 			const { data: { session } } = await supabase.auth.getSession();
 			if (session?.user) {
-				await supabase
+				const { error } = await supabase
 					.from('clients')
 					.update({ avatar_url: avatarUrl })
 					.eq('id', session.user.id);
+				if (error) throw error;
 			}
+			confirmer('Photo de profil mise à jour.');
 		} catch (e) {
 			console.error('Erreur mise à jour avatar:', e);
+			setAvatar(precedent);
+			signalerErreur("La photo de profil n'a pas pu être enregistrée.");
 		}
 	}
 
 	const displayName = (firstName || lastName) ? `${firstName} ${lastName}`.trim() : 'Mon Profil';
-	const avatarOptions = [
-		displayName || 'Client',
-		'Sophie',
-		'Elodie',
-		'Lucas',
-		'Marie'
-	];
-
 	if (loading) {
 		return (
 			<EnChargement label="Chargement de votre profil..." className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -204,19 +191,16 @@ export default function DiamantClientProfile() {
 			{/* Photo de profil & résumé réel */}
 			<section className="dx-carte relative overflow-hidden">
 				<div className="flex flex-col items-center bg-dx-papier px-6 pb-6 pt-8 text-center">
-					<div className="group relative h-28 w-28">
-						<div className="h-full w-full overflow-hidden rounded-full bg-dx-ivoire-2 ring-4 ring-dx-carte">
-							<img src={generateAvatar(selectedAvatarSeed)} alt="Avatar" width={112} height={112} className="h-full w-full object-cover" />
-						</div>
+					<div className="relative h-28 w-28">
+						<AvatarDisplay avatarKey={avatar} nom={displayName === 'Mon Profil' ? null : displayName} size={112} className="ring-4 ring-dx-carte" />
 						<button
 							type="button"
 							onClick={() => setShowAvatarSelector(true)}
-							className="absolute inset-0 flex flex-col items-center justify-center rounded-full bg-dx-nuit/55 text-white opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
+							className="absolute -bottom-1 -right-1 grid h-9 w-9 place-items-center rounded-full bg-dx-encre text-dx-creme shadow-[0_6px_14px_-6px_rgb(31_24_19/0.6)] ring-2 ring-dx-carte transition-colors hover:bg-dx-terre"
+							aria-label="Changer de photo de profil"
 							title="Changer de photo"
-							aria-label="Changer de photo"
 						>
-							<Upload size={18} className="mb-1" />
-							<span className="text-[10px] font-semibold">Modifier</span>
+							<Camera size={16} />
 						</button>
 					</div>
 					<h2 className="mt-5 break-words font-heading text-[1.9rem] font-light leading-none tracking-[-0.03em] text-dx-encre">{displayName}</h2>
@@ -233,43 +217,12 @@ export default function DiamantClientProfile() {
 					</div>
 				</dl>
 
-				<AnimatePresence>
-					{showAvatarSelector && (
-						<motion.div
-							initial={reduit ? false : { opacity: 0 }}
-							animate={{ opacity: 1 }}
-							exit={{ opacity: 0 }}
-							className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-dx-carte/97 p-6"
-							role="dialog"
-							aria-label="Choisir un avatar"
-						>
-							<h4 className="dx-h3 mb-5">Choisir un avatar</h4>
-							<div className="mb-6 flex flex-wrap justify-center gap-3">
-								{avatarOptions.map(seed => (
-									<button
-										key={seed}
-										type="button"
-										onClick={() => handleAvatarSelect(seed)}
-										aria-pressed={selectedAvatarSeed === seed}
-										className={`relative h-14 w-14 overflow-hidden rounded-full transition-transform ${
-											selectedAvatarSeed === seed ? 'scale-110 ring-2 ring-dx-terre ring-offset-2 ring-offset-dx-carte' : 'ring-1 ring-dx-filet hover:scale-105'
-										}`}
-									>
-										<img src={generateAvatar(seed)} alt={seed} className="h-full w-full object-cover" />
-										{selectedAvatarSeed === seed && (
-											<span className="absolute inset-0 flex items-center justify-center bg-dx-terre/30">
-												<Check size={20} className="text-white" />
-											</span>
-										)}
-									</button>
-								))}
-							</div>
-							<button type="button" onClick={() => setShowAvatarSelector(false)} className="dx-btn dx-btn--sm dx-btn--fantome">
-								Annuler
-							</button>
-						</motion.div>
-					)}
-				</AnimatePresence>
+				<AvatarPicker
+					ouvert={showAvatarSelector}
+					onClose={() => setShowAvatarSelector(false)}
+					value={avatar}
+					onChange={handleAvatarSelect}
+				/>
 			</section>
 
 			{/* Informations personnelles */}

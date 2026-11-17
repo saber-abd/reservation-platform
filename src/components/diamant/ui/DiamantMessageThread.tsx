@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { getMessages, sendMessage, type Message } from '@/lib/queries';
 import { getSession } from '@/lib/auth';
+import { Lock } from 'lucide-react';
+import { isRoleReadOnly } from '@/lib/permissions';
+import { useLectureSeule } from '@/components/diamant/dashboard/kit/lectureSeule';
+import { avertirLectureSeule } from '@/components/diamant/dashboard/kit/notifier';
+
+const MESSAGE_ENVOI_DEMO = 'Envoi désactivé en mode Démo : la messagerie est en lecture seule.';
 
 interface Props {
 	professionalId: string;
@@ -15,6 +21,8 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 	const [sending, setSending] = useState(false);
 	const bottomRef = useRef<HTMLDivElement>(null);
 	const listeRef = useRef<HTMLDivElement>(null);
+	// Fil côté pro : le compte « démo » consulte sans pouvoir écrire.
+	const lectureSeule = useLectureSeule(role === 'professional');
 
 	function getStorageKey(pid: string, cid: string) {
 		return `diamant_messages_${pid}_${cid}`;
@@ -68,6 +76,10 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 
 	async function handleSend(e: React.FormEvent) {
 		e.preventDefault();
+		if (role === 'professional' && isRoleReadOnly()) {
+			avertirLectureSeule(MESSAGE_ENVOI_DEMO);
+			return;
+		}
 		if (!body.trim()) return;
 		setSending(true);
 		const text = body.trim();
@@ -154,18 +166,30 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 				</div>
 				<div ref={bottomRef} />
 			</div>
-			<form onSubmit={handleSend} className="flex items-center gap-2 border-t border-dx-filet bg-dx-carte p-2.5 focus-within:shadow-[inset_0_0_0_2px_var(--dx-terre)]">
-				<label htmlFor={`fil-${clientId}`} className="sr-only">Écrire un message</label>
+			{lectureSeule && (
+				<p className="flex items-center gap-1.5 border-t border-dx-filet bg-dx-carte px-3.5 pt-2.5 text-xs font-semibold text-dx-gris">
+					<Lock size={12} /> Lecture seule (mode Démo) : envoi désactivé.
+				</p>
+			)}
+			<form
+				onSubmit={handleSend}
+				onClick={lectureSeule ? () => avertirLectureSeule(MESSAGE_ENVOI_DEMO) : undefined}
+				className={'flex items-center gap-2 bg-dx-carte p-2.5 focus-within:shadow-[inset_0_0_0_2px_var(--dx-terre)] ' + (lectureSeule ? 'cursor-not-allowed opacity-70' : 'border-t border-dx-filet')}
+			>
+				<label htmlFor={'fil-' + clientId} className="sr-only">Écrire un message</label>
 				<input
-					id={`fil-${clientId}`}
+					id={'fil-' + clientId}
 					value={body}
 					onChange={(e) => setBody(e.target.value)}
-					placeholder="Écrire un message..."
-					className="dx-sans-contour min-w-0 flex-1 rounded-full bg-transparent px-3 py-2 text-sm text-dx-encre placeholder:text-dx-gris focus:outline-none"
+					readOnly={lectureSeule}
+					aria-disabled={lectureSeule || undefined}
+					placeholder={lectureSeule ? 'Lecture seule : envoi désactivé' : 'Écrire un message...'}
+					className={'dx-sans-contour min-w-0 flex-1 rounded-full bg-transparent px-3 py-2 text-sm text-dx-encre placeholder:text-dx-gris focus:outline-none ' + (lectureSeule ? 'cursor-not-allowed' : '')}
 				/>
 				<button
-					type="submit"
-					disabled={sending || !body.trim()}
+					type={lectureSeule ? 'button' : 'submit'}
+					disabled={!lectureSeule && (sending || !body.trim())}
+					aria-disabled={lectureSeule || undefined}
 					className="dx-btn dx-btn--sm"
 				>
 					Envoyer

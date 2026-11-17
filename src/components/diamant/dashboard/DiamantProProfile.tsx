@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getPrimaryProfessional, getDemoTag, type Professional } from '@/lib/queries';
 import { getActiveProRole, type ProRole } from '@/lib/permissions';
-import { User, Mail, Phone, MapPin, Building2, Save, CreditCard, RefreshCw, Upload, Lock, ArrowRight } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Building2, Save, CreditCard, RefreshCw, Camera, Lock, ArrowRight } from 'lucide-react';
+import { AvatarDisplay } from '@/components/diamant/ui/DiamantAvatarPicker';
+import AvatarPicker from '@/components/diamant/ui/DiamantAvatarChoix';
 import { EnChargement, Pastille, Squelette } from './kit/primitives';
-import { avertirLectureSeule, confirmer, informer } from './kit/notifier';
+import { avertirLectureSeule, confirmer, informer, signalerErreur } from './kit/notifier';
 
 export default function DiamantProProfile() {
 	const [pro, setPro] = useState<Professional | null>(null);
@@ -13,6 +15,9 @@ export default function DiamantProProfile() {
 	const [successMsg, setSuccessMsg] = useState('');
 	const [errorMsg, setErrorMsg] = useState('');
 	const [role, setRole] = useState<ProRole>('admin');
+	// Photo de l'établissement : valeur de professionals.avatar_url (avatar dessiné, photo importée ou ancienne URL).
+	const [avatar, setAvatar] = useState<string | null>(null);
+	const [choixAvatar, setChoixAvatar] = useState(false);
 
 	// FormData
 	const [businessName, setBusinessName] = useState('');
@@ -68,6 +73,7 @@ export default function DiamantProProfile() {
 
 				if (p) {
 					setPro(p);
+					setAvatar(p.avatar_url ?? null);
 				} else {
 					// Fallback pro object for demo mode
 					setPro({
@@ -161,12 +167,35 @@ export default function DiamantProProfile() {
 		}
 	}
 
+	// Enregistre la photo dans professionals.avatar_url (admin seulement ; démo et employé en lecture seule).
+	async function handleAvatar(valeur: string) {
+		if (role === 'employee' || role === 'demo') {
+			avertirLectureSeule();
+			return;
+		}
+		const precedent = avatar;
+		setAvatar(valeur);
+		try {
+			if (pro && pro.id !== 'demo-pro-diamant') {
+				const { error } = await supabase.from('professionals').update({ avatar_url: valeur }).eq('id', pro.id);
+				if (error) throw error;
+				setPro({ ...pro, avatar_url: valeur });
+			}
+			// L'en-tête du site écoute cet événement pour rafraîchir l'avatar affiché.
+			window.dispatchEvent(new CustomEvent('diamant:avatar-changed', { detail: { avatarUrl: valeur } }));
+			confirmer("Photo de l'établissement mise à jour.");
+		} catch (err) {
+			console.error(err);
+			setAvatar(precedent);
+			signalerErreur("La photo n'a pas pu être enregistrée.");
+		}
+	}
+
 	function handleBilling() {
 		informer('Fonctionnalité "Gérer la facturation" à venir très prochainement !');
 	}
 
 	const lectureSeule = role === 'employee' || role === 'demo';
-	const initiale = (businessName || name || 'O').trim().charAt(0).toUpperCase();
 
 	if (loading) {
 		return (
@@ -204,21 +233,17 @@ export default function DiamantProProfile() {
 				<section className="dx-carte overflow-hidden lg:col-span-8">
 					{/* Carte identité */}
 					<div className="flex flex-col gap-5 border-b border-dx-filet bg-dx-papier p-6 sm:flex-row sm:items-center sm:p-8">
-						<div className="group relative shrink-0">
-							<div className="grid h-24 w-24 place-items-center rounded-full bg-dx-encre font-heading text-5xl italic text-dx-creme" aria-hidden="true">
-								{initiale}
-							</div>
-							{role === 'admin' && (
-								<button
-									type="button"
-									onClick={() => informer("Fonctionnalité d'upload d'image à venir. Les avatars sont générés automatiquement pour la démo.")}
-									className="absolute inset-0 flex flex-col items-center justify-center rounded-full bg-dx-nuit/60 text-white opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
-									aria-label="Modifier l'image de l'établissement"
-								>
-									<Upload size={18} className="mb-1" />
-									<span className="text-[10px] font-semibold">Modifier</span>
-								</button>
-							)}
+						<div className="relative shrink-0">
+							<AvatarDisplay avatarKey={avatar} nom={businessName || name || 'O'} size={96} className="!bg-dx-encre !text-dx-creme italic" />
+							<button
+								type="button"
+								onClick={() => setChoixAvatar(true)}
+								className="absolute -bottom-1 -right-1 grid h-9 w-9 place-items-center rounded-full bg-dx-carte text-dx-encre shadow-[0_6px_14px_-6px_rgb(31_24_19/0.5)] ring-1 ring-dx-filet transition-colors hover:text-dx-terre"
+								aria-label="Changer la photo de l'établissement"
+								title={lectureSeule ? 'Photo (lecture seule)' : 'Changer la photo'}
+							>
+								{lectureSeule ? <Lock size={15} /> : <Camera size={16} />}
+							</button>
 						</div>
 						<div className="min-w-0">
 							<h2 className="font-heading text-[clamp(1.8rem,3vw,2.5rem)] font-light leading-none tracking-[-0.03em] text-dx-encre">{businessName || 'Mon Établissement'}</h2>
@@ -304,6 +329,17 @@ export default function DiamantProProfile() {
 					</section>
 				</aside>
 			</div>
+
+			<AvatarPicker
+				ouvert={choixAvatar}
+				onClose={() => setChoixAvatar(false)}
+				value={avatar}
+				onChange={handleAvatar}
+				lectureSeule={lectureSeule}
+				onLectureSeule={() =>
+					avertirLectureSeule(role === 'demo' ? undefined : "Modification réservée à l'administrateur.")
+				}
+			/>
 		</div>
 	);
 }

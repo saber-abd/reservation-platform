@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { supabase } from '@/lib/supabase';
-import { MapPin, Clock, Edit2, Navigation, ArrowRight } from 'lucide-react';
-import type { Appointment } from '@/lib/queries';
-import { EASE, EnChargement, EtatVide, PastilleStatut, Squelette } from './kit/primitives';
+import { MapPin, Clock, Edit2, Navigation, ArrowRight, CalendarX } from 'lucide-react';
+import { updateAppointmentStatus } from '@/lib/queries';
+import { EASE, EnChargement, EtatVide, Fenetre, PastilleStatut, Squelette } from './kit/primitives';
+import { confirmer, signalerErreur } from './kit/notifier';
 
 export default function DiamantClientAppointments() {
 	const [appointments, setAppointments] = useState<any[]>([]);
@@ -11,6 +12,9 @@ export default function DiamantClientAppointments() {
 	const [editingAppt, setEditingAppt] = useState<any | null>(null);
 	const [newDate, setNewDate] = useState('');
 	const [maintenant, setMaintenant] = useState<number | null>(null);
+	// Rendez-vous dont l'annulation attend la confirmation du client.
+	const [aAnnuler, setAAnnuler] = useState<any | null>(null);
+	const [annulation, setAnnulation] = useState(false);
 	const reduit = useReducedMotion();
 
 	useEffect(() => {
@@ -28,6 +32,8 @@ export default function DiamantClientAppointments() {
 				.select('*, services(name, duration_minutes, price), professionals(business_name, address)')
 				.eq('client_id', session.user.id)
 				.gte('start_time', new Date().toISOString())
+				// Un rendez-vous annulé n'est plus « le prochain ».
+				.neq('status', 'cancelled')
 				.order('start_time', { ascending: true })
 				.limit(1);
 
@@ -54,6 +60,24 @@ export default function DiamantClientAppointments() {
 			}
 		} catch (e) {
 			console.error(e);
+		}
+	}
+
+	// Même requête que les espaces clients Standard et Premium (updateAppointmentStatus → « cancelled »).
+	// Comme chez eux, l'annulation reste possible jusqu'au rendez-vous ; la règle des 24 h ne vise que le déplacement.
+	async function annulerRdv() {
+		if (!aAnnuler) return;
+		setAnnulation(true);
+		try {
+			await updateAppointmentStatus(aAnnuler.id, 'cancelled');
+			setAAnnuler(null);
+			confirmer('Rendez-vous annulé.', 'Le créneau est libéré ; vous pouvez en réserver un autre quand vous le souhaitez.');
+			setLoading(true);
+			await fetchAppointments();
+		} catch (err) {
+			signalerErreur(err instanceof Error ? err.message : "L'annulation a échoué.");
+		} finally {
+			setAnnulation(false);
 		}
 	}
 
@@ -195,12 +219,42 @@ export default function DiamantClientAppointments() {
 								Itinéraire
 							</a>
 						)}
-						<button type="button" className="dx-btn dx-btn--fantome ml-auto !text-dx-sable hover:!bg-white/10 hover:!text-white">
-							Annuler le RDV
-						</button>
+						{(appt.status === 'pending' || appt.status === 'confirmed') && (
+							<button
+								type="button"
+								onClick={() => setAAnnuler(appt)}
+								className="dx-btn dx-btn--fantome ml-auto !text-dx-sable hover:!bg-white/10 hover:!text-white"
+							>
+								Annuler le RDV
+							</button>
+						)}
 					</>
 				)}
 			</div>
+
+			<Fenetre
+				ouvert={!!aAnnuler}
+				onClose={() => !annulation && setAAnnuler(null)}
+				icone={<CalendarX size={18} />}
+				titre="Annuler ce rendez-vous ?"
+				sousTitre={
+					aAnnuler
+						? `${aAnnuler.services?.name || 'Prestation'}, ${new Date(aAnnuler.start_time).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}.`
+						: undefined
+				}
+				pied={
+					<>
+						<button type="button" onClick={() => setAAnnuler(null)} disabled={annulation} className="dx-btn dx-btn--ligne">
+							Garder le rendez-vous
+						</button>
+						<button type="button" onClick={annulerRdv} disabled={annulation} className="dx-btn dx-btn--danger">
+							{annulation ? 'Annulation…' : 'Annuler le rendez-vous'}
+						</button>
+					</>
+				}
+			>
+				<p className="text-sm text-dx-encre-2">Le créneau sera libéré pour d'autres clients. Cette action ne peut pas être défaite.</p>
+			</Fenetre>
 		</motion.section>
 	);
 }

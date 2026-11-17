@@ -5,7 +5,7 @@
  * Stockage inchangé : la valeur est une chaîne enregistrée dans `avatar_url` (clients ou professionals).
  * - avatar dessiné : son chemin, ex. « /images/diamant/avatars/ciseaux.svg » ;
  * - photo importée : image JPEG 256 × 256 encodée en data URL (pas de compartiment de stockage dédié) ;
- * - anciennes valeurs (URL Dicebear, clés des anciens avatars) : URL affichée telle quelle, clé inconnue
+ * - anciennes valeurs : URL d'image affichée telle quelle ; avatars Dicebear (dessin animé), clé inconnue
  *   ou image en erreur → repli sur l'initiale (ou une silhouette si le nom n'est pas fourni).
  */
 // Module léger (importé par l'en-tête du site public) : la fenêtre de choix, qui charge le recadrage
@@ -43,6 +43,8 @@ export function srcAvatar(valeur: string | null | undefined): string | null {
 	// Clé nue d'un avatar de la série (« ciseaux ») : acceptée aussi.
 	const parCle = AVATARS.find((a) => a.cle === v);
 	if (parCle) return parCle.src;
+	// Anciens avatars Dicebear (visages de dessin animé, hors du style du salon) : repli sur l'initiale.
+	if (/^https?:\/\/api\.dicebear\.com\//.test(v)) return null;
 	if (/^https?:\/\//.test(v) || v.startsWith('/') || v.startsWith('data:image/')) return v;
 	return null;
 }

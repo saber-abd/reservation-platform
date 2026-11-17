@@ -14,10 +14,15 @@ import {
 	type Professional 
 } from '@/lib/queries';
 import { DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
-import { Send, ExternalLink, Search, CheckCheck, ArrowLeft } from 'lucide-react';
+import { Send, ExternalLink, Search, CheckCheck, ArrowLeft, Lock } from 'lucide-react';
+import { isRoleReadOnly } from '@/lib/permissions';
 import { useReducedMotion } from 'motion/react';
 import { Avatar, EnChargement, EtatVide, Squelette, cx } from './kit/primitives';
 import { publierClients } from './kit/indexClients';
+import { quandEcritureAutorisee, useLectureSeule } from './kit/lectureSeule';
+import { avertirLectureSeule } from './kit/notifier';
+
+const MESSAGE_ENVOI_DEMO = 'Envoi désactivé en mode Démo : la messagerie est en lecture seule.';
 
 interface Props {
 	isPro: boolean;
@@ -51,6 +56,8 @@ export default function DiamantMessenger({ isPro }: Props) {
 	// Sur téléphone (vue pro) : la liste des conversations, puis le fil choisi.
 	const [filMobile, setFilMobile] = useState(false);
 	const reduit = useReducedMotion();
+	// Compte « démo » (vue pro) : consultation seule, ni envoi ni marquage « lu » en base.
+	const lectureSeule = useLectureSeule(isPro);
 
 	// Synchroniser le nom du professionnel (DB / localStorage / cookie)
 	function resolveProName(pro: Professional | null): string {
@@ -193,13 +200,17 @@ export default function DiamantMessenger({ isPro }: Props) {
 		fetchMessages();
 
 		// Si le pro ouvre la conversation, marquer les messages de ce client comme lus
+		// (attend le rôle réel ; jamais pour le compte démo, en lecture seule).
+		let annulerMarquage = () => {};
 		if (isPro) {
-			markMessagesAsRead(proId, activeClientId, 'professional');
-			setUnreadCounts(prev => {
-				if (!prev[activeClientId]) return prev;
-				const next = { ...prev };
-				delete next[activeClientId];
-				return next;
+			annulerMarquage = quandEcritureAutorisee(() => {
+				markMessagesAsRead(proId, activeClientId, 'professional');
+				setUnreadCounts(prev => {
+					if (!prev[activeClientId]) return prev;
+					const next = { ...prev };
+					delete next[activeClientId];
+					return next;
+				});
 			});
 		}
 
@@ -225,7 +236,7 @@ export default function DiamantMessenger({ isPro }: Props) {
 						});
 						scrollToBottom();
 
-						if (isPro && newMsg.sender === 'client') {
+						if (isPro && newMsg.sender === 'client' && !isRoleReadOnly()) {
 							markMessagesAsRead(proId, activeClientId, 'professional');
 						}
 					} else if (isPro && newMsg.sender === 'client') {
@@ -317,6 +328,7 @@ export default function DiamantMessenger({ isPro }: Props) {
 		window.addEventListener('diamant:profile-updated', handleProfileUpdate);
 
 		return () => {
+			annulerMarquage();
 			if (channel) supabase.removeChannel(channel);
 			window.removeEventListener('storage', handleStorage);
 			window.removeEventListener('diamant:new-message', handleCustomNewMessage);
@@ -368,6 +380,10 @@ export default function DiamantMessenger({ isPro }: Props) {
 
 	async function handleSend(e: React.FormEvent) {
 		e.preventDefault();
+		if (isPro && isRoleReadOnly()) {
+			avertirLectureSeule(MESSAGE_ENVOI_DEMO);
+			return;
+		}
 		if (!newMessage.trim() || !proId || !activeClientId) return;
 
 		setSending(true);
@@ -696,19 +712,34 @@ export default function DiamantMessenger({ isPro }: Props) {
 
 				{/* Barre de saisie */}
 				<div className="border-t border-dx-filet bg-dx-carte p-3 sm:p-4">
-					<form onSubmit={handleSend} className="flex items-center gap-2 rounded-full border border-dx-filet-fort bg-dx-ivoire p-1.5 pl-4 transition-colors focus-within:border-dx-terre focus-within:shadow-[0_0_0_3px_rgb(168_75_37/0.14)]">
+					{lectureSeule && (
+						<p className="mb-2 flex items-center gap-1.5 px-2 text-xs font-semibold text-dx-gris">
+							<Lock size={12} /> Lecture seule (mode Démo) : la consultation est libre, l'envoi de messages est désactivé.
+						</p>
+					)}
+					<form
+						onSubmit={handleSend}
+						onClick={lectureSeule ? () => avertirLectureSeule(MESSAGE_ENVOI_DEMO) : undefined}
+						className={cx(
+							'flex items-center gap-2 rounded-full border border-dx-filet-fort bg-dx-ivoire p-1.5 pl-4 transition-colors focus-within:border-dx-terre focus-within:shadow-[0_0_0_3px_rgb(168_75_37/0.14)]',
+							lectureSeule && 'cursor-not-allowed opacity-70'
+						)}
+					>
 						<label htmlFor="dx-composer" className="sr-only">{isPro ? 'Répondre au client' : 'Écrire à votre artisan'}</label>
 						<input
 							id="dx-composer"
 							type="text"
 							value={newMessage}
 							onChange={e => setNewMessage(e.target.value)}
-							placeholder={isPro ? "Répondre au client..." : "Écrivez votre message à votre artisan..."}
-							className="dx-sans-contour min-w-0 flex-1 bg-transparent py-2 text-[0.9375rem] text-dx-encre placeholder:text-dx-gris focus:outline-none"
+							readOnly={lectureSeule}
+							aria-disabled={lectureSeule || undefined}
+							placeholder={lectureSeule ? 'Lecture seule : envoi désactivé' : isPro ? "Répondre au client..." : "Écrivez votre message à votre artisan..."}
+							className={cx('dx-sans-contour min-w-0 flex-1 bg-transparent py-2 text-[0.9375rem] text-dx-encre placeholder:text-dx-gris focus:outline-none', lectureSeule && 'cursor-not-allowed')}
 						/>
 						<button
-							type="submit"
-							disabled={sending || !newMessage.trim()}
+							type={lectureSeule ? 'button' : 'submit'}
+							disabled={!lectureSeule && (sending || !newMessage.trim())}
+							aria-disabled={lectureSeule || undefined}
 							className="dx-btn !min-h-10 !px-4"
 						>
 							<span className="hidden sm:inline">Envoyer</span>

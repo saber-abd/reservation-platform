@@ -161,7 +161,8 @@ function Agenda({
 				<div className="pt-0">
 					{heures.map((h) => (
 						<div key={h} className="dx-agenda__heure">
-							{h > hDebut && <span>{`${String(h).padStart(2, '0')}:00`}</span>}
+							{/* Libellé centré sur sa ligne ; le premier, en haut de la grille, reste sous la ligne. */}
+							<span style={h === hDebut ? { transform: 'translateY(3px)' } : undefined}>{`${String(h).padStart(2, '0')}:00`}</span>
 						</div>
 					))}
 				</div>

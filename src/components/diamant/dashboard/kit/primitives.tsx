@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import NumberFlow from '@number-flow/react';
 import { MoreHorizontal, X } from 'lucide-react';
+import { srcAvatar } from '@/components/diamant/ui/DiamantAvatarPicker';
 
 export const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -160,6 +161,11 @@ export function Avatar({
 	className?: string;
 }) {
 	const initiale = (nom || '?').trim().charAt(0).toUpperCase() || '?';
+	// Avatar dessiné (/images/diamant/avatars/…), photo importée (data URL) ou ancienne URL ;
+	// une image en erreur ou une valeur inconnue retombe sur l'initiale.
+	const src = srcAvatar(url);
+	const [enErreur, setEnErreur] = useState(false);
+	useEffect(() => setEnErreur(false), [src]);
 	return (
 		<span
 			data-ton={ton}
@@ -167,7 +173,7 @@ export function Avatar({
 			style={{ width: taille, height: taille, fontSize: Math.round(taille * 0.42) }}
 			aria-hidden="true"
 		>
-			{url && url.startsWith('http') ? <img src={url} alt="" width={taille} height={taille} loading="lazy" decoding="async" /> : initiale}
+			{src && !enErreur ? <img src={src} alt="" width={taille} height={taille} loading="lazy" decoding="async" onError={() => setEnErreur(true)} /> : initiale}
 		</span>
 	);
 }
