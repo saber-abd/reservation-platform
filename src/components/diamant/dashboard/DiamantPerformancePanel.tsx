@@ -3,7 +3,9 @@ import { supabase } from '@/lib/supabase';
 import { getPrimaryProfessional, getDemoTag, type Appointment } from '@/lib/queries';
 import { generateDiamantDemoAppointments, DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
 import DiamantNewClientsModal, { type PeriodClientDetail } from './DiamantNewClientsModal';
-import { TrendingUp, Calendar, Users, ArrowUpRight, BarChart3, Scissors, Award, Clock } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
+import { Chiffre, Courbe, EASE, EnChargement, Pastille, Segments, Squelette } from './kit/primitives';
 import { formatEuros, roundMoney } from '@/lib/money';
 
 // recharts (~350 Ko) n'est chargé que lorsque le graphique est affiché.
@@ -21,6 +23,8 @@ export default function DiamantPerformancePanel() {
 	const [customEnd, setCustomEnd] = useState('');
 	
 	const [loading, setLoading] = useState(true);
+	const [pret, setPret] = useState(false);
+	const reduit = useReducedMotion();
 	const [appointments, setAppointments] = useState<AppointmentWithService[]>([]);
 	const [periodClients, setPeriodClients] = useState<PeriodClientDetail[]>([]);
 	const [showNewClientsModal, setShowNewClientsModal] = useState(false);
@@ -110,6 +114,7 @@ export default function DiamantPerformancePanel() {
 			console.error(err);
 		} finally {
 			setLoading(false);
+			setPret(true);
 		}
 	}
 
@@ -158,212 +163,234 @@ export default function DiamantPerformancePanel() {
 		return rate > 0 ? Math.min(Math.max(rate, 65), 92) : 75;
 	}, [appointments]);
 
+	// Les chiffres partent de zéro puis roulent jusqu'à leur valeur (NumberFlow).
+	const [vus, setVus] = useState({ ca: 0, rdv: 0, clients: 0, panier: 0, retention: 0 });
+	useEffect(() => {
+		if (!pret) return;
+		const id = window.requestAnimationFrame(() =>
+			setVus({ ca: totalCa, rdv: rdvCount, clients: newClientsCount, panier: panierMoyen, retention: retentionRate })
+		);
+		return () => window.cancelAnimationFrame(id);
+	}, [pret, totalCa, rdvCount, newClientsCount, panierMoyen, retentionRate]);
+
+	const apparition = (i: number) =>
+		reduit
+			? {}
+			: {
+				initial: { opacity: 0, y: 14 },
+				animate: { opacity: 1, y: 0 },
+				transition: { duration: 0.6, ease: EASE, delay: 0.05 * i },
+			};
+
+	// Courbe du chiffre d'affaires (vue calculée sur les rendez-vous déjà chargés)
+	const courbe = useMemo(() => {
+		const tri = [...appointments].sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+		const groupes = new Map<string, number>();
+		for (const a of tri) {
+			const d = new Date(a.start_time);
+			const cle = range === 'year' ? `${d.getFullYear()}-${d.getMonth()}` : d.toDateString();
+			groupes.set(cle, (groupes.get(cle) || 0) + (a.services?.price || 0));
+		}
+		return Array.from(groupes.values());
+	}, [appointments, range]);
+
+	const ARC = 2 * Math.PI * 38;
+
 	return (
-		<div className="space-y-8">
+		<div className="space-y-6">
 			{/* Sélecteur de période */}
-			<div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-stone-200 shadow-sm">
-				<div className="flex flex-wrap items-center gap-2">
-					<span className="text-xs font-bold text-stone-400 uppercase tracking-widest mr-2">Période :</span>
-					<button 
-						onClick={() => setRange('week')}
-						className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${range === 'week' ? 'bg-deep-teal-50 text-deep-teal-700 border border-deep-teal-200 shadow-2xs' : 'text-stone-600 hover:bg-stone-50 border border-transparent'}`}
-					>
-						7 jours
-					</button>
-					<button 
-						onClick={() => setRange('month')}
-						className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${range === 'month' ? 'bg-deep-teal-50 text-deep-teal-700 border border-deep-teal-200 shadow-2xs' : 'text-stone-600 hover:bg-stone-50 border border-transparent'}`}
-					>
-						30 jours
-					</button>
-					<button 
-						onClick={() => setRange('year')}
-						className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${range === 'year' ? 'bg-deep-teal-50 text-deep-teal-700 border border-deep-teal-200 shadow-2xs' : 'text-stone-600 hover:bg-stone-50 border border-transparent'}`}
-					>
-						1 an
-					</button>
-					<button 
-						onClick={() => setRange('custom')}
-						className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${range === 'custom' ? 'bg-deep-teal-50 text-deep-teal-700 border border-deep-teal-200 shadow-2xs' : 'text-stone-600 hover:bg-stone-50 border border-transparent'}`}
-					>
-						Personnalisé
-					</button>
+			<div className="flex flex-wrap items-center justify-between gap-3">
+				<div className="flex flex-wrap items-center gap-3">
+					<span className="text-sm font-semibold text-dx-encre">Période :</span>
+					<Segments<TimeRange>
+						label="Période"
+						value={range}
+						onChange={setRange}
+						options={[
+							{ value: 'week', label: '7 jours' },
+							{ value: 'month', label: '30 jours' },
+							{ value: 'year', label: '1 an' },
+							{ value: 'custom', label: 'Personnalisé' },
+						]}
+					/>
 				</div>
 
 				{range === 'custom' && (
-					<div className="flex flex-wrap items-center gap-3 animate-in fade-in duration-200">
-						<input 
-							type="date" 
+					<div className="flex flex-wrap items-center gap-2">
+						<input
+							type="date"
+							aria-label="Début de la période"
 							value={customStart}
 							onChange={e => setCustomStart(e.target.value)}
-							className="px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-stone-700 focus:outline-none focus:border-deep-teal-400"
+							className="dx-champ !min-h-9 !w-auto !py-1.5 text-sm"
 						/>
-						<span className="text-xs text-stone-400 font-bold">au</span>
-						<input 
-							type="date" 
+						<span className="text-sm text-dx-gris">au</span>
+						<input
+							type="date"
+							aria-label="Fin de la période"
 							value={customEnd}
 							onChange={e => setCustomEnd(e.target.value)}
-							className="px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-stone-700 focus:outline-none focus:border-deep-teal-400"
+							className="dx-champ !min-h-9 !w-auto !py-1.5 text-sm"
 						/>
 					</div>
 				)}
 			</div>
 
-			{/* KPI Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-				{/* CA */}
-				<div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
-					<div className="flex items-center justify-between mb-3">
-						<div className="w-9 h-9 rounded-xl bg-deep-teal-50 border border-deep-teal-100 flex items-center justify-center text-deep-teal-500">
-							<TrendingUp size={18} />
+			{!pret ? (
+				<EnChargement label="Chargement des statistiques…" className="grid gap-4 lg:grid-cols-12">
+					<Squelette className="h-[260px] !rounded-[14px] lg:col-span-7" />
+					<Squelette className="h-[260px] !rounded-[14px] lg:col-span-5" />
+					<Squelette className="h-[380px] !rounded-[14px] lg:col-span-12" />
+				</EnChargement>
+			) : (
+				<div className="grid gap-4 lg:grid-cols-12" aria-busy={loading}>
+					{/* Chiffre d'affaires */}
+					<motion.section {...apparition(0)} className="dx-carte flex flex-col p-6 sm:p-7 lg:col-span-7">
+						<div className="flex flex-wrap items-center justify-between gap-3">
+							<p className="text-sm font-semibold text-dx-encre">Chiffre d'Affaires</p>
+							<Pastille ton="terre" nu>{getRangeLabel(range)}</Pastille>
 						</div>
-						<span className="text-[11px] font-bold text-deep-teal-600 bg-deep-teal-50 px-2 py-0.5 rounded-full uppercase tracking-wider">
-							{getRangeLabel(range)}
-						</span>
-					</div>
-					<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Chiffre d'Affaires</p>
-					<p className="text-2xl font-black text-stone-800 font-heading">
-						{formatEuros(totalCa)}
-					</p>
-				</div>
-
-				{/* RDV */}
-				<div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
-					<div className="flex items-center justify-between mb-3">
-						<div className="w-9 h-9 rounded-xl bg-jasmine-50 border border-jasmine-100 flex items-center justify-center text-jasmine-600">
-							<Calendar size={18} />
+						<Chiffre valeur={vus.ca} euros className="mt-6 text-[clamp(3rem,6vw,5rem)] text-dx-encre" />
+						<div className="mt-auto pt-6">
+							{courbe.length > 1 ? <Courbe valeurs={courbe} hauteur={64} /> : <div className="h-16 border-b border-dashed border-dx-filet-fort" />}
 						</div>
-						<span className="text-[11px] font-bold text-jasmine-700 bg-jasmine-50 px-2 py-0.5 rounded-full uppercase tracking-wider">
-							Activité
-						</span>
-					</div>
-					<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Rendez-vous réalisés</p>
-					<p className="text-2xl font-black text-stone-800 font-heading">{rdvCount}</p>
-				</div>
+					</motion.section>
 
-				{/* Nouveaux Clients (Cliquable !) */}
-				<button 
-					type="button"
-					onClick={() => setShowNewClientsModal(true)} 
-					className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-deep-teal-300 hover:shadow-md transition-all card-hover group text-left cursor-pointer"
-				>
-					<div className="flex items-center justify-between mb-3">
-						<div className="w-9 h-9 rounded-xl bg-deep-teal-50 border border-deep-teal-100 flex items-center justify-center text-deep-teal-500 group-hover:scale-105 group-hover:bg-deep-teal-500 group-hover:text-white transition-all">
-							<Users size={18} />
+					{/* Activité, clients, panier */}
+					<motion.section {...apparition(1)} className="dx-carte flex flex-col divide-y divide-dx-filet lg:col-span-5">
+						<div className="flex items-end justify-between gap-4 px-6 py-5">
+							<div>
+								<p className="text-sm font-semibold text-dx-encre">Rendez-vous réalisés</p>
+								<p className="dx-meta mt-0.5">Activité</p>
+							</div>
+							<Chiffre valeur={vus.rdv} className="text-[2.75rem] text-dx-encre" />
 						</div>
-						<span className="text-[11px] font-bold text-stone-400 group-hover:text-deep-teal-600 transition-colors flex items-center gap-1">
-							Voir liste <ArrowUpRight size={12}/>
-						</span>
-					</div>
-					<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Nouveaux Clients</p>
-					<p className="text-2xl font-black text-stone-800 font-heading">{newClientsCount}</p>
-				</button>
-
-				{/* Panier Moyen */}
-				<div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
-					<div className="flex items-center justify-between mb-3">
-						<div className="w-9 h-9 rounded-xl bg-jasmine-50 border border-jasmine-100 flex items-center justify-center text-jasmine-600">
-							<span className="font-black text-base">€</span>
+						<button
+							type="button"
+							onClick={() => setShowNewClientsModal(true)}
+							className="group flex items-end justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-dx-ivoire"
+						>
+							<div>
+								<p className="text-sm font-semibold text-dx-encre">Nouveaux Clients</p>
+								<p className="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold text-dx-gris group-hover:text-dx-terre">
+									Voir liste <ArrowUpRight size={12} />
+								</p>
+							</div>
+							<Chiffre valeur={vus.clients} className="text-[2.75rem] text-dx-encre" />
+						</button>
+						<div className="flex items-end justify-between gap-4 px-6 py-5">
+							<div>
+								<p className="text-sm font-semibold text-dx-encre">Panier Moyen</p>
+								<p className="dx-meta mt-0.5">Moyenne</p>
+							</div>
+							<Chiffre valeur={vus.panier} euros className="text-[2.75rem] text-dx-encre" />
 						</div>
-						<span className="text-[11px] font-bold text-jasmine-700 bg-jasmine-50 px-2 py-0.5 rounded-full uppercase tracking-wider">
-							Moyenne
-						</span>
-					</div>
-					<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Panier Moyen</p>
-					<p className="text-2xl font-black text-stone-800 font-heading">
-						{formatEuros(panierMoyen)}
-					</p>
-				</div>
-			</div>
+					</motion.section>
 
-			{/* Graphique d'évolution du CA */}
-			<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-				<div className="flex items-center justify-between mb-6">
-					<div>
-						<h2 className="text-base font-bold text-stone-800 font-heading">Évolution du Chiffre d'Affaires</h2>
-						<p className="text-xs text-stone-400 mt-0.5">Historique des recettes sur : {getRangeLabel(range)}</p>
-					</div>
-					<span className="text-xs font-bold text-deep-teal-600 bg-deep-teal-50 border border-deep-teal-100 px-3 py-1 rounded-full uppercase tracking-wider font-heading">
-						{appointments.length} prestation{appointments.length > 1 ? 's' : ''}
-					</span>
-				</div>
-				{/* Graphique chargé à la demande : jamais pendant le rendu serveur (loading y vaut true). */}
-				{loading ? (
-					<div className="animate-pulse h-64 bg-stone-100 rounded-xl"></div>
-				) : (
-					<Suspense fallback={<div className="animate-pulse h-64 bg-stone-100 rounded-xl"></div>}>
-						<DiamantRevenueChart appointments={appointments} range={range} />
-					</Suspense>
-				)}
-			</div>
+					{/* Graphique d'évolution du CA */}
+					<motion.section {...apparition(2)} className="dx-carte p-6 sm:p-7 lg:col-span-12">
+						<div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+							<div>
+								<h2 className="dx-h2">Évolution du Chiffre d'Affaires</h2>
+								<p className="dx-meta mt-1">Historique des recettes sur : {getRangeLabel(range)}</p>
+							</div>
+							<Pastille ton="neutre" nu>
+								{appointments.length} prestation{appointments.length > 1 ? 's' : ''}
+							</Pastille>
+						</div>
+						{/* Graphique chargé à la demande : jamais pendant le rendu serveur (pret y vaut false). */}
+						<div className={loading ? 'opacity-50 transition-opacity' : 'transition-opacity'}>
+							<Suspense fallback={<Squelette className="h-[300px] w-full !rounded-xl" />}>
+								<DiamantRevenueChart appointments={appointments} range={range} />
+							</Suspense>
+						</div>
+					</motion.section>
 
-			{/* Top Prestations & Fidélité */}
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-				{/* Top prestations */}
-				<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-					<h2 className="text-base font-bold text-stone-800 mb-6 font-heading">Top Prestations ({getRangeLabel(range)})</h2>
-					<div className="space-y-5">
-						{topServices.length === 0 ? (
-							<p className="text-sm text-stone-400 py-6 text-center">Aucune prestation sur la période</p>
-						) : (
-							topServices.map((svc) => (
-								<div key={svc.name}>
-									<div className="flex items-center justify-between mb-2">
-										<span className="text-stone-700 text-sm font-medium">{svc.name} ({svc.count}x)</span>
-										<div className="text-right">
-											<span className="text-deep-teal-600 font-bold text-sm font-heading">{svc.percentage}%</span>
-											<span className="text-[11px] text-stone-400 ml-2 font-medium font-heading">({formatEuros(svc.ca)})</span>
+					{/* Top prestations */}
+					<motion.section {...apparition(3)} className="dx-carte p-6 sm:p-7 lg:col-span-7">
+						<h2 className="dx-h2">Top Prestations</h2>
+						<p className="dx-meta mt-1">{getRangeLabel(range)}</p>
+						<ol className="mt-6 space-y-5">
+							{topServices.length === 0 ? (
+								<li className="py-6 text-center text-sm text-dx-gris">Aucune prestation sur la période</li>
+							) : (
+								topServices.map((svc, i) => (
+									<li key={svc.name}>
+										<div className="mb-2 flex items-baseline justify-between gap-3">
+											<span className="flex min-w-0 items-baseline gap-3">
+												<span className="font-heading text-sm italic text-dx-terre">{String(i + 1).padStart(2, '0')}</span>
+												<span className="truncate text-[0.9375rem] font-medium text-dx-encre">{svc.name} <span className="text-dx-gris">({svc.count}x)</span></span>
+											</span>
+											<span className="dx-tabulaire shrink-0 text-sm">
+												<span className="font-semibold text-dx-encre">{svc.percentage}%</span>
+												<span className="ml-2 text-dx-gris">({formatEuros(svc.ca)})</span>
+											</span>
 										</div>
-									</div>
-									<div className="w-full bg-stone-100 rounded-full h-2 overflow-hidden">
-										<div 
-											className="bg-deep-teal-400 h-2 rounded-full transition-all duration-500" 
-											style={{ width: `${svc.percentage}%` }}
-										/>
-									</div>
-								</div>
-							))
-						)}
-					</div>
-				</div>
+										<div className="h-1.5 w-full overflow-hidden rounded-full bg-dx-ivoire-2">
+											<motion.div
+												className="h-full rounded-full bg-dx-terre"
+												initial={reduit ? false : { width: 0 }}
+												animate={{ width: `${svc.percentage}%` }}
+												transition={{ duration: 0.9, ease: EASE, delay: 0.2 + i * 0.08 }}
+												style={reduit ? { width: `${svc.percentage}%` } : undefined}
+											/>
+										</div>
+									</li>
+								))
+							)}
+						</ol>
+					</motion.section>
 
-				{/* Fidélité */}
-				<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-					<h2 className="text-base font-bold text-stone-800 mb-6 font-heading">Fidélité Clientèle</h2>
-					<div className="flex items-center justify-center h-48">
-						<div className="relative w-44 h-44 flex items-center justify-center">
-							<svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
-								<circle cx="50" cy="50" r="38" fill="none" stroke="#f5f5f4" strokeWidth="12" />
-								<circle 
-									cx="50" cy="50" r="38" fill="none" stroke="#14b8a6" strokeWidth="12"
-									strokeDasharray={`${Math.round(retentionRate * 2.38)} 238`} strokeLinecap="round" 
-								/>
-							</svg>
-							<div className="text-center z-10">
-								<span className="block text-3xl font-black text-stone-900 font-heading">{retentionRate}%</span>
-								<span className="text-[11px] text-stone-400 uppercase tracking-widest font-bold">Rétention</span>
+					{/* Fidélité */}
+					<motion.section {...apparition(4)} className="dx-carte dx-carte--nuit flex flex-col p-6 sm:p-7 lg:col-span-5">
+						<h2 className="font-heading text-[1.375rem] font-normal tracking-[-0.02em] text-dx-creme">Fidélité Clientèle</h2>
+						<p className="mt-1 text-sm text-dx-sable">Part des clients venus plus d'une fois sur la période</p>
+						<div className="my-6 flex items-center justify-center">
+							<div className="relative grid h-48 w-48 place-items-center">
+								<svg className="absolute inset-0 h-full w-full -rotate-90" viewBox="0 0 100 100" aria-hidden="true">
+									<circle cx="50" cy="50" r="38" fill="none" stroke="var(--dx-filet-nuit)" strokeWidth="7" />
+									<motion.circle
+										cx="50"
+										cy="50"
+										r="38"
+										fill="none"
+										stroke="var(--dx-terre-clair)"
+										strokeWidth="7"
+										strokeLinecap="round"
+										strokeDasharray={ARC}
+										initial={reduit ? false : { strokeDashoffset: ARC }}
+										animate={{ strokeDashoffset: ARC * (1 - retentionRate / 100) }}
+										transition={{ duration: 1.3, ease: EASE, delay: 0.3 }}
+										style={reduit ? { strokeDashoffset: ARC * (1 - retentionRate / 100) } : undefined}
+									/>
+								</svg>
+								<div className="text-center">
+									<Chiffre valeur={vus.retention} suffixe="%" className="block text-5xl text-white" />
+									<span className="mt-1 block text-xs text-dx-sable">Rétention</span>
+								</div>
 							</div>
 						</div>
-					</div>
-					<div className="mt-4 grid grid-cols-2 gap-3">
-						<div className="rounded-xl bg-stone-50 border border-stone-100 p-3 text-center">
-							<p className="text-xl font-black text-stone-900 font-heading">{rdvCount}</p>
-							<p className="text-xs text-stone-400 uppercase tracking-widest mt-0.5">Visites totales</p>
+						<div className="mt-auto grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-dx-filet-nuit">
+							<div className="bg-dx-nuit-2 p-4 text-center">
+								<Chiffre valeur={vus.rdv} className="text-3xl text-dx-creme" />
+								<p className="mt-1 text-xs text-dx-sable">Visites totales</p>
+							</div>
+							<button
+								type="button"
+								onClick={() => setShowNewClientsModal(true)}
+								className="bg-dx-nuit-2 p-4 text-center transition-colors hover:bg-[#30261f]"
+								title="Cliquer pour voir la liste"
+							>
+								<Chiffre valeur={vus.clients} prefixe="+" className="text-3xl text-dx-terre-clair" />
+								<p className="mt-1 text-xs text-dx-sable">Nouveaux clients</p>
+							</button>
 						</div>
-						<div 
-							onClick={() => setShowNewClientsModal(true)}
-							className="rounded-xl bg-deep-teal-50 border border-deep-teal-100 p-3 text-center cursor-pointer hover:bg-deep-teal-100/70 transition-colors"
-							title="Cliquer pour voir la liste"
-						>
-							<p className="text-xl font-black text-deep-teal-700 font-heading">+{newClientsCount}</p>
-							<p className="text-xs text-deep-teal-500 uppercase tracking-widest mt-0.5 font-bold">Nouveaux clients</p>
-						</div>
-					</div>
+					</motion.section>
 				</div>
-			</div>
+			)}
 
 			{/* Modale de détail des nouveaux clients */}
-			<DiamantNewClientsModal 
+			<DiamantNewClientsModal
 				isOpen={showNewClientsModal}
 				onClose={() => setShowNewClientsModal(false)}
 				clients={periodClients}

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Calendar, Clock, Scissors, ArrowRight, CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
+import { ArrowRight, RotateCcw } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
+import { EASE, EnChargement, EtatVide, Pastille, Squelette } from './kit/primitives';
 
 interface RecentAppt {
 	id: string;
@@ -16,6 +18,7 @@ interface RecentAppt {
 export default function DiamantClientRecentHistory() {
 	const [pastAppointments, setPastAppointments] = useState<RecentAppt[]>([]);
 	const [loading, setLoading] = useState(true);
+	const reduit = useReducedMotion();
 
 	useEffect(() => {
 		async function fetchRecentHistory() {
@@ -74,91 +77,83 @@ export default function DiamantClientRecentHistory() {
 
 	if (loading) {
 		return (
-			<div className="rounded-2xl border border-stone-200 bg-white p-8 text-center text-xs text-stone-400">
-				Chargement de votre historique récent...
-			</div>
+			<EnChargement label="Chargement de votre historique récent..." className="space-y-3">
+				<Squelette className="h-6 w-48" />
+				<Squelette className="h-20 w-full !rounded-[14px]" />
+				<Squelette className="h-20 w-full !rounded-[14px]" />
+			</EnChargement>
 		);
 	}
 
 	return (
-		<div className="rounded-2xl border border-stone-200 bg-white p-6 md:p-7 shadow-xs">
-			<div className="flex items-center justify-between mb-6 pb-3 border-b border-stone-100">
+		<section aria-labelledby="dx-historique-recent">
+			<div className="mb-5 flex flex-wrap items-end justify-between gap-3">
 				<div>
-					<h2 className="text-xl font-bold text-stone-900 tracking-tight">Historique Récent</h2>
-					<p className="text-xs text-stone-400 mt-0.5">Dernières prestations réalisées auprès de notre établissement</p>
+					<h2 id="dx-historique-recent" className="dx-h2">Historique Récent</h2>
+					<p className="dx-meta mt-1">Dernières prestations réalisées auprès de notre établissement</p>
 				</div>
 				{pastAppointments.length > 0 && (
-					<a 
-						href="/demo-diamant/espace-client/historique" 
-						className="text-xs font-bold text-deep-teal-600 hover:text-deep-teal-700 hover:underline flex items-center gap-1 cursor-pointer"
-					>
+					<a href="/demo-diamant/espace-client/historique" className="dx-lien">
 						<span>Voir tout l'historique</span>
-						<ArrowRight size={13} />
+						<ArrowRight size={14} />
 					</a>
 				)}
 			</div>
-			
+
 			{pastAppointments.length === 0 ? (
-				<div className="py-8 text-center text-stone-400 space-y-3">
-					<div className="w-12 h-12 rounded-2xl bg-stone-50 border border-stone-200/80 text-stone-400 flex items-center justify-center mx-auto">
-						<Clock size={20} />
-					</div>
-					<p className="text-sm font-medium text-stone-600">Aucun historique de rendez-vous pour le moment.</p>
-					<p className="text-xs text-stone-400 max-w-sm mx-auto">
-						Vos prestations passées s'afficheront ici au fur et à mesure de vos visites chez Diamant Prestige.
-					</p>
+				<div className="dx-carte">
+					<EtatVide
+						dessin="ciseaux"
+						titre="Aucun historique de rendez-vous pour le moment."
+						texte="Vos prestations passées s'afficheront ici au fur et à mesure de vos visites."
+					/>
 				</div>
 			) : (
-				<div className="space-y-3">
-					{pastAppointments.map((appt) => (
-						<div 
-							key={appt.id} 
-							className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-stone-100 bg-stone-50/60 hover:bg-white hover:border-stone-200 hover:shadow-2xs transition-all gap-4"
+				<ol className="dx-frise space-y-3">
+					{pastAppointments.map((appt, i) => (
+						<motion.li
+							key={appt.id}
+							initial={reduit ? false : { opacity: 0, x: -8 }}
+							animate={{ opacity: 1, x: 0 }}
+							transition={{ duration: 0.5, ease: EASE, delay: 0.1 + i * 0.07 }}
+							className="relative"
 						>
-							<div className="flex items-start sm:items-center gap-3.5">
-								<div className="w-11 h-11 rounded-xl bg-white border border-stone-200 flex items-center justify-center text-deep-teal-700 shrink-0 shadow-2xs">
-									<Scissors size={18} />
-								</div>
-								<div>
-									<div className="flex items-center gap-2">
-										<p className="text-stone-900 font-bold text-sm">{appt.serviceName}</p>
+							<span className="dx-frise__point" data-ton={appt.status === 'cancelled' ? 'annule' : undefined} aria-hidden="true" />
+							<div className="dx-carte dx-carte--plate flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+								<div className="min-w-0">
+									<div className="flex flex-wrap items-center gap-2">
+										<p className="dx-h3">{appt.serviceName}</p>
 										{appt.status === 'completed' ? (
-											<span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-												<CheckCircle2 size={10} />
-												<span>Réalisé</span>
-											</span>
+											<Pastille ton="ok">Réalisé</Pastille>
 										) : (
-											<span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
-												<XCircle size={10} />
-												<span>Annulé</span>
-											</span>
+											<Pastille ton="neutre">Annulé</Pastille>
 										)}
 									</div>
-									<div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500 mt-1">
-										<span className="font-medium text-stone-700">{appt.formattedDate} à {appt.timeString}</span>
-										<span>•</span>
+									<p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-dx-gris">
+										<span className="font-medium text-dx-encre-2">{appt.formattedDate} à {appt.timeString}</span>
+										<span aria-hidden="true">·</span>
 										<span>{appt.durationString}</span>
 										{appt.price > 0 && (
 											<>
-												<span>•</span>
-												<span className="font-bold text-stone-900">{appt.price} €</span>
+												<span aria-hidden="true">·</span>
+												<span className="dx-tabulaire font-semibold text-dx-encre">{appt.price} €</span>
 											</>
 										)}
-									</div>
+									</p>
 								</div>
-							</div>
 
-							<a 
-								href={`/demo-diamant/reservation?service=${encodeURIComponent(appt.serviceName)}`}
-								className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border border-stone-200 bg-white text-deep-teal-700 hover:bg-deep-teal-50 hover:border-deep-teal-300 text-xs font-bold uppercase tracking-wider transition-all shadow-2xs cursor-pointer self-start sm:self-auto shrink-0"
-							>
-								<RotateCcw size={13} />
-								<span>Reprendre</span>
-							</a>
-						</div>
+								<a
+									href={`/demo-diamant/reservation?service=${encodeURIComponent(appt.serviceName)}`}
+									className="dx-btn dx-btn--sm dx-btn--ligne self-start sm:self-auto"
+								>
+									<RotateCcw size={13} />
+									<span>Reprendre</span>
+								</a>
+							</div>
+						</motion.li>
 					))}
-				</div>
+				</ol>
 			)}
-		</div>
+		</section>
 	);
 }

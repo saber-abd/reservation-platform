@@ -704,7 +704,7 @@ export default function DiamantMessenger({ isPro }: Props) {
 							value={newMessage}
 							onChange={e => setNewMessage(e.target.value)}
 							placeholder={isPro ? "Répondre au client..." : "Écrivez votre message à votre artisan..."}
-							className="min-w-0 flex-1 bg-transparent py-2 text-[0.9375rem] text-dx-encre placeholder:text-dx-gris focus:outline-none"
+							className="dx-sans-contour min-w-0 flex-1 bg-transparent py-2 text-[0.9375rem] text-dx-encre placeholder:text-dx-gris focus:outline-none"
 						/>
 						<button
 							type="submit"

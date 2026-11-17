@@ -542,7 +542,7 @@ export default function AppointmentsPanel() {
 			{/* Agenda */}
 			<section className="dx-carte overflow-hidden">
 				<div className="flex flex-col gap-4 border-b border-dx-filet bg-dx-papier px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-					<div className="flex items-center gap-2">
+					<div className="flex flex-wrap items-center gap-2">
 						<button type="button" onClick={() => decaler(-1)} className="dx-icone-btn" aria-label={vue === 'jour' ? 'Jour précédent' : 'Semaine précédente'}>
 							<ChevronLeft size={18} />
 						</button>
@@ -552,7 +552,7 @@ export default function AppointmentsPanel() {
 						<button type="button" onClick={() => setReference(new Date())} className="dx-btn dx-btn--sm dx-btn--ligne ml-1">
 							Aujourd'hui
 						</button>
-						<h2 className="dx-h3 ml-3 first-letter:uppercase" aria-live="polite">{libellePeriode}</h2>
+						<h2 className="dx-h3 w-full first-letter:uppercase sm:ml-3 sm:w-auto" aria-live="polite">{libellePeriode}</h2>
 					</div>
 					<div className="flex flex-wrap items-center gap-3">
 						<span className="dx-meta">

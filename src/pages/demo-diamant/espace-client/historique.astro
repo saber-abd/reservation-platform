@@ -2,15 +2,13 @@
 import DiamantDashboardLayout from '@/layouts/diamant/DiamantDashboardLayout.astro';
 import DiamantClientNav from '@/components/diamant/dashboard/DiamantClientNav';
 import DiamantClientHistory from '@/components/diamant/dashboard/DiamantClientHistory';
+import DiamantPageHead from '@/components/diamant/dashboard/kit/DiamantPageHead.astro';
 ---
 
 <DiamantDashboardLayout title="Historique des Rendez-vous">
 	<DiamantClientNav slot="sidebar" basePath="/demo-diamant" client:load />
-	
-	<div class="mb-8">
-		<h1 class="text-3xl font-black text-stone-800 tracking-tight">Historique des Rendez-vous</h1>
-		<p class="text-stone-500 mt-2">Consultez vos prestations passées, téléchargez vos reçus et reprenez facilement vos soins préférés.</p>
-	</div>
+
+	<DiamantPageHead titre="Historique" accent="des rendez-vous" sousTitre="Consultez vos prestations passées, téléchargez vos reçus et reprenez facilement vos soins préférés." />
 
 	<DiamantClientHistory client:load />
 </DiamantDashboardLayout>

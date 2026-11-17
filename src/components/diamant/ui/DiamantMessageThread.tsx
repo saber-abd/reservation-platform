@@ -154,14 +154,14 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 				</div>
 				<div ref={bottomRef} />
 			</div>
-			<form onSubmit={handleSend} className="flex items-center gap-2 border-t border-dx-filet bg-dx-carte p-2.5">
+			<form onSubmit={handleSend} className="flex items-center gap-2 border-t border-dx-filet bg-dx-carte p-2.5 focus-within:shadow-[inset_0_0_0_2px_var(--dx-terre)]">
 				<label htmlFor={`fil-${clientId}`} className="sr-only">Écrire un message</label>
 				<input
 					id={`fil-${clientId}`}
 					value={body}
 					onChange={(e) => setBody(e.target.value)}
 					placeholder="Écrire un message..."
-					className="min-w-0 flex-1 rounded-full bg-transparent px-3 py-2 text-sm text-dx-encre placeholder:text-dx-gris focus:outline-none"
+					className="dx-sans-contour min-w-0 flex-1 rounded-full bg-transparent px-3 py-2 text-sm text-dx-encre placeholder:text-dx-gris focus:outline-none"
 				/>
 				<button
 					type="submit"

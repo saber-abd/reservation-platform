@@ -14,6 +14,8 @@ import {
 	Scissors,
 	ChevronRight
 } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
+import { Chiffre, EASE, EnChargement, Pastille, Squelette } from './kit/primitives';
 
 interface LoyaltyBadge {
 	id: string;
@@ -87,6 +89,7 @@ export default function DiamantClientFidelite() {
 	const [visitsCount, setVisitsCount] = useState<number>(0);
 	const [memberSince, setMemberSince] = useState<string>('');
 	const [loading, setLoading] = useState(true);
+	const reduit = useReducedMotion();
 
 	useEffect(() => {
 		async function fetchLoyaltyData() {
@@ -140,170 +143,192 @@ export default function DiamantClientFidelite() {
 	let currentTier = 'Cristal';
 	let nextTier = 'Argent';
 	let nextTierPoints = 150;
-	let tierGradient = 'from-stone-500 to-stone-700';
 
 	if (points >= 700) {
 		currentTier = 'Diamant';
 		nextTier = 'Ambassadeur Ultime';
 		nextTierPoints = 1000;
-		tierGradient = 'from-amber-500 via-rose-500 to-purple-600';
 	} else if (points >= 350) {
 		currentTier = 'Or';
 		nextTier = 'Diamant';
 		nextTierPoints = 700;
-		tierGradient = 'from-amber-500 to-amber-700';
 	} else if (points >= 150) {
 		currentTier = 'Argent';
 		nextTier = 'Or';
 		nextTierPoints = 350;
-		tierGradient = 'from-teal-600 to-deep-teal-700';
 	}
 
 	const progressPercent = Math.min(100, Math.round((points / nextTierPoints) * 100));
 
+	// Le solde roule jusqu'à sa valeur une fois les données chargées (NumberFlow).
+	const [vus, setVus] = useState(0);
+	useEffect(() => {
+		if (loading) return;
+		const id = window.requestAnimationFrame(() => setVus(points));
+		return () => window.cancelAnimationFrame(id);
+	}, [loading, points]);
+
 	if (loading) {
 		return (
-			<div className="rounded-2xl border border-stone-200 bg-white p-12 text-center text-stone-400">
-				Chargement de vos privilèges...
-			</div>
+			<EnChargement label="Chargement de vos privilèges..." className="space-y-6">
+				<Squelette className="h-[300px] w-full !rounded-[22px]" />
+				<Squelette className="h-24 w-full !rounded-[14px]" />
+				<Squelette className="h-24 w-full !rounded-[14px]" />
+			</EnChargement>
 		);
 	}
 
-	return (
-		<div className="space-y-8">
-			{/* Carte de Fidélité & Statut Réel */}
-			<div className="rounded-3xl border border-stone-200 bg-gradient-to-br from-white via-stone-50/80 to-amber-50/30 p-7 md:p-9 shadow-sm relative overflow-hidden">
-				<div className="absolute top-0 right-0 w-80 h-80 bg-amber-100/40 blur-[90px] pointer-events-none rounded-full"></div>
-				<div className="absolute -bottom-10 -left-10 w-64 h-64 bg-deep-teal-100/30 blur-[80px] pointer-events-none rounded-full"></div>
+	// Carte à tampons : un tampon par visite, par carte de 10
+	const TAMPONS = 10;
+	const tamponsPleins = visitsCount === 0 ? 0 : ((visitsCount - 1) % TAMPONS) + 1;
+	const paliers = [
+		{ nom: 'Cristal', seuil: 0 },
+		{ nom: 'Argent', seuil: 150 },
+		{ nom: 'Or', seuil: 350 },
+		{ nom: 'Diamant', seuil: 700 },
+	];
 
-				<div className="flex flex-col md:flex-row md:items-center justify-between gap-8 relative z-10">
-					<div className="flex items-center gap-5">
-						<div className="w-18 h-18 rounded-2xl border border-amber-200/80 bg-white p-1 shadow-xs flex items-center justify-center shrink-0">
-							<div className="w-full h-full rounded-xl bg-gradient-to-br from-amber-50 to-amber-100/80 flex items-center justify-center">
-								<Crown size={32} className="text-amber-600" />
-							</div>
+	return (
+		<div className="space-y-10">
+			{/* Carte de fidélité et statut réel */}
+			<motion.section
+				initial={reduit ? false : { opacity: 0, y: 16, rotateX: 6 }}
+				animate={{ opacity: 1, y: 0, rotateX: 0 }}
+				transition={{ duration: 0.8, ease: EASE }}
+				className="dx-carte dx-carte--nuit overflow-hidden !rounded-[22px]"
+				aria-label="Carte de fidélité"
+			>
+				<div className="grid gap-8 p-6 sm:p-9 lg:grid-cols-[1.1fr_1fr] lg:gap-12">
+					<div className="flex flex-col">
+						<div className="flex items-center justify-between gap-3">
+							<p className="text-sm text-dx-sable">Statut Fidélité</p>
+							<Crown size={20} className="text-dx-terre-clair" />
 						</div>
-						<div>
-							<div className="flex items-center gap-2">
-								<span className="text-[10px] font-black uppercase tracking-widest text-amber-800 bg-amber-100/80 px-2.5 py-0.5 rounded-full border border-amber-200">
-									Statut Fidélité
-								</span>
-							</div>
-							<h2 className="text-3xl md:text-4xl font-black text-stone-900 tracking-tight mt-1">
-								Niveau {currentTier}
-							</h2>
-							<p className="text-stone-500 text-xs mt-1">
-								{memberSince ? `Membre depuis ${memberSince}` : 'Compte Privilège'} • {visitsCount} prestation{visitsCount > 1 ? 's' : ''} réalisée{visitsCount > 1 ? 's' : ''}
-							</p>
+						<h2 className="mt-4 font-heading text-[clamp(2.4rem,5vw,3.6rem)] font-light leading-none tracking-[-0.035em] text-dx-creme">
+							Niveau <em className="text-dx-terre-clair">{currentTier}</em>
+						</h2>
+						<p className="mt-3 text-sm text-dx-sable">
+							{memberSince ? `Membre depuis ${memberSince}` : 'Compte Privilège'} • {visitsCount} prestation{visitsCount > 1 ? 's' : ''} réalisée{visitsCount > 1 ? 's' : ''}
+						</p>
+
+						{/* Tampons */}
+						<div className="mt-8">
+							<p className="mb-3 text-xs text-dx-sable">Carte de passage · {tamponsPleins} / {TAMPONS}</p>
+							<ol className="grid max-w-sm grid-cols-5 gap-2.5" aria-label={`${tamponsPleins} tampons sur ${TAMPONS}`}>
+								{Array.from({ length: TAMPONS }, (_, i) => {
+									const plein = i < tamponsPleins;
+									return (
+										<motion.li
+											key={i}
+											initial={reduit ? false : { scale: plein ? 0.4 : 1, opacity: plein ? 0 : 1 }}
+											animate={{ scale: 1, opacity: 1 }}
+											transition={{ duration: 0.45, ease: EASE, delay: 0.4 + i * 0.08 }}
+											className={`grid aspect-square place-items-center rounded-full border ${plein ? 'border-dx-terre-clair bg-dx-terre text-white' : 'border-dashed border-dx-filet-nuit text-dx-filet-nuit'}`}
+										>
+											{plein ? <Scissors size={16} className="-rotate-45" /> : <span className="dx-tabulaire text-xs">{i + 1}</span>}
+										</motion.li>
+									);
+								})}
+							</ol>
 						</div>
 					</div>
 
-					<div className="bg-white/90 p-5 rounded-2xl border border-stone-200/80 shadow-2xs backdrop-blur-xs min-w-[240px]">
-						<div className="flex items-center justify-between text-xs mb-1.5">
-							<span className="text-stone-500 font-bold uppercase tracking-wider">Solde Points</span>
-							<span className="text-amber-700 font-black text-xs">Palier suivant : {nextTierPoints} pts</span>
+					{/* Solde et jauge vers le palier suivant */}
+					<div className="flex flex-col rounded-2xl bg-dx-nuit-2 p-6">
+						<div className="flex items-baseline justify-between gap-3">
+							<span className="text-sm text-dx-sable">Solde Points</span>
+							<span className="text-xs font-semibold text-dx-terre-clair">Palier suivant : {nextTierPoints} pts</span>
 						</div>
-						<div className="flex items-baseline gap-2">
-							<p className="text-3xl font-black text-stone-900">
-								{points}
-							</p>
-							<span className="text-xs font-bold text-amber-600 uppercase tracking-wider">points</span>
+						<p className="mt-3 flex items-baseline gap-2">
+							<Chiffre valeur={vus} className="text-[clamp(3.5rem,7vw,5rem)] text-white" />
+							<span className="text-sm text-dx-sable">points</span>
+						</p>
+
+						<div className="mt-6">
+							<div className="h-2 w-full overflow-hidden rounded-full bg-dx-filet-nuit" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progressPercent} aria-label="Progression vers le palier suivant">
+								<motion.div
+									className="h-full rounded-full bg-dx-terre-clair"
+									initial={reduit ? false : { width: 0 }}
+									animate={{ width: `${progressPercent}%` }}
+									transition={{ duration: 1.2, ease: EASE, delay: 0.3 }}
+									style={reduit ? { width: `${progressPercent}%` } : undefined}
+								/>
+							</div>
+							<ol className="mt-3 grid grid-cols-4 text-[11px] text-dx-sable">
+								{paliers.map((p) => (
+									<li key={p.nom} className={points >= p.seuil ? 'font-semibold text-dx-creme' : ''}>
+										{p.nom}
+										<span className="dx-tabulaire block opacity-70">{p.seuil}</span>
+									</li>
+								))}
+							</ol>
 						</div>
 
-						{/* Barre de progression réelle vers le prochain palier */}
-						<div className="w-full bg-stone-100 h-2.5 rounded-full overflow-hidden mt-3 border border-stone-200">
-							<div 
-								className="h-full bg-gradient-to-r from-amber-500 to-amber-600 rounded-full transition-all duration-700"
-								style={{ width: `${progressPercent}%` }}
-							></div>
-						</div>
-						<p className="text-[11px] text-stone-400 mt-2 text-right">
+						<p className="mt-auto pt-6 text-sm text-dx-sable">
 							{points >= nextTierPoints ? 'Palier atteint !' : `Encore ${nextTierPoints - points} points pour le statut ${nextTier}`}
 						</p>
 					</div>
 				</div>
-			</div>
+			</motion.section>
 
-			{/* Section Badges & Avantages */}
-			<div>
-				<div className="flex items-center justify-between mb-4">
+			{/* Privilèges et badges */}
+			<section>
+				<div className="mb-5 flex flex-wrap items-end justify-between gap-3">
 					<div>
-						<h3 className="text-xl font-bold text-stone-900 tracking-tight">Vos Privilèges & Badges</h3>
-						<p className="text-xs text-stone-500 mt-0.5">
-							Débloquez de nouveaux privilèges exclusifs à mesure de vos visites en salon.
-						</p>
+						<h3 className="dx-h2">Vos Privilèges & Badges</h3>
+						<p className="dx-meta mt-1">Débloquez de nouveaux privilèges à mesure de vos visites en salon.</p>
 					</div>
-					<div className="flex items-center gap-3 text-xs">
-						<span className="flex items-center gap-1.5 font-bold text-emerald-700">
-							<CheckCircle2 size={14} className="text-emerald-600" />
+					<div className="flex items-center gap-4 text-xs">
+						<span className="flex items-center gap-1.5 font-semibold text-dx-ok">
+							<CheckCircle2 size={14} />
 							<span>Débloqué</span>
 						</span>
-						<span className="flex items-center gap-1.5 font-bold text-stone-400">
-							<Lock size={13} className="text-stone-400" />
+						<span className="flex items-center gap-1.5 font-semibold text-dx-gris">
+							<Lock size={13} />
 							<span>Verrouillé</span>
 						</span>
 					</div>
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					{LOYALTY_BADGES.map((badge) => {
+				<ol className="dx-carte divide-y divide-dx-filet overflow-hidden">
+					{LOYALTY_BADGES.map((badge, i) => {
 						const isUnlocked = points >= badge.requiredPoints || (badge.requiredVisits !== undefined && visitsCount >= badge.requiredVisits);
 						const IconComponent = badge.icon;
 						const remainingPoints = Math.max(0, badge.requiredPoints - points);
 
-						if (isUnlocked) {
-							// Badge DÉBLOQUÉ : Lumineux, éclatant, statut vérifié
-							return (
-								<div 
-									key={badge.id}
-									className="rounded-2xl border border-amber-200/90 bg-white p-5 shadow-xs flex items-start gap-4 transition-all hover:shadow-md relative overflow-hidden group"
-								>
-									<div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
-										<IconComponent size={22} />
-									</div>
-
-									<div className="flex-1 min-w-0">
-										<div className="flex items-center justify-between gap-2 mb-1">
-											<h4 className="font-bold text-stone-900 text-sm leading-snug">{badge.title}</h4>
-											<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
-												<CheckCircle2 size={11} />
-												<span>Disponible</span>
-											</span>
-										</div>
-										<p className="text-xs text-stone-600 leading-relaxed">{badge.description}</p>
-									</div>
-								</div>
-							);
-						}
-
-						// Badge VERROUILLÉ : Grisé, transparent, avec cadenas et indicateur de progression (standard mondial)
 						return (
-							<div 
+							<motion.li
 								key={badge.id}
-								className="rounded-2xl border border-dashed border-stone-200 bg-stone-50/60 p-5 opacity-45 grayscale hover:opacity-70 hover:grayscale-0 transition-all flex items-start gap-4 relative"
+								initial={reduit ? false : { opacity: 0, y: 8 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.45, ease: EASE, delay: Math.min(i * 0.06, 0.4) }}
+								className={`grid grid-cols-[2.5rem_1fr] items-start gap-4 px-5 py-5 sm:grid-cols-[3rem_2.75rem_1fr_auto] sm:items-center sm:px-6 ${isUnlocked ? '' : 'bg-dx-papier'}`}
 							>
-								<div className="w-12 h-12 rounded-xl bg-stone-200/70 text-stone-500 flex items-center justify-center shrink-0 border border-stone-200">
-									<Lock size={20} className="text-stone-500" />
+								<span className="hidden font-heading text-lg italic text-dx-terre sm:block">{String(i + 1).padStart(2, '0')}</span>
+								<span className={`grid h-11 w-11 place-items-center rounded-full ${isUnlocked ? 'bg-dx-terre-pale text-dx-terre' : 'bg-dx-ivoire-2 text-dx-sable'}`}>
+									{isUnlocked ? <IconComponent size={19} /> : <Lock size={17} />}
+								</span>
+								<div className="min-w-0">
+									<h4 className={`dx-h3 ${isUnlocked ? '' : '!text-dx-encre-2'}`}>{badge.title}</h4>
+									<p className={`mt-0.5 text-sm leading-relaxed ${isUnlocked ? 'text-dx-encre-2' : 'text-dx-gris'}`}>{badge.description}</p>
+									{!isUnlocked && (
+										<p className="mt-1.5 text-xs font-semibold text-dx-terre">
+											Plus que {remainingPoints} point{remainingPoints > 1 ? 's' : ''} pour débloquer
+										</p>
+									)}
 								</div>
-
-								<div className="flex-1 min-w-0">
-									<div className="flex items-center justify-between gap-2 mb-1">
-										<h4 className="font-bold text-stone-700 text-sm leading-snug">{badge.title}</h4>
-										<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-stone-200/60 text-stone-600 shrink-0">
-											<Lock size={10} />
-											<span>{badge.requiredPoints} pts</span>
-										</span>
-									</div>
-									<p className="text-xs text-stone-500 leading-relaxed">{badge.description}</p>
-									<p className="text-[11px] text-amber-700/80 font-bold mt-2">
-										🔒 Plus que {remainingPoints} point{remainingPoints > 1 ? 's' : ''} pour débloquer
-									</p>
+								<div className="col-start-2 sm:col-start-auto">
+									{isUnlocked ? (
+										<Pastille ton="ok">Disponible</Pastille>
+									) : (
+										<Pastille ton="neutre" nu><Lock size={10} /> {badge.requiredPoints} pts</Pastille>
+									)}
 								</div>
-							</div>
+							</motion.li>
 						);
 					})}
-				</div>
-			</div>
+				</ol>
+			</section>
 		</div>
 	);
 }

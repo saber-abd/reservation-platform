@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getPrimaryProfessional, getDemoTag, type Professional } from '@/lib/queries';
 import { getActiveProRole, type ProRole } from '@/lib/permissions';
-import { User, Mail, Phone, MapPin, Building2, Save, CreditCard, RefreshCw, Upload, Lock } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Building2, Save, CreditCard, RefreshCw, Upload, Lock, ArrowRight } from 'lucide-react';
+import { EnChargement, Pastille, Squelette } from './kit/primitives';
+import { avertirLectureSeule, confirmer, informer } from './kit/notifier';
 
 export default function DiamantProProfile() {
 	const [pro, setPro] = useState<Professional | null>(null);
@@ -97,6 +99,7 @@ export default function DiamantProProfile() {
 
 		if (role === 'employee' || role === 'demo') {
 			setErrorMsg("Action désactivée : modifications non autorisées dans ce mode.");
+			avertirLectureSeule("Action désactivée : modifications non autorisées dans ce mode.");
 			return;
 		}
 
@@ -142,6 +145,7 @@ export default function DiamantProProfile() {
 			console.warn("DB update failed (likely RLS), but saved locally.", err);
 		} finally {
 			setSuccessMsg('Profil et nom de l\'établissement mis à jour avec succès.');
+			confirmer('Profil et nom de l\'établissement mis à jour avec succès.');
 			
 			// MAJ locale state
 			if (pro) {
@@ -158,157 +162,107 @@ export default function DiamantProProfile() {
 	}
 
 	function handleBilling() {
-		alert('Fonctionnalité "Gérer la facturation" à venir très prochainement !');
+		informer('Fonctionnalité "Gérer la facturation" à venir très prochainement !');
 	}
 
-	function generateAvatar() {
-		const seed = encodeURIComponent(businessName || name || 'Prestige');
-		return `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&backgroundColor=f08080,f8ad9d,ffdab9&textColor=ffffff`;
-	}
+	const lectureSeule = role === 'employee' || role === 'demo';
+	const initiale = (businessName || name || 'O').trim().charAt(0).toUpperCase();
 
 	if (loading) {
-		return <div className="py-12 text-center text-stone-400">Chargement du profil...</div>;
+		return (
+			<EnChargement label="Chargement du profil..." className="grid gap-6 lg:grid-cols-12">
+				<Squelette className="h-[560px] !rounded-[14px] lg:col-span-8" />
+				<Squelette className="h-[360px] !rounded-[14px] lg:col-span-4" />
+			</EnChargement>
+		);
 	}
+
+	const champs: { id: string; label: string; icon: typeof User; value: string; set: (v: string) => void; type?: string; large?: boolean }[] = [
+		{ id: 'pro-etab', label: "Nom de l'établissement", icon: Building2, value: businessName, set: setBusinessName },
+		{ id: 'pro-nom', label: 'Nom du gérant / Praticien', icon: User, value: name, set: setName },
+		{ id: 'pro-adresse', label: 'Adresse postale', icon: MapPin, value: address, set: setAddress, large: true },
+		{ id: 'pro-tel', label: 'Téléphone', icon: Phone, value: phone, set: setPhone, type: 'tel' },
+		{ id: 'pro-email', label: 'Email de contact', icon: Mail, value: email, set: setEmail, type: 'email' },
+	];
 
 	return (
 		<div className="space-y-6">
-			{successMsg && (
-				<div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl">
-					{successMsg}
-				</div>
-			)}
-			{errorMsg && (
-				<div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl">
-					{errorMsg}
-				</div>
-			)}
-
 			{/* Alerte Mode Employé ou Démo */}
-			{(role === 'employee' || role === 'demo') && (
-				<div className={`mb-6 p-4 rounded-2xl border flex items-start gap-3.5 shadow-2xs ${
-					role === 'demo' 
-						? 'bg-purple-50 border-purple-200 text-purple-950' 
-						: 'bg-amber-50 border-amber-200 text-amber-950'
-				}`}>
-					<div className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 ${
-						role === 'demo' 
-							? 'bg-purple-100 border-purple-300 text-purple-800' 
-							: 'bg-amber-100 border-amber-300 text-amber-800'
-					}`}>
-						<Lock size={16} />
-					</div>
-					<div>
-						<p className="font-bold text-sm">
-							{role === 'demo' ? 'Mode Démo Commercial — Consultation Seule' : 'Mode Employé — Modification Verrouillée'}
-						</p>
-						<p className="text-xs mt-0.5 leading-relaxed opacity-90">
-							{role === 'demo'
-								? "Vous explorez le profil en mode Démo Commercial. Toutes les informations sont visibles pour vos prospects, mais les modifications sont désactivées."
-								: "Vous êtes connecté avec les droits Employé. Vous n'avez pas la permission de modifier les informations de l'établissement."}
-						</p>
-					</div>
+			{lectureSeule && (
+				<div className="dx-bandeau" data-ton={role === 'demo' ? 'lecture' : 'attente'}>
+					<Lock size={17} className={role === 'demo' ? 'mt-0.5 flex-none text-dx-terre-clair' : 'mt-0.5 flex-none'} />
+					<p>
+						<b className="block">{role === 'demo' ? 'Mode Démo Commercial — Consultation Seule' : 'Mode Employé — Modification Verrouillée'}</b>
+						{role === 'demo'
+							? "Vous explorez le profil en mode Démo Commercial. Toutes les informations sont visibles pour vos prospects, mais les modifications sont désactivées."
+							: "Vous êtes connecté avec les droits Employé. Vous n'avez pas la permission de modifier les informations de l'établissement."}
+					</p>
 				</div>
 			)}
 
-			{/* Carte identité */}
-			<div className="rounded-2xl border border-stone-200 bg-white p-7 shadow-sm mb-6">
-				<div className="flex flex-col md:flex-row items-center gap-6 mb-8 border-b border-stone-100 pb-7">
-					<div className="relative group shrink-0">
-						<div className="w-24 h-24 rounded-2xl bg-stone-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-md">
-							<img src={generateAvatar()} alt="Avatar" className="w-full h-full object-cover" />
-						</div>
-						{role === 'admin' && (
-							<button 
-								onClick={() => alert('Fonctionnalité d\'upload d\'image à venir. Les avatars sont générés automatiquement pour la démo.')}
-								className="absolute inset-0 bg-black/50 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl cursor-pointer"
-							>
-								<Upload size={18} className="mb-1" />
-								<span className="text-[10px] font-bold uppercase tracking-wider">Modifier</span>
-							</button>
-						)}
-					</div>
-					<div className="text-center md:text-left">
-						<h2 className="text-2xl font-bold text-stone-900 mb-1">{businessName || 'Mon Établissement'}</h2>
-						<p className="text-deep-teal-600 text-sm font-bold uppercase tracking-widest">{pro?.description || 'Professionnel'}</p>
-					</div>
-				</div>
-
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-7">
-					<div className="md:col-span-2">
-						<div className="flex items-center justify-between mb-5">
-							<h3 className="text-base font-bold text-stone-800">Informations Publiques</h3>
-							{(role === 'employee' || role === 'demo') && (
-								<span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-500 border border-stone-200 flex items-center gap-1">
-									<Lock size={11} /> Lecture Seule
-								</span>
+			<div className="grid items-start gap-6 lg:grid-cols-12">
+				<section className="dx-carte overflow-hidden lg:col-span-8">
+					{/* Carte identité */}
+					<div className="flex flex-col gap-5 border-b border-dx-filet bg-dx-papier p-6 sm:flex-row sm:items-center sm:p-8">
+						<div className="group relative shrink-0">
+							<div className="grid h-24 w-24 place-items-center rounded-full bg-dx-encre font-heading text-5xl italic text-dx-creme" aria-hidden="true">
+								{initiale}
+							</div>
+							{role === 'admin' && (
+								<button
+									type="button"
+									onClick={() => informer("Fonctionnalité d'upload d'image à venir. Les avatars sont générés automatiquement pour la démo.")}
+									className="absolute inset-0 flex flex-col items-center justify-center rounded-full bg-dx-nuit/60 text-white opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
+									aria-label="Modifier l'image de l'établissement"
+								>
+									<Upload size={18} className="mb-1" />
+									<span className="text-[10px] font-semibold">Modifier</span>
+								</button>
 							)}
 						</div>
-						<form onSubmit={handleSave} className="space-y-4">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<div>
-									<label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Building2 size={12}/> Nom de l'établissement</label>
-									<input 
-										type="text" 
-										disabled={role === 'employee' || role === 'demo'}
-										value={businessName} 
-										onChange={e => setBusinessName(e.target.value)} 
-										className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400 disabled:opacity-60 disabled:cursor-not-allowed" 
-									/>
-								</div>
-								<div>
-									<label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-2"><User size={12}/> Nom du gérant / Praticien</label>
-									<input 
-										type="text" 
-										disabled={role === 'employee' || role === 'demo'}
-										value={name} 
-										onChange={e => setName(e.target.value)} 
-										className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400 disabled:opacity-60 disabled:cursor-not-allowed" 
-									/>
-								</div>
-							</div>
-							
-							<div>
-								<label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-2"><MapPin size={12}/> Adresse postale</label>
-								<input 
-									type="text" 
-									disabled={role === 'employee' || role === 'demo'}
-									value={address} 
-									onChange={e => setAddress(e.target.value)} 
-									className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400 disabled:opacity-60 disabled:cursor-not-allowed" 
-								/>
+						<div className="min-w-0">
+							<h2 className="font-heading text-[clamp(1.8rem,3vw,2.5rem)] font-light leading-none tracking-[-0.03em] text-dx-encre">{businessName || 'Mon Établissement'}</h2>
+							<p className="mt-2 text-sm text-dx-gris">{pro?.description || 'Professionnel'}</p>
+						</div>
+					</div>
+
+					<div className="p-6 sm:p-8">
+						<div className="mb-5 flex items-center justify-between gap-3">
+							<h3 className="dx-h2">Informations Publiques</h3>
+							{lectureSeule && (
+								<Pastille ton="neutre" nu><Lock size={11} /> Lecture Seule</Pastille>
+							)}
+						</div>
+						<form onSubmit={handleSave}>
+							<div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+								{champs.map((c) => {
+									const Icon = c.icon;
+									return (
+										<div key={c.id} className={c.large ? 'md:col-span-2' : ''}>
+											<label htmlFor={c.id} className="dx-champ-label flex items-center gap-2">
+												<Icon size={13} className="text-dx-terre" /> {c.label}
+											</label>
+											<input
+												id={c.id}
+												type={c.type || 'text'}
+												disabled={lectureSeule}
+												value={c.value}
+												onChange={(e) => c.set(e.target.value)}
+												className="dx-champ"
+											/>
+										</div>
+									);
+								})}
 							</div>
 
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<div>
-									<label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Phone size={12}/> Téléphone</label>
-									<input 
-										type="tel" 
-										disabled={role === 'employee' || role === 'demo'}
-										value={phone} 
-										onChange={e => setPhone(e.target.value)} 
-										className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400 disabled:opacity-60 disabled:cursor-not-allowed" 
-									/>
-								</div>
-								<div>
-									<label className="block text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Mail size={12}/> Email de contact</label>
-									<input 
-										type="email" 
-										disabled={role === 'employee' || role === 'demo'}
-										value={email} 
-										onChange={e => setEmail(e.target.value)} 
-										className="w-full px-4 py-3 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:border-deep-teal-400 focus:ring-1 focus:ring-deep-teal-400 disabled:opacity-60 disabled:cursor-not-allowed" 
-									/>
-								</div>
-							</div>
-
-							<div className="pt-4 flex justify-end">
-								{role === 'employee' || role === 'demo' ? (
-									<div className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-stone-100 text-stone-400 font-bold text-xs border border-stone-200">
+							<div className="mt-7 flex justify-end border-t border-dx-filet pt-6">
+								{lectureSeule ? (
+									<span className="inline-flex items-center gap-2 rounded-full bg-dx-ivoire px-5 py-3 text-sm font-semibold text-dx-gris">
 										<Lock size={14} />
-										<span>{role === 'demo' ? 'Lecture seule (Mode Démo)' : 'Modification réservée à l\'administrateur'}</span>
-									</div>
+										{role === 'demo' ? 'Lecture seule (Mode Démo)' : "Modification réservée à l'administrateur"}
+									</span>
 								) : (
-									<button type="submit" disabled={saving} className="flex items-center gap-2 px-6 py-3 rounded-xl bg-deep-teal-500 text-white font-bold text-sm hover:bg-deep-teal-600 transition-colors disabled:opacity-50 cursor-pointer shadow-xs">
+									<button type="submit" disabled={saving} className="dx-btn">
 										{saving ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
 										{saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
 									</button>
@@ -316,35 +270,39 @@ export default function DiamantProProfile() {
 							</div>
 						</form>
 					</div>
+				</section>
 
-					<div>
-						<h3 className="text-base font-bold text-stone-800 mb-5">Abonnement</h3>
-						<div className="rounded-2xl border border-deep-teal-200 bg-deep-teal-50 p-6 shadow-sm">
-							<div className="flex items-center justify-between mb-3">
-								<span className="text-deep-teal-700 font-bold uppercase tracking-widest text-sm">Plan Prestige</span>
-								<span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full border border-green-200">Actif</span>
-							</div>
-							<p className="text-stone-600 text-sm mb-5">Toutes les fonctionnalités premium sont activées.</p>
-							<button onClick={handleBilling} className="flex items-center justify-center gap-2 w-full rounded-xl border border-deep-teal-300 bg-white px-4 py-3 text-sm font-bold text-deep-teal-700 hover:bg-deep-teal-50 transition-colors card-hover">
-								<CreditCard size={16} /> Gérer la facturation
-							</button>
+				<aside className="space-y-6 lg:col-span-4">
+					<section className="dx-carte dx-carte--nuit p-6">
+						<div className="flex items-center justify-between gap-3">
+							<p className="text-sm text-dx-sable">Abonnement</p>
+							<span className="inline-flex items-center gap-1.5 rounded-full bg-[#2c3a2f] px-2.5 py-0.5 text-xs font-semibold text-[#b7d4bd]">
+								<span className="h-1.5 w-1.5 rounded-full bg-[#9fc4a7]" /> Actif
+							</span>
 						</div>
+						<p className="mt-3 font-heading text-[2rem] font-light leading-none tracking-[-0.03em] text-dx-creme">Plan <em className="text-dx-terre-clair">Prestige</em></p>
+						<p className="mt-3 text-sm text-dx-sable">Toutes les fonctionnalités premium sont activées.</p>
+						<button type="button" onClick={handleBilling} className="dx-btn dx-btn--clair mt-6 w-full">
+							<CreditCard size={16} /> Gérer la facturation
+						</button>
+					</section>
 
-						<div className="mt-5 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
-							<h4 className="text-stone-700 font-bold text-sm mb-3">Accès rapide</h4>
-							<div className="space-y-2">
-								<a href="/demo-diamant/dashboard" className="flex items-center gap-3 p-2 rounded-lg hover:bg-stone-50 text-stone-600 text-sm transition-colors">
-									<span className="w-6 h-6 rounded-md bg-stone-100 flex items-center justify-center text-stone-500 text-xs">→</span>
-									Tableau de bord
+					<section className="dx-carte p-6">
+						<h4 className="dx-h3 mb-3">Accès rapide</h4>
+						<ul className="divide-y divide-dx-filet">
+							<li>
+								<a href="/demo-diamant/dashboard" className="group flex items-center justify-between py-3 text-sm font-medium text-dx-encre-2 hover:text-dx-terre">
+									Tableau de bord <ArrowRight size={15} className="text-dx-sable transition-transform group-hover:translate-x-0.5 group-hover:text-dx-terre" />
 								</a>
-								<a href="/demo-diamant/dashboard/services" className="flex items-center gap-3 p-2 rounded-lg hover:bg-stone-50 text-stone-600 text-sm transition-colors">
-									<span className="w-6 h-6 rounded-md bg-stone-100 flex items-center justify-center text-stone-500 text-xs">✂</span>
-									Gérer les prestations
+							</li>
+							<li>
+								<a href="/demo-diamant/dashboard/services" className="group flex items-center justify-between py-3 text-sm font-medium text-dx-encre-2 hover:text-dx-terre">
+									Gérer les prestations <ArrowRight size={15} className="text-dx-sable transition-transform group-hover:translate-x-0.5 group-hover:text-dx-terre" />
 								</a>
-							</div>
-						</div>
-					</div>
-				</div>
+							</li>
+						</ul>
+					</section>
+				</aside>
 			</div>
 		</div>
 	);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getBannedClientRecord, checkIsClientBannedInDb, type BannedClientRecord } from '@/lib/permissions';
-import { ShieldAlert, AlertTriangle, LogOut, Phone, Mail, ArrowRight } from 'lucide-react';
+import { ShieldAlert, AlertTriangle, LogOut, ArrowRight } from 'lucide-react';
 
 interface DiamantClientBanGuardProps {
 	basePath: string;
@@ -91,45 +91,39 @@ export default function DiamantClientBanGuard({ basePath, children }: DiamantCli
 	}
 
 	if (loading) {
-		return <div className="p-8 text-center text-xs text-stone-400">Vérification des accès...</div>;
+		return <div className="p-8 text-center text-sm text-dx-gris">Vérification des accès...</div>;
 	}
 
 	if (bannedRecord) {
 		return (
-			<div data-ban-guard="true" className="max-w-2xl mx-auto py-8 px-2 animate-in fade-in zoom-in-95 duration-300">
-				<div className="rounded-3xl border-2 border-rose-200 bg-white p-8 md:p-10 shadow-xl text-center relative overflow-hidden">
-					{/* Effet d'arrière-plan discret */}
-					<div className="absolute -top-16 -right-16 w-48 h-48 bg-rose-100/50 rounded-full blur-3xl pointer-events-none"></div>
-					<div className="absolute -bottom-16 -left-16 w-48 h-48 bg-rose-100/50 rounded-full blur-3xl pointer-events-none"></div>
-
-					<div className="relative z-10">
-						<div className="w-16 h-16 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-5 shadow-inner">
-							<ShieldAlert size={36} />
+			<div data-ban-guard="true" className="mx-auto max-w-2xl py-6">
+				<div className="dx-carte overflow-hidden">
+					<div className="flex items-center gap-4 bg-dx-nuit px-6 py-6 text-dx-creme sm:px-9">
+						<span className="grid h-12 w-12 flex-none place-items-center rounded-full bg-dx-alerte text-white">
+							<ShieldAlert size={22} />
+						</span>
+						<div>
+							<p className="text-sm text-dx-sable">Accès Restreint & Suspendu</p>
+							<h2 className="font-heading text-[clamp(1.6rem,3vw,2.2rem)] font-light leading-tight tracking-[-0.03em] text-white">
+								Votre compte a été suspendu
+							</h2>
 						</div>
+					</div>
 
-						<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-200 text-xs font-black uppercase tracking-wider mb-4">
-							<span>Accès Restreint & Suspendu</span>
-						</div>
-
-						<h2 className="text-2xl md:text-3xl font-black text-stone-900 tracking-tight mb-3">
-							Votre compte a été suspendu
-						</h2>
-
-						<p className="text-sm text-stone-600 max-w-lg mx-auto leading-relaxed mb-6">
+					<div className="space-y-6 px-6 py-7 sm:px-9">
+						<p className="text-[0.9375rem] leading-relaxed text-dx-encre-2">
 							La direction de l'établissement a bloqué l'accès à votre espace personnel ainsi qu'à la prise de rendez-vous en ligne.
 						</p>
 
-						{/* Boîte Motif du Bannissement */}
-						<div className="p-5 rounded-2xl bg-rose-50/80 border border-rose-200 text-left mb-6 shadow-2xs">
-							<p className="text-[11px] font-black uppercase tracking-wider text-rose-700 mb-1 flex items-center gap-1.5">
+						{/* Motif du bannissement */}
+						<div className="border-l-2 border-dx-alerte pl-5">
+							<p className="flex items-center gap-1.5 text-xs font-semibold text-dx-alerte">
 								<AlertTriangle size={14} />
 								<span>Motif de la suspension</span>
 							</p>
-							<p className="text-base font-bold text-rose-950 mt-1">
-								« {bannedRecord.reason} »
-							</p>
+							<p className="mt-1.5 font-heading text-xl italic text-dx-encre">« {bannedRecord.reason} »</p>
 							{bannedRecord.bannedAt && (
-								<p className="text-xs text-stone-400 mt-2">
+								<p className="mt-2 text-xs text-dx-gris">
 									Sanction appliquée le {new Date(bannedRecord.bannedAt).toLocaleDateString('fr-FR', {
 										day: 'numeric',
 										month: 'long',
@@ -142,27 +136,22 @@ export default function DiamantClientBanGuard({ basePath, children }: DiamantCli
 						</div>
 
 						{/* Précisions des restrictions */}
-						<div className="p-4 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-500 text-left mb-8 space-y-1.5">
-							<p className="font-bold text-stone-700">Conséquences de cette mesure :</p>
-							<p>• Tous vos onglets (Mes Rendez-vous, Avantages VIP, Messagerie, Profil) sont verrouillés.</p>
-							<p>• Aucune réservation ne peut être confirmée sous ce compte.</p>
-							<p>• Pour toute régularisation ou réclamation, merci de contacter directement le salon.</p>
+						<div className="rounded-xl bg-dx-ivoire p-4 text-sm text-dx-encre-2">
+							<p className="mb-2 font-semibold text-dx-encre">Conséquences de cette mesure :</p>
+							<ul className="list-disc space-y-1 pl-5">
+								<li>Tous vos onglets (Mes Rendez-vous, Avantages VIP, Messagerie, Profil) sont verrouillés.</li>
+								<li>Aucune réservation ne peut être confirmée sous ce compte.</li>
+								<li>Pour toute régularisation ou réclamation, merci de contacter directement le salon.</li>
+							</ul>
 						</div>
 
 						{/* Boutons d'action */}
-						<div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-							<a
-								href={`${basePath}/contact`}
-								className="w-full sm:w-auto px-6 py-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 font-bold text-xs transition-colors cursor-pointer inline-flex items-center justify-center gap-2"
-							>
+						<div className="flex flex-col gap-2.5 sm:flex-row">
+							<a href={`${basePath}/contact`} className="dx-btn dx-btn--ligne">
 								<span>Contacter l'établissement</span>
 								<ArrowRight size={14} />
 							</a>
-							<button
-								type="button"
-								onClick={handleLogout}
-								className="w-full sm:w-auto px-6 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-colors cursor-pointer shadow-xs inline-flex items-center justify-center gap-2"
-							>
+							<button type="button" onClick={handleLogout} className="dx-btn dx-btn--danger">
 								<LogOut size={14} />
 								<span>Se déconnecter</span>
 							</button>

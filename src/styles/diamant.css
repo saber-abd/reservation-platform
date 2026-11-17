@@ -791,6 +791,8 @@ html.diamant-client-banned #dashboard-content > *:not([data-ban-guard]) {
 .dashboard-diamant body { background: var(--dx-ivoire); color: var(--dx-encre); -webkit-font-smoothing: antialiased; }
 .dashboard-diamant ::selection { background: var(--dx-terre); color: #fff; }
 .dashboard-diamant :focus-visible { outline: 2px solid var(--dx-terre); outline-offset: 2px; }
+/* Champs sans bordure posés dans un conteneur qui porte lui-même l'anneau de focus */
+.dashboard-diamant .dx-sans-contour:focus-visible, .dashboard-diamant .dx-palette [cmdk-input]:focus-visible { outline: none; }
 .dashboard-diamant * { scrollbar-width: thin; scrollbar-color: var(--dx-filet-fort) transparent; }
 
 @layer components {

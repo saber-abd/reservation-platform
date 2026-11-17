@@ -3,17 +3,17 @@ import DiamantDashboardLayout from '@/layouts/diamant/DiamantDashboardLayout.ast
 import DiamantClientNav from '@/components/diamant/dashboard/DiamantClientNav';
 import DiamantClientProfile from '@/components/diamant/dashboard/DiamantClientProfile';
 import AccountPrivacyActions from '@/components/shared/AccountPrivacyActions';
+import DiamantPageHead from '@/components/diamant/dashboard/kit/DiamantPageHead.astro';
 ---
 
 <DiamantDashboardLayout title="Mon Profil">
 	<DiamantClientNav slot="sidebar" basePath="/demo-diamant" client:load />
-	
-	<div class="mb-8">
-		<h1 class="text-3xl font-black text-stone-800 tracking-tight">Mon Profil</h1>
-		<p class="text-stone-500 mt-2">Gérez vos informations personnelles et préférences.</p>
-	</div>
+
+	<DiamantPageHead titre="Mon" accent="profil" sousTitre="Gérez vos informations personnelles et préférences : le salon les retrouve à chaque rendez-vous." />
 
 	<DiamantClientProfile client:load />
 
-	<AccountPrivacyActions basePath="/demo-diamant" client:idle />
+	<div class="dx-donnees">
+		<AccountPrivacyActions basePath="/demo-diamant" client:idle />
+	</div>
 </DiamantDashboardLayout>

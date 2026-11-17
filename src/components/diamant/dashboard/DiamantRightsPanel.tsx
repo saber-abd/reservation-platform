@@ -52,6 +52,10 @@ import {
 	RefreshCw
 } from 'lucide-react';
 import { MAX_NAME_LENGTH } from '@/lib/limits';
+import { motion, useReducedMotion } from 'motion/react';
+import { Avatar, EtatVide, Fenetre, Pastille } from './kit/primitives';
+import { informer } from './kit/notifier';
+import { publierClients } from './kit/indexClients';
 import { supabase } from '@/lib/supabase';
 
 const ROLE_OPTIONS: { role: ProRole; label: string }[] = [
@@ -76,7 +80,7 @@ const PERMISSION_ROWS: { label: string; icon: typeof Calendar; admin: string; em
 function AccessCell({ access, label }: { access: Access; label: string }) {
 	if (access === 'full') {
 		return (
-			<span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+			<span className="inline-flex items-center gap-1.5 font-medium text-dx-ok">
 				<Check size={14} className="shrink-0" />
 				<span>{label}</span>
 			</span>
@@ -84,15 +88,15 @@ function AccessCell({ access, label }: { access: Access; label: string }) {
 	}
 	if (access === 'read') {
 		return (
-			<span className="inline-flex items-center gap-1 text-stone-600 font-bold">
-				<Eye size={14} className="shrink-0" />
+			<span className="inline-flex items-center gap-1.5 font-medium text-dx-encre-2">
+				<Eye size={14} className="shrink-0 text-dx-gris" />
 				<span>{label}</span>
 			</span>
 		);
 	}
 	return (
-		<span className="inline-flex items-center gap-1 text-rose-700 font-bold">
-			<X size={14} className="shrink-0" />
+		<span className="inline-flex items-center gap-1.5 font-medium text-dx-gris">
+			<X size={14} className="shrink-0 text-dx-alerte" />
 			<span>{label}</span>
 		</span>
 	);
@@ -152,11 +156,11 @@ export default function DiamantRightsPanel() {
 
 	const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+	// Notifications : sonner (îlot DiamantToaster du layout), mêmes messages qu'avant.
 	function showToast(msg: string) {
-		setToast(msg);
-		if (toastTimer.current) clearTimeout(toastTimer.current);
-		toastTimer.current = setTimeout(() => setToast(null), 3500);
+		informer(msg);
 	}
+	const reduit = useReducedMotion();
 
 	// Échap ferme la fenêtre ouverte
 	useEffect(() => {
@@ -195,6 +199,7 @@ export default function DiamantRightsPanel() {
 			// Load clients
 			const all = await getAllClients(effectiveId, tag, DEMO_DIAMANT_CLIENTS);
 			setClients(all);
+			publierClients(all);
 
 			// Load banned clients (Local + BDD Supabase)
 			const localBanned = getBannedClients();
@@ -599,29 +604,53 @@ export default function DiamantRightsPanel() {
 		});
 	}, [clients, bannedClients, clientSearch, clientFilter]);
 
+	const libelleRole = (r: ProRole) => (r === 'admin' ? 'Administrateur' : r === 'demo' ? 'Démo' : 'Employé');
+
+	// Sélecteur de rôle réutilisé dans les fenêtres de création et de modification
+	function choixRole(valeur: ProRole, changer: (r: ProRole) => void) {
+		return (
+			<div className="grid grid-cols-1 gap-2 sm:grid-cols-3" role="radiogroup" aria-label="Rôle assigné">
+				{([
+					{ r: 'admin', icon: <ShieldCheck size={15} />, titre: 'Admin', aide: 'Accès total' },
+					{ r: 'employee', icon: <UserCheck size={15} />, titre: 'Employé', aide: '4 onglets' },
+					{ r: 'demo', icon: <Eye size={15} />, titre: 'Démo', aide: 'Lecture seule' },
+				] as const).map((o) => {
+					const actif = valeur === o.r;
+					return (
+						<button
+							key={o.r}
+							type="button"
+							role="radio"
+							aria-checked={actif}
+							onClick={() => changer(o.r)}
+							className={`rounded-xl border p-3 text-left transition-colors ${actif ? 'border-dx-terre bg-dx-terre-pale/60 shadow-[0_0_0_1px_var(--dx-terre)]' : 'border-dx-filet-fort hover:border-dx-encre'}`}
+						>
+							<span className={`flex items-center gap-1.5 text-sm font-semibold ${actif ? 'text-dx-terre-fonce' : 'text-dx-encre'}`}>
+								{o.icon} {o.titre}
+							</span>
+							<span className="mt-0.5 block text-xs text-dx-gris">{o.aide}</span>
+						</button>
+					);
+				})}
+			</div>
+		);
+	}
+
 	return (
 		<div className="space-y-8">
-			{/* Toast notification */}
-			{toast && (
-				<div role="status" className="fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-50 flex items-center gap-2 bg-stone-900 text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-bold border border-stone-800 animate-in fade-in slide-in-from-bottom-4">
-					<Sparkles size={16} className="text-jasmine-400 shrink-0" />
-					<span>{toast}</span>
-				</div>
-			)}
-
 			{/* En-tête : titre de la page et aperçu de l'espace selon le rôle */}
 			<header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
 				<div className="min-w-0">
-					<h1 className="text-3xl font-black text-stone-900 tracking-tight">Gestion des droits</h1>
-					<p className="text-stone-500 mt-1 max-w-xl">
+					<h1 className="dx-titre">Gestion <em>des droits</em></h1>
+					<p className="dx-sous-titre">
 						Comptes de l'équipe, modération des clients et règles d'accès à l'espace pro.
 					</p>
 				</div>
 
 				{realRole === 'admin' && (
 				<div className="shrink-0">
-					<p id="diamant-role-preview" className="text-xs font-bold text-stone-500 mb-1.5">Voir l'espace en tant que</p>
-					<div role="radiogroup" aria-labelledby="diamant-role-preview" className="inline-flex rounded-xl border border-border bg-white p-1 shadow-2xs">
+					<p id="diamant-role-preview" className="mb-2 text-sm font-semibold text-dx-encre">Voir l'espace en tant que</p>
+					<div role="radiogroup" aria-labelledby="diamant-role-preview" className="dx-segments">
 						{ROLE_OPTIONS.map((option) => {
 							const selected = activeRole === option.role;
 							return (
@@ -631,18 +660,21 @@ export default function DiamantRightsPanel() {
 									role="radio"
 									aria-checked={selected}
 									onClick={() => handleSwitchRole(option.role)}
-									className={`px-3.5 py-1.5 rounded-lg text-sm font-bold transition-colors cursor-pointer ${
-										selected
-											? 'bg-secondary text-secondary-foreground'
-											: 'text-stone-500 hover:text-stone-900'
-									}`}
+									className="dx-segment"
 								>
+									{selected && (
+										<motion.span
+											layoutId="dx-droits-role"
+											className="dx-segment-fond"
+											transition={reduit ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 36 }}
+										/>
+									)}
 									{option.label}
 								</button>
 							);
 						})}
 					</div>
-					<p className="text-xs text-stone-500 mt-1.5">
+					<p className="mt-2 text-xs text-dx-gris">
 						{activeRole === 'demo'
 							? 'Lecture seule : les modifications sont bloquées.'
 							: 'Accès complet, modifications autorisées.'}
@@ -652,7 +684,7 @@ export default function DiamantRightsPanel() {
 			</header>
 
 			{/* Navigation interne des onglets */}
-			<div role="tablist" aria-label="Sections de la gestion des droits" className="flex gap-1 overflow-x-auto border-b border-border">
+			<div role="tablist" aria-label="Sections de la gestion des droits" className="dx-onglets">
 				{([
 					{ key: 'team', label: 'Équipe', count: members.length, icon: <UserCheck size={16} /> },
 					{ key: 'clients', label: 'Clients & modération', count: clients.length, icon: <UserX size={16} /> },
@@ -666,21 +698,22 @@ export default function DiamantRightsPanel() {
 							role="tab"
 							aria-selected={selected}
 							onClick={() => setActiveTab(tab.key)}
-							className={`-mb-px shrink-0 px-4 py-2.5 border-b-2 text-sm font-bold transition-colors cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-								selected
-									? 'border-primary text-stone-900'
-									: 'border-transparent text-stone-500 hover:text-stone-900'
-							}`}
+							className="dx-onglet"
 						>
-							<span className={selected ? 'text-primary' : 'text-stone-400'}>{tab.icon}</span>
+							<span className={selected ? 'text-dx-terre' : 'text-dx-sable'}>{tab.icon}</span>
 							<span>{tab.label}</span>
-							{tab.count !== null && (
-								<span className="text-xs font-bold text-stone-400">{tab.count}</span>
-							)}
+							{tab.count !== null && <span className="dx-compte">{tab.count}</span>}
 							{tab.key === 'clients' && bannedCount > 0 && (
-								<span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-rose-100 text-rose-700">
+								<Pastille ton="alerte" nu className="!py-0 !text-[11px]">
 									{bannedCount} {bannedCount > 1 ? 'bannis' : 'banni'}
-								</span>
+								</Pastille>
+							)}
+							{selected && (
+								<motion.span
+									layoutId="dx-droits-onglet"
+									className="dx-onglet-trait"
+									transition={reduit ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 38 }}
+								/>
 							)}
 						</button>
 					);
@@ -689,148 +722,113 @@ export default function DiamantRightsPanel() {
 
 			{/* ONGLET 1 : ÉQUIPE & COMPTES EMPLOYÉS */}
 			{activeTab === 'team' && (
-				<div className="space-y-6">
-					<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+				<div className="space-y-5">
+					<div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
 						<div>
-							<h3 className="text-xl font-bold text-stone-900 tracking-tight">Comptes de l'équipe</h3>
-							<p className="text-xs text-stone-500 mt-1">
+							<h3 className="dx-h2">Comptes de l'équipe</h3>
+							<p className="dx-meta mt-1">
 								Les employés n'ont accès qu'au planning, à la clientèle, à la messagerie et à la recherche.
 							</p>
 						</div>
-						<button
-							type="button"
-							onClick={openCreateChooser}
-							className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 transition-all shadow-xs cursor-pointer shrink-0 self-start sm:self-auto"
-						>
+						<button type="button" onClick={openCreateChooser} className="dx-btn dx-btn--encre self-start sm:self-auto">
 							<Plus size={15} />
 							<span>Créer un compte</span>
 						</button>
 					</div>
 
-					{/* Liste des employés */}
-					<div className="rounded-2xl border border-stone-200 bg-white overflow-x-auto shadow-xs">
-						<table className={`w-full text-left text-sm ${members.length ? 'min-w-[44rem]' : ''}`}>
-							<thead className="bg-stone-50 text-xs uppercase font-bold text-stone-400 border-b border-stone-100">
+					<div className="dx-carte overflow-x-auto">
+						{members.length === 0 ? (
+							<EtatVide
+								dessin="clients"
+								titre="Aucun compte configuré pour le moment."
+								action={
+									<button type="button" onClick={openCreateChooser} className="dx-btn dx-btn--sm dx-btn--encre">
+										<Plus size={14} />
+										<span>Créer un compte</span>
+									</button>
+								}
+							/>
+						) : (
+						<table className="dx-table min-w-[44rem]">
+							<thead>
 								<tr>
-									<th className="px-5 py-3.5">Membre</th>
-									<th className="px-5 py-3.5">Rôle</th>
-									<th className="px-5 py-3.5">Statut</th>
-									<th className="px-5 py-3.5 text-right">Actions</th>
+									<th>Membre</th>
+									<th>Rôle</th>
+									<th>Statut</th>
+									<th className="text-right">Actions</th>
 								</tr>
 							</thead>
-							<tbody className="divide-y divide-stone-100">
-								{members.length === 0 ? (
-									<tr>
-										<td colSpan={4} className="p-8 text-center text-xs text-stone-400">
-											Aucun compte configuré pour le moment.
-											<div className="mt-4 flex justify-center">
-												<button
-													type="button"
-													onClick={openCreateChooser}
-													className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 transition-all cursor-pointer shadow-xs"
-												>
-													<Plus size={14} />
-													<span>Créer un compte</span>
-												</button>
-											</div>
-										</td>
-									</tr>
-								) : (
-									members.map((member) => {
-										const isAdmin = member.role === 'admin';
-										const isDemo = member.role === 'demo';
-										return (
-											<tr key={member.id} className="hover:bg-stone-50/50 transition-colors">
-												<td className="px-5 py-4">
-													<div className="flex items-center gap-3">
-														<div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${
-															isAdmin 
-																? 'bg-amber-100 text-amber-800 border border-amber-200 shadow-2xs' 
-																: isDemo
-																? 'bg-purple-100 text-purple-800 border border-purple-200 shadow-2xs'
-																: 'bg-secondary text-secondary-foreground border border-border'
-														}`}>
-															{member.name.charAt(0).toUpperCase()}
+							<tbody>
+								{members.map((member) => {
+									const isAdmin = member.role === 'admin';
+									const isDemo = member.role === 'demo';
+									return (
+										<tr key={member.id}>
+											<td>
+												<div className="flex items-center gap-3">
+													<Avatar nom={member.name} taille={38} ton={isAdmin ? 'encre' : isDemo ? undefined : 'terre'} />
+													<div className="min-w-0 max-w-[18rem]">
+														<div className="flex flex-wrap items-center gap-2">
+															<p className="break-words font-semibold text-dx-encre">{member.name}</p>
+															{isAdmin && <Pastille ton="encre" nu className="!py-0 !text-[11px]">Gérant</Pastille>}
+															{isDemo && <Pastille ton="neutre" nu className="!py-0 !text-[11px]">Visite Démo</Pastille>}
 														</div>
-														<div className="min-w-0 max-w-[18rem]">
-															<div className="flex flex-wrap items-center gap-2">
-																<p className="font-bold text-stone-900 break-words">{member.name}</p>
-																{isAdmin && (
-																	<span className="text-[10px] bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-bold">
-																		Gérant
-																	</span>
-																)}
-																{isDemo && (
-																	<span className="text-[10px] bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-full font-bold">
-																		Visite Démo
-																	</span>
-																)}
-															</div>
-															<p className="text-xs text-stone-500 mt-0.5 break-all">{[member.specialty, member.email].filter(Boolean).join(' · ')}</p>
+														<p className="mt-0.5 break-all text-xs text-dx-gris">{[member.specialty, member.email].filter(Boolean).join(' · ')}</p>
+													</div>
+												</div>
+											</td>
+											<td>
+												{isAdmin ? (
+													<div>
+														<span className="inline-flex items-center gap-1.5 text-sm font-semibold text-dx-encre">
+															<ShieldCheck size={14} className="text-dx-terre" /> Administrateur
+														</span>
+														<p className="mt-0.5 text-xs text-dx-gris">Tous les onglets, modifications autorisées</p>
+													</div>
+												) : isDemo ? (
+													<div>
+														<span className="inline-flex items-center gap-1.5 text-sm font-semibold text-dx-encre">
+															<Eye size={14} className="text-dx-gris" /> Démo
+														</span>
+														<p className="mt-0.5 text-xs text-dx-gris">Présentation commerciale en lecture seule</p>
+													</div>
+												) : (
+													<div>
+														<span className="inline-flex items-center gap-1.5 text-sm font-semibold text-dx-encre">
+															<UserCheck size={14} className="text-dx-terre" /> Employé
+														</span>
+														<div className="mt-1.5 flex flex-wrap gap-1">
+															{['Planning', 'Clientèle', 'Messagerie', 'Recherche'].map((t) => (
+																<span key={t} className="rounded-md bg-dx-ivoire-2 px-1.5 py-0.5 text-[11px] font-medium text-dx-encre-2">{t}</span>
+															))}
 														</div>
 													</div>
-												</td>
-												<td className="px-5 py-4">
-													{isAdmin ? (
-														<div>
-															<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
-																<ShieldCheck size={13} className="text-amber-700" />
-																<span>Administrateur</span>
-															</span>
-															<p className="text-[11px] text-stone-400 mt-1">Tous les onglets, modifications autorisées</p>
-														</div>
-													) : isDemo ? (
-														<div>
-															<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-800 border border-purple-200">
-																<Eye size={13} className="text-purple-700" />
-																<span>Démo</span>
-															</span>
-															<p className="text-[11px] text-purple-600/80 mt-1 font-medium">Présentation commerciale en lecture seule</p>
-														</div>
-													) : (
-														<div>
-															<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-secondary text-secondary-foreground border border-border">
-																<UserCheck size={13} className="text-secondary-foreground" />
-																<span>Employé</span>
-															</span>
-															<div className="flex flex-wrap gap-1 mt-1.5">
-																<span className="text-[10px] font-semibold bg-stone-100 text-stone-600 px-2 py-0.5 rounded">Planning</span>
-																<span className="text-[10px] font-semibold bg-stone-100 text-stone-600 px-2 py-0.5 rounded">Clientèle</span>
-																<span className="text-[10px] font-semibold bg-stone-100 text-stone-600 px-2 py-0.5 rounded">Messagerie</span>
-																<span className="text-[10px] font-semibold bg-stone-100 text-stone-600 px-2 py-0.5 rounded">Recherche</span>
-															</div>
-														</div>
-													)}
-												</td>
-											<td className="px-5 py-4">
-												<span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${
-													member.status === 'active' 
-														? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-														: 'bg-stone-100 text-stone-600 border-stone-200'
-												}`}>
-													<span className={`w-1.5 h-1.5 rounded-full ${member.status === 'active' ? 'bg-emerald-500' : 'bg-stone-400'}`}></span>
-													{member.status === 'active' ? 'Actif' : 'Suspendu'}
-												</span>
+												)}
 											</td>
-											<td className="px-5 py-4 text-right">
-												<div className="inline-flex items-center gap-2">
+											<td>
+												<Pastille ton={member.status === 'active' ? 'ok' : 'neutre'}>
+													{member.status === 'active' ? 'Actif' : 'Suspendu'}
+												</Pastille>
+											</td>
+											<td className="text-right">
+												<div className="inline-flex items-center gap-1">
 													<button
 														type="button"
 														onClick={() => handleOpenEditMember(member)}
-														className="p-1.5 rounded-lg border border-stone-200 text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors"
+														className="dx-icone-btn"
 														title="Modifier les informations ou le mot de passe"
 														aria-label={`Modifier le compte de ${member.name}`}
 													>
-														<Pencil size={15} />
+														<Pencil size={16} />
 													</button>
 													<button
 														type="button"
 														onClick={() => handleToggleMemberStatus(member)}
-														className="p-1.5 rounded-lg border border-stone-200 text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors"
+														className="dx-icone-btn"
 														title={member.status === 'active' ? 'Suspendre cet accès' : 'Réactiver cet accès'}
 														aria-label={`${member.status === 'active' ? 'Suspendre' : 'Réactiver'} l'accès de ${member.name}`}
 													>
-														{member.status === 'active' ? <Lock size={15} /> : <Unlock size={15} />}
+														{member.status === 'active' ? <Lock size={16} /> : <Unlock size={16} />}
 													</button>
 													<button
 														type="button"
@@ -839,31 +837,31 @@ export default function DiamantRightsPanel() {
 															id: member.id,
 															name: `${member.name} (${isAdmin ? 'administrateur' : isDemo ? 'compte démo' : 'employé'})`
 														}); }}
-														className="p-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition-colors"
+														className="dx-icone-btn hover:!bg-dx-alerte-pale hover:!text-dx-alerte"
 														title={isAdmin ? 'Supprimer ce compte administrateur' : 'Supprimer ce compte'}
 														aria-label={`Supprimer le compte de ${member.name}`}
 													>
-														<Trash2 size={15} />
+														<Trash2 size={16} />
 													</button>
 												</div>
 											</td>
 										</tr>
 									);
-								})
-							)}
+								})}
 							</tbody>
 						</table>
+						)}
 					</div>
 				</div>
 			)}
 
 			{/* ONGLET 2 : MODÉRATION & GESTION CLIENTS */}
 			{activeTab === 'clients' && (
-				<div className="space-y-6">
-					<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+				<div className="space-y-5">
+					<div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
 						<div>
-							<h3 className="text-xl font-bold text-stone-900 tracking-tight">Comptes clients et modération</h3>
-							<p className="text-xs text-stone-500 mt-1">
+							<h3 className="dx-h2">Comptes clients et modération</h3>
+							<p className="dx-meta mt-1">
 								Un client banni ne peut plus réserver en ligne. La suppression d'un compte est définitive.
 							</p>
 						</div>
@@ -873,217 +871,185 @@ export default function DiamantRightsPanel() {
 								type="button"
 								onClick={handleRefreshClients}
 								disabled={isSyncing}
-								className="px-3.5 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-700 hover:text-stone-900 hover:border-stone-300 hover:bg-stone-50 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+								className="dx-btn dx-btn--sm dx-btn--ligne"
 								title="Recharger la liste des clients inscrits pour la démo Diamant"
 							>
-								<RefreshCw size={13} className={isSyncing ? 'animate-spin text-primary' : 'text-stone-500'} />
+								<RefreshCw size={13} className={isSyncing ? 'animate-spin text-dx-terre' : ''} />
 								<span>{isSyncing ? 'Synchronisation…' : 'Actualiser'}</span>
 							</button>
 
 							{/* Filtres de statut */}
-							<div className="flex items-center gap-2 bg-stone-100 p-1 rounded-xl border border-stone-200">
-								<button
-									type="button"
-									onClick={() => setClientFilter('all')}
-									aria-pressed={clientFilter === 'all'}
-									className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-										clientFilter === 'all' ? 'bg-white text-stone-900 shadow-xs' : 'text-stone-500'
-									}`}
-								>
-									Tous ({clients.length})
-								</button>
-								<button
-									type="button"
-									onClick={() => setClientFilter('active')}
-									aria-pressed={clientFilter === 'active'}
-									className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-										clientFilter === 'active' ? 'bg-white text-emerald-700 shadow-xs' : 'text-stone-500'
-									}`}
-								>
-									Actifs ({clients.length - bannedCount})
-								</button>
-								<button
-									type="button"
-									onClick={() => setClientFilter('banned')}
-									aria-pressed={clientFilter === 'banned'}
-									className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-										clientFilter === 'banned' ? 'bg-white text-rose-700 shadow-xs' : 'text-stone-500'
-									}`}
-								>
-									Bannis ({bannedCount})
-								</button>
+							<div className="dx-segments" role="group" aria-label="Filtrer par statut">
+								{([
+									{ k: 'all', label: `Tous (${clients.length})` },
+									{ k: 'active', label: `Actifs (${clients.length - bannedCount})` },
+									{ k: 'banned', label: `Bannis (${bannedCount})` },
+								] as const).map((f) => (
+									<button
+										key={f.k}
+										type="button"
+										onClick={() => setClientFilter(f.k)}
+										aria-pressed={clientFilter === f.k}
+										className="dx-segment !text-xs"
+									>
+										{clientFilter === f.k && (
+											<motion.span
+												layoutId="dx-droits-filtre"
+												className="dx-segment-fond"
+												transition={reduit ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 36 }}
+											/>
+										)}
+										{f.label}
+									</button>
+								))}
 							</div>
 						</div>
 					</div>
 
 					{/* Barre de recherche */}
-					<div className="relative">
-						<Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
+					<div className="dx-recherche max-w-md">
+						<Search size={16} />
 						<input
-							type="text"
+							type="search"
 							value={clientSearch}
 							onChange={e => setClientSearch(e.target.value)}
 							placeholder="Rechercher par nom, téléphone, email…"
 							aria-label="Rechercher un client"
-							className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-stone-200 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none text-sm transition-all shadow-xs"
+							className="dx-champ"
 						/>
 					</div>
 
 					{/* Liste des clients */}
-					<div className="rounded-2xl border border-stone-200 bg-white overflow-x-auto shadow-xs">
-						<table className={`w-full text-left text-sm ${filteredClients.length ? 'min-w-[44rem]' : ''}`}>
-							<thead className="bg-stone-50 text-xs uppercase font-bold text-stone-400 border-b border-stone-100">
+					<div className="dx-carte overflow-x-auto">
+						{filteredClients.length === 0 ? (
+							<EtatVide dessin="clients" titre="Aucun client ne correspond aux critères de sélection." />
+						) : (
+						<table className="dx-table min-w-[46rem]">
+							<thead>
 								<tr>
-									<th className="px-5 py-3.5">Client</th>
-									<th className="px-5 py-3.5">Coordonnées</th>
-									<th className="px-5 py-3.5">Statut</th>
-									<th className="px-5 py-3.5 text-right">Actions</th>
+									<th>Client</th>
+									<th>Coordonnées</th>
+									<th>Statut</th>
+									<th className="text-right">Actions</th>
 								</tr>
 							</thead>
-							<tbody className="divide-y divide-stone-100">
-								{filteredClients.length === 0 ? (
-									<tr>
-										<td colSpan={4} className="p-8 text-center text-xs text-stone-400">
-											Aucun client ne correspond aux critères de sélection.
-										</td>
-									</tr>
-								) : (
-									filteredClients.map((client) => {
-										const banInfo = bannedClients[client.id] || (client.is_banned || client.ban === 'oui' ? {
-											clientId: client.id,
-											clientName: client.full_name || 'Client',
-											clientEmail: client.email || null,
-											reason: client.ban_reason || 'Non-respect des conditions de réservation',
-											bannedAt: client.banned_at || client.created_at || new Date().toISOString()
-										} : null);
-										const isBanned = !!banInfo;
+							<tbody>
+								{filteredClients.map((client) => {
+									const banInfo = bannedClients[client.id] || (client.is_banned || client.ban === 'oui' ? {
+										clientId: client.id,
+										clientName: client.full_name || 'Client',
+										clientEmail: client.email || null,
+										reason: client.ban_reason || 'Non-respect des conditions de réservation',
+										bannedAt: client.banned_at || client.created_at || new Date().toISOString()
+									} : null);
+									const isBanned = !!banInfo;
 
-										return (
-											<tr key={client.id} className="hover:bg-stone-50/50 transition-colors">
-												<td className="px-5 py-4">
-													<div className="flex items-center gap-3">
-														<div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${
-															isBanned 
-																? 'bg-rose-100 text-rose-700 border border-rose-200' 
-																: 'bg-stone-200 text-stone-700'
-														}`}>
-															{client.full_name ? client.full_name.charAt(0).toUpperCase() : <User size={16} />}
-														</div>
-														<div className="min-w-0 max-w-[18rem]">
-															<p className="font-bold text-stone-900 break-words">{client.full_name || 'Client'}</p>
-															<p className="text-[11px] text-stone-400 mt-0.5">
-																Inscrit le {new Date(client.created_at).toLocaleDateString('fr-FR')}
-															</p>
-														</div>
+									return (
+										<tr key={client.id}>
+											<td>
+												<div className="flex items-center gap-3">
+													<Avatar nom={client.full_name || 'Client'} taille={36} ton={isBanned ? 'alerte' : undefined} />
+													<div className="min-w-0 max-w-[18rem]">
+														<p className="break-words font-semibold text-dx-encre">{client.full_name || 'Client'}</p>
+														<p className="mt-0.5 text-xs text-dx-gris">
+															Inscrit le {new Date(client.created_at).toLocaleDateString('fr-FR')}
+														</p>
 													</div>
-												</td>
-												<td className="px-5 py-4">
-													<p className="text-xs text-stone-700 font-medium">{client.phone || 'Tél. non renseigné'}</p>
-													<p className="text-xs text-stone-400 mt-0.5">{client.email || 'Email non renseigné'}</p>
-												</td>
-												<td className="px-5 py-4">
+												</div>
+											</td>
+											<td>
+												<p className="dx-tabulaire text-sm text-dx-encre">{client.phone || 'Tél. non renseigné'}</p>
+												<p className="mt-0.5 text-xs text-dx-gris">{client.email || 'Email non renseigné'}</p>
+											</td>
+											<td>
+												{isBanned ? (
+													<div>
+														<Pastille ton="alerte">Banni</Pastille>
+														<p className="mt-1 max-w-[14rem] text-xs text-dx-alerte">Motif : {banInfo.reason}</p>
+													</div>
+												) : (
+													<Pastille ton="ok">Actif</Pastille>
+												)}
+											</td>
+											<td className="text-right">
+												<div className="inline-flex items-center gap-1.5">
+													<button
+														type="button"
+														onClick={() => handleOpenEditClient(client)}
+														className="dx-btn dx-btn--sm dx-btn--fantome"
+														title="Modifier les coordonnées du client"
+													>
+														<Pencil size={13} />
+														<span>Modifier</span>
+													</button>
+
 													{isBanned ? (
-														<div>
-															<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-																<XCircle size={13} />
-																<span>Banni</span>
-															</span>
-															<p className="text-[11px] text-rose-600 font-medium mt-1">
-																Motif : {banInfo.reason}
-															</p>
-														</div>
+														<button type="button" onClick={() => handleUnban(client)} className="dx-btn dx-btn--sm dx-btn--ligne !text-dx-ok">
+															Débannir
+														</button>
 													) : (
-														<span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-															<CheckCircle2 size={13} />
-															<span>Actif</span>
-														</span>
+														<button
+															type="button"
+															onClick={() => { if (!checkReadOnly()) setBanModalClient(client); }}
+															className="dx-btn dx-btn--sm dx-btn--ligne !text-dx-alerte"
+														>
+															Bannir
+														</button>
 													)}
-												</td>
-												<td className="px-5 py-4 text-right">
-													<div className="inline-flex items-center gap-2">
-														<button
-															type="button"
-															onClick={() => handleOpenEditClient(client)}
-															className="px-2.5 py-1.5 rounded-lg border border-stone-200 text-stone-700 hover:text-stone-900 hover:border-stone-300 hover:bg-stone-50 text-xs font-bold transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
-															title="Modifier les coordonnées du client"
-														>
-															<Pencil size={13} />
-															<span>Modifier</span>
-														</button>
 
-														{isBanned ? (
-															<button
-																type="button"
-																onClick={() => handleUnban(client)}
-																className="px-3 py-1.5 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold transition-all cursor-pointer shadow-2xs"
-															>
-																Débannir
-															</button>
-														) : (
-															<button
-																type="button"
-																onClick={() => { if (!checkReadOnly()) setBanModalClient(client); }}
-																className="px-3 py-1.5 rounded-lg border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-bold transition-all cursor-pointer shadow-2xs"
-															>
-																Bannir
-															</button>
-														)}
-
-														<button
-															type="button"
-															onClick={() => { if (!checkReadOnly()) setDeleteConfirm({ type: 'client', id: client.id, name: client.full_name || 'Client' }); }}
-															className="p-1.5 rounded-lg border border-stone-200 text-stone-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-colors cursor-pointer"
-															title="Supprimer définitivement ce compte client"
-															aria-label={`Supprimer le compte de ${client.full_name || 'ce client'}`}
-														>
-															<Trash2 size={15} />
-														</button>
-													</div>
-												</td>
-											</tr>
-										);
-									})
-								)}
+													<button
+														type="button"
+														onClick={() => { if (!checkReadOnly()) setDeleteConfirm({ type: 'client', id: client.id, name: client.full_name || 'Client' }); }}
+														className="dx-icone-btn hover:!bg-dx-alerte-pale hover:!text-dx-alerte"
+														title="Supprimer définitivement ce compte client"
+														aria-label={`Supprimer le compte de ${client.full_name || 'ce client'}`}
+													>
+														<Trash2 size={16} />
+													</button>
+												</div>
+											</td>
+										</tr>
+									);
+								})}
 							</tbody>
 						</table>
+						)}
 					</div>
 				</div>
 			)}
 
 			{/* ONGLET 3 : MATRICE DES PERMISSIONS */}
 			{activeTab === 'matrix' && (
-				<div className="space-y-6">
+				<div className="space-y-5">
 					<div>
-						<h3 className="text-xl font-bold text-stone-900 tracking-tight">Permissions par rôle</h3>
-						<p className="text-xs text-stone-500 mt-1">
-							Ce que chaque rôle peut voir et modifier dans l'espace pro.
-						</p>
+						<h3 className="dx-h2">Permissions par rôle</h3>
+						<p className="dx-meta mt-1">Ce que chaque rôle peut voir et modifier dans l'espace pro.</p>
 					</div>
 
-					<div className="rounded-2xl border border-stone-200 bg-white overflow-x-auto shadow-xs">
-						<table className="w-full min-w-[48rem] text-left text-sm">
-							<thead className="bg-stone-50 text-xs uppercase font-bold text-stone-400 border-b border-stone-100">
+					<div className="dx-carte overflow-x-auto">
+						<table className="dx-table min-w-[48rem]">
+							<thead>
 								<tr>
-									<th scope="col" className="px-5 py-3.5">Onglet</th>
-									<th scope="col" className="px-5 py-3.5">Administrateur</th>
-									<th scope="col" className="px-5 py-3.5">Employé</th>
-									<th scope="col" className="px-5 py-3.5">Démo</th>
-									<th scope="col" className="px-5 py-3.5">Pourquoi</th>
+									<th scope="col">Onglet</th>
+									<th scope="col">Administrateur</th>
+									<th scope="col">Employé</th>
+									<th scope="col">Démo</th>
+									<th scope="col">Pourquoi</th>
 								</tr>
 							</thead>
-							<tbody className="divide-y divide-stone-100 text-xs">
+							<tbody className="text-[0.8125rem]">
 								{PERMISSION_ROWS.map((row) => (
 									<tr key={row.label}>
-										<th scope="row" className="px-5 py-3.5 font-bold text-stone-900">
+										<th scope="row" className="!border-b !border-dx-filet !bg-transparent !px-4 !py-3 text-left font-semibold text-dx-encre">
 											<span className="flex items-center gap-2">
-												<row.icon size={15} className="text-primary shrink-0" />
+												<row.icon size={15} className="shrink-0 text-dx-terre" />
 												<span>{row.label}</span>
 											</span>
 										</th>
-										<td className="px-5 py-3.5"><AccessCell access="full" label={row.admin} /></td>
-										<td className="px-5 py-3.5"><AccessCell access={row.employeeAccess} label={row.employee} /></td>
-										<td className="px-5 py-3.5 whitespace-nowrap"><AccessCell access="read" label="Lecture seule" /></td>
-										<td className="px-5 py-3.5 text-stone-500">{row.reason}</td>
+										<td><AccessCell access="full" label={row.admin} /></td>
+										<td><AccessCell access={row.employeeAccess} label={row.employee} /></td>
+										<td className="whitespace-nowrap"><AccessCell access="read" label="Lecture seule" /></td>
+										<td className="text-dx-gris">{row.reason}</td>
 									</tr>
 								))}
 							</tbody>
@@ -1093,651 +1059,244 @@ export default function DiamantRightsPanel() {
 			)}
 
 			{/* CHOIX DU TYPE DE COMPTE */}
-			{showCreateChooser && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4" onClick={() => setShowCreateChooser(false)}>
-					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-						<div className="flex items-center justify-between pb-4 border-b border-stone-100">
-							<div>
-								<h4 className="font-bold text-stone-900 text-base">Créer un compte</h4>
-								<p className="text-xs text-stone-400">Choisissez le type de compte à créer</p>
-							</div>
-							<button
-								type="button"
-								onClick={() => setShowCreateChooser(false)}
-								className="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
-								aria-label="Fermer"
-							>
-								<X size={18} />
+			<Fenetre
+				ouvert={showCreateChooser}
+				onClose={() => setShowCreateChooser(false)}
+				titre="Créer un compte"
+				sousTitre="Choisissez le type de compte à créer"
+				icone={<Plus size={18} />}
+			>
+				{confirmClientSignup ? (
+					<div className="space-y-4">
+						<p className="text-sm text-dx-encre-2">
+							Le compte client se crée depuis la page d'inscription du site. Vous allez être déconnecté de l'espace pro puis redirigé vers ce formulaire.
+						</p>
+						<div className="flex justify-end gap-2">
+							<button type="button" onClick={() => setConfirmClientSignup(false)} className="dx-btn dx-btn--sm dx-btn--ligne">
+								Retour
+							</button>
+							<button type="button" onClick={goToClientSignup} className="dx-btn dx-btn--sm dx-btn--encre">
+								Continuer vers l'inscription
 							</button>
 						</div>
-
-						{confirmClientSignup ? (
-							<div className="pt-4 space-y-4">
-								<p className="text-sm text-stone-600">
-									Le compte client se crée depuis la page d'inscription du site. Vous allez être déconnecté de l'espace pro puis redirigé vers ce formulaire.
-								</p>
-								<div className="flex justify-end gap-2">
-									<button
-										type="button"
-										onClick={() => setConfirmClientSignup(false)}
-										className="px-4 py-2 rounded-xl border border-stone-200 text-xs font-bold text-stone-600 hover:bg-stone-50 transition-colors cursor-pointer"
-									>
-										Retour
-									</button>
-									<button
-										type="button"
-										onClick={goToClientSignup}
-										className="px-4 py-2 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 transition-colors cursor-pointer"
-									>
-										Continuer vers l'inscription
-									</button>
-								</div>
-							</div>
-						) : (
-							<div className="pt-4 grid gap-2">
-								{([
-									{ key: 'client', label: 'Compte utilisateur', desc: 'Client du salon : réservations, fidélité, messagerie', icon: <User size={18} />, tone: 'bg-stone-100 text-stone-700' },
-									{ key: 'employee', label: 'Compte employé', desc: 'Planning, clientèle, messagerie et recherche', icon: <UserPlus size={18} />, tone: 'bg-secondary text-secondary-foreground' },
-									{ key: 'admin', label: 'Compte administrateur', desc: 'Accès à tous les onglets et à la gestion', icon: <ShieldCheck size={18} />, tone: 'bg-amber-100 text-amber-700' },
-									{ key: 'demo', label: 'Compte démo', desc: 'Présentation commerciale en lecture seule', icon: <Eye size={18} />, tone: 'bg-purple-100 text-purple-700' },
-								] as const).map((option) => (
-									<button
-										key={option.key}
-										type="button"
-										onClick={() => (option.key === 'client' ? setConfirmClientSignup(true) : chooseAccountType(option.key))}
-										className="flex items-center gap-3 w-full rounded-xl border border-stone-200 p-3 text-left hover:border-stone-300 hover:bg-stone-50 transition-colors cursor-pointer"
-									>
-										<span className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center ${option.tone}`}>{option.icon}</span>
-										<span>
-											<span className="block text-sm font-bold text-stone-900">{option.label}</span>
-											<span className="block text-xs text-stone-400">{option.desc}</span>
-										</span>
-									</button>
-								))}
-							</div>
-						)}
 					</div>
-				</div>
-			)}
+				) : (
+					<div className="grid gap-2">
+						{([
+							{ key: 'client', label: 'Compte utilisateur', desc: 'Client du salon : réservations, fidélité, messagerie', icon: <User size={18} /> },
+							{ key: 'employee', label: 'Compte employé', desc: 'Planning, clientèle, messagerie et recherche', icon: <UserPlus size={18} /> },
+							{ key: 'admin', label: 'Compte administrateur', desc: 'Accès à tous les onglets et à la gestion', icon: <ShieldCheck size={18} /> },
+							{ key: 'demo', label: 'Compte démo', desc: 'Présentation commerciale en lecture seule', icon: <Eye size={18} /> },
+						] as const).map((option) => (
+							<button
+								key={option.key}
+								type="button"
+								onClick={() => (option.key === 'client' ? setConfirmClientSignup(true) : chooseAccountType(option.key))}
+								className="group flex w-full items-center gap-3 rounded-xl border border-dx-filet p-3 text-left transition-colors hover:border-dx-encre hover:bg-dx-ivoire"
+							>
+								<span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-dx-ivoire-2 text-dx-terre">{option.icon}</span>
+								<span className="flex-1">
+									<span className="block text-sm font-semibold text-dx-encre">{option.label}</span>
+									<span className="block text-xs text-dx-gris">{option.desc}</span>
+								</span>
+							</button>
+						))}
+					</div>
+				)}
+			</Fenetre>
 
 			{/* MODAL AJOUT EMPLOYÉ / ADMIN / DÉMO */}
-			{showAddModal && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95" role="dialog" aria-modal="true">
-						<div className="flex items-center justify-between pb-4 border-b border-stone-100">
-							<div className="flex items-center gap-2.5">
-								<div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-									newMemberRole === 'admin' 
-										? 'bg-amber-100 text-amber-700' 
-										: newMemberRole === 'demo'
-										? 'bg-purple-100 text-purple-700'
-										: 'bg-secondary text-secondary-foreground'
-								}`}>
-									{newMemberRole === 'admin' ? <ShieldCheck size={18} /> : newMemberRole === 'demo' ? <Eye size={18} /> : <UserPlus size={18} />}
-								</div>
-								<div>
-									<h4 className="font-bold text-stone-900 text-base">
-										{newMemberRole === 'admin' 
-											? 'Nouveau compte administrateur' 
-											: newMemberRole === 'demo' 
-											? 'Nouveau compte démo' 
-											: 'Nouveau compte employé'}
-									</h4>
-									<p className="text-xs text-stone-400">
-										{newMemberRole === 'admin' 
-											? 'Accès à tous les onglets et à la gestion' 
-											: newMemberRole === 'demo'
-											? 'Présentation commerciale en lecture seule'
-											: 'Planning, clientèle, messagerie et recherche'}
-									</p>
-								</div>
-							</div>
+			<Fenetre
+				ouvert={showAddModal}
+				onClose={() => setShowAddModal(false)}
+				fermerSurVoile={false}
+				icone={newMemberRole === 'admin' ? <ShieldCheck size={18} /> : newMemberRole === 'demo' ? <Eye size={18} /> : <UserPlus size={18} />}
+				titre={newMemberRole === 'admin' ? 'Nouveau compte administrateur' : newMemberRole === 'demo' ? 'Nouveau compte démo' : 'Nouveau compte employé'}
+				sousTitre={newMemberRole === 'admin' ? 'Accès à tous les onglets et à la gestion' : newMemberRole === 'demo' ? 'Présentation commerciale en lecture seule' : 'Planning, clientèle, messagerie et recherche'}
+			>
+				<form onSubmit={handleCreateMember} className="space-y-4">
+					<div>
+						<label htmlFor="rights-field-1" className="dx-champ-label">Nom complet *</label>
+						<input id="rights-field-1" type="text" required value={newMemberName} maxLength={MAX_NAME_LENGTH} onChange={e => setNewMemberName(e.target.value)} placeholder="Ex : Sarah Bernard" className="dx-champ" data-autofocus />
+					</div>
+					<div>
+						<label htmlFor="rights-field-2" className="dx-champ-label">Adresse email (identifiant de connexion) *</label>
+						<input id="rights-field-2" type="email" required value={newMemberEmail} onChange={e => setNewMemberEmail(e.target.value)} placeholder="Ex : sarah@diamant-prestige.fr" className="dx-champ" />
+					</div>
+					<div>
+						<label htmlFor="rights-field-3" className="dx-champ-label">Mot de passe initial *</label>
+						<div className="relative">
+							<input id="rights-field-3" type={showNewPassword ? 'text' : 'password'} required minLength={8} value={newMemberPassword} onChange={e => setNewMemberPassword(e.target.value)} placeholder="Minimum 8 caractères" className="dx-champ !pr-12" />
 							<button
 								type="button"
-								onClick={() => setShowAddModal(false)}
-								className="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg cursor-pointer"
-								aria-label="Fermer"
+								onClick={() => setShowNewPassword(!showNewPassword)}
+								className="dx-icone-btn absolute right-1 top-1/2 -translate-y-1/2"
+								title={showNewPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+								aria-label={showNewPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
 							>
-								<X size={18} />
+								{showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
 							</button>
 						</div>
-
-						<form onSubmit={handleCreateMember} className="mt-4 space-y-4">
-							<div>
-								<label htmlFor="rights-field-1" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Nom complet *
-								</label>
-								<input id="rights-field-1"
-									type="text"
-									required
-									value={newMemberName}
-									maxLength={MAX_NAME_LENGTH}
-									onChange={e => setNewMemberName(e.target.value)}
-									placeholder="Ex : Sarah Bernard"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
-								/>
-							</div>
-
-							<div>
-								<label htmlFor="rights-field-2" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Adresse email (identifiant de connexion) *
-								</label>
-								<input id="rights-field-2"
-									type="email"
-									required
-									value={newMemberEmail}
-									onChange={e => setNewMemberEmail(e.target.value)}
-									placeholder="Ex : sarah@diamant-prestige.fr"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
-								/>
-							</div>
-
-							<div>
-								<label htmlFor="rights-field-3" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Mot de passe initial *
-								</label>
-								<div className="relative">
-									<input id="rights-field-3"
-										type={showNewPassword ? 'text' : 'password'}
-										required
-										minLength={8}
-										value={newMemberPassword}
-										onChange={e => setNewMemberPassword(e.target.value)}
-										placeholder="Minimum 8 caractères"
-										className="w-full rounded-xl border border-stone-200 bg-stone-50 pl-3.5 pr-11 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
-									/>
-									<button
-										type="button"
-										onClick={() => setShowNewPassword(!showNewPassword)}
-										className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 p-1 rounded-md transition-colors cursor-pointer"
-										title={showNewPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
-										aria-label={showNewPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
-									>
-										{showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-									</button>
-								</div>
-								<p className="text-[11px] text-stone-400 mt-1">
-									Utilisable tout de suite sur la page de connexion.
-								</p>
-							</div>
-
-							<div>
-								<label htmlFor="rights-field-4" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Spécialité / Fonction
-								</label>
-								<input id="rights-field-4"
-									type="text"
-									value={newMemberSpecialty}
-									onChange={e => setNewMemberSpecialty(e.target.value)}
-									placeholder={newMemberRole === 'admin' ? "Ex : Co-gérant / Responsable" : newMemberRole === 'demo' ? "Ex : Compte Découverte Visiteur" : "Ex : Experte Soins & Brushing"}
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
-								/>
-							</div>
-
-							<div>
-								<p className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Rôle assigné
-								</p>
-								<div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-									<button
-										type="button"
-										onClick={() => setNewMemberRole('admin')}
-										className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-											newMemberRole === 'admin' 
-												? 'border-amber-500 bg-amber-50/80 ring-1 ring-amber-300' 
-												: 'border-stone-200 hover:border-stone-300'
-										}`}
-									>
-										<div className="flex items-center gap-1.5 font-bold text-xs text-stone-900">
-											<ShieldCheck size={14} className="text-amber-600" />
-											<span>Admin</span>
-										</div>
-										<p className="text-[10px] text-stone-500 mt-0.5">Accès total</p>
-									</button>
-									<button
-										type="button"
-										onClick={() => setNewMemberRole('employee')}
-										className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-											newMemberRole === 'employee' 
-												? 'border-primary bg-secondary/60 ring-1 ring-primary/40' 
-												: 'border-stone-200 hover:border-stone-300'
-										}`}
-									>
-										<div className="flex items-center gap-1.5 font-bold text-xs text-stone-900">
-											<UserCheck size={14} className="text-primary" />
-											<span>Employé</span>
-										</div>
-										<p className="text-[10px] text-stone-500 mt-0.5">4 onglets</p>
-									</button>
-									<button
-										type="button"
-										onClick={() => setNewMemberRole('demo')}
-										className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-											newMemberRole === 'demo' 
-												? 'border-purple-500 bg-purple-50/80 ring-1 ring-purple-300' 
-												: 'border-stone-200 hover:border-stone-300'
-										}`}
-									>
-										<div className="flex items-center gap-1.5 font-bold text-xs text-stone-900">
-											<Eye size={14} className="text-purple-600" />
-											<span>Démo</span>
-										</div>
-										<p className="text-[10px] text-stone-500 mt-0.5">Lecture seule</p>
-									</button>
-								</div>
-							</div>
-
-							<div className="pt-2 flex items-center justify-end gap-2.5">
-								<button
-									type="button"
-									onClick={() => setShowAddModal(false)}
-									className="px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-xs font-bold hover:bg-stone-50 cursor-pointer"
-								>
-									Annuler
-								</button>
-								<button
-									type="submit"
-									className={`px-5 py-2.5 rounded-xl text-white text-xs font-bold shadow-xs cursor-pointer transition-all ${
-										newMemberRole === 'admin' 
-											? 'bg-amber-600 hover:bg-amber-700' 
-											: newMemberRole === 'demo'
-											? 'bg-purple-600 hover:bg-purple-700'
-											: 'bg-stone-900 hover:bg-stone-800'
-									}`}
-								>
-									{newMemberRole === 'admin' 
-										? 'Créer le compte administrateur' 
-										: newMemberRole === 'demo'
-										? 'Créer le compte démo'
-										: 'Créer le compte employé'}
-								</button>
-							</div>
-						</form>
+						<p className="dx-champ-aide">Utilisable tout de suite sur la page de connexion.</p>
 					</div>
-				</div>
-			)}
+					<div>
+						<label htmlFor="rights-field-4" className="dx-champ-label">Spécialité / Fonction</label>
+						<input id="rights-field-4" type="text" value={newMemberSpecialty} onChange={e => setNewMemberSpecialty(e.target.value)} placeholder={newMemberRole === 'admin' ? "Ex : Co-gérant / Responsable" : newMemberRole === 'demo' ? "Ex : Compte Découverte Visiteur" : "Ex : Experte Soins & Brushing"} className="dx-champ" />
+					</div>
+					<div>
+						<p className="dx-champ-label">Rôle assigné</p>
+						{choixRole(newMemberRole, setNewMemberRole)}
+					</div>
+					<div className="flex items-center justify-end gap-2 pt-2">
+						<button type="button" onClick={() => setShowAddModal(false)} className="dx-btn dx-btn--ligne">Annuler</button>
+						<button type="submit" className="dx-btn dx-btn--encre">
+							{newMemberRole === 'admin' ? 'Créer le compte administrateur' : newMemberRole === 'demo' ? 'Créer le compte démo' : 'Créer le compte employé'}
+						</button>
+					</div>
+				</form>
+			</Fenetre>
 
 			{/* MODAL MODIFIER COMPTE (ADMIN / EMPLOYÉ / DÉMO) */}
-			{editMemberModal && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95" role="dialog" aria-modal="true">
-						<div className="flex items-center justify-between pb-4 border-b border-stone-100">
-							<div className="flex items-center gap-2.5">
-								<div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-									editMemberRole === 'admin' 
-										? 'bg-amber-100 text-amber-700' 
-										: editMemberRole === 'demo'
-										? 'bg-purple-100 text-purple-700'
-										: 'bg-secondary text-secondary-foreground'
-								}`}>
-									<Pencil size={18} />
-								</div>
-								<div>
-									<h4 className="font-bold text-stone-900 text-base">
-										Modifier le compte
-									</h4>
-									<p className="text-xs text-stone-400">
-										Mise à jour des coordonnées, rôle et mot de passe
-									</p>
-								</div>
-							</div>
+			<Fenetre
+				ouvert={!!editMemberModal}
+				onClose={() => setEditMemberModal(null)}
+				fermerSurVoile={false}
+				icone={<Pencil size={17} />}
+				titre="Modifier le compte"
+				sousTitre="Mise à jour des coordonnées, rôle et mot de passe"
+			>
+				<form onSubmit={handleSaveMemberSubmit} className="space-y-4">
+					<div>
+						<label htmlFor="rights-field-5" className="dx-champ-label">Nom complet *</label>
+						<input id="rights-field-5" type="text" required value={editMemberName} maxLength={MAX_NAME_LENGTH} onChange={e => setEditMemberName(e.target.value)} placeholder="Ex : Sarah Bernard" className="dx-champ" data-autofocus />
+					</div>
+					<div>
+						<label htmlFor="rights-field-6" className="dx-champ-label">Adresse email (identifiant de connexion) *</label>
+						<input id="rights-field-6" type="email" required value={editMemberEmail} onChange={e => setEditMemberEmail(e.target.value)} placeholder="Ex : sarah@diamant-prestige.fr" className="dx-champ" />
+					</div>
+					<div>
+						<label htmlFor="rights-field-7" className="dx-champ-label">Nouveau mot de passe (optionnel)</label>
+						<div className="relative">
+							<input id="rights-field-7" type={showEditPassword ? 'text' : 'password'} minLength={8} value={editMemberPassword} onChange={e => setEditMemberPassword(e.target.value)} placeholder="Laisser vide pour ne pas modifier" className="dx-champ !pr-12" />
 							<button
 								type="button"
-								onClick={() => setEditMemberModal(null)}
-								className="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg cursor-pointer"
-								aria-label="Fermer"
+								onClick={() => setShowEditPassword(!showEditPassword)}
+								className="dx-icone-btn absolute right-1 top-1/2 -translate-y-1/2"
+								title={showEditPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+								aria-label={showEditPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
 							>
-								<X size={18} />
+								{showEditPassword ? <EyeOff size={16} /> : <Eye size={16} />}
 							</button>
 						</div>
-
-						<form onSubmit={handleSaveMemberSubmit} className="mt-4 space-y-4">
-							<div>
-								<label htmlFor="rights-field-5" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Nom complet *
-								</label>
-								<input id="rights-field-5"
-									type="text"
-									required
-									value={editMemberName}
-									maxLength={MAX_NAME_LENGTH}
-									onChange={e => setEditMemberName(e.target.value)}
-									placeholder="Ex : Sarah Bernard"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
-								/>
-							</div>
-
-							<div>
-								<label htmlFor="rights-field-6" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Adresse email (identifiant de connexion) *
-								</label>
-								<input id="rights-field-6"
-									type="email"
-									required
-									value={editMemberEmail}
-									onChange={e => setEditMemberEmail(e.target.value)}
-									placeholder="Ex : sarah@diamant-prestige.fr"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
-								/>
-							</div>
-
-							<div>
-								<label htmlFor="rights-field-7" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Nouveau mot de passe (optionnel)
-								</label>
-								<div className="relative">
-									<input id="rights-field-7"
-										type={showEditPassword ? 'text' : 'password'}
-										minLength={8}
-										value={editMemberPassword}
-										onChange={e => setEditMemberPassword(e.target.value)}
-										placeholder="Laisser vide pour ne pas modifier"
-										className="w-full rounded-xl border border-stone-200 bg-stone-50 pl-3.5 pr-11 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
-									/>
-									<button
-										type="button"
-										onClick={() => setShowEditPassword(!showEditPassword)}
-										className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 p-1 rounded-md transition-colors cursor-pointer"
-										title={showEditPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
-										aria-label={showEditPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
-									>
-										{showEditPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-									</button>
-								</div>
-								<p className="text-[11px] text-stone-400 mt-1">
-									Mot de passe utilisé sur la page de connexion.
-								</p>
-							</div>
-
-							<div>
-								<label htmlFor="rights-field-8" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Spécialité / Fonction
-								</label>
-								<input id="rights-field-8"
-									type="text"
-									value={editMemberSpecialty}
-									onChange={e => setEditMemberSpecialty(e.target.value)}
-									placeholder="Ex : Co-gérant / Responsable"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
-								/>
-							</div>
-
-							<div>
-								<p className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Rôle assigné
-								</p>
-								<div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-									<button
-										type="button"
-										onClick={() => setEditMemberRole('admin')}
-										className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-											editMemberRole === 'admin' 
-												? 'border-amber-500 bg-amber-50/80 ring-1 ring-amber-300' 
-												: 'border-stone-200 hover:border-stone-300'
-										}`}
-									>
-										<div className="flex items-center gap-1.5 font-bold text-xs text-stone-900">
-											<ShieldCheck size={14} className="text-amber-600" />
-											<span>Admin</span>
-										</div>
-										<p className="text-[10px] text-stone-500 mt-0.5">Accès total</p>
-									</button>
-									<button
-										type="button"
-										onClick={() => setEditMemberRole('employee')}
-										className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-											editMemberRole === 'employee' 
-												? 'border-primary bg-secondary/60 ring-1 ring-primary/40' 
-												: 'border-stone-200 hover:border-stone-300'
-										}`}
-									>
-										<div className="flex items-center gap-1.5 font-bold text-xs text-stone-900">
-											<UserCheck size={14} className="text-primary" />
-											<span>Employé</span>
-										</div>
-										<p className="text-[10px] text-stone-500 mt-0.5">4 onglets</p>
-									</button>
-									<button
-										type="button"
-										onClick={() => setEditMemberRole('demo')}
-										className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-											editMemberRole === 'demo' 
-												? 'border-purple-500 bg-purple-50/80 ring-1 ring-purple-300' 
-												: 'border-stone-200 hover:border-stone-300'
-										}`}
-									>
-										<div className="flex items-center gap-1.5 font-bold text-xs text-stone-900">
-											<Eye size={14} className="text-purple-600" />
-											<span>Démo</span>
-										</div>
-										<p className="text-[10px] text-stone-500 mt-0.5">Lecture seule</p>
-									</button>
-								</div>
-							</div>
-
-							<div className="pt-2 flex items-center justify-end gap-2.5">
-								<button
-									type="button"
-									onClick={() => setEditMemberModal(null)}
-									className="px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-xs font-bold hover:bg-stone-50 cursor-pointer"
-								>
-									Annuler
-								</button>
-								<button
-									type="submit"
-									disabled={isSavingMember}
-									className="px-5 py-2.5 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
-								>
-									{isSavingMember ? (
-										<span>Enregistrement…</span>
-									) : (
-										<>
-											<Check size={14} />
-											<span>Enregistrer</span>
-										</>
-									)}
-								</button>
-							</div>
-						</form>
+						<p className="dx-champ-aide">Mot de passe utilisé sur la page de connexion.</p>
 					</div>
-				</div>
-			)}
+					<div>
+						<label htmlFor="rights-field-8" className="dx-champ-label">Spécialité / Fonction</label>
+						<input id="rights-field-8" type="text" value={editMemberSpecialty} onChange={e => setEditMemberSpecialty(e.target.value)} placeholder="Ex : Co-gérant / Responsable" className="dx-champ" />
+					</div>
+					<div>
+						<p className="dx-champ-label">Rôle assigné</p>
+						{choixRole(editMemberRole, setEditMemberRole)}
+					</div>
+					<div className="flex items-center justify-end gap-2 pt-2">
+						<button type="button" onClick={() => setEditMemberModal(null)} className="dx-btn dx-btn--ligne">Annuler</button>
+						<button type="submit" disabled={isSavingMember} className="dx-btn dx-btn--encre">
+							{isSavingMember ? <span>Enregistrement…</span> : (<><Check size={14} /><span>Enregistrer</span></>)}
+						</button>
+					</div>
+				</form>
+			</Fenetre>
 
 			{/* MODAL BANNIR CLIENT */}
-			{banModalClient && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95" role="dialog" aria-modal="true">
-						<div className="flex items-center gap-3 pb-4 border-b border-stone-100">
-							<div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center">
-								<AlertTriangle size={20} />
-							</div>
-							<div>
-								<h4 className="font-bold text-stone-900 text-base">Bannir le client</h4>
-								<p className="text-xs text-stone-500">{banModalClient.full_name || 'Client'}</p>
-							</div>
-						</div>
-
-						<div className="mt-4 space-y-3">
-							<p className="text-xs text-stone-600 leading-relaxed">
-								Le bannissement empêchera ce client d'effectuer toute nouvelle réservation en ligne auprès de votre établissement.
-							</p>
-
-							<div>
-								<label htmlFor="rights-field-9" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Motif de la sanction
-								</label>
-								<select id="rights-field-9"
-									value={banReason}
-									onChange={e => setBanReason(e.target.value)}
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-xs focus:border-primary focus:outline-none"
-								>
-									<option value="No-shows répétés (absences non prévenues)">No-shows répétés (absences non prévenues)</option>
-									<option value="Comportement inapproprié ou irrespectueux">Comportement inapproprié ou irrespectueux</option>
-									<option value="Facture ou acompte impayé">Facture ou acompte impayé</option>
-									<option value="Retards systématiques pénalisant le planning">Retards systématiques pénalisant le planning</option>
-									<option value="Autre motif">Autre motif personnalisé</option>
-								</select>
-							</div>
-
-							{banReason === 'Autre motif' && (
-								<div>
-									<textarea
-										rows={2}
-										value={customBanReason}
-										onChange={e => setCustomBanReason(e.target.value)}
-										placeholder="Précisez la raison du bannissement…"
-										aria-label="Motif personnalisé"
-										className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs focus:border-primary focus:outline-none"
-									/>
-								</div>
-							)}
-						</div>
-
-						<div className="mt-6 flex items-center justify-end gap-2.5">
-							<button
-								type="button"
-								onClick={() => setBanModalClient(null)}
-								className="px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-xs font-bold hover:bg-stone-50"
-							>
-								Annuler
-							</button>
-							<button
-								type="button"
-								onClick={handleBanClientSubmit}
-								className="px-5 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 shadow-xs cursor-pointer"
-							>
-								Confirmer le bannissement
-							</button>
-						</div>
+			<Fenetre
+				ouvert={!!banModalClient}
+				onClose={() => setBanModalClient(null)}
+				icone={<AlertTriangle size={18} className="text-dx-alerte" />}
+				titre="Bannir le client"
+				sousTitre={banModalClient?.full_name || 'Client'}
+				pied={
+					<>
+						<button type="button" onClick={() => setBanModalClient(null)} className="dx-btn dx-btn--ligne">Annuler</button>
+						<button type="button" onClick={handleBanClientSubmit} className="dx-btn dx-btn--danger">Confirmer le bannissement</button>
+					</>
+				}
+			>
+				<div className="space-y-4">
+					<p className="text-sm text-dx-encre-2">
+						Le bannissement empêchera ce client d'effectuer toute nouvelle réservation en ligne auprès de votre établissement.
+					</p>
+					<div>
+						<label htmlFor="rights-field-9" className="dx-champ-label">Motif de la sanction</label>
+						<select id="rights-field-9" value={banReason} onChange={e => setBanReason(e.target.value)} className="dx-champ">
+							<option value="No-shows répétés (absences non prévenues)">No-shows répétés (absences non prévenues)</option>
+							<option value="Comportement inapproprié ou irrespectueux">Comportement inapproprié ou irrespectueux</option>
+							<option value="Facture ou acompte impayé">Facture ou acompte impayé</option>
+							<option value="Retards systématiques pénalisant le planning">Retards systématiques pénalisant le planning</option>
+							<option value="Autre motif">Autre motif personnalisé</option>
+						</select>
 					</div>
+					{banReason === 'Autre motif' && (
+						<textarea
+							rows={2}
+							value={customBanReason}
+							onChange={e => setCustomBanReason(e.target.value)}
+							placeholder="Précisez la raison du bannissement…"
+							aria-label="Motif personnalisé"
+							className="dx-champ"
+						/>
+					)}
 				</div>
-			)}
+			</Fenetre>
 
 			{/* MODAL DE CONFIRMATION DE SUPPRESSION */}
-			{deleteConfirm && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-					<div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95" role="dialog" aria-modal="true">
-						<div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center mx-auto mb-3">
-							<Trash2 size={24} />
-						</div>
-						<h4 className="font-bold text-stone-900 text-center text-base">Confirmer la suppression</h4>
-						<p className="text-xs text-stone-500 text-center mt-2 leading-relaxed">
-							Êtes-vous certain de vouloir supprimer le compte de <strong className="text-stone-900">{deleteConfirm.name}</strong> ? Cette action est irréversible.
-						</p>
-
-						<div className="mt-6 flex items-center justify-center gap-3">
-							<button
-								type="button"
-								onClick={() => setDeleteConfirm(null)}
-								className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 text-xs font-bold hover:bg-stone-50"
-							>
-								Annuler
-							</button>
-							<button
-								type="button"
-								onClick={confirmDelete}
-								className="px-5 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 shadow-xs cursor-pointer"
-							>
-								Supprimer
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
+			<Fenetre
+				ouvert={!!deleteConfirm}
+				onClose={() => setDeleteConfirm(null)}
+				largeur={420}
+				icone={<Trash2 size={18} className="text-dx-alerte" />}
+				titre="Confirmer la suppression"
+				pied={
+					<>
+						<button type="button" onClick={() => setDeleteConfirm(null)} className="dx-btn dx-btn--ligne">Annuler</button>
+						<button type="button" onClick={confirmDelete} className="dx-btn dx-btn--danger">Supprimer</button>
+					</>
+				}
+			>
+				<p className="text-sm leading-relaxed text-dx-encre-2">
+					Êtes-vous certain de vouloir supprimer le compte de <strong className="text-dx-encre">{deleteConfirm?.name}</strong> ? Cette action est irréversible.
+				</p>
+			</Fenetre>
 
 			{/* MODAL MODIFICATION CLIENT */}
-			{editClientModal && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95" role="dialog" aria-modal="true">
-						<div className="flex items-center justify-between pb-4 border-b border-stone-100">
-							<div className="flex items-center gap-2.5">
-								<div className="w-9 h-9 rounded-xl bg-secondary text-secondary-foreground flex items-center justify-center">
-									<Pencil size={18} />
-								</div>
-								<div>
-									<h4 className="font-bold text-stone-900 text-base">Modifier la fiche client</h4>
-									<p className="text-xs text-stone-400">Mise à jour des coordonnées par l'administrateur</p>
-								</div>
-							</div>
-							<button
-								type="button"
-								onClick={() => setEditClientModal(null)}
-								className="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg cursor-pointer"
-								aria-label="Fermer"
-							>
-								<X size={18} />
-							</button>
-						</div>
-
-						<form onSubmit={handleSaveClientSubmit} className="mt-4 space-y-4">
-							<div>
-								<label htmlFor="rights-field-10" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Nom complet *
-								</label>
-								<input id="rights-field-10"
-									type="text"
-									required
-									value={editFullName}
-									maxLength={MAX_NAME_LENGTH}
-									onChange={e => setEditFullName(e.target.value)}
-									placeholder="Ex : Sophie Martin"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
-								/>
-							</div>
-
-							<div>
-								<label htmlFor="rights-field-11" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Téléphone
-								</label>
-								<input id="rights-field-11"
-									type="tel"
-									value={editPhone}
-									onChange={e => setEditPhone(e.target.value)}
-									placeholder="Ex : 06 12 34 56 78"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
-								/>
-							</div>
-
-							<div>
-								<label htmlFor="rights-field-12" className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Adresse email
-								</label>
-								<input id="rights-field-12"
-									type="email"
-									value={editEmail}
-									onChange={e => setEditEmail(e.target.value)}
-									placeholder="Ex : sophie.martin@email.com"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
-								/>
-							</div>
-
-							<div className="pt-2 flex items-center justify-end gap-2.5">
-								<button
-									type="button"
-									onClick={() => setEditClientModal(null)}
-									className="px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-xs font-bold hover:bg-stone-50 cursor-pointer"
-								>
-									Annuler
-								</button>
-								<button
-									type="submit"
-									disabled={isSavingClient}
-									className="px-5 py-2.5 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
-								>
-									{isSavingClient ? (
-										<span>Enregistrement…</span>
-									) : (
-										<>
-											<Check size={14} />
-											<span>Enregistrer</span>
-										</>
-									)}
-								</button>
-							</div>
-						</form>
+			<Fenetre
+				ouvert={!!editClientModal}
+				onClose={() => setEditClientModal(null)}
+				fermerSurVoile={false}
+				icone={<Pencil size={17} />}
+				titre="Modifier la fiche client"
+				sousTitre="Mise à jour des coordonnées par l'administrateur"
+			>
+				<form onSubmit={handleSaveClientSubmit} className="space-y-4">
+					<div>
+						<label htmlFor="rights-field-10" className="dx-champ-label">Nom complet *</label>
+						<input id="rights-field-10" type="text" required value={editFullName} maxLength={MAX_NAME_LENGTH} onChange={e => setEditFullName(e.target.value)} placeholder="Ex : Sophie Martin" className="dx-champ" data-autofocus />
 					</div>
-				</div>
-			)}
+					<div>
+						<label htmlFor="rights-field-11" className="dx-champ-label">Téléphone</label>
+						<input id="rights-field-11" type="tel" value={editPhone} onChange={e => setEditPhone(e.target.value)} placeholder="Ex : 06 12 34 56 78" className="dx-champ" />
+					</div>
+					<div>
+						<label htmlFor="rights-field-12" className="dx-champ-label">Adresse email</label>
+						<input id="rights-field-12" type="email" value={editEmail} onChange={e => setEditEmail(e.target.value)} placeholder="Ex : sophie.martin@email.com" className="dx-champ" />
+					</div>
+					<div className="flex items-center justify-end gap-2 pt-2">
+						<button type="button" onClick={() => setEditClientModal(null)} className="dx-btn dx-btn--ligne">Annuler</button>
+						<button type="submit" disabled={isSavingClient} className="dx-btn dx-btn--encre">
+							{isSavingClient ? <span>Enregistrement…</span> : (<><Check size={14} /><span>Enregistrer</span></>)}
+						</button>
+					</div>
+				</form>
+			</Fenetre>
 		</div>
 	);
 }

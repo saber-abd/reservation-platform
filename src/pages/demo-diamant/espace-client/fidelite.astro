@@ -2,15 +2,13 @@
 import DiamantDashboardLayout from '@/layouts/diamant/DiamantDashboardLayout.astro';
 import DiamantClientNav from '@/components/diamant/dashboard/DiamantClientNav';
 import DiamantClientFidelite from '@/components/diamant/dashboard/DiamantClientFidelite';
+import DiamantPageHead from '@/components/diamant/dashboard/kit/DiamantPageHead.astro';
 ---
 
 <DiamantDashboardLayout title="Fidélité & Privilèges">
 	<DiamantClientNav slot="sidebar" basePath="/demo-diamant" client:load />
-	
-	<div class="mb-8">
-		<h1 class="text-3xl font-black text-stone-800 tracking-tight">Fidélité & Privilèges</h1>
-		<p class="text-stone-500 mt-2">Votre fidélité récompensée par des privilèges exclusifs au fil de vos visites.</p>
-	</div>
+
+	<DiamantPageHead titre="Fidélité" accent="& privilèges" sousTitre="Chaque euro dépensé au salon vaut un point. Les privilèges se débloquent au fil de vos visites." />
 
 	<DiamantClientFidelite client:load />
 </DiamantDashboardLayout>

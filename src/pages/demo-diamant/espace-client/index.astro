@@ -3,45 +3,34 @@ import DiamantDashboardLayout from '@/layouts/diamant/DiamantDashboardLayout.ast
 import DiamantClientNav from '@/components/diamant/dashboard/DiamantClientNav';
 import DiamantClientAppointments from '@/components/diamant/dashboard/DiamantClientAppointments';
 import DiamantClientRecentHistory from '@/components/diamant/dashboard/DiamantClientRecentHistory';
-import { Calendar as CalendarIcon, Sparkles } from 'lucide-react';
+import DiamantPageHead from '@/components/diamant/dashboard/kit/DiamantPageHead.astro';
+import { ArrowRight, Calendar as CalendarIcon } from 'lucide-react';
 ---
 
 <DiamantDashboardLayout title="Mes Rendez-vous">
 	<DiamantClientNav slot="sidebar" basePath="/demo-diamant" client:load />
-	
-	<div class="mb-8">
-		<h1 class="text-3xl font-black text-stone-800 tracking-tight">Mes Rendez-vous</h1>
-		<p class="text-stone-500 mt-2">Retrouvez vos prochains rendez-vous et l'historique complet de vos prestations passées.</p>
-	</div>
 
-	<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-		<!-- Colonne principale : Prochain RDV et Historique Récent avec espacement aéré -->
-		<div class="lg:col-span-2 space-y-10">
-			<!-- Section 1 : Prochain RDV à venir -->
-			<div>
-				<DiamantClientAppointments client:load />
-			</div>
+	<DiamantPageHead titre="Mes" accent="rendez-vous" sousTitre="Retrouvez vos prochains rendez-vous et l'historique complet de vos prestations passées." />
 
-			<!-- Section 2 : Historique Récent synchronisé avec la base de données -->
-			<div class="pt-2">
-				<DiamantClientRecentHistory client:load />
-			</div>
+	<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+		<!-- Colonne principale : prochain RDV puis historique récent en frise -->
+		<div class="flex flex-col gap-12 lg:col-span-2">
+			<DiamantClientAppointments client:load />
+			<DiamantClientRecentHistory client:load />
 		</div>
 
-		<!-- Colonne latérale : Action rapide de réservation -->
-		<div class="space-y-6">
-			<a 
-				href="/demo-diamant/reservation" 
-				class="flex flex-col items-center justify-center p-8 rounded-2xl border border-stone-200 bg-gradient-to-b from-stone-50 to-white hover:border-deep-teal-300 hover:shadow-md transition-all text-center group shadow-xs cursor-pointer"
-			>
-				<div class="w-16 h-16 rounded-2xl bg-deep-teal-50 border border-deep-teal-200 text-deep-teal-700 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform shadow-2xs">
-					<CalendarIcon size={26} />
-				</div>
-				<h3 class="text-lg font-bold text-stone-900 mb-1">Nouveau Rendez-vous</h3>
-				<p class="text-stone-500 text-xs leading-relaxed max-w-xs">
+		<!-- Colonne latérale : réservation -->
+		<aside class="space-y-6">
+			<a href="/demo-diamant/reservation" class="dx-carte group block overflow-hidden p-7">
+				<span class="inline-grid h-12 w-12 place-items-center rounded-full bg-dx-terre-pale text-dx-terre">
+					<CalendarIcon size={22} />
+				</span>
+				<h3 class="mt-6 font-heading text-[1.9rem] font-light leading-none tracking-[-0.03em] text-dx-encre">Nouveau <em class="text-dx-terre">rendez-vous</em></h3>
+				<p class="mt-3 text-sm leading-relaxed text-dx-gris">
 					Consultez le planning de l'établissement et réservez votre prochain soin en ligne.
 				</p>
+				<span class="dx-lien mt-6">Réserver un créneau <ArrowRight size={14} /></span>
 			</a>
-		</div>
+		</aside>
 	</div>
 </DiamantDashboardLayout>

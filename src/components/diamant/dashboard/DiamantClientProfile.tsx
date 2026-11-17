@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Save, RefreshCw, Upload, Check, Calendar, Clock, User } from 'lucide-react';
+import { Save, RefreshCw, Upload, Check } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { EnChargement, Squelette } from './kit/primitives';
+import { confirmer } from './kit/notifier';
 import { supabase } from '@/lib/supabase';
 
 export default function DiamantClientProfile() {
 	const [saving, setSaving] = useState(false);
 	const [loading, setLoading] = useState(true);
+	const reduit = useReducedMotion();
 	const [successMsg, setSuccessMsg] = useState('');
 	const [showAvatarSelector, setShowAvatarSelector] = useState(false);
 	const [selectedAvatarSeed, setSelectedAvatarSeed] = useState('Client');
@@ -147,6 +151,7 @@ export default function DiamantClientProfile() {
 			}
 
 			setSuccessMsg('Vos informations ont été enregistrées avec succès.');
+			confirmer('Vos informations ont été enregistrées avec succès.');
 		} catch (e) {
 			console.error('Erreur sauvegarde profil:', e);
 		} finally {
@@ -187,171 +192,143 @@ export default function DiamantClientProfile() {
 
 	if (loading) {
 		return (
-			<div className="rounded-2xl border border-stone-200 bg-white p-12 text-center text-stone-400">
-				Chargement de votre profil...
-			</div>
+			<EnChargement label="Chargement de votre profil..." className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+				<Squelette className="h-[420px] !rounded-[14px]" />
+				<Squelette className="h-[520px] !rounded-[14px] lg:col-span-2" />
+			</EnChargement>
 		);
 	}
 
 	return (
-		<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-stone-800">
-			{/* Photo de profil & Résumé réel */}
-			<div className="rounded-2xl border border-stone-200 bg-white p-8 shadow-xs text-center h-fit relative">
-				{showAvatarSelector ? (
-					<div className="absolute inset-0 bg-white/95 backdrop-blur-xs z-10 rounded-2xl p-6 flex flex-col items-center justify-center border border-stone-200 shadow-lg">
-						<h4 className="text-xs font-bold text-stone-800 mb-4 uppercase tracking-widest">Choisir un avatar</h4>
-						<div className="flex flex-wrap justify-center gap-3 mb-6">
-							{avatarOptions.map(seed => (
-								<button 
-									key={seed}
-									type="button"
-									onClick={() => handleAvatarSelect(seed)}
-									className={`relative w-14 h-14 rounded-full border-2 overflow-hidden transition-all cursor-pointer ${
-										selectedAvatarSeed === seed ? 'border-deep-teal-500 scale-110 shadow-md' : 'border-stone-200 hover:border-deep-teal-300'
-									}`}
-								>
-									<img src={generateAvatar(seed)} alt={seed} className="w-full h-full object-cover" />
-									{selectedAvatarSeed === seed && (
-										<div className="absolute inset-0 bg-deep-teal-500/20 flex items-center justify-center">
-											<Check size={20} className="text-white drop-shadow-md" />
-										</div>
-									)}
-								</button>
-							))}
+		<div className="grid grid-cols-1 items-start gap-6 text-dx-encre lg:grid-cols-3">
+			{/* Photo de profil & résumé réel */}
+			<section className="dx-carte relative overflow-hidden">
+				<div className="flex flex-col items-center bg-dx-papier px-6 pb-6 pt-8 text-center">
+					<div className="group relative h-28 w-28">
+						<div className="h-full w-full overflow-hidden rounded-full bg-dx-ivoire-2 ring-4 ring-dx-carte">
+							<img src={generateAvatar(selectedAvatarSeed)} alt="Avatar" width={112} height={112} className="h-full w-full object-cover" />
 						</div>
-						<button 
+						<button
 							type="button"
-							onClick={() => setShowAvatarSelector(false)} 
-							className="text-xs font-bold text-stone-500 hover:text-stone-800 transition-colors uppercase tracking-widest cursor-pointer"
+							onClick={() => setShowAvatarSelector(true)}
+							className="absolute inset-0 flex flex-col items-center justify-center rounded-full bg-dx-nuit/55 text-white opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
+							title="Changer de photo"
+							aria-label="Changer de photo"
 						>
-							Annuler
+							<Upload size={18} className="mb-1" />
+							<span className="text-[10px] font-semibold">Modifier</span>
 						</button>
 					</div>
-				) : null}
-
-				<div className="relative w-32 h-32 mx-auto mb-6 group">
-					<div className="w-full h-full rounded-full border border-stone-200 shadow-2xs p-1 bg-white">
-						<div className="w-full h-full rounded-full flex items-center justify-center overflow-hidden bg-stone-100">
-							<img src={generateAvatar(selectedAvatarSeed)} alt="Avatar" className="w-full h-full object-cover" />
-						</div>
-					</div>
-					<button 
-						type="button"
-						onClick={() => setShowAvatarSelector(true)}
-						className="absolute inset-0 m-1 bg-black/40 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer backdrop-blur-[2px]"
-						title="Changer de photo"
-					>
-						<Upload size={18} className="mb-1" />
-						<span className="text-[10px] font-bold uppercase tracking-wider">Modifier</span>
-					</button>
+					<h2 className="mt-5 break-words font-heading text-[1.9rem] font-light leading-none tracking-[-0.03em] text-dx-encre">{displayName}</h2>
+					<p className="mt-2 text-sm text-dx-gris">{memberSince ? `Membre depuis ${memberSince}` : 'Compte Client'}</p>
 				</div>
-				
-				<h2 className="text-2xl font-bold text-stone-900 mb-1 break-words">{displayName}</h2>
-				<p className="text-deep-teal-600 text-xs font-bold uppercase tracking-widest mb-6">
-					{memberSince ? `Membre depuis ${memberSince}` : 'Compte Client'}
-				</p>
-				
-				<div className="flex flex-col gap-3">
-					<div className="flex items-center justify-between text-sm p-3.5 rounded-xl bg-stone-50 border border-stone-100">
-						<span className="text-xs text-stone-500 font-medium">Rendez-vous passés</span>
-						<span className="text-stone-900 font-black text-lg">{pastCount}</span>
+				<dl className="divide-y divide-dx-filet border-t border-dx-filet">
+					<div className="flex items-baseline justify-between gap-3 px-6 py-4">
+						<dt className="text-sm text-dx-gris">Rendez-vous passés</dt>
+						<dd className="dx-chiffre text-3xl text-dx-encre">{pastCount}</dd>
 					</div>
-					<div className="flex items-center justify-between text-sm p-3.5 rounded-xl bg-stone-50 border border-stone-100">
-						<span className="text-xs text-stone-500 font-medium">Dernière visite</span>
-						<span className="text-stone-900 font-bold text-sm">
-							{lastVisit || 'Aucune visite'}
-						</span>
+					<div className="flex items-baseline justify-between gap-3 px-6 py-4">
+						<dt className="text-sm text-dx-gris">Dernière visite</dt>
+						<dd className="text-sm font-semibold text-dx-encre">{lastVisit || 'Aucune visite'}</dd>
 					</div>
-				</div>
-			</div>
+				</dl>
 
-			{/* Informations Personnelles */}
-			<div className="lg:col-span-2 rounded-2xl border border-stone-200 bg-white p-8 shadow-xs">
-				<div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-stone-100 pb-4 mb-6 gap-4">
-					<div>
-						<h3 className="text-lg font-bold text-stone-900">Informations Personnelles</h3>
-						<p className="text-xs text-stone-400 mt-0.5">Vos coordonnées réelles utilisées pour vos réservations et contact par le salon.</p>
-					</div>
-					{successMsg && (
-						<span className="text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full text-xs font-bold border border-emerald-200 animate-in fade-in">
-							{successMsg}
-						</span>
+				<AnimatePresence>
+					{showAvatarSelector && (
+						<motion.div
+							initial={reduit ? false : { opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0 }}
+							className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-dx-carte/97 p-6"
+							role="dialog"
+							aria-label="Choisir un avatar"
+						>
+							<h4 className="dx-h3 mb-5">Choisir un avatar</h4>
+							<div className="mb-6 flex flex-wrap justify-center gap-3">
+								{avatarOptions.map(seed => (
+									<button
+										key={seed}
+										type="button"
+										onClick={() => handleAvatarSelect(seed)}
+										aria-pressed={selectedAvatarSeed === seed}
+										className={`relative h-14 w-14 overflow-hidden rounded-full transition-transform ${
+											selectedAvatarSeed === seed ? 'scale-110 ring-2 ring-dx-terre ring-offset-2 ring-offset-dx-carte' : 'ring-1 ring-dx-filet hover:scale-105'
+										}`}
+									>
+										<img src={generateAvatar(seed)} alt={seed} className="h-full w-full object-cover" />
+										{selectedAvatarSeed === seed && (
+											<span className="absolute inset-0 flex items-center justify-center bg-dx-terre/30">
+												<Check size={20} className="text-white" />
+											</span>
+										)}
+									</button>
+								))}
+							</div>
+							<button type="button" onClick={() => setShowAvatarSelector(false)} className="dx-btn dx-btn--sm dx-btn--fantome">
+								Annuler
+							</button>
+						</motion.div>
 					)}
+				</AnimatePresence>
+			</section>
+
+			{/* Informations personnelles */}
+			<section className="dx-carte p-6 sm:p-8 lg:col-span-2">
+				<div className="mb-6 border-b border-dx-filet pb-5">
+					<h3 className="dx-h2">Informations Personnelles</h3>
+					<p className="dx-meta mt-1">Vos coordonnées réelles utilisées pour vos réservations et contact par le salon.</p>
 				</div>
-				
-				<form onSubmit={handleSave} className="space-y-6">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+				<form onSubmit={handleSave} className="space-y-5">
+					<div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 						<div>
-							<label className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-2">Prénom</label>
-							<input 
-								type="text" 
-								value={firstName} 
-								onChange={e => setFirstName(e.target.value)} 
-								placeholder="Votre prénom"
-								className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:border-deep-teal-400 focus:bg-white transition-colors" 
-							/>
+							<label htmlFor="cl-prenom" className="dx-champ-label">Prénom</label>
+							<input id="cl-prenom" type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Votre prénom" className="dx-champ" />
 						</div>
 						<div>
-							<label className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-2">Nom</label>
-							<input 
-								type="text" 
-								value={lastName} 
-								onChange={e => setLastName(e.target.value)} 
-								placeholder="Votre nom"
-								className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:border-deep-teal-400 focus:bg-white transition-colors" 
-							/>
+							<label htmlFor="cl-nom" className="dx-champ-label">Nom</label>
+							<input id="cl-nom" type="text" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Votre nom" className="dx-champ" />
 						</div>
 					</div>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 						<div>
-							<label className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-2">Adresse Email</label>
-							<input 
-								type="email" 
-								value={email} 
-								disabled 
-								className="w-full bg-stone-100 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-500 cursor-not-allowed" 
-							/>
-							<p className="text-[11px] text-stone-400 mt-1">Identifiant associé à votre compte de connexion.</p>
+							<label htmlFor="cl-email" className="dx-champ-label">Adresse Email</label>
+							<input id="cl-email" type="email" value={email} disabled className="dx-champ" />
+							<p className="dx-champ-aide">Identifiant associé à votre compte de connexion.</p>
 						</div>
 						<div>
-							<label className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-2">Numéro de Téléphone</label>
-							<input 
-								type="tel" 
-								value={phone} 
-								onChange={e => setPhone(e.target.value)} 
-								placeholder="Ex : 06 00 00 00 00"
-								className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:border-deep-teal-400 focus:bg-white transition-colors" 
-							/>
-							<p className="text-[11px] text-stone-400 mt-1">Pour la confirmation de vos rendez-vous.</p>
+							<label htmlFor="cl-tel" className="dx-champ-label">Numéro de Téléphone</label>
+							<input id="cl-tel" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="Ex : 06 00 00 00 00" className="dx-champ" />
+							<p className="dx-champ-aide">Pour la confirmation de vos rendez-vous.</p>
 						</div>
 					</div>
 
 					<div>
-						<label className="block text-xs font-bold text-stone-500 uppercase tracking-widest mb-2">
-							Préférences Capillaires (Nature des cheveux, allergies, souhaits...)
-						</label>
-						<textarea 
-							rows={3} 
-							value={preferences} 
-							onChange={e => setPreferences(e.target.value)} 
+						<label htmlFor="cl-pref" className="dx-champ-label">Préférences Capillaires (Nature des cheveux, allergies, souhaits...)</label>
+						<textarea
+							id="cl-pref"
+							rows={4}
+							value={preferences}
+							onChange={e => setPreferences(e.target.value)}
 							placeholder="Indiquez ici vos préférences ou sensibilités éventuelles pour vos prestations..."
-							className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:border-deep-teal-400 focus:bg-white transition-colors resize-none"
+							className="dx-champ !resize-none"
 						></textarea>
 					</div>
 
-					<div className="pt-2 flex justify-end">
-						<button 
-							type="submit" 
-							disabled={saving} 
-							className="flex items-center gap-2 px-6 py-3 rounded-xl bg-deep-teal-600 text-white font-bold text-xs uppercase tracking-widest hover:bg-deep-teal-700 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
-						>
+					<div className="flex flex-wrap items-center justify-end gap-3 border-t border-dx-filet pt-5">
+						{successMsg && (
+							<span className="inline-flex items-center gap-1.5 text-sm font-semibold text-dx-ok" role="status">
+								<Check size={15} /> {successMsg}
+							</span>
+						)}
+						<button type="submit" disabled={saving} className="dx-btn">
 							{saving ? <RefreshCw size={15} className="animate-spin" /> : <Save size={15} />}
 							<span>{saving ? 'Enregistrement...' : 'Enregistrer les modifications'}</span>
 						</button>
 					</div>
 				</form>
-			</div>
+			</section>
 		</div>
 	);
 }

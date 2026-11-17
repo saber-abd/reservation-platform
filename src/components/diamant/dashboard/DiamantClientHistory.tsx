@@ -1,22 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
-import { 
-	Calendar, 
-	Clock, 
-	CheckCircle2, 
-	Star, 
-	Search, 
-	Scissors, 
-	Download, 
-	RefreshCw, 
-	Sparkles, 
-	ChevronRight, 
-	Filter, 
-	Receipt,
-	User,
-	Eye,
-	X
-} from 'lucide-react';
+import { Clock, Star, Search, Download, RefreshCw, Receipt } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
+import { Chiffre, EASE, EnChargement, EtatVide, Fenetre, Pastille, Segments, Squelette } from './kit/primitives';
+import { confirmer } from './kit/notifier';
 
 interface PastAppointment {
 	id: string;
@@ -105,10 +92,11 @@ export default function DiamantClientHistory() {
 	const [selectedReceipt, setSelectedReceipt] = useState<PastAppointment | null>(null);
 	const [toast, setToast] = useState<string | null>(null);
 
+	// Notification : sonner (îlot DiamantToaster du layout)
 	function showToast(msg: string) {
-		setToast(msg);
-		setTimeout(() => setToast(null), 3000);
+		confirmer(msg);
 	}
+	const reduit = useReducedMotion();
 
 	useEffect(() => {
 		async function fetchClientPastAppointments() {
@@ -206,282 +194,224 @@ export default function DiamantClientHistory() {
 		return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0] || 'Diamant Prestige';
 	}, [appointments]);
 
+	// Les chiffres roulent jusqu'à leur valeur une fois l'historique chargé.
+	const [vus, setVus] = useState({ prestations: 0, points: 0 });
+	useEffect(() => {
+		if (loading) return;
+		const id = window.requestAnimationFrame(() => setVus({ prestations: totalPrestations, points: totalPointsEarned }));
+		return () => window.cancelAnimationFrame(id);
+	}, [loading, totalPrestations, totalPointsEarned]);
+
+	// Frise : regroupement par année (vue calculée sur les rendez-vous chargés)
+	const parAnnee = useMemo(() => {
+		const groupes: { annee: string; liste: PastAppointment[] }[] = [];
+		for (const a of filtered) {
+			const annee = String(new Date(a.rawDate).getFullYear());
+			const g = groupes.find((x) => x.annee === annee);
+			if (g) g.liste.push(a);
+			else groupes.push({ annee, liste: [a] });
+		}
+		return groupes;
+	}, [filtered]);
+
 	return (
 		<div className="space-y-8">
-			{/* Toast */}
-			{toast && (
-				<div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-stone-900 text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-bold border border-stone-800 animate-in fade-in slide-in-from-bottom-4">
-					<Sparkles size={16} className="text-jasmine-400" />
-					<span>{toast}</span>
+			{/* Chiffres du client */}
+			<div className="dx-carte grid grid-cols-1 divide-y divide-dx-filet sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+				<div className="p-6">
+					<p className="text-sm font-semibold text-dx-encre">Prestations honorées</p>
+					<p className="mt-3 flex items-baseline gap-2">
+						<Chiffre valeur={vus.prestations} className="text-5xl text-dx-encre" />
+						<span className="text-sm text-dx-gris">visite{totalPrestations > 1 ? 's' : ''}</span>
+					</p>
 				</div>
-			)}
-
-			{/* En-tête des Statistiques Client */}
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-				<div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-xs">
-					<div className="flex items-center gap-3">
-						<div className="w-10 h-10 rounded-xl bg-deep-teal-50 border border-deep-teal-200 flex items-center justify-center text-deep-teal-700">
-							<CheckCircle2 size={20} />
-						</div>
-						<div>
-							<p className="text-xs text-stone-500 font-bold uppercase tracking-wider">Prestations honorées</p>
-							<p className="text-2xl font-black text-stone-900 mt-0.5 font-heading">{totalPrestations} visite{totalPrestations > 1 ? 's' : ''}</p>
-						</div>
-					</div>
+				<div className="p-6">
+					<p className="text-sm font-semibold text-dx-encre">Points fidélité cumulés</p>
+					<p className="mt-3 flex items-baseline gap-2">
+						<Chiffre valeur={vus.points} prefixe="+" className="text-5xl text-dx-terre" />
+						<span className="text-sm text-dx-gris">pts</span>
+					</p>
 				</div>
-
-				<div className="rounded-2xl border border-jasmine-200 bg-gradient-to-br from-jasmine-50/70 to-white p-5 shadow-xs">
-					<div className="flex items-center gap-3">
-						<div className="w-10 h-10 rounded-xl bg-jasmine-100 border border-jasmine-300 flex items-center justify-center text-jasmine-700">
-							<Star size={20} className="fill-current" />
-						</div>
-						<div>
-							<p className="text-xs text-jasmine-800 font-bold uppercase tracking-wider">Points fidélité cumulés</p>
-							<p className="text-2xl font-black text-jasmine-700 mt-0.5 font-heading">+{totalPointsEarned} pts</p>
-						</div>
-					</div>
-				</div>
-
-				<div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-xs">
-					<div className="flex items-center gap-3">
-						<div className="w-10 h-10 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-700">
-							<Scissors size={20} />
-						</div>
-						<div>
-							<p className="text-xs text-stone-500 font-bold uppercase tracking-wider">Établissement & Coiffeur</p>
-							<p className="text-base font-black text-stone-900 mt-0.5 font-heading">{favoriteStylist}</p>
-						</div>
-					</div>
+				<div className="p-6">
+					<p className="text-sm font-semibold text-dx-encre">Établissement & Coiffeur</p>
+					<p className="mt-3 font-heading text-[1.75rem] font-light leading-tight tracking-[-0.02em] text-dx-encre">{favoriteStylist}</p>
 				</div>
 			</div>
 
 			{/* Barre d'outils : Recherche & Filtres */}
-			<div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-				<div className="relative flex-1 max-w-md">
-					<Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
+			<div className="flex flex-col items-stretch justify-between gap-4 sm:flex-row sm:items-center">
+				<div className="dx-recherche w-full max-w-md">
+					<Search size={16} />
 					<input
-						type="text"
+						type="search"
 						value={searchQuery}
 						onChange={e => setSearchQuery(e.target.value)}
 						placeholder="Rechercher par soin, coiffeur, date..."
-						className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-stone-200 focus:border-deep-teal-500 focus:ring-2 focus:ring-deep-teal-500/20 focus:outline-none text-sm transition-all shadow-xs"
+						aria-label="Rechercher dans l'historique"
+						className="dx-champ"
 					/>
 				</div>
-
-				<div className="flex items-center gap-1.5 bg-stone-100 p-1 rounded-xl border border-stone-200 self-start sm:self-auto">
-					<button
-						type="button"
-						onClick={() => setSelectedPeriod('all')}
-						className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-							selectedPeriod === 'all' 
-								? 'bg-white text-stone-900 shadow-xs' 
-								: 'text-stone-500 hover:text-stone-900'
-						}`}
-					>
-						Toutes ({appointments.length})
-					</button>
-					<button
-						type="button"
-						onClick={() => setSelectedPeriod('3months')}
-						className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-							selectedPeriod === '3months' 
-								? 'bg-white text-stone-900 shadow-xs' 
-								: 'text-stone-500 hover:text-stone-900'
-						}`}
-					>
-						3 derniers mois
-					</button>
-					<button
-						type="button"
-						onClick={() => setSelectedPeriod('2025')}
-						className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-							selectedPeriod === '2025' 
-								? 'bg-white text-stone-900 shadow-xs' 
-								: 'text-stone-500 hover:text-stone-900'
-						}`}
-					>
-						Année 2025
-					</button>
-				</div>
+				<Segments<'all' | '3months' | '2025'>
+					label="Période"
+					value={selectedPeriod}
+					onChange={setSelectedPeriod}
+					taille="sm"
+					options={[
+						{ value: 'all', label: `Toutes (${appointments.length})` },
+						{ value: '3months', label: '3 derniers mois' },
+						{ value: '2025', label: 'Année 2025' },
+					]}
+				/>
 			</div>
 
-			{/* Liste des Rendez-vous Passés */}
-			<div className="space-y-4">
-				{loading ? (
-					<div className="rounded-2xl border border-stone-200 bg-white p-12 text-center text-stone-500 text-sm">
-						Chargement de votre historique de prestations...
-					</div>
-				) : filtered.length === 0 ? (
-					<div className="rounded-2xl border border-stone-200 bg-white p-12 text-center shadow-xs">
-						<div className="w-12 h-12 rounded-full bg-stone-100 text-stone-400 flex items-center justify-center mx-auto mb-3">
-							<Calendar size={22} />
-						</div>
-						<p className="font-bold text-stone-900 text-base">Aucun rendez-vous trouvé</p>
-						<p className="text-xs text-stone-500 mt-1 max-w-sm mx-auto">
-							Aucune prestation ne correspond à vos filtres de recherche.
-						</p>
-						{searchQuery && (
-							<button
-								type="button"
-								onClick={() => { setSearchQuery(''); setSelectedPeriod('all'); }}
-								className="mt-4 px-4 py-2 rounded-xl bg-stone-100 text-stone-700 text-xs font-bold hover:bg-stone-200 transition-colors"
-							>
+			{/* Frise des rendez-vous passés */}
+			{loading ? (
+				<EnChargement label="Chargement de votre historique de prestations..." className="space-y-3">
+					<Squelette className="h-32 w-full !rounded-[14px]" />
+					<Squelette className="h-32 w-full !rounded-[14px]" />
+				</EnChargement>
+			) : filtered.length === 0 ? (
+				<div className="dx-carte">
+					<EtatVide
+						dessin="agenda"
+						titre="Aucun rendez-vous trouvé"
+						texte="Aucune prestation ne correspond à vos filtres de recherche."
+						action={searchQuery ? (
+							<button type="button" onClick={() => { setSearchQuery(''); setSelectedPeriod('all'); }} className="dx-btn dx-btn--sm dx-btn--ligne">
 								Réinitialiser les filtres
 							</button>
-						)}
-					</div>
-				) : (
-					filtered.map((appt) => (
-						<div 
-							key={appt.id} 
-							className="rounded-2xl border border-stone-200 bg-white p-5 md:p-6 shadow-xs hover:border-stone-300 hover:shadow-sm transition-all"
-						>
-							<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-stone-100">
-								<div className="flex items-start gap-3.5">
-									<div className="w-11 h-11 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-700 shrink-0">
-										<Scissors size={20} />
-									</div>
-									<div>
-										<div className="flex flex-wrap items-center gap-2">
-											<h3 className="font-bold text-stone-900 text-base md:text-lg font-heading">
-												{appt.serviceName}
-											</h3>
-											<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-												<CheckCircle2 size={12} className="text-emerald-600" />
-												<span>Effectué</span>
-											</span>
-										</div>
-										<p className="text-xs text-stone-500 mt-1 flex flex-wrap items-center gap-3">
-											<span className="font-semibold text-stone-700">Artisan : {appt.stylistName}</span>
-											<span>•</span>
-											<span className="flex items-center gap-1">
-												<Clock size={12} className="text-stone-400" />
-												{appt.duration}
-											</span>
-											<span>•</span>
-											<span className="font-black text-stone-900">{appt.price} €</span>
-										</p>
-									</div>
-								</div>
+						) : undefined}
+					/>
+				</div>
+			) : (
+				<div className="space-y-10">
+					{parAnnee.map((groupe) => (
+						<section key={groupe.annee} aria-label={`Année ${groupe.annee}`}>
+							<p className="mb-4 flex items-baseline gap-3">
+								<span className="dx-chiffre text-4xl text-dx-encre">{groupe.annee}</span>
+								<span className="text-sm text-dx-gris">{groupe.liste.length} prestation{groupe.liste.length > 1 ? 's' : ''}</span>
+							</p>
+							<ol className="dx-frise space-y-4">
+								{groupe.liste.map((appt, i) => {
+									const d = new Date(appt.rawDate);
+									return (
+										<motion.li
+											key={appt.id}
+											className="relative"
+											initial={reduit ? false : { opacity: 0, x: -8 }}
+											animate={{ opacity: 1, x: 0 }}
+											transition={{ duration: 0.5, ease: EASE, delay: Math.min(i * 0.06, 0.4) }}
+										>
+											<span className="dx-frise__point" data-ton={appt.status === 'cancelled' ? 'annule' : undefined} aria-hidden="true" />
+											<article className="dx-carte grid gap-4 p-5 sm:grid-cols-[5rem_1fr] sm:p-6">
+												<div className="flex items-baseline gap-2 sm:block sm:text-center">
+													<p className="dx-chiffre text-4xl text-dx-encre">{d.getDate()}</p>
+													<p className="text-sm text-dx-gris sm:mt-1">{d.toLocaleDateString('fr-FR', { month: 'short' })} · {appt.time}</p>
+												</div>
+												<div className="min-w-0 sm:border-l sm:border-dx-filet sm:pl-6">
+													<div className="flex flex-wrap items-center gap-2">
+														<h3 className="dx-h3 !text-lg">{appt.serviceName}</h3>
+														<Pastille ton="ok">Effectué</Pastille>
+													</div>
+													<p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-dx-gris">
+														<span className="font-medium text-dx-encre-2">Artisan : {appt.stylistName}</span>
+														<span aria-hidden="true">·</span>
+														<span className="inline-flex items-center gap-1"><Clock size={12} /> {appt.duration}</span>
+														<span aria-hidden="true">·</span>
+														<span className="dx-tabulaire font-semibold text-dx-encre">{appt.price} €</span>
+													</p>
+													<p className="mt-0.5 text-xs text-dx-gris">{appt.date}</p>
 
-								<div className="text-left md:text-right shrink-0">
-									<p className="text-sm font-bold text-stone-900">{appt.date}</p>
-									<p className="text-xs text-stone-400 mt-0.5">à {appt.time}</p>
-								</div>
-							</div>
+													{appt.notes && (
+														<p className="mt-3 border-l-2 border-dx-terre-clair pl-3 font-heading text-[0.9375rem] italic leading-relaxed text-dx-encre-2">
+															{appt.notes}
+														</p>
+													)}
 
-							{appt.notes && (
-								<p className="text-xs text-stone-600 mt-3.5 leading-relaxed bg-stone-50/80 p-3 rounded-xl border border-stone-100">
-									{appt.notes}
-								</p>
-							)}
-
-							<div className="mt-4 flex flex-wrap items-center justify-between gap-3 pt-1">
-								<div className="flex items-center gap-1">
-									{[...Array(appt.rating || 5)].map((_, i) => (
-										<Star key={i} size={14} className="text-jasmine-500 fill-current" />
-									))}
-									<span className="text-xs text-stone-400 font-bold ml-1.5">Note maximale (5/5)</span>
-								</div>
-
-								<div className="flex items-center gap-2.5">
-									<button
-										type="button"
-										onClick={() => setSelectedReceipt(appt)}
-										className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-stone-200 text-stone-700 text-xs font-bold hover:bg-stone-50 transition-colors cursor-pointer"
-										title="Voir le reçu de la prestation"
-									>
-										<Receipt size={14} className="text-stone-500" />
-										<span>Reçu</span>
-									</button>
-
-									<a
-										href={`/demo-diamant/reservation?service=${encodeURIComponent(appt.serviceName)}`}
-										className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-all shadow-xs cursor-pointer"
-									>
-										<RefreshCw size={13} />
-										<span>Reprendre ce rendez-vous</span>
-									</a>
-								</div>
-							</div>
-						</div>
-					))
-				)}
-			</div>
-
-			{/* Modal Reçu de Prestation */}
-			{selectedReceipt && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95">
-						<div className="flex items-center justify-between pb-4 border-b border-stone-100">
-							<div className="flex items-center gap-2.5">
-								<div className="w-10 h-10 rounded-xl bg-jasmine-100 text-jasmine-700 flex items-center justify-center">
-									<Receipt size={20} />
-								</div>
-								<div>
-									<h4 className="font-bold text-stone-900 text-base">Reçu de Prestation</h4>
-									<p className="text-xs text-stone-400">{selectedReceipt.receiptNumber}</p>
-								</div>
-							</div>
-							<button
-								type="button"
-								onClick={() => setSelectedReceipt(null)}
-								className="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg cursor-pointer"
-							>
-								<X size={18} />
-							</button>
-						</div>
-
-						<div className="my-5 space-y-3.5 text-xs text-stone-600">
-							<div className="flex items-center justify-between py-1.5 border-b border-stone-100">
-								<span className="text-stone-400">Établissement</span>
-								<span className="font-bold text-stone-900">Maison Prestige Diamant</span>
-							</div>
-							<div className="flex items-center justify-between py-1.5 border-b border-stone-100">
-								<span className="text-stone-400">Date & Heure</span>
-								<span className="font-bold text-stone-900">{selectedReceipt.date} à {selectedReceipt.time}</span>
-							</div>
-							<div className="flex items-center justify-between py-1.5 border-b border-stone-100">
-								<span className="text-stone-400">Prestation</span>
-								<span className="font-bold text-stone-900 text-right">{selectedReceipt.serviceName}</span>
-							</div>
-							<div className="flex items-center justify-between py-1.5 border-b border-stone-100">
-								<span className="text-stone-400">Coiffeur(se) artisan</span>
-								<span className="font-bold text-stone-900">{selectedReceipt.stylistName}</span>
-							</div>
-							<div className="flex items-center justify-between py-1.5 border-b border-stone-100">
-								<span className="text-stone-400">Points fidélité gagnés</span>
-								<span className="font-bold text-jasmine-600">+{selectedReceipt.pointsEarned} points VIP</span>
-							</div>
-							<div className="flex items-center justify-between pt-2 text-sm">
-								<span className="font-bold text-stone-900">Total réglé (TTC)</span>
-								<span className="text-lg font-black text-stone-900">{selectedReceipt.price} €</span>
-							</div>
-						</div>
-
-						<div className="flex items-center justify-end gap-2.5 pt-2 border-t border-stone-100">
-							<button
-								type="button"
-								onClick={() => setSelectedReceipt(null)}
-								className="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 text-xs font-bold hover:bg-stone-50"
-							>
-								Fermer
-							</button>
-							<button
-								type="button"
-								onClick={() => {
-									showToast("Téléchargement du reçu PDF démarré.");
-									setSelectedReceipt(null);
-								}}
-								className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-800 transition-all shadow-xs cursor-pointer"
-							>
-								<Download size={14} />
-								<span>Télécharger PDF</span>
-							</button>
-						</div>
-					</div>
+													<div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+														<div className="flex items-center gap-0.5" aria-label={`Note ${appt.rating || 5} sur 5`}>
+															{[...Array(appt.rating || 5)].map((_, k) => (
+																<Star key={k} size={13} className="fill-current text-dx-terre" />
+															))}
+															<span className="ml-2 text-xs text-dx-gris">Note maximale (5/5)</span>
+														</div>
+														<div className="flex items-center gap-2">
+															<button
+																type="button"
+																onClick={() => setSelectedReceipt(appt)}
+																className="dx-btn dx-btn--sm dx-btn--ligne"
+																title="Voir le reçu de la prestation"
+															>
+																<Receipt size={14} />
+																<span>Reçu</span>
+															</button>
+															<a href={`/demo-diamant/reservation?service=${encodeURIComponent(appt.serviceName)}`} className="dx-btn dx-btn--sm">
+																<RefreshCw size={13} />
+																<span>Reprendre ce rendez-vous</span>
+															</a>
+														</div>
+													</div>
+												</div>
+											</article>
+										</motion.li>
+									);
+								})}
+							</ol>
+						</section>
+					))}
 				</div>
 			)}
+
+			{/* Reçu de prestation */}
+			<Fenetre
+				ouvert={!!selectedReceipt}
+				onClose={() => setSelectedReceipt(null)}
+				largeur={440}
+				icone={<Receipt size={18} />}
+				titre="Reçu de Prestation"
+				sousTitre={selectedReceipt?.receiptNumber}
+				pied={
+					<>
+						<button type="button" onClick={() => setSelectedReceipt(null)} className="dx-btn dx-btn--sm dx-btn--ligne">
+							Fermer
+						</button>
+						<button
+							type="button"
+							onClick={() => {
+								showToast("Téléchargement du reçu PDF démarré.");
+								setSelectedReceipt(null);
+							}}
+							className="dx-btn dx-btn--sm dx-btn--encre"
+						>
+							<Download size={14} />
+							<span>Télécharger PDF</span>
+						</button>
+					</>
+				}
+			>
+				{selectedReceipt && (
+					<div className="rounded-xl border border-dashed border-dx-filet-fort bg-dx-ivoire px-5 py-4">
+						<dl className="divide-y divide-dashed divide-dx-filet-fort text-sm">
+							{[
+								['Établissement', 'Maison Prestige Diamant'],
+								['Date & Heure', `${selectedReceipt.date} à ${selectedReceipt.time}`],
+								['Prestation', selectedReceipt.serviceName],
+								['Coiffeur(se) artisan', selectedReceipt.stylistName],
+								['Points fidélité gagnés', `+${selectedReceipt.pointsEarned} points VIP`],
+							].map(([k, v]) => (
+								<div key={k} className="flex items-baseline justify-between gap-4 py-2.5">
+									<dt className="text-dx-gris">{k}</dt>
+									<dd className={`text-right font-medium ${k.startsWith('Points') ? 'text-dx-terre' : 'text-dx-encre'}`}>{v}</dd>
+								</div>
+							))}
+						</dl>
+						<div className="mt-2 flex items-baseline justify-between border-t border-dx-encre pt-3">
+							<span className="font-semibold text-dx-encre">Total réglé (TTC)</span>
+							<span className="dx-chiffre text-3xl text-dx-encre">{selectedReceipt.price} €</span>
+						</div>
+					</div>
+				)}
+			</Fenetre>
 		</div>
 	);
 }
