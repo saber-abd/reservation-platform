@@ -96,6 +96,10 @@ export function formulesIncluant(id: string): string {
 	return noms.length > 1 ? `${noms.slice(0, -1).join(', ')} et ${noms.at(-1)}` : `${noms[0] ?? ''} uniquement`;
 }
 
+/** Mention du paiement en ligne (Stripe), possible plus tard sur demande, sur les fiches et résumés des formules. */
+export const MENTION_PAIEMENT =
+	'Sur demande, le paiement en ligne peut être ajouté plus tard avec Stripe : un acompte à la réservation ou le paiement complet de la prestation.';
+
 /** Espace insécable avant « : ; ? ! » (typographie française). */
 export const fr = (texte: string) => texte.replace(/ ([:;?!])/g, ' $1');
 

@@ -10,7 +10,7 @@ import CadreNavigateur from '@/components/commercial/CadreNavigateur.astro';
 import CadreTelephone from '@/components/commercial/CadreTelephone.astro';
 import { membres } from '@/components/commercial/equipe';
 import { contact } from '@/components/commercial/contact';
-import { paliers, devis, descriptionService, estInclus } from '@/components/commercial/offre';
+import { paliers, devis, descriptionService, estInclus, MENTION_PAIEMENT, fr } from '@/components/commercial/offre';
 import { formatEuros, type FormuleId } from '@/lib/devis';
 import { ArrowRight, ArrowUpRight, Phone, Check, CalendarCheck, ShieldCheck, Gem, MessagesSquare, PenTool, Rocket } from 'lucide-react';
 
@@ -233,6 +233,7 @@ const metiers: Record<FormuleId, string> = { standard: 'dépannage informatique'
 											<span class="palier-montant num">dès {p.prixBase}</span>
 											<span class="palier-frais">puis {p.frais} de frais</span>
 										</p>
+										<p class="palier-paiement">{fr(MENTION_PAIEMENT)}</p>
 									</div>
 									{i > 0 && <p class="palier-herite">Tout {paliers[i - 1].nom}, plus :</p>}
 									<ul class="palier-liste">

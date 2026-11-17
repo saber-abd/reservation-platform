@@ -526,7 +526,7 @@
       "id": "acompte",
       "nom": "Acompte en ligne",
       "categorie": "options",
-      "description": "Paiement d'un acompte à la réservation par carte bancaire. Frais Stripe prélevés sur chaque paiement.",
+      "description": "Paiement en ligne par carte bancaire : un acompte à la réservation ou le paiement complet de la prestation. Frais Stripe prélevés sur chaque paiement.",
       "outils": [
         "Stripe"
       ],

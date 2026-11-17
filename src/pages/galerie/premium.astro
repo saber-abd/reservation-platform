@@ -1,7 +1,7 @@
 ---
 import CommercialLayout from '@/layouts/commercial/CommercialLayout.astro';
 import FormulaGallery, { type GalleryShot } from '@/components/commercial/FormulaGallery.astro';
-import { paliers, fraisDe } from '@/components/commercial/offre';
+import { paliers, MENTION_PAIEMENT, fr, fraisDe } from '@/components/commercial/offre';
 import { Database, ShieldCheck, Users, LineChart, Euro, Gift, LayoutTemplate, Settings, Smartphone } from 'lucide-react';
 
 // Prix et frais : src/data/devis.json (via offre.ts), jamais écrits à la main.
@@ -260,6 +260,7 @@ const galleryShots: GalleryShot[] = [
 						))}
 					</div>
 					<p class="mt-4 text-sm font-semibold text-stone-700">Total estimé : {p.frais}, payés sur vos propres comptes.</p>
+					<p class="mt-2 text-sm text-stone-500">{fr(MENTION_PAIEMENT)}</p>
 					{notes.map((f) => (
 						<p class="mt-3 text-xs text-stone-400 italic">* {f.nom} : {f.note}</p>
 					))}

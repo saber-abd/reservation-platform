@@ -1,7 +1,7 @@
 ---
 import CommercialLayout from '@/layouts/commercial/CommercialLayout.astro';
 import FormulaGallery, { type GalleryShot } from '@/components/commercial/FormulaGallery.astro';
-import { paliers, fraisDe, descriptionService } from '@/components/commercial/offre';
+import { paliers, fraisDe, descriptionService, MENTION_PAIEMENT, fr } from '@/components/commercial/offre';
 import {
 	Code2,
 	Paintbrush, 
@@ -303,6 +303,7 @@ const galleryShots: GalleryShot[] = [
 					<p class="text-sm text-stone-500">Main d’œuvre, sans option</p>
 					<div class="mt-1 text-3xl font-black text-deep-teal-300 tabular-nums">dès {p.prixBase}</div>
 					<p class="text-sm text-stone-500 mt-2">Environ {p.jours} de travail. Frais de fonctionnement : {p.frais}.</p>
+					<p class="text-sm text-stone-500 mt-2">{fr(MENTION_PAIEMENT)}</p>
 				</div>
 
 				<div class="bg-white border border-stone-200 shadow-sm rounded-3xl p-10 hover:shadow-md transition-shadow" data-reveal data-reveal-delay="100">
