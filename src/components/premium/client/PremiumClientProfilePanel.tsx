@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { useAuthedClient } from '@/lib/useAuthedClient';
 import { updateClient } from '@/lib/queries';
-import AvatarPicker, { type AvatarKey } from '@/components/premium/ui/PremiumAvatarPicker';
+import AvatarPicker, { AvatarDisplay, type AvatarKey } from '@/components/premium/ui/PremiumAvatarPicker';
 import { MAX_NAME_LENGTH } from '@/lib/limits';
+import { PageHead, PageSkeleton } from '@/components/premium/dashboard/kit/Base';
 
 export default function ClientProfilePanel() {
 	const { loading, client, email, error } = useAuthedClient();
@@ -28,61 +30,77 @@ export default function ClientProfilePanel() {
 		try {
 			await updateClient(client.id, { full_name: fullName, phone, avatar_url: avatarKey });
 			setMessage('Profil mis à jour.');
+			toast.success('Profil mis à jour.');
 		} catch (err) {
-			setMessage(err instanceof Error ? err.message : 'Erreur lors de la mise à jour.');
+			const msg = err instanceof Error ? err.message : 'Erreur lors de la mise à jour.';
+			setMessage(msg);
+			toast.error(msg);
 		} finally {
 			setSaving(false);
 		}
 	}
 
-	if (loading) return <p className="text-sm text-muted-foreground">Chargement...</p>;
-	if (error) return <p className="text-sm text-red-600">{error}</p>;
+	if (loading) return <PageSkeleton cards={1} />;
+	if (error) return <p className="pe-erreur">{error}</p>;
 
 	return (
-		<div>
-			<h1 className="text-2xl font-bold text-foreground">Mon profil</h1>
+		<div className="pe-entree">
+			<PageHead title="Mon profil" sub="Vos coordonnées servent à l'atelier pour confirmer et rappeler vos rendez-vous." />
 
-			<form onSubmit={handleSubmit} className="mt-6 mx-auto max-w-md space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm">
-				<div>
-					<label className="block text-sm font-medium text-stone-700">Email</label>
-					<input
-						type="email"
-						value={email ?? ''}
-						disabled
-						className="mt-1 w-full rounded-lg border border-border bg-stone-50 px-3 py-2 text-sm text-muted-foreground"
-					/>
-				</div>
-				<div>
-					<label className="block text-sm font-medium text-stone-700">Nom complet</label>
-					<input
-						type="text"
-						value={fullName}
-						maxLength={MAX_NAME_LENGTH}
-						onChange={(e) => setFullName(e.target.value)}
-						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
-					/>
-				</div>
-				<div>
-					<label className="block text-sm font-medium text-stone-700">Téléphone</label>
-					<input
-						type="tel"
-						value={phone}
-						onChange={(e) => setPhone(e.target.value)}
-						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
-					/>
-				</div>
-				<div>
-					<AvatarPicker value={avatarKey} onChange={(k: AvatarKey) => setAvatarKey(k)} />
-				</div>
-				{message && <p className="text-sm text-muted-foreground">{message}</p>}
-				<button
-					type="submit"
-					disabled={saving}
-					className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-60"
-				>
-					{saving ? 'Enregistrement...' : 'Enregistrer'}
-				</button>
-			</form>
+			<div className="grid max-w-4xl items-start gap-4 md:grid-cols-[260px_minmax(0,1fr)]">
+				{/* Carte d'identité */}
+				<aside className="pe-card pe-card--sombre p-5 md:sticky md:top-6" aria-label="Votre carte">
+					<div className="flex items-center gap-4 md:block">
+						<AvatarDisplay avatarKey={avatarKey} size={72} className="!border-0" />
+						<div className="min-w-0 md:mt-4">
+							<p className="break-words text-xl font-extrabold uppercase leading-tight [font-stretch:118%]">{fullName || 'Votre nom'}</p>
+							<p className="pe-tech mt-1 break-all !normal-case !tracking-normal">{email ?? ''}</p>
+						</div>
+					</div>
+					<p className="mt-4 border-t border-pe-filet-sombre pt-4 text-sm tabular-nums text-pe-acier-clair">{phone || 'Téléphone non renseigné'}</p>
+				</aside>
+
+				<form onSubmit={handleSubmit} className="pe-card">
+					<div className="pe-card__corps grid gap-5">
+						<div>
+							<label className="pe-label" htmlFor="profil-email">
+								Email
+							</label>
+							<input id="profil-email" type="email" value={email ?? ''} disabled className="pe-input" />
+						</div>
+						<div className="grid gap-5 sm:grid-cols-2">
+							<div>
+								<label className="pe-label" htmlFor="profil-nom">
+									Nom complet
+								</label>
+								<input
+									id="profil-nom"
+									type="text"
+									value={fullName}
+									maxLength={MAX_NAME_LENGTH}
+									onChange={(e) => setFullName(e.target.value)}
+									className="pe-input"
+								/>
+							</div>
+							<div>
+								<label className="pe-label" htmlFor="profil-tel">
+									Téléphone
+								</label>
+								<input id="profil-tel" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="pe-input" />
+							</div>
+						</div>
+						<div className="border-t border-pe-filet pt-5">
+							<AvatarPicker value={avatarKey} onChange={(k: AvatarKey) => setAvatarKey(k)} />
+						</div>
+						<div className="flex flex-wrap items-center gap-4">
+							<button type="submit" disabled={saving} className="pe-btn">
+								{saving ? 'Enregistrement…' : 'Enregistrer'}
+							</button>
+							{message && <p className="text-sm text-pe-acier">{message}</p>}
+						</div>
+					</div>
+				</form>
+			</div>
 		</div>
 	);
 }

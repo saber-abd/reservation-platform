@@ -8,6 +8,8 @@ import AccountPrivacyActions from '@/components/shared/AccountPrivacyActions';
 <PremiumDashboardLayout title="Mon profil">
 	<PremiumClientNav slot="sidebar" basePath="/demo-premium" client:load />
 	<ClientProfilePanel client:load />
-	<AccountPrivacyActions basePath="/demo-premium" client:idle />
+	<div class="pe-donnees max-w-4xl">
+		<AccountPrivacyActions basePath="/demo-premium" client:idle />
+	</div>
 </PremiumDashboardLayout>
 

@@ -94,12 +94,12 @@ export default function ImageCropper({ imageSrc, onCropComplete, onCancel }: Ima
 	};
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-			<div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl flex flex-col">
-				<h3 className="mb-4 text-lg font-bold text-stone-900">Recadrer la photo</h3>
-				<p className="text-sm text-stone-500 mb-4">Ajustez l'image (déplacez et zoomez) pour qu'elle s'intègre parfaitement dans le carré.</p>
-				
-				<div className="relative h-[350px] w-full rounded-xl overflow-hidden bg-stone-100">
+		<div className="fixed inset-0 z-[90] flex items-center justify-center bg-pe-carbone/80 p-4" role="dialog" aria-modal="true" aria-labelledby="pe-recadrage-titre">
+			<div className="relative flex w-full max-w-lg flex-col rounded-[2px] border-t-4 border-pe-rouge bg-pe-carte p-6">
+				<h3 id="pe-recadrage-titre" className="pe-h2 mb-2">Recadrer la photo</h3>
+				<p className="mb-4 text-sm text-pe-acier">Déplacez et zoomez l'image : elle sera affichée au format carré dans le catalogue.</p>
+
+				<div className="relative h-[350px] w-full overflow-hidden rounded-[2px] bg-pe-carbone">
 					<Cropper
 						image={imageSrc}
 						crop={crop}
@@ -112,7 +112,7 @@ export default function ImageCropper({ imageSrc, onCropComplete, onCancel }: Ima
 				</div>
 
 				<div className="mt-6">
-					<label htmlFor="zoom" className="block text-sm font-medium text-stone-700">Zoom</label>
+					<label htmlFor="zoom" className="pe-label">Zoom</label>
 					<input
 						type="range"
 						id="zoom"
@@ -120,25 +120,16 @@ export default function ImageCropper({ imageSrc, onCropComplete, onCancel }: Ima
 						min={1}
 						max={3}
 						step={0.1}
-						aria-labelledby="Zoom"
 						onChange={(e) => setZoom(Number(e.target.value))}
-						className="w-full mt-2"
+						className="mt-1 w-full accent-pe-rouge"
 					/>
 				</div>
 
 				<div className="mt-6 flex justify-end gap-3">
-					<button
-						type="button"
-						onClick={onCancel}
-						className="rounded-xl border border-border px-4 py-2 font-medium text-stone-600 transition-colors hover:bg-stone-50"
-					>
+					<button type="button" onClick={onCancel} className="pe-btn pe-btn--ligne">
 						Annuler
 					</button>
-					<button
-						type="button"
-						onClick={handleSave}
-						className="rounded-xl bg-rose-600 px-4 py-2 font-medium text-white transition-colors hover:bg-rose-700"
-					>
+					<button type="button" onClick={handleSave} className="pe-btn">
 						Recadrer et appliquer
 					</button>
 				</div>

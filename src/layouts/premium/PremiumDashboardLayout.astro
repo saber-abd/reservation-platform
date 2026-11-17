@@ -1,8 +1,9 @@
 ---
 import '@fontsource-variable/archivo/wdth.css';
 import '../../styles/premium.css';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChevronsLeft } from 'lucide-react';
 import { getSiteConfig } from '@/config/site';
+import PremiumToaster from '@/components/premium/ui/PremiumToaster';
 const siteConfig = await getSiteConfig(Astro.url.pathname);
 
 interface Props {
@@ -24,106 +25,71 @@ const isPreview = /^\/demo-[^/]+\/apercu(\/|$)/.test(currentPath);
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="robots" content="noindex, nofollow" />
 		<title>{title} — {siteConfig.business.name}</title>
-		<meta name="theme-color" content="#0c0a09" />
+		<meta name="theme-color" content="#121315" />
+		<script is:inline>
+			document.documentElement.classList.add('js');
+			try {
+				if (localStorage.getItem('premium_dash_sidebar') === 'replie') document.documentElement.dataset.peReplie = '1';
+			} catch (e) {}
+		</script>
 	</head>
-	<body class="bg-[#eceae5] text-foreground selection:bg-primary selection:text-white overflow-hidden">
-		<div class="flex h-screen">
-			{/* Sidebar */}
-			<aside id="dash-drawer" data-open="false" class="dash-drawer w-64 flex-shrink-0 border-r border-stone-800 bg-[#121315] flex flex-col z-10" aria-label="Navigation de l’espace">
-				<div class="p-6 border-b border-stone-800">
-					<a href={`${basePath}/`} aria-label={siteConfig.business.name} class="flex items-center gap-3">
-						<span class="h-3.5 w-3.5 shrink-0 -skew-x-[14deg] bg-primary" aria-hidden="true"></span>
-						<span class="truncate text-lg font-extrabold uppercase text-white [font-stretch:125%]">{siteConfig.business.name}</span>
+	<body class="pe-body">
+		<div class="pe-shell">
+			{/* Barre latérale carbone : logo, navigation (îlot), instrument date/heure, retour au site */}
+			<aside id="dash-drawer" data-open="false" class="pe-side" aria-label="Navigation de l’espace">
+				<div class="pe-side__logo">
+					<a href={`${basePath}/`} aria-label={siteConfig.business.name} class="pe-side__marque">
+						<i aria-hidden="true"></i>
+						<span class="pe-side__nom">{siteConfig.business.name}</span>
 					</a>
+					<button id="pe-replier" type="button" class="pe-side__replier" aria-label="Réduire la barre latérale" aria-pressed="false">
+						<ChevronsLeft />
+					</button>
 				</div>
-				<div class="flex-1 overflow-y-auto p-4">
+				<div class="pe-side__nav">
 					<slot name="sidebar" />
 				</div>
-				<div class="p-4 border-t border-stone-800">
-					<a href={`${basePath}/`} class="flex items-center justify-center gap-2 rounded-[2px] border border-stone-700 px-4 py-3 text-sm font-semibold text-stone-300 transition-colors hover:border-primary hover:text-white">
-						<ArrowLeft size={16} />
-						Retour au site
+				<div class="pe-side__bas">
+					<div class="pe-horloge" aria-hidden="true">
+						<span class="pe-horloge__date" data-horloge-date></span>
+						<span class="pe-horloge__heure" data-horloge-heure></span>
+					</div>
+					<a href={`${basePath}/`} class="pe-retour" title="Retour au site">
+						<ArrowLeft />
+						<span>Retour au site</span>
 					</a>
 				</div>
 			</aside>
 
-			{/* Main Content */}
-			<main class="flex-1 overflow-y-auto bg-[#eceae5]">
-				{/* Mobile Header */}
-				<header class="md:hidden sticky top-0 z-50 border-b border-stone-200 bg-white px-6 py-4 flex items-center justify-between">
-					<a href={`${basePath}/`} aria-label={siteConfig.business.name} class="flex items-center gap-3">
-						<span class="flex items-center gap-2.5 text-base font-extrabold uppercase text-stone-900 [font-stretch:125%]">
-							<span class="h-3 w-3 -skew-x-[14deg] bg-primary" aria-hidden="true"></span>{siteConfig.business.name}
-						</span>
+			<main id="pe-main" class="pe-main">
+				{/* En-tête mobile */}
+				<header class="pe-topbar">
+					<a href={`${basePath}/`} aria-label={siteConfig.business.name} class="pe-side__marque">
+						<i aria-hidden="true"></i>
+						<span class="pe-side__nom">{siteConfig.business.name}</span>
 					</a>
-					<button id="dash-menu-btn" type="button" class="dash-burger text-stone-900" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="dash-drawer">
+					<button id="dash-menu-btn" type="button" class="pe-burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="dash-drawer">
 						<span></span><span></span><span></span>
 					</button>
 				</header>
 				{isPreview && (
-					<div role="status" class="border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-center text-xs font-semibold text-amber-900 md:px-8">
-						Aperçu avec des données fictives : lecture seule, aucune modification n'est enregistrée.
-						<a href={`${basePath}/connexion`} class="ml-2 underline">Se connecter</a>
+					<div role="status" class="pe-apercu-bandeau">
+						<p>Aperçu avec des données fictives : lecture seule, aucune modification n'est enregistrée.</p>
+						<a href={`${basePath}/connexion`}>Se connecter</a>
 					</div>
 				)}
-				<div class="mx-auto max-w-5xl px-4 py-8 md:px-8 md:py-12">
+				<div class="pe-page">
 					<slot />
 				</div>
 			</main>
-			<div id="dash-backdrop" class="dash-backdrop" data-open="false" aria-hidden="true"></div>
+			<div id="dash-backdrop" class="pe-fond" data-open="false" aria-hidden="true"></div>
 		</div>
+		<PremiumToaster client:load />
 	</body>
 </html>
 
-<style>
-	/* Tiroir de navigation sur mobile : la barre latérale glisse depuis la gauche. */
-	@media (max-width: 767px) {
-		.dash-drawer {
-			position: fixed;
-			inset-block: 0;
-			left: 0;
-			z-index: 60;
-			width: min(18rem, 85vw);
-			transform: translateX(-100%);
-			transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-		}
-		.dash-drawer[data-open='true'] { transform: none; }
-		.dash-backdrop {
-			position: fixed;
-			inset: 0;
-			z-index: 55;
-			background: rgb(12 10 9 / 0.5);
-			opacity: 0;
-			visibility: hidden;
-			transition: opacity 0.3s ease, visibility 0s linear 0.3s;
-		}
-		.dash-backdrop[data-open='true'] { opacity: 1; visibility: visible; transition: opacity 0.3s ease, visibility 0s; }
-	}
-	@media (min-width: 768px) { .dash-backdrop { display: none; } }
-
-	.dash-burger { position: relative; width: 40px; height: 40px; border-radius: 10px; }
-	.dash-burger span {
-		position: absolute;
-		left: 10px;
-		width: 20px;
-		height: 2px;
-		border-radius: 2px;
-		background: currentColor;
-		transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
-	}
-	.dash-burger span:nth-child(1) { top: 13px; }
-	.dash-burger span:nth-child(2) { top: 19px; }
-	.dash-burger span:nth-child(3) { top: 25px; }
-	.dash-burger[aria-expanded='true'] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
-	.dash-burger[aria-expanded='true'] span:nth-child(2) { opacity: 0; }
-	.dash-burger[aria-expanded='true'] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
-
-	@media (prefers-reduced-motion: reduce) {
-		.dash-drawer, .dash-backdrop, .dash-burger span { transition-duration: 0.01ms !important; }
-	}
-</style>
-
 <script>
+	// Tiroir de navigation (mobile), repli de la barre latérale (bureau), petit instrument date / heure.
 	const drawer = document.getElementById('dash-drawer');
 	const backdrop = document.getElementById('dash-backdrop');
 	const toggle = document.getElementById('dash-menu-btn');
@@ -140,7 +106,44 @@ const isPreview = /^\/demo-[^/]+\/apercu(\/|$)/.test(currentPath);
 			if ((e.target as HTMLElement).closest('a')) setOpen(false);
 		});
 		document.addEventListener('keydown', (e) => {
-			if (e.key === 'Escape') setOpen(false);
+			if (e.key === 'Escape' && drawer.dataset.open === 'true') {
+				setOpen(false);
+				toggle.focus();
+			}
 		});
+	}
+
+	const replier = document.getElementById('pe-replier');
+	if (replier) {
+		const root = document.documentElement;
+		const sync = () => {
+			const replie = root.dataset.peReplie === '1';
+			replier.setAttribute('aria-pressed', String(replie));
+			replier.setAttribute('aria-label', replie ? 'Déplier la barre latérale' : 'Réduire la barre latérale');
+		};
+		sync();
+		replier.addEventListener('click', () => {
+			const replie = root.dataset.peReplie !== '1';
+			if (replie) root.dataset.peReplie = '1';
+			else delete root.dataset.peReplie;
+			try {
+				localStorage.setItem('premium_dash_sidebar', replie ? 'replie' : 'ouvert');
+			} catch (e) {}
+			sync();
+		});
+	}
+
+	const dateEl = document.querySelector<HTMLElement>('[data-horloge-date]');
+	const heureEl = document.querySelector<HTMLElement>('[data-horloge-heure]');
+	if (dateEl && heureEl) {
+		const tick = () => {
+			const d = new Date();
+			dateEl.textContent = d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+			const h = String(d.getHours()).padStart(2, '0');
+			const m = String(d.getMinutes()).padStart(2, '0');
+			heureEl.innerHTML = `${h}<b>:</b>${m}`;
+		};
+		tick();
+		window.setInterval(tick, 20_000);
 	}
 </script>

@@ -51,7 +51,7 @@ function ScrollColumn({
 		<ul
 			ref={listRef}
 			onScroll={handleScroll}
-			className="h-[108px] overflow-y-scroll scroll-smooth rounded-lg border border-border bg-white"
+			className="h-[108px] w-14 overflow-y-scroll scroll-smooth rounded-[2px] border border-pe-filet-fort bg-white"
 			style={{ scrollbarWidth: 'none' }}
 		>
 			{/* Padding spacers so first/last item can be centered */}
@@ -60,10 +60,10 @@ function ScrollColumn({
 				<li
 					key={item}
 					onClick={() => onSelect(item)}
-					className={`flex h-9 cursor-pointer items-center justify-center text-sm font-medium transition-colors select-none ${
+					className={`flex h-9 cursor-pointer items-center justify-center text-sm font-semibold tabular-nums transition-colors select-none ${
 						selected === item
-							? 'bg-rose-600 text-white'
-							: 'text-stone-600 hover:bg-stone-50'
+							? 'bg-pe-encre text-white'
+							: 'text-pe-acier hover:bg-pe-carte-2'
 					}`}
 				>
 					{formatItem(item)}
@@ -90,21 +90,34 @@ export default function TimePicker({ value, onChange, label, id }: Props) {
 		[onChange],
 	);
 
-	// Close on click outside
+	// Fermeture au clic extérieur et avec Échap
 	useEffect(() => {
 		function handler(e: MouseEvent) {
 			if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
 				setOpen(false);
 			}
 		}
-		if (open) document.addEventListener('mousedown', handler);
-		return () => document.removeEventListener('mousedown', handler);
+		function onKey(e: KeyboardEvent) {
+			if (e.key === 'Escape') {
+				e.stopPropagation();
+				setOpen(false);
+			}
+		}
+		if (open) {
+			document.addEventListener('mousedown', handler);
+			containerRef.current?.addEventListener('keydown', onKey);
+		}
+		const el = containerRef.current;
+		return () => {
+			document.removeEventListener('mousedown', handler);
+			el?.removeEventListener('keydown', onKey);
+		};
 	}, [open]);
 
 	return (
 		<div ref={containerRef} className="relative">
 			{label && (
-				<label htmlFor={id} className="block text-sm text-stone-700">
+				<label htmlFor={id} className="pe-label">
 					{label}
 				</label>
 			)}
@@ -112,16 +125,18 @@ export default function TimePicker({ value, onChange, label, id }: Props) {
 				id={id}
 				type="button"
 				onClick={() => setOpen((v) => !v)}
-				className="mt-1 flex w-full items-center justify-between rounded-lg border border-border bg-white px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-rose-600"
+				aria-expanded={open}
+				aria-label={label ? `${label} : ${value || 'non définie'}` : undefined}
+				className="flex min-h-[42px] w-full items-center justify-between rounded-[2px] border border-pe-filet-fort bg-white px-3 py-2 text-left transition-colors hover:border-pe-encre"
 			>
-				<span className="font-mono">{value || '-- : --'}</span>
-				<span className="ml-2 text-stone-400">▾</span>
+				<span className="text-[1.05rem] font-bold tabular-nums [font-stretch:110%]">{value || '-- : --'}</span>
+				<svg className="ml-2 h-4 w-4 text-pe-acier" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="8" cy="8" r="6.2" /><path d="M8 4.5V8l2.4 1.6" /></svg>
 			</button>
 
 			{open && (
-				<div className="absolute z-50 mt-1 flex gap-1 rounded-xl border border-border bg-white p-2 shadow-lg">
+				<div className="absolute z-50 mt-1 flex gap-1 rounded-[2px] border border-pe-encre bg-white p-2 shadow-[0_12px_24px_-12px_rgb(18_19_21/0.4)]">
 					<div className="flex flex-col items-center gap-1">
-						<span className="text-xs text-stone-500">H</span>
+						<span className="pe-tech">H</span>
 						<ScrollColumn
 							items={HOURS}
 							selected={selectedHour}
@@ -129,9 +144,9 @@ export default function TimePicker({ value, onChange, label, id }: Props) {
 							formatItem={pad}
 						/>
 					</div>
-					<div className="flex items-center font-bold text-stone-400">:</div>
+					<div className="flex items-center font-bold text-pe-rouge">:</div>
 					<div className="flex flex-col items-center gap-1">
-						<span className="text-xs text-stone-500">Min</span>
+						<span className="pe-tech">Min</span>
 						<ScrollColumn
 							items={MINUTES}
 							selected={selectedMinute}
@@ -142,7 +157,7 @@ export default function TimePicker({ value, onChange, label, id }: Props) {
 					<button
 						type="button"
 						onClick={() => setOpen(false)}
-						className="ml-2 self-end rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700"
+						className="pe-btn pe-btn--sm ml-2 self-end"
 					>
 						OK
 					</button>

@@ -1,33 +1,51 @@
 import { useEffect, useState, useMemo } from 'react';
-import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 import { getSession } from '@/lib/auth';
-import { 
-	getClientNote, 
-	getAllClients, 
-	upsertClientNote, 
-	getAppointmentsForClient, 
-	getPrimaryProfessional, 
-	getProfessionalByUserId, 
-	getDemoTag, 
+import {
+	getClientNote,
+	getAllClients,
+	upsertClientNote,
+	getAppointmentsForClient,
+	getPrimaryProfessional,
+	getProfessionalByUserId,
+	getDemoTag,
 	updateClient,
-	type Client, 
-	type Appointment, 
-	type Professional 
+	type Client,
+	type Appointment,
+	type Professional,
 } from '@/lib/queries';
 import { isRoleReadOnly } from '@/lib/permissions';
 import MessageThread from '@/components/premium/ui/PremiumMessageThread';
-import { User, Phone, Mail, Calendar, MessageSquare, Search, ShieldCheck, Clock, FileText, Pencil, X, Check, Sparkles } from 'lucide-react';
+import { LECTURE_SEULE } from '@/components/premium/ui/PremiumToaster';
+import { Phone, Mail, Search, Pencil, Check, ChevronRight, X } from 'lucide-react';
 import { MAX_NAME_LENGTH } from '@/lib/limits';
+import { EmptyState, PageHead, PageSkeleton, RowsSkeleton, StatusTag, type Statut } from './kit/Base';
+import { SidePanel } from './kit/Interactive';
+
+function Initiale({ client, size = 40 }: { client: Client; size?: number }) {
+	const hasPhoto = client.avatar_url && client.avatar_url.startsWith('http');
+	return (
+		<span
+			className="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[2px] bg-pe-encre font-extrabold text-pe-blanc [font-stretch:115%]"
+			style={{ width: size, height: size, fontSize: size * 0.42 }}
+			aria-hidden="true"
+		>
+			{hasPhoto ? (
+				<img src={client.avatar_url as string} alt="" className="h-full w-full object-cover" />
+			) : (
+				(client.full_name?.trim().charAt(0) || '?').toUpperCase()
+			)}
+		</span>
+	);
+}
 
 function ClientNoteCard({ professionalId, client }: { professionalId: string; client: Client }) {
 	const [note, setNote] = useState('');
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
-	const [status, setStatus] = useState<string | null>(null);
 
 	useEffect(() => {
 		setLoading(true);
-		setStatus(null);
 		getClientNote(professionalId, client.id)
 			.then((existing) => setNote(existing?.note ?? ''))
 			.finally(() => setLoading(false));
@@ -35,56 +53,46 @@ function ClientNoteCard({ professionalId, client }: { professionalId: string; cl
 
 	async function handleSave() {
 		if (isRoleReadOnly()) {
-			setStatus("Action désactivée : cette démonstration est en lecture seule.");
-			setTimeout(() => setStatus(null), 3000);
+			toast.error(LECTURE_SEULE);
 			return;
 		}
 		setSaving(true);
-		setStatus(null);
 		try {
 			await upsertClientNote(professionalId, client.id, note);
-			setStatus('Note enregistrée avec succès.');
-			setTimeout(() => setStatus(null), 3000);
+			toast.success('Note enregistrée avec succès.');
 		} catch (err) {
-			setStatus(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+			toast.error(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
 		} finally {
 			setSaving(false);
 		}
 	}
 
 	return (
-		<div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-xs">
-			<div className="flex items-center gap-2 mb-1">
-				<FileText size={16} className="text-primary" />
-				<p className="text-sm font-black text-stone-900 uppercase tracking-wider">Note privée & Fiche technique</p>
+		<section className="pe-card" aria-labelledby="note-titre">
+			<div className="pe-card__tete">
+				<h3 id="note-titre" className="pe-h2">Note privée & fiche technique</h3>
+				<span className="pe-tech">Visible par vous seul</span>
 			</div>
-			<p className="text-xs text-stone-500">
-				Visible uniquement par vous — véhicule, préférences, points de vigilance, remarques d'atelier...
-			</p>
-			<textarea
-				rows={3}
-				value={note}
-				disabled={loading}
-				onChange={(e) => setNote(e.target.value)}
-				placeholder="Ex : Clio 2019 diesel, pneus hiver à prévoir, préfère être rappelé après 18h..."
-				className="mt-3 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-stone-400"
-			/>
-			<div className="mt-3 flex items-center justify-between">
-				<button
-					type="button"
-					onClick={handleSave}
-					disabled={saving || loading}
-					className="rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white transition-all hover:bg-primary/90 disabled:opacity-50 cursor-pointer shadow-2xs"
-				>
-					{saving ? 'Enregistrement...' : 'Enregistrer la note'}
-				</button>
-				{status && (
-					<span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">
-						{status}
-					</span>
-				)}
+			<div className="pe-card__corps grid gap-3">
+				<label htmlFor="note-client" className="text-sm text-pe-acier">
+					Véhicule, préférences, points de vigilance, remarques d'atelier...
+				</label>
+				<textarea
+					id="note-client"
+					rows={3}
+					value={note}
+					disabled={loading}
+					onChange={(e) => setNote(e.target.value)}
+					placeholder="Ex : Clio 2019 diesel, pneus hiver à prévoir, préfère être rappelé après 18h..."
+					className="pe-input"
+				/>
+				<div>
+					<button type="button" onClick={handleSave} disabled={saving || loading} className="pe-btn pe-btn--encre pe-btn--sm">
+						{saving ? 'Enregistrement…' : 'Enregistrer la note'}
+					</button>
+				</div>
 			</div>
-		</div>
+		</section>
 	);
 }
 
@@ -93,63 +101,46 @@ function ClientAppointments({ clientId }: { clientId: string }) {
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
+		setLoading(true);
 		getAppointmentsForClient(clientId)
 			.then(setAppointments)
 			.finally(() => setLoading(false));
 	}, [clientId]);
 
-	if (loading) return <p className="text-sm text-stone-400 py-4">Chargement des interventions...</p>;
+	if (loading) return <RowsSkeleton rows={3} />;
 	if (appointments.length === 0) {
-		return (
-			<div className="rounded-2xl border border-dashed border-stone-200 p-6 text-center text-xs text-stone-400 bg-stone-50/50">
-				Aucune intervention enregistrée pour ce client pour le moment.
-			</div>
-		);
+		return <EmptyState kind="pont" title="Aucune intervention enregistrée pour ce client pour le moment." />;
 	}
 
-	const statusLabels: Record<string, { label: string; cls: string }> = {
-		pending: { label: 'En attente', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-		confirmed: { label: 'Confirmé', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-		cancelled: { label: 'Annulé', cls: 'bg-rose-50 text-rose-700 border-rose-200' },
-		completed: { label: 'Terminé', cls: 'bg-stone-100 text-stone-700 border-stone-200' },
-	};
-
 	return (
-		<div className="rounded-3xl border border-stone-200 bg-white overflow-hidden shadow-xs">
-			<table className="w-full text-left text-sm">
-				<thead className="bg-stone-50 text-xs uppercase font-bold text-stone-400 border-b border-stone-100">
-					<tr>
-						<th className="px-4 py-3">Date & Heure</th>
-						<th className="px-4 py-3">Prestation</th>
-						<th className="px-4 py-3 text-right">Statut</th>
+		<table className="pe-table">
+			<thead>
+				<tr>
+					<th>Date & heure</th>
+					<th>Prestation</th>
+					<th className="!text-right">Statut</th>
+				</tr>
+			</thead>
+			<tbody>
+				{appointments.map((apt) => (
+					<tr key={apt.id}>
+						<td className="whitespace-nowrap font-semibold tabular-nums">
+							{new Date(apt.start_time).toLocaleString('fr-FR', {
+								day: '2-digit',
+								month: 'short',
+								year: 'numeric',
+								hour: '2-digit',
+								minute: '2-digit',
+							})}
+						</td>
+						<td className="text-pe-acier">{apt.services?.name ?? '—'}</td>
+						<td className="text-right">
+							<StatusTag status={apt.status as Statut} />
+						</td>
 					</tr>
-				</thead>
-				<tbody className="divide-y divide-stone-100">
-					{appointments.map((apt) => {
-						const meta = statusLabels[apt.status] || { label: apt.status, cls: 'bg-stone-100 text-stone-700' };
-						return (
-							<tr key={apt.id} className="hover:bg-stone-50/50 transition-colors">
-								<td className="px-4 py-3 text-stone-900 font-medium">
-									{new Date(apt.start_time).toLocaleString('fr-FR', {
-										day: '2-digit',
-										month: 'short',
-										year: 'numeric',
-										hour: '2-digit',
-										minute: '2-digit'
-									})}
-								</td>
-								<td className="px-4 py-3 text-stone-600">{apt.services?.name ?? '—'}</td>
-								<td className="px-4 py-3 text-right">
-									<span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${meta.cls}`}>
-										{meta.label}
-									</span>
-								</td>
-							</tr>
-						);
-					})}
-				</tbody>
-			</table>
-		</div>
+				))}
+			</tbody>
+		</table>
 	);
 }
 
@@ -157,21 +148,16 @@ export default function ClientsPanel() {
 	const [professional, setProfessional] = useState<Professional | null>(null);
 	const [clients, setClients] = useState<Client[]>([]);
 	const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+	const [panelOpen, setPanelOpen] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [searchQuery, setSearchQuery] = useState('');
 
-	// Modal d'édition des infos client
+	// Édition des coordonnées client (dans le panneau)
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 	const [editFullName, setEditFullName] = useState('');
 	const [editPhone, setEditPhone] = useState('');
 	const [editEmail, setEditEmail] = useState('');
 	const [isSavingClient, setIsSavingClient] = useState(false);
-	const [editToast, setEditToast] = useState<string | null>(null);
-
-	function showEditToast(msg: string) {
-		setEditToast(msg);
-		setTimeout(() => setEditToast(null), 3500);
-	}
 
 	function handleOpenEdit(client: Client) {
 		setEditFullName(client.full_name || '');
@@ -183,7 +169,7 @@ export default function ClientsPanel() {
 	async function handleSaveEdit(e: React.FormEvent) {
 		e.preventDefault();
 		if (isRoleReadOnly()) {
-			showEditToast("Action désactivée : cette démonstration est en lecture seule.");
+			toast.error(LECTURE_SEULE);
 			return;
 		}
 		if (!selectedClient) return;
@@ -192,19 +178,25 @@ export default function ClientsPanel() {
 			const updated = await updateClient(selectedClient.id, {
 				full_name: editFullName.trim(),
 				phone: editPhone.trim() || null,
-				email: editEmail.trim() || null
+				email: editEmail.trim() || null,
 			});
 
-			setSelectedClient(prev => prev ? { ...prev, ...updated } : null);
-			setClients(prev => prev.map(c => c.id === selectedClient.id ? { ...c, ...updated } : c));
+			setSelectedClient((prev) => (prev ? { ...prev, ...updated } : null));
+			setClients((prev) => prev.map((c) => (c.id === selectedClient.id ? { ...c, ...updated } : c)));
 			setIsEditModalOpen(false);
-			showEditToast(`Fiche de ${editFullName.trim() || 'ce client'} mise à jour avec succès.`);
+			toast.success(`Fiche de ${editFullName.trim() || 'ce client'} mise à jour avec succès.`);
 		} catch (err) {
 			console.error('Error updating client in ClientsPanel:', err);
-			showEditToast("Erreur lors de la mise à jour des coordonnées.");
+			toast.error('Erreur lors de la mise à jour des coordonnées.');
 		} finally {
 			setIsSavingClient(false);
 		}
+	}
+
+	function openClient(client: Client) {
+		setSelectedClient(client);
+		setIsEditModalOpen(false);
+		setPanelOpen(true);
 	}
 
 	useEffect(() => {
@@ -242,13 +234,14 @@ export default function ClientsPanel() {
 				if (isMounted) {
 					setClients(allClients);
 
-					// Présélectionner le client passé en paramètre URL ?clientId=...
+					// Présélectionner le client passé en paramètre URL ?clientId=... (sa fiche s'ouvre)
 					const params = new URLSearchParams(window.location.search);
 					const targetId = params.get('clientId');
 					if (targetId) {
-						const found = allClients.find(c => c.id === targetId);
+						const found = allClients.find((c) => c.id === targetId);
 						if (found) {
 							setSelectedClient(found);
+							setPanelOpen(true);
 						} else if (allClients.length > 0) {
 							setSelectedClient(allClients[0]);
 						}
@@ -265,8 +258,7 @@ export default function ClientsPanel() {
 
 		loadData();
 
-
-		return () => { 
+		return () => {
 			isMounted = false;
 		};
 	}, []);
@@ -275,319 +267,304 @@ export default function ClientsPanel() {
 	const filteredClients = useMemo(() => {
 		if (!searchQuery.trim()) return clients;
 		const q = searchQuery.toLowerCase().trim();
-		return clients.filter(c => 
-			(c.full_name && c.full_name.toLowerCase().includes(q)) ||
-			(c.phone && c.phone.includes(q)) ||
-			(c.email && c.email.toLowerCase().includes(q))
+		return clients.filter(
+			(c) =>
+				(c.full_name && c.full_name.toLowerCase().includes(q)) ||
+				(c.phone && c.phone.includes(q)) ||
+				(c.email && c.email.toLowerCase().includes(q)),
 		);
 	}, [clients, searchQuery]);
 
-	if (loading) {
-		return (
-			<div className="flex justify-center items-center py-20 text-stone-400">
-				<p className="text-sm font-semibold">Chargement de la clientèle...</p>
-			</div>
-		);
-	}
+	if (loading) return <PageSkeleton cards={1} />;
+
+	const inscrit = (c: Client) =>
+		new Date(c.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
 
 	return (
-		<div>
-			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-				<div>
-					<h1 className="text-3xl font-black text-stone-900 uppercase tracking-widest font-[var(--font-heading)]">Clientèle</h1>
-					<p className="mt-2 text-stone-500 font-medium">
-						Fiches de vos {clients.length} pilotes : coordonnées, historique d'interventions et échanges directs.
-					</p>
-				</div>
-			</div>
+		<div className="pe-entree">
+			<PageHead
+				title="Clientèle"
+				sub={
+					<>
+						<strong>{clients.length} client{clients.length > 1 ? 's' : ''}</strong> : coordonnées, historique d'interventions et échanges directs. Cliquez
+						sur une ligne pour ouvrir la fiche.
+					</>
+				}
+			/>
 
-			<div className="mt-6 grid items-start gap-6 lg:grid-cols-3">
-				{/* Colonne de gauche : Annuaire des clients */}
-				<div className="rounded-3xl border border-stone-200 bg-white p-4 shadow-xs lg:col-span-1">
-					<div className="relative mb-3">
-						<Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+			<section className="pe-card" aria-label="Annuaire des clients">
+				<div className="flex flex-wrap items-center justify-between gap-3 border-b border-pe-filet p-3 md:px-[22px]">
+					<div className="relative w-full max-w-md">
+						<Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-pe-acier" aria-hidden="true" />
 						<input
-							type="text"
+							type="search"
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
 							placeholder="Rechercher par nom, tél, email..."
-							className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-stone-50 border border-stone-200 focus:border-primary focus:bg-white focus:outline-none transition-all placeholder:text-stone-400"
+							aria-label="Rechercher un client"
+							className="pe-input !pl-9"
 						/>
 					</div>
-
-					<div className="flex items-center justify-between px-1 mb-2">
-						<span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
-							{filteredClients.length} client{filteredClients.length > 1 ? 's' : ''} trouvé{filteredClients.length > 1 ? 's' : ''}
-						</span>
-					</div>
-
-					<div className="max-h-[580px] overflow-y-auto space-y-1.5 pr-1">
-						{filteredClients.length === 0 && (
-							<p className="py-8 text-center text-xs text-stone-400">Aucun client ne correspond à votre recherche.</p>
-						)}
-						{filteredClients.map((client) => {
-							const isSelected = selectedClient?.id === client.id;
-							return (
-								<button
-									key={client.id}
-									onClick={() => setSelectedClient(client)}
-									className={`w-full text-left p-3 rounded-xl flex items-center gap-3 transition-all cursor-pointer ${
-										isSelected
-											? 'border-stone-900 border-l-4 border-l-primary bg-stone-900 text-white font-medium shadow-md'
-											: 'border-stone-100 hover:border-stone-300 bg-stone-50/50 hover:bg-white text-stone-700'
-									} border`}
-								>
-									<div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-bold text-xs ${
-										isSelected 
-											? 'bg-primary text-white shadow-2xs' 
-											: 'bg-stone-200 text-stone-600'
-									}`}>
-										{client.avatar_url && client.avatar_url.startsWith('http') ? (
-											<img src={client.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
-										) : client.full_name ? (
-											client.full_name.charAt(0).toUpperCase()
-										) : (
-											<User size={16} />
-										)}
-									</div>
-									<div className="flex-1 min-w-0">
-										<p className={`font-bold text-sm truncate ${isSelected ? 'text-white' : 'text-stone-900'}`}>
-											{client.full_name || 'Client'}
-										</p>
-										<p className={`text-xs truncate mt-0.5 ${isSelected ? 'text-stone-400' : 'text-stone-500'}`}>
-											{client.phone || client.email || 'Client enregistré'}
-										</p>
-									</div>
-								</button>
-							);
-						})}
-					</div>
+					<span className="pe-tech" role="status">
+						{filteredClients.length} client{filteredClients.length > 1 ? 's' : ''} trouvé{filteredClients.length > 1 ? 's' : ''}
+					</span>
 				</div>
 
-				{/* Colonne de droite : Fiche détaillée du client sélectionné */}
-				<div className="lg:col-span-2 flex flex-col gap-6">
-					{selectedClient && professional ? (
-						<>
-							{/* Dossier client */}
-							<div className="rounded-3xl border border-stone-200 bg-white p-6 shadow-xs">
-								<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-stone-100">
-									<div className="flex items-center gap-4 min-w-0">
-										<div className="w-16 h-16 shrink-0 rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-white flex items-center justify-center font-bold text-2xl shadow-sm overflow-hidden">
-											{selectedClient.avatar_url && selectedClient.avatar_url.startsWith('http') ? (
-												<img src={selectedClient.avatar_url} alt="" className="w-full h-full object-cover" />
-											) : selectedClient.full_name ? (
-												selectedClient.full_name.charAt(0).toUpperCase()
-											) : (
-												<User size={28} />
-											)}
-										</div>
+				{filteredClients.length === 0 ? (
+					<EmptyState
+						kind="recherche"
+						title="Aucun client ne correspond à votre recherche."
+						action={
+							searchQuery ? (
+								<button type="button" className="pe-btn pe-btn--ligne pe-btn--sm" onClick={() => setSearchQuery('')}>
+									Effacer la recherche
+								</button>
+							) : undefined
+						}
+					/>
+				) : (
+					<>
+						{/* Bureau : tableau dense */}
+						<table className="pe-table hidden md:table">
+							<thead>
+								<tr>
+									<th>Client</th>
+									<th>Téléphone</th>
+									<th>Email</th>
+									<th>Inscrit le</th>
+									<th>
+										<span className="sr-only">Ouvrir</span>
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								{filteredClients.map((client) => (
+									<tr
+										key={client.id}
+										data-clic
+										onClick={() => openClient(client)}
+										className={selectedClient?.id === client.id && panelOpen ? '!bg-white' : ''}
+									>
+										<td>
+											<span className="flex items-center gap-3">
+												<Initiale client={client} size={34} />
+												<button
+													type="button"
+													className="pe-ligne-nom text-left"
+													onClick={(e) => {
+														e.stopPropagation();
+														openClient(client);
+													}}
+												>
+													{client.full_name || 'Client'}
+												</button>
+											</span>
+										</td>
+										<td className="whitespace-nowrap tabular-nums text-pe-acier">{client.phone || '—'}</td>
+										<td className="max-w-[16rem] truncate text-pe-acier">{client.email || '—'}</td>
+										<td className="whitespace-nowrap tabular-nums text-pe-acier">{inscrit(client)}</td>
+										<td className="w-10 text-right text-pe-acier">
+											<ChevronRight size={18} aria-hidden="true" />
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+
+						{/* Mobile : liste */}
+						<ul className="pe-rows md:hidden">
+							{filteredClients.map((client) => (
+								<li key={client.id}>
+									<button type="button" className="pe-row-btn" onClick={() => openClient(client)}>
+										<Initiale client={client} size={40} />
+										<span className="min-w-0 flex-1">
+											<span className="pe-ligne-nom block truncate">{client.full_name || 'Client'}</span>
+											<span className="block truncate text-sm text-pe-acier">{client.phone || client.email || 'Client enregistré'}</span>
+										</span>
+										<ChevronRight size={18} className="text-pe-acier" aria-hidden="true" />
+									</button>
+								</li>
+							))}
+						</ul>
+					</>
+				)}
+			</section>
+
+			{/* Fiche client en panneau latéral */}
+			<SidePanel
+				open={panelOpen && !!selectedClient}
+				onClose={() => {
+					setPanelOpen(false);
+					setIsEditModalOpen(false);
+				}}
+				title="Fiche client"
+				wide
+			>
+				{selectedClient && professional ? (
+					<div className="grid gap-5">
+						{/* Dossier client */}
+						<section className="pe-card pe-card--sombre">
+							<div className="pe-card__corps grid gap-5">
+								<div className="flex flex-wrap items-start justify-between gap-4">
+									<div className="flex min-w-0 items-center gap-4">
+										<span className="relative">
+											<Initiale client={selectedClient} size={64} />
+											<span className="absolute -bottom-1 -right-1 h-3.5 w-3.5 -skew-x-[14deg] bg-pe-rouge" aria-hidden="true" />
+										</span>
 										<div className="min-w-0">
-											<div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-												<h2 className="text-xl font-black text-stone-900 uppercase tracking-wider font-[var(--font-heading)] break-words">
-													{selectedClient.full_name || 'Client'}
-												</h2>
-												<span className="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-primary/10 text-primary/90 border border-primary/30 uppercase tracking-wider">
-													Client Premium
-												</span>
-											</div>
-											<p className="text-xs text-stone-400 mt-1 flex items-center gap-1.5">
-												<Calendar size={13} />
-												Inscrit le {new Date(selectedClient.created_at).toLocaleDateString('fr-FR', {
+											<h3 className="break-words text-[1.6rem] font-extrabold uppercase leading-none tracking-[-0.01em] [font-stretch:120%]">
+												{selectedClient.full_name || 'Client'}
+											</h3>
+											<p className="pe-tech mt-2">
+												Client Premium · Inscrit le{' '}
+												{new Date(selectedClient.created_at).toLocaleDateString('fr-FR', {
 													day: 'numeric',
 													month: 'long',
-													year: 'numeric'
+													year: 'numeric',
 												})}
 											</p>
 										</div>
 									</div>
-
-									{/* Actions : Modifier informations & ouvrir messagerie */}
-									<div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start sm:self-auto">
+									{!isEditModalOpen && (
 										<button
 											type="button"
 											onClick={() => handleOpenEdit(selectedClient)}
-											className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-700 text-xs font-bold hover:bg-primary/10 hover:border-primary/40 hover:text-primary/90 transition-all shadow-2xs cursor-pointer"
+											className="pe-btn pe-btn--fantome pe-btn--sm"
 											title="Modifier les coordonnées du client"
 										>
-											<Pencil size={14} />
-											<span>Modifier la fiche</span>
+											<Pencil aria-hidden="true" />
+											Modifier la fiche
 										</button>
-									</div>
-								</div>
-
-								{/* Grille des coordonnées */}
-								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-									<div className="p-4 rounded-xl bg-stone-50 border border-stone-100 flex items-center gap-3">
-										<div className="w-10 h-10 rounded-xl bg-white border border-stone-200 flex items-center justify-center text-primary shrink-0">
-											<Phone size={18} />
-										</div>
-										<div className="min-w-0">
-											<p className="text-xs font-medium text-stone-400 uppercase tracking-wider">Téléphone</p>
-											{selectedClient.phone ? (
-												<a href={`tel:${selectedClient.phone}`} className="text-sm font-bold text-stone-900 hover:text-primary transition-colors truncate block">
-													{selectedClient.phone}
-												</a>
-											) : (
-												<p className="text-sm text-stone-400 italic">Non renseigné</p>
-											)}
-										</div>
-									</div>
-
-									<div className="p-4 rounded-xl bg-stone-50 border border-stone-100 flex items-center gap-3">
-										<div className="w-10 h-10 rounded-xl bg-white border border-stone-200 flex items-center justify-center text-primary shrink-0">
-											<Mail size={18} />
-										</div>
-										<div className="min-w-0">
-											<p className="text-xs font-medium text-stone-400 uppercase tracking-wider">Email</p>
-											{selectedClient.email ? (
-												<a href={`mailto:${selectedClient.email}`} className="text-sm font-bold text-stone-900 hover:text-primary transition-colors truncate block">
-													{selectedClient.email}
-												</a>
-											) : (
-												<p className="text-sm text-stone-400 italic">Non renseigné</p>
-											)}
-										</div>
-									</div>
-								</div>
-							</div>
-							
-							{/* Note privée */}
-							<ClientNoteCard professionalId={professional.id} client={selectedClient} />
-							
-							{/* Historique des rendez-vous */}
-							<div>
-								<h3 className="text-sm font-black text-stone-900 uppercase tracking-wider mb-3 flex items-center gap-2">
-									<Clock size={18} className="text-primary" />
-									<span>Historique des interventions</span>
-								</h3>
-								<ClientAppointments clientId={selectedClient.id} />
-							</div>
-
-							{/* Messagerie directe */}
-							<div>
-								<div className="flex items-center justify-between mb-3">
-									<h3 className="text-sm font-black text-stone-900 uppercase tracking-wider flex items-center gap-2">
-										<MessageSquare size={18} className="text-primary" />
-										<span>Fil de discussion direct</span>
-									</h3>
-								</div>
-								<MessageThread professionalId={professional.id} clientId={selectedClient.id} role="professional" />
-							</div>
-						</>
-					) : (
-						<div className="rounded-2xl border border-dashed border-stone-300 p-12 text-center bg-white shadow-xs">
-							<div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center text-stone-400 mx-auto mb-3">
-								<User size={24} />
-							</div>
-							<p className="text-sm font-bold text-stone-700">Sélectionnez un pilote</p>
-							<p className="text-xs text-stone-400 mt-1 max-w-sm mx-auto">
-								Cliquez sur un client dans la liste de gauche pour consulter sa fiche détaillée, son historique et lui envoyer un message.
-							</p>
-						</div>
-					)}
-				</div>
-			</div>
-
-			{/* Toast notification */}
-			{editToast && (
-				<div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-stone-900 text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-bold border border-stone-800 animate-in fade-in slide-in-from-bottom-4">
-					<Sparkles size={16} className="text-amber-400" />
-					<span>{editToast}</span>
-				</div>
-			)}
-
-			{/* Modal d'édition des coordonnées client */}
-			{isEditModalOpen && selectedClient && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95">
-						<div className="flex items-center justify-between pb-4 border-b border-stone-100">
-							<div className="flex items-center gap-2.5">
-								<div className="w-9 h-9 rounded-xl bg-primary/15 text-primary/90 flex items-center justify-center">
-									<Pencil size={18} />
-								</div>
-								<div>
-									<h4 className="font-bold text-stone-900 text-base">Modifier la fiche client</h4>
-									<p className="text-xs text-stone-400">Mise à jour des coordonnées par le professionnel</p>
-								</div>
-							</div>
-							<button
-								type="button"
-								onClick={() => setIsEditModalOpen(false)}
-								className="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg cursor-pointer"
-							>
-								<X size={18} />
-							</button>
-						</div>
-
-						<form onSubmit={handleSaveEdit} className="mt-4 space-y-4">
-							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Nom complet *
-								</label>
-								<input
-									type="text"
-									required
-									value={editFullName}
-									maxLength={MAX_NAME_LENGTH}
-									onChange={e => setEditFullName(e.target.value)}
-									placeholder="Ex : Sophie Martin"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
-								/>
-							</div>
-
-							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Numéro de téléphone
-								</label>
-								<input
-									type="tel"
-									value={editPhone}
-									onChange={e => setEditPhone(e.target.value)}
-									placeholder="Ex : 06 12 34 56 78"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
-								/>
-							</div>
-
-							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Adresse Email
-								</label>
-								<input
-									type="email"
-									value={editEmail}
-									onChange={e => setEditEmail(e.target.value)}
-									placeholder="Ex : sophie.martin@email.com"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-primary focus:bg-white focus:outline-none transition-all"
-								/>
-							</div>
-
-							<div className="pt-2 flex items-center justify-end gap-2.5">
-								<button
-									type="button"
-									onClick={() => setIsEditModalOpen(false)}
-									className="px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-xs font-bold hover:bg-stone-50 cursor-pointer"
-								>
-									Annuler
-								</button>
-								<button
-									type="submit"
-									disabled={isSavingClient}
-									className="px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
-								>
-									{isSavingClient ? (
-										<span>Enregistrement...</span>
-									) : (
-										<>
-											<Check size={14} />
-											<span>Enregistrer</span>
-										</>
 									)}
-								</button>
+								</div>
+
+								{isEditModalOpen ? (
+									<form onSubmit={handleSaveEdit} className="grid gap-4 rounded-[2px] bg-pe-carte p-4 text-pe-encre">
+										<p className="pe-h3">Modifier la fiche client</p>
+										<div>
+											<label className="pe-label" htmlFor="edit-nom">
+												Nom complet *
+											</label>
+											<input
+												id="edit-nom"
+												type="text"
+												required
+												value={editFullName}
+												maxLength={MAX_NAME_LENGTH}
+												onChange={(e) => setEditFullName(e.target.value)}
+												placeholder="Ex : Sophie Martin"
+												className="pe-input"
+											/>
+										</div>
+										<div className="grid gap-4 sm:grid-cols-2">
+											<div>
+												<label className="pe-label" htmlFor="edit-tel">
+													Numéro de téléphone
+												</label>
+												<input
+													id="edit-tel"
+													type="tel"
+													value={editPhone}
+													onChange={(e) => setEditPhone(e.target.value)}
+													placeholder="Ex : 06 12 34 56 78"
+													className="pe-input"
+												/>
+											</div>
+											<div>
+												<label className="pe-label" htmlFor="edit-mail">
+													Adresse Email
+												</label>
+												<input
+													id="edit-mail"
+													type="email"
+													value={editEmail}
+													onChange={(e) => setEditEmail(e.target.value)}
+													placeholder="Ex : sophie.martin@email.com"
+													className="pe-input"
+												/>
+											</div>
+										</div>
+										<div className="flex flex-wrap gap-2.5">
+											<button type="submit" disabled={isSavingClient} className="pe-btn">
+												{isSavingClient ? (
+													'Enregistrement…'
+												) : (
+													<>
+														<Check aria-hidden="true" />
+														Enregistrer
+													</>
+												)}
+											</button>
+											<button type="button" onClick={() => setIsEditModalOpen(false)} className="pe-btn pe-btn--ligne">
+												<X aria-hidden="true" />
+												Annuler
+											</button>
+										</div>
+									</form>
+								) : (
+									<dl className="grid gap-px overflow-hidden rounded-[2px] bg-pe-filet-sombre sm:grid-cols-2">
+										<div className="grid gap-1 bg-pe-carbone p-3 sm:pr-4">
+											<dt className="pe-tech flex items-center gap-2">
+												<Phone size={13} aria-hidden="true" /> Téléphone
+											</dt>
+											<dd>
+												{selectedClient.phone ? (
+													<a href={`tel:${selectedClient.phone}`} className="font-semibold tabular-nums hover:text-pe-rouge">
+														{selectedClient.phone}
+													</a>
+												) : (
+													<span className="text-pe-acier-clair">Non renseigné</span>
+												)}
+											</dd>
+										</div>
+										<div className="grid gap-1 bg-pe-carbone p-3 sm:pl-4">
+											<dt className="pe-tech flex items-center gap-2">
+												<Mail size={13} aria-hidden="true" /> Email
+											</dt>
+											<dd className="min-w-0">
+												{selectedClient.email ? (
+													<a href={`mailto:${selectedClient.email}`} className="block truncate font-semibold hover:text-pe-rouge">
+														{selectedClient.email}
+													</a>
+												) : (
+													<span className="text-pe-acier-clair">Non renseigné</span>
+												)}
+											</dd>
+										</div>
+									</dl>
+								)}
 							</div>
-						</form>
+						</section>
+
+						{/* Note privée */}
+						<ClientNoteCard professionalId={professional.id} client={selectedClient} />
+
+						{/* Historique des rendez-vous */}
+						<section className="pe-card" aria-labelledby="historique-titre">
+							<div className="pe-card__tete">
+								<h3 id="historique-titre" className="pe-h2">
+									Historique des interventions
+								</h3>
+							</div>
+							<ClientAppointments clientId={selectedClient.id} />
+						</section>
+
+						{/* Messagerie directe */}
+						<section aria-labelledby="fil-titre">
+							<h3 id="fil-titre" className="pe-h2 mb-3">
+								Fil de discussion direct
+							</h3>
+							<MessageThread professionalId={professional.id} clientId={selectedClient.id} role="professional" />
+						</section>
 					</div>
-				</div>
-			)}
+				) : (
+					<EmptyState
+						kind="liste"
+						title="Sélectionnez un client"
+						text="Cliquez sur un client dans la liste pour consulter sa fiche détaillée, son historique et lui envoyer un message."
+					/>
+				)}
+			</SidePanel>
 		</div>
 	);
 }

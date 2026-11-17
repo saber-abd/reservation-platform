@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import { signOut } from '@/lib/auth';
-import { LayoutDashboard, Wrench, Calendar, Users, BarChart3, UserCircle, LogOut } from 'lucide-react';
+import { CalendarClock, Wrench, CalendarRange, Users, Gauge, Building2, LogOut } from 'lucide-react';
 
 // Libellés alignés sur les titres des pages (l'ancien « Arsenal » / « Pilotes » ne disait pas où l'on allait).
 const links = [
-	{ label: 'Rendez-vous', href: '/dashboard', icon: <LayoutDashboard size={16} /> },
-	{ label: 'Prestations', href: '/dashboard/services', icon: <Wrench size={16} /> },
-	{ label: 'Disponibilités', href: '/dashboard/disponibilites', icon: <Calendar size={16} /> },
-	{ label: 'Clients', href: '/dashboard/clients', icon: <Users size={16} /> },
-	{ label: 'Statistiques', href: '/dashboard/statistiques', icon: <BarChart3 size={16} /> },
-	{ label: 'Profil', href: '/dashboard/profil', icon: <UserCircle size={16} /> },
+	{ label: 'Rendez-vous', href: '/dashboard', icon: <CalendarClock /> },
+	{ label: 'Prestations', href: '/dashboard/services', icon: <Wrench /> },
+	{ label: 'Disponibilités', href: '/dashboard/disponibilites', icon: <CalendarRange /> },
+	{ label: 'Clients', href: '/dashboard/clients', icon: <Users /> },
+	{ label: 'Statistiques', href: '/dashboard/statistiques', icon: <Gauge /> },
+	{ label: 'Profil', href: '/dashboard/profil', icon: <Building2 /> },
 ];
+
+const sansBarre = (p: string) => p.replace(/\/+$/, '') || '/';
 
 export default function PremiumDashboardNav({ basePath = '' }: { basePath?: string }) {
 	const [currentPath, setCurrentPath] = useState('');
@@ -32,33 +34,29 @@ export default function PremiumDashboardNav({ basePath = '' }: { basePath?: stri
 	}
 
 	return (
-		<nav className="flex flex-col gap-2 h-full">
-			<div className="flex flex-col gap-1 flex-1">
-				{links.map((link) => {
-					const isActive = currentPath === `${basePath}${link.href}`;
+		<nav className="pe-nav" aria-label="Tableau de bord">
+			<div className="pe-nav__liste">
+				{links.map((link, i) => {
+					const isActive = currentPath !== '' && sansBarre(currentPath) === sansBarre(`${basePath}${link.href}`);
 					return (
 						<a
 							key={link.href}
 							href={`${basePath}${link.href}`}
-							className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider transition-all ${
-								isActive
-									? 'bg-stone-900 text-white border-l-4 border-primary'
-									: 'text-stone-400 hover:bg-stone-900 hover:text-white border-l-4 border-transparent'
-							}`}
+							className="pe-nav__lien"
+							aria-current={isActive ? 'page' : undefined}
+							title={link.label}
 						>
 							{link.icon}
-							{link.label}
+							<span className="pe-nav__label">{link.label}</span>
+							<span className="pe-nav__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
 						</a>
 					);
 				})}
 			</div>
-			<div className="mt-auto pt-4 border-t border-stone-800">
-				<button
-					onClick={handleSignOut}
-					className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-stone-400 hover:bg-stone-900 hover:text-primary transition-colors"
-				>
-					<LogOut size={16} />
-					{isPreview ? "Quitter l'aperçu" : 'Se déconnecter'}
+			<div className="pe-nav__bas">
+				<button type="button" onClick={handleSignOut} className="pe-nav__lien pe-nav__sortie" title={isPreview ? "Quitter l'aperçu" : 'Se déconnecter'}>
+					<LogOut />
+					<span className="pe-nav__label">{isPreview ? "Quitter l'aperçu" : 'Se déconnecter'}</span>
 				</button>
 			</div>
 		</nav>

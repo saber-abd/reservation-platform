@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { signOut } from '@/lib/auth';
-import { LogOut, Calendar, Award, MessageSquare, UserCircle } from 'lucide-react';
+import { LogOut, CalendarClock, Award, MessageSquare, UserCircle } from 'lucide-react';
 
 const links = [
-	{ label: 'Mes Réservations', href: '/espace-client', icon: <Calendar size={16} /> },
-	{ label: 'Privilèges', href: '/espace-client/fidelite', icon: <Award size={16} /> },
-	{ label: 'Messages', href: '/espace-client/messages', icon: <MessageSquare size={16} /> },
-	{ label: 'Mon profil', href: '/espace-client/profil', icon: <UserCircle size={16} /> },
+	{ label: 'Mes Réservations', href: '/espace-client', icon: <CalendarClock /> },
+	{ label: 'Privilèges', href: '/espace-client/fidelite', icon: <Award /> },
+	{ label: 'Messages', href: '/espace-client/messages', icon: <MessageSquare /> },
+	{ label: 'Mon profil', href: '/espace-client/profil', icon: <UserCircle /> },
 ];
+
+const sansBarre = (p: string) => p.replace(/\/+$/, '') || '/';
 
 export default function PremiumClientNav({ basePath = '' }: { basePath?: string }) {
 	const [currentPath, setCurrentPath] = useState('');
@@ -23,33 +25,29 @@ export default function PremiumClientNav({ basePath = '' }: { basePath?: string 
 	}
 
 	return (
-		<nav className="flex flex-col gap-2 h-full">
-			<div className="flex flex-col gap-1 flex-1">
-				{links.map((link) => {
-					const isActive = currentPath === `${basePath}${link.href}`;
+		<nav className="pe-nav" aria-label="Espace client">
+			<div className="pe-nav__liste">
+				{links.map((link, i) => {
+					const isActive = currentPath !== '' && sansBarre(currentPath) === sansBarre(`${basePath}${link.href}`);
 					return (
 						<a
 							key={link.href}
 							href={`${basePath}${link.href}`}
-							className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider transition-all ${
-								isActive
-									? 'bg-muted text-foreground border-l-4 border-primary'
-									: 'text-muted-foreground hover:bg-muted hover:text-foreground border-l-4 border-transparent'
-							}`}
+							className="pe-nav__lien"
+							aria-current={isActive ? 'page' : undefined}
+							title={link.label}
 						>
 							{link.icon}
-							{link.label}
+							<span className="pe-nav__label">{link.label}</span>
+							<span className="pe-nav__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
 						</a>
 					);
 				})}
 			</div>
-			<div className="mt-auto pt-4 border-t border-stone-800">
-				<button
-					onClick={handleSignOut}
-					className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-wider text-muted-foreground hover:bg-muted hover:text-primary transition-colors"
-				>
-					<LogOut size={16} />
-					Se déconnecter
+			<div className="pe-nav__bas">
+				<button type="button" onClick={handleSignOut} className="pe-nav__lien pe-nav__sortie" title="Se déconnecter">
+					<LogOut />
+					<span className="pe-nav__label">Se déconnecter</span>
 				</button>
 			</div>
 		</nav>

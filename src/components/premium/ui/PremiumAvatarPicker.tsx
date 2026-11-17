@@ -366,7 +366,10 @@ export function AvatarDisplay({
 				className={`flex items-center justify-center rounded-full bg-stone-200 text-stone-500 shrink-0 ${className}`}
 				style={{ width: size, height: size, fontSize: size * 0.45 }}
 			>
-				👤
+				<svg viewBox="0 0 24 24" width="55%" height="55%" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+					<circle cx="12" cy="8" r="4" />
+					<path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" />
+				</svg>
 			</span>
 		);
 	}
@@ -382,24 +385,27 @@ export function AvatarDisplay({
 export default function AvatarPicker({ value, onChange }: AvatarPickerProps) {
 	return (
 		<div>
-			<p className="text-sm font-medium text-stone-700">Photo de profil</p>
-			<p className="mt-0.5 text-xs text-stone-500">Choisissez un avatar prédéfini</p>
-			<div className="mt-3 grid grid-cols-6 gap-2 sm:grid-cols-6">
-				{AVATARS.map((avatar) => (
-					<button
-						key={avatar.key}
-						type="button"
-						title={avatar.label}
-						onClick={() => onChange(avatar.key)}
-						className={`overflow-hidden rounded-full transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-2 ${
-							value === avatar.key
-								? 'ring-2 ring-rose-600 ring-offset-2 scale-110'
-								: 'opacity-70 hover:opacity-100'
-						}`}
-						style={{ width: 52, height: 52 }}
-						dangerouslySetInnerHTML={{ __html: avatar.svg }}
-					/>
-				))}
+			<p className="pe-label !mb-1">Photo de profil</p>
+			<p className="text-sm text-pe-acier">Choisissez un avatar prédéfini</p>
+			<div className="mt-4 grid grid-cols-6 gap-3" role="radiogroup" aria-label="Avatar">
+				{AVATARS.map((avatar) => {
+					const selected = value === avatar.key;
+					return (
+						<button
+							key={avatar.key}
+							type="button"
+							role="radio"
+							aria-checked={selected}
+							aria-label={avatar.label}
+							title={avatar.label}
+							onClick={() => onChange(avatar.key)}
+							className={`relative aspect-square w-full max-w-[56px] overflow-hidden rounded-full transition-[opacity,transform,box-shadow] duration-200 hover:opacity-100 ${
+								selected ? 'opacity-100 shadow-[0_0_0_2px_var(--pe-carte),0_0_0_4px_var(--pe-rouge)]' : 'opacity-60'
+							}`}
+							dangerouslySetInnerHTML={{ __html: avatar.svg }}
+						/>
+					);
+				})}
 			</div>
 		</div>
 	);

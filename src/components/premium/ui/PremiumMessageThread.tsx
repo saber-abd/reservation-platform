@@ -1,14 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { getMessages, sendMessage, type Message } from '@/lib/queries';
 import { getSession } from '@/lib/auth';
+import { SendHorizontal } from 'lucide-react';
 
 interface Props {
 	professionalId: string;
 	clientId: string;
 	role: 'professional' | 'client';
+	/** « grand » : fil plus haut (page Messagerie de l'espace client). */
+	variant?: 'grand';
 }
 
-export default function MessageThread({ professionalId, clientId, role }: Props) {
+function jourDe(iso: string) {
+	return new Date(iso).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+export default function MessageThread({ professionalId, clientId, role, variant }: Props) {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [body, setBody] = useState('');
 	const [loading, setLoading] = useState(true);
@@ -60,7 +67,9 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 	}, [professionalId, clientId]);
 
 	useEffect(() => {
-		bottomRef.current?.scrollIntoView({ block: 'nearest' });
+		// Fait défiler le fil (et seulement lui) jusqu'au dernier message.
+		const flux = bottomRef.current?.parentElement;
+		if (flux) flux.scrollTop = flux.scrollHeight;
 	}, [messages]);
 
 	async function handleSend(e: React.FormEvent) {
@@ -119,47 +128,62 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 	}
 
 	return (
-		<div className="flex flex-col rounded-xl border border-border bg-white">
-			<div className="max-h-80 min-h-40 flex-1 overflow-y-auto p-4">
-				{loading && <p className="text-sm text-stone-500">Chargement des messages...</p>}
-				{!loading && messages.length === 0 && (
-					<p className="text-sm text-stone-500">Aucun message pour le moment. Démarrez la conversation !</p>
+		<div className={`pe-fil ${variant === 'grand' ? 'pe-fil--grand' : ''}`}>
+			<div className="pe-fil__flux" role="log" aria-live="polite" aria-label="Messages">
+				{loading && messages.length === 0 && (
+					<div aria-busy="true" className="flex flex-col gap-3">
+						<span className="sr-only">Chargement…</span>
+						<span className="pe-skel self-start" style={{ height: 46, width: '55%' }} />
+						<span className="pe-skel self-end" style={{ height: 46, width: '45%' }} />
+						<span className="pe-skel self-start" style={{ height: 30, width: '35%' }} />
+					</div>
 				)}
-				<div className="flex flex-col gap-2">
-					{messages.map((message) => (
-						<div
-							key={message.id}
-							className={`max-w-[75%] rounded-xl px-3 py-2 text-sm ${
-								message.sender === role ? 'self-end bg-rose-600 text-white' : 'self-start bg-stone-100 text-stone-800'
-							}`}
-						>
-							<p>{message.body}</p>
-							<p className={`mt-1 text-[10px] ${message.sender === role ? 'text-rose-100' : 'text-stone-400'}`}>
-								{new Date(message.created_at).toLocaleString('fr-FR', {
-									day: 'numeric',
-									month: 'short',
-									hour: '2-digit',
-									minute: '2-digit',
-								})}
-							</p>
+				{!loading && messages.length === 0 && (
+					<div className="m-auto grid justify-items-center gap-2 text-center">
+						<svg viewBox="0 0 64 40" className="h-10 w-16 text-pe-filet-fort" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+							<path d="M4 4h38v22H22l-8 8v-8H4z" />
+							<path d="M30 14h30v20h-6v6l-8-6H30z" />
+						</svg>
+						<p className="text-sm text-pe-acier">Aucun message pour le moment. Démarrez la conversation !</p>
+					</div>
+				)}
+				{messages.map((message, i) => {
+					const mine = message.sender === role;
+					const jour = jourDe(message.created_at);
+					const nouveauJour = i === 0 || jourDe(messages[i - 1].created_at) !== jour;
+					return (
+						<div key={message.id} className="contents">
+							{nouveauJour && <p className="pe-fil__jour">{jour}</p>}
+							<div className={`pe-bulle ${mine ? 'pe-bulle--moi' : 'pe-bulle--eux'}`}>
+								<p>{message.body}</p>
+								<time dateTime={message.created_at}>
+									{new Date(message.created_at).toLocaleString('fr-FR', {
+										hour: '2-digit',
+										minute: '2-digit',
+									})}
+								</time>
+							</div>
 						</div>
-					))}
-				</div>
+					);
+				})}
 				<div ref={bottomRef} />
 			</div>
-			<form onSubmit={handleSend} className="flex gap-2 border-t border-border p-3">
+			<form onSubmit={handleSend} className="pe-fil__saisie">
+				<label htmlFor={`msg-${clientId}`} className="sr-only">
+					Votre message
+				</label>
 				<input
+					id={`msg-${clientId}`}
 					value={body}
 					onChange={(e) => setBody(e.target.value)}
 					placeholder="Écrire un message..."
-					className="flex-1 rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+					autoComplete="off"
+					className="pe-input"
 				/>
-				<button
-					type="submit"
-					disabled={sending || !body.trim()}
-					className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700 disabled:opacity-50"
-				>
-					Envoyer
+				<button type="submit" disabled={sending || !body.trim()} className="pe-btn">
+					<SendHorizontal aria-hidden="true" />
+					<span className="hidden sm:inline">Envoyer</span>
+					<span className="sr-only sm:hidden">Envoyer</span>
 				</button>
 			</form>
 		</div>
