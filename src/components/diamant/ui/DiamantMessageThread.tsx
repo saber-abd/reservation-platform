@@ -14,6 +14,7 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 	const [loading, setLoading] = useState(true);
 	const [sending, setSending] = useState(false);
 	const bottomRef = useRef<HTMLDivElement>(null);
+	const listeRef = useRef<HTMLDivElement>(null);
 
 	function getStorageKey(pid: string, cid: string) {
 		return `diamant_messages_${pid}_${cid}`;
@@ -59,8 +60,10 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 		};
 	}, [professionalId, clientId]);
 
+	// Défile seulement le fil (pas la page) jusqu'au dernier message.
 	useEffect(() => {
-		bottomRef.current?.scrollIntoView({ block: 'nearest' });
+		const el = listeRef.current;
+		if (el) el.scrollTop = el.scrollHeight;
 	}, [messages]);
 
 	async function handleSend(e: React.FormEvent) {
@@ -119,45 +122,51 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 	}
 
 	return (
-		<div className="flex flex-col rounded-xl border border-border bg-white">
-			<div className="max-h-80 min-h-40 flex-1 overflow-y-auto p-4">
-				{loading && <p className="text-sm text-stone-500">Chargement des messages...</p>}
-				{!loading && messages.length === 0 && (
-					<p className="text-sm text-stone-500">Aucun message pour le moment. Démarrez la conversation !</p>
+		<div className="flex flex-col overflow-hidden rounded-xl border border-dx-filet bg-dx-ivoire">
+			<div ref={listeRef} className="max-h-80 min-h-40 flex-1 overflow-y-auto px-4 py-4">
+				{loading && (
+					<div aria-busy="true" className="flex flex-col gap-2">
+						<span className="sr-only" role="status">Chargement des messages...</span>
+						<span className="dx-squelette block h-9 w-2/3" />
+						<span className="dx-squelette ml-auto block h-9 w-1/2" />
+					</div>
 				)}
-				<div className="flex flex-col gap-2">
-					{messages.map((message) => (
-						<div
-							key={message.id}
-							className={`max-w-[75%] rounded-xl px-3 py-2 text-sm ${
-								message.sender === role ? 'self-end bg-rose-600 text-white' : 'self-start bg-stone-100 text-stone-800'
-							}`}
-						>
-							<p>{message.body}</p>
-							<p className={`mt-1 text-[10px] ${message.sender === role ? 'text-rose-100' : 'text-stone-400'}`}>
-								{new Date(message.created_at).toLocaleString('fr-FR', {
-									day: 'numeric',
-									month: 'short',
-									hour: '2-digit',
-									minute: '2-digit',
-								})}
-							</p>
-						</div>
-					))}
+				{!loading && messages.length === 0 && (
+					<p className="py-6 text-center text-sm text-dx-gris">Aucun message pour le moment. Démarrez la conversation !</p>
+				)}
+				<div className="flex flex-col gap-1.5">
+					{messages.map((message) => {
+						const moi = message.sender === role;
+						return (
+							<div key={message.id} className={`flex flex-col ${moi ? 'items-end' : 'items-start'}`}>
+								<p className={`dx-bulle !text-sm ${moi ? 'dx-bulle--moi' : 'dx-bulle--autre'}`}>{message.body}</p>
+								<p className="mt-1 px-1 text-[10px] text-dx-gris">
+									{new Date(message.created_at).toLocaleString('fr-FR', {
+										day: 'numeric',
+										month: 'short',
+										hour: '2-digit',
+										minute: '2-digit',
+									})}
+								</p>
+							</div>
+						);
+					})}
 				</div>
 				<div ref={bottomRef} />
 			</div>
-			<form onSubmit={handleSend} className="flex gap-2 border-t border-border p-3">
+			<form onSubmit={handleSend} className="flex items-center gap-2 border-t border-dx-filet bg-dx-carte p-2.5">
+				<label htmlFor={`fil-${clientId}`} className="sr-only">Écrire un message</label>
 				<input
+					id={`fil-${clientId}`}
 					value={body}
 					onChange={(e) => setBody(e.target.value)}
 					placeholder="Écrire un message..."
-					className="flex-1 rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+					className="min-w-0 flex-1 rounded-full bg-transparent px-3 py-2 text-sm text-dx-encre placeholder:text-dx-gris focus:outline-none"
 				/>
 				<button
 					type="submit"
 					disabled={sending || !body.trim()}
-					className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700 disabled:opacity-50"
+					className="dx-btn dx-btn--sm"
 				>
 					Envoyer
 				</button>

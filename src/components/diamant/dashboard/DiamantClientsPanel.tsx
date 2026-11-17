@@ -1,34 +1,36 @@
 import { useEffect, useState, useMemo } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { supabase } from '@/lib/supabase';
 import { getSession } from '@/lib/auth';
-import { 
-	getClientNote, 
-	getAllClients, 
-	upsertClientNote, 
-	getAppointmentsForClient, 
-	getPrimaryProfessional, 
-	getProfessionalByUserId, 
-	getDemoTag, 
+import {
+	getClientNote,
+	getAllClients,
+	upsertClientNote,
+	getAppointmentsForClient,
+	getPrimaryProfessional,
+	getProfessionalByUserId,
+	getDemoTag,
 	updateClient,
-	type Client, 
-	type Appointment, 
-	type Professional 
+	type Client,
+	type Appointment,
+	type Professional
 } from '@/lib/queries';
 import { DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
 import { isRoleReadOnly } from '@/lib/permissions';
 import MessageThread from '@/components/diamant/ui/DiamantMessageThread';
-import { User, Phone, Mail, Calendar, MessageSquare, Search, ExternalLink, ShieldCheck, Clock, FileText, Pencil, X, Check, Sparkles } from 'lucide-react';
+import { Phone, Mail, Calendar, MessageSquare, Search, ExternalLink, FileText, Pencil, Check, ChevronRight, Clock } from 'lucide-react';
 import { MAX_NAME_LENGTH } from '@/lib/limits';
+import { Avatar, EASE, EnChargement, EtatVide, Fenetre, Panneau, Pastille, PastilleStatut, Squelette } from './kit/primitives';
+import { avertirLectureSeule, confirmer, signalerErreur } from './kit/notifier';
+import { publierClients } from './kit/indexClients';
 
 function ClientNoteCard({ professionalId, client }: { professionalId: string; client: Client }) {
 	const [note, setNote] = useState('');
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
-	const [status, setStatus] = useState<string | null>(null);
 
 	useEffect(() => {
 		setLoading(true);
-		setStatus(null);
 		getClientNote(professionalId, client.id)
 			.then((existing) => setNote(existing?.note ?? ''))
 			.finally(() => setLoading(false));
@@ -36,56 +38,53 @@ function ClientNoteCard({ professionalId, client }: { professionalId: string; cl
 
 	async function handleSave() {
 		if (isRoleReadOnly()) {
-			setStatus("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
-			setTimeout(() => setStatus(null), 3000);
+			avertirLectureSeule("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
 			return;
 		}
 		setSaving(true);
-		setStatus(null);
 		try {
 			await upsertClientNote(professionalId, client.id, note);
-			setStatus('Note enregistrée avec succès.');
-			setTimeout(() => setStatus(null), 3000);
+			confirmer('Note enregistrée avec succès.');
 		} catch (err) {
-			setStatus(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
+			signalerErreur(err instanceof Error ? err.message : "Erreur lors de l'enregistrement.");
 		} finally {
 			setSaving(false);
 		}
 	}
 
 	return (
-		<div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-xs">
-			<div className="flex items-center gap-2 mb-1">
-				<FileText size={16} className="text-deep-teal-600" />
-				<p className="text-sm font-bold text-stone-900">Note privée & Fiche technique</p>
+		<section className="dx-carte dx-carte--plate p-5">
+			<div className="flex items-center gap-2">
+				<FileText size={16} className="text-dx-terre" />
+				<h3 className="dx-h3">Note privée & Fiche technique</h3>
 			</div>
-			<p className="text-xs text-stone-500">
+			<p className="mt-1 text-xs text-dx-gris">
 				Visible uniquement par vous — préférences, formules de coloration, sensibilités, allergies...
 			</p>
-			<textarea
-				rows={3}
-				value={note}
-				disabled={loading}
-				onChange={(e) => setNote(e.target.value)}
-				placeholder="Ex : coloration 7.1 + 20vol, préfère le thé vert, allergie au latex..."
-				className="mt-3 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-deep-teal-500/20 transition-all placeholder:text-stone-400"
-			/>
-			<div className="mt-3 flex items-center justify-between">
+			<label htmlFor={`note-${client.id}`} className="sr-only">Note privée</label>
+			{loading ? (
+				<Squelette className="mt-3 h-[88px] w-full !rounded-[10px]" />
+			) : (
+				<textarea
+					id={`note-${client.id}`}
+					rows={3}
+					value={note}
+					onChange={(e) => setNote(e.target.value)}
+					placeholder="Ex : coloration 7.1 + 20vol, préfère le thé vert, allergie au latex..."
+					className="dx-champ mt-3"
+				/>
+			)}
+			<div className="mt-3 flex items-center justify-end">
 				<button
 					type="button"
 					onClick={handleSave}
 					disabled={saving || loading}
-					className="rounded-xl bg-deep-teal-600 px-4 py-2 text-xs font-bold text-white transition-all hover:bg-deep-teal-700 disabled:opacity-50 cursor-pointer shadow-2xs"
+					className="dx-btn dx-btn--sm dx-btn--encre"
 				>
 					{saving ? 'Enregistrement...' : 'Enregistrer la note'}
 				</button>
-				{status && (
-					<span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">
-						{status}
-					</span>
-				)}
 			</div>
-		</div>
+		</section>
 	);
 }
 
@@ -94,63 +93,55 @@ function ClientAppointments({ clientId }: { clientId: string }) {
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
+		setLoading(true);
 		getAppointmentsForClient(clientId)
 			.then(setAppointments)
 			.finally(() => setLoading(false));
 	}, [clientId]);
 
-	if (loading) return <p className="text-sm text-stone-400 py-4">Chargement des rendez-vous...</p>;
+	if (loading) {
+		return (
+			<EnChargement label="Chargement des rendez-vous…" className="space-y-2">
+				<Squelette className="h-12 w-full" />
+				<Squelette className="h-12 w-full" />
+			</EnChargement>
+		);
+	}
 	if (appointments.length === 0) {
 		return (
-			<div className="rounded-2xl border border-dashed border-stone-200 p-6 text-center text-xs text-stone-400 bg-stone-50/50">
+			<div className="rounded-xl border border-dashed border-dx-filet-fort px-4 py-6 text-center text-sm text-dx-gris">
 				Aucun rendez-vous enregistré pour ce client pour le moment.
 			</div>
 		);
 	}
 
-	const statusLabels: Record<string, { label: string; cls: string }> = {
-		pending: { label: 'En attente', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-		confirmed: { label: 'Confirmé', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-		cancelled: { label: 'Annulé', cls: 'bg-rose-50 text-rose-700 border-rose-200' },
-		completed: { label: 'Terminé', cls: 'bg-stone-100 text-stone-700 border-stone-200' },
-	};
-
 	return (
-		<div className="rounded-2xl border border-stone-200 bg-white overflow-hidden shadow-xs">
-			<table className="w-full text-left text-sm">
-				<thead className="bg-stone-50 text-xs uppercase font-bold text-stone-400 border-b border-stone-100">
-					<tr>
-						<th className="px-4 py-3">Date & Heure</th>
-						<th className="px-4 py-3">Prestation</th>
-						<th className="px-4 py-3 text-right">Statut</th>
-					</tr>
-				</thead>
-				<tbody className="divide-y divide-stone-100">
-					{appointments.map((apt) => {
-						const meta = statusLabels[apt.status] || { label: apt.status, cls: 'bg-stone-100 text-stone-700' };
-						return (
-							<tr key={apt.id} className="hover:bg-stone-50/50 transition-colors">
-								<td className="px-4 py-3 text-stone-900 font-medium">
-									{new Date(apt.start_time).toLocaleString('fr-FR', {
-										day: '2-digit',
-										month: 'short',
-										year: 'numeric',
-										hour: '2-digit',
-										minute: '2-digit'
-									})}
-								</td>
-								<td className="px-4 py-3 text-stone-600">{apt.services?.name ?? '—'}</td>
-								<td className="px-4 py-3 text-right">
-									<span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${meta.cls}`}>
-										{meta.label}
-									</span>
-								</td>
-							</tr>
-						);
-					})}
-				</tbody>
-			</table>
-		</div>
+		<ol className="divide-y divide-dx-filet overflow-hidden rounded-xl border border-dx-filet bg-dx-carte">
+			{appointments.map((apt) => {
+				const d = new Date(apt.start_time);
+				return (
+					<li key={apt.id} className="grid grid-cols-[3.25rem_1fr_auto] items-center gap-3 px-4 py-3">
+						<div className="text-center leading-none">
+							<p className="dx-chiffre text-2xl text-dx-encre">{d.getDate()}</p>
+							<p className="mt-1 text-[0.6875rem] text-dx-gris">{d.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' })}</p>
+						</div>
+						<div className="min-w-0">
+							<p className="truncate text-sm font-semibold text-dx-encre">{apt.services?.name ?? '—'}</p>
+							<p className="dx-tabulaire text-xs text-dx-gris">
+								{d.toLocaleString('fr-FR', {
+									day: '2-digit',
+									month: 'short',
+									year: 'numeric',
+									hour: '2-digit',
+									minute: '2-digit'
+								})}
+							</p>
+						</div>
+						<PastilleStatut statut={apt.status} />
+					</li>
+				);
+			})}
+		</ol>
 	);
 }
 
@@ -158,8 +149,11 @@ export default function ClientsPanel() {
 	const [professional, setProfessional] = useState<Professional | null>(null);
 	const [clients, setClients] = useState<Client[]>([]);
 	const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+	const [ficheOuverte, setFicheOuverte] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [searchQuery, setSearchQuery] = useState('');
+	const [basePath, setBasePath] = useState('/demo-diamant');
+	const reduit = useReducedMotion();
 
 	// Modal d'édition des infos client
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -167,12 +161,6 @@ export default function ClientsPanel() {
 	const [editPhone, setEditPhone] = useState('');
 	const [editEmail, setEditEmail] = useState('');
 	const [isSavingClient, setIsSavingClient] = useState(false);
-	const [editToast, setEditToast] = useState<string | null>(null);
-
-	function showEditToast(msg: string) {
-		setEditToast(msg);
-		setTimeout(() => setEditToast(null), 3500);
-	}
 
 	function handleOpenEdit(client: Client) {
 		setEditFullName(client.full_name || '');
@@ -184,7 +172,7 @@ export default function ClientsPanel() {
 	async function handleSaveEdit(e: React.FormEvent) {
 		e.preventDefault();
 		if (isRoleReadOnly()) {
-			showEditToast("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
+			avertirLectureSeule("Action désactivée en mode Démo : Ce rôle est réservé à la présentation commerciale en lecture seule.");
 			return;
 		}
 		if (!selectedClient) return;
@@ -199,10 +187,10 @@ export default function ClientsPanel() {
 			setSelectedClient(prev => prev ? { ...prev, ...updated } : null);
 			setClients(prev => prev.map(c => c.id === selectedClient.id ? { ...c, ...updated } : c));
 			setIsEditModalOpen(false);
-			showEditToast(`Fiche de ${editFullName.trim() || 'ce client'} mise à jour avec succès.`);
+			confirmer(`Fiche de ${editFullName.trim() || 'ce client'} mise à jour avec succès.`);
 		} catch (err) {
 			console.error('Error updating client in ClientsPanel:', err);
-			showEditToast("Erreur lors de la mise à jour des coordonnées.");
+			signalerErreur("Erreur lors de la mise à jour des coordonnées.");
 		} finally {
 			setIsSavingClient(false);
 		}
@@ -210,6 +198,7 @@ export default function ClientsPanel() {
 
 	useEffect(() => {
 		let isMounted = true;
+		setBasePath(window.location.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '/demo-diamant');
 
 		async function loadData() {
 			try {
@@ -243,14 +232,16 @@ export default function ClientsPanel() {
 
 				if (isMounted) {
 					setClients(allClients);
+					publierClients(allClients);
 
-					// Présélectionner le client passé en paramètre URL ?clientId=...
+					// Présélectionner le client passé en paramètre URL ?clientId=... (fiche ouverte)
 					const params = new URLSearchParams(window.location.search);
 					const targetId = params.get('clientId');
 					if (targetId) {
 						const found = allClients.find(c => c.id === targetId);
 						if (found) {
 							setSelectedClient(found);
+							setFicheOuverte(true);
 						} else if (allClients.length > 0) {
 							setSelectedClient(allClients[0]);
 						}
@@ -277,7 +268,7 @@ export default function ClientsPanel() {
 
 		window.addEventListener('diamant:client-updated', onClientUpdated);
 
-		return () => { 
+		return () => {
 			isMounted = false;
 			window.removeEventListener('diamant:client-updated', onClientUpdated);
 		};
@@ -287,336 +278,313 @@ export default function ClientsPanel() {
 	const filteredClients = useMemo(() => {
 		if (!searchQuery.trim()) return clients;
 		const q = searchQuery.toLowerCase().trim();
-		return clients.filter(c => 
+		return clients.filter(c =>
 			(c.full_name && c.full_name.toLowerCase().includes(q)) ||
 			(c.phone && c.phone.includes(q)) ||
 			(c.email && c.email.toLowerCase().includes(q))
 		);
 	}, [clients, searchQuery]);
 
-	const basePath = typeof window !== 'undefined' ? (window.location.pathname.match(/^\/(demo-[^/]+)/)?.[0] || '/demo-diamant') : '/demo-diamant';
+	function ouvrirFiche(client: Client) {
+		setSelectedClient(client);
+		setFicheOuverte(true);
+	}
+
+	const inscrit = (c: Client) =>
+		new Date(c.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
 	if (loading) {
 		return (
-			<div className="flex justify-center items-center py-20 text-stone-400">
-				<p className="text-sm font-semibold">Chargement de la clientèle...</p>
-			</div>
+			<EnChargement label="Chargement de la clientèle…" className="space-y-4">
+				<div className="flex flex-wrap items-center justify-between gap-3">
+					<Squelette className="h-11 w-full max-w-md !rounded-full" />
+					<Squelette className="h-4 w-40" />
+				</div>
+				<div className="dx-carte divide-y divide-dx-filet overflow-hidden">
+					{[0, 1, 2, 3, 4, 5].map((i) => (
+						<div key={i} className="flex items-center gap-4 px-5 py-4">
+							<Squelette className="h-9 w-9 !rounded-full" />
+							<Squelette className="h-4 w-44" />
+							<Squelette className="ml-auto hidden h-4 w-32 sm:block" />
+							<Squelette className="hidden h-4 w-48 md:block" />
+						</div>
+					))}
+				</div>
+			</EnChargement>
 		);
 	}
 
 	return (
 		<div>
-			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-				<div>
-					<h1 className="text-2xl font-bold text-stone-900 tracking-tight">Fiches Clientèle</h1>
-					<p className="mt-1 text-sm text-stone-500">
-						Consultez l'historique de vos {clients.length} clients, accédez à leurs coordonnées et échangez directement.
-					</p>
+			<div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+				<div className="dx-recherche w-full max-w-md">
+					<Search size={16} />
+					<input
+						type="search"
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
+						placeholder="Rechercher par nom, tél, email..."
+						aria-label="Rechercher un client"
+						className="dx-champ"
+					/>
 				</div>
+				<p className="dx-meta" aria-live="polite">
+					<span className="dx-tabulaire font-semibold text-dx-encre">{filteredClients.length}</span> client{filteredClients.length > 1 ? 's' : ''} trouvé{filteredClients.length > 1 ? 's' : ''}
+					{searchQuery.trim() ? '' : ` · Consultez l'historique de vos ${clients.length} clients, leurs coordonnées et vos échanges.`}
+				</p>
 			</div>
 
-			<div className="mt-6 grid items-start gap-6 lg:grid-cols-3">
-				{/* Colonne de gauche : Annuaire des clients */}
-				<div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-xs lg:col-span-1">
-					<div className="relative mb-3">
-						<Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-						<input
-							type="text"
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-							placeholder="Rechercher par nom, tél, email..."
-							className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-stone-50 border border-stone-200 focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all placeholder:text-stone-400"
-						/>
-					</div>
-
-					<div className="flex items-center justify-between px-1 mb-2">
-						<span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
-							{filteredClients.length} client{filteredClients.length > 1 ? 's' : ''} trouvé{filteredClients.length > 1 ? 's' : ''}
-						</span>
-					</div>
-
-					<div className="max-h-[580px] overflow-y-auto space-y-1.5 pr-1">
-						{filteredClients.length === 0 && (
-							<p className="py-8 text-center text-xs text-stone-400">Aucun client ne correspond à votre recherche.</p>
-						)}
-						{filteredClients.map((client) => {
-							const isSelected = selectedClient?.id === client.id;
-							return (
-								<button
-									key={client.id}
-									onClick={() => setSelectedClient(client)}
-									className={`w-full text-left p-3 rounded-xl flex items-center gap-3 transition-all cursor-pointer ${
-										isSelected
-											? 'border-deep-teal-500 bg-deep-teal-50/80 text-deep-teal-950 font-medium ring-1 ring-deep-teal-200 shadow-xs'
-											: 'border-stone-100 hover:border-stone-200 bg-stone-50/50 hover:bg-white text-stone-700'
-									} border`}
-								>
-									<div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-bold text-xs ${
-										isSelected 
-											? 'bg-deep-teal-600 text-white shadow-2xs' 
-											: 'bg-stone-200 text-stone-600'
-									}`}>
-										{client.avatar_url && client.avatar_url.startsWith('http') ? (
-											<img src={client.avatar_url} alt="" className="w-full h-full object-cover rounded-full" />
-										) : client.full_name ? (
-											client.full_name.charAt(0).toUpperCase()
-										) : (
-											<User size={16} />
-										)}
-									</div>
-									<div className="flex-1 min-w-0">
-										<p className={`font-bold text-sm truncate ${isSelected ? 'text-deep-teal-950' : 'text-stone-900'}`}>
-											{client.full_name || 'Client'}
-										</p>
-										<p className="text-xs text-stone-500 truncate mt-0.5">
-											{client.phone || client.email || 'Client enregistré'}
-										</p>
-									</div>
-								</button>
-							);
-						})}
-					</div>
-				</div>
-
-				{/* Colonne de droite : Fiche détaillée du client sélectionné */}
-				<div className="lg:col-span-2 flex flex-col gap-6">
-					{selectedClient && professional ? (
-						<>
-							{/* Dossier client */}
-							<div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-xs">
-								<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-stone-100">
-									<div className="flex items-center gap-4 min-w-0">
-										<div className="w-16 h-16 shrink-0 rounded-2xl bg-gradient-to-br from-deep-teal-500 to-deep-teal-700 text-white flex items-center justify-center font-bold text-2xl shadow-sm overflow-hidden">
-											{selectedClient.avatar_url && selectedClient.avatar_url.startsWith('http') ? (
-												<img src={selectedClient.avatar_url} alt="" className="w-full h-full object-cover" />
-											) : selectedClient.full_name ? (
-												selectedClient.full_name.charAt(0).toUpperCase()
-											) : (
-												<User size={28} />
-											)}
-										</div>
-										<div className="min-w-0">
-											<div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-												<h2 className="text-xl font-black text-stone-900 tracking-tight break-words">
-													{selectedClient.full_name || 'Client'}
-												</h2>
-												<span className="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-deep-teal-50 text-deep-teal-700 border border-deep-teal-200 uppercase tracking-wider">
-													Client Privilégié
-												</span>
-											</div>
-											<p className="text-xs text-stone-400 mt-1 flex items-center gap-1.5">
-												<Calendar size={13} />
-												Inscrit le {new Date(selectedClient.created_at).toLocaleDateString('fr-FR', {
-													day: 'numeric',
-													month: 'long',
-													year: 'numeric'
-												})}
-											</p>
-										</div>
-									</div>
-
-									{/* Actions : Modifier informations & ouvrir messagerie */}
-									<div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start sm:self-auto">
-										<button
-											type="button"
-											onClick={() => handleOpenEdit(selectedClient)}
-											className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-700 text-xs font-bold hover:bg-deep-teal-50 hover:border-deep-teal-300 hover:text-deep-teal-700 transition-all shadow-2xs cursor-pointer"
-											title="Modifier les coordonnées du client"
+			<div className="dx-carte overflow-hidden">
+				{filteredClients.length === 0 ? (
+					<EtatVide
+						dessin="clients"
+						titre="Aucun client ne correspond à votre recherche."
+						action={searchQuery ? <button type="button" onClick={() => setSearchQuery('')} className="dx-btn dx-btn--sm dx-btn--ligne">Effacer la recherche</button> : undefined}
+					/>
+				) : (
+					<>
+						<table className="dx-table hidden md:table">
+							<thead>
+								<tr>
+									<th>Client</th>
+									<th>Téléphone</th>
+									<th>Email</th>
+									<th className="hidden lg:table-cell">Inscrit le</th>
+									<th className="w-10"><span className="sr-only">Ouvrir</span></th>
+								</tr>
+							</thead>
+							<tbody>
+								{filteredClients.map((client, i) => {
+									const actif = ficheOuverte && selectedClient?.id === client.id;
+									return (
+										<motion.tr
+											key={client.id}
+											data-actif={actif}
+											onClick={() => ouvrirFiche(client)}
+											className="dx-ligne-cliquable group"
+											initial={reduit ? false : { opacity: 0 }}
+											animate={{ opacity: 1 }}
+											transition={{ duration: 0.35, ease: EASE, delay: Math.min(i * 0.025, 0.35) }}
 										>
-											<Pencil size={14} />
-											<span>Modifier la fiche</span>
-										</button>
-										<a
-											href={`${basePath}/dashboard/messages?clientId=${encodeURIComponent(selectedClient.id)}`}
-											className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 transition-all shadow-xs"
-										>
-											<MessageSquare size={15} />
-											<span>Ouvrir dans la messagerie</span>
-											<ExternalLink size={13} />
-										</a>
-									</div>
-								</div>
+											<td>
+												<div className="flex items-center gap-3">
+													<Avatar nom={client.full_name || 'Client'} url={client.avatar_url} taille={34} ton={actif ? 'terre' : undefined} />
+													<button
+														type="button"
+														onClick={(e) => {
+															e.stopPropagation();
+															ouvrirFiche(client);
+														}}
+														className="truncate text-left font-semibold text-dx-encre group-hover:text-dx-terre"
+													>
+														{client.full_name || 'Client'}
+													</button>
+												</div>
+											</td>
+											<td className="dx-tabulaire whitespace-nowrap">{client.phone || <span className="text-dx-sable">—</span>}</td>
+											<td className="max-w-[16rem] truncate">{client.email || <span className="text-dx-sable">—</span>}</td>
+											<td className="hidden whitespace-nowrap text-dx-gris lg:table-cell">{new Date(client.created_at).toLocaleDateString('fr-FR')}</td>
+											<td className="text-right text-dx-sable group-hover:text-dx-terre"><ChevronRight size={16} /></td>
+										</motion.tr>
+									);
+								})}
+							</tbody>
+						</table>
 
-								{/* Grille des coordonnées */}
-								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-									<div className="p-4 rounded-xl bg-stone-50 border border-stone-100 flex items-center gap-3">
-										<div className="w-10 h-10 rounded-xl bg-white border border-stone-200 flex items-center justify-center text-deep-teal-600 shrink-0">
-											<Phone size={18} />
-										</div>
-										<div className="min-w-0">
-											<p className="text-xs font-medium text-stone-400 uppercase tracking-wider">Téléphone</p>
-											{selectedClient.phone ? (
-												<a href={`tel:${selectedClient.phone}`} className="text-sm font-bold text-stone-900 hover:text-deep-teal-600 transition-colors truncate block">
-													{selectedClient.phone}
-												</a>
-											) : (
-												<p className="text-sm text-stone-400 italic">Non renseigné</p>
-											)}
-										</div>
-									</div>
+						<ul className="divide-y divide-dx-filet md:hidden">
+							{filteredClients.map((client) => (
+								<li key={client.id}>
+									<button type="button" onClick={() => ouvrirFiche(client)} className="flex w-full items-center gap-3 px-4 py-3.5 text-left">
+										<Avatar nom={client.full_name || 'Client'} url={client.avatar_url} taille={38} />
+										<span className="min-w-0 flex-1">
+											<span className="block truncate font-semibold text-dx-encre">{client.full_name || 'Client'}</span>
+											<span className="block truncate text-sm text-dx-gris">{client.phone || client.email || 'Client enregistré'}</span>
+										</span>
+										<ChevronRight size={16} className="text-dx-sable" />
+									</button>
+								</li>
+							))}
+						</ul>
+					</>
+				)}
+			</div>
 
-									<div className="p-4 rounded-xl bg-stone-50 border border-stone-100 flex items-center gap-3">
-										<div className="w-10 h-10 rounded-xl bg-white border border-stone-200 flex items-center justify-center text-deep-teal-600 shrink-0">
-											<Mail size={18} />
-										</div>
-										<div className="min-w-0">
-											<p className="text-xs font-medium text-stone-400 uppercase tracking-wider">Email</p>
-											{selectedClient.email ? (
-												<a href={`mailto:${selectedClient.email}`} className="text-sm font-bold text-stone-900 hover:text-deep-teal-600 transition-colors truncate block">
-													{selectedClient.email}
-												</a>
-											) : (
-												<p className="text-sm text-stone-400 italic">Non renseigné</p>
-											)}
-										</div>
-									</div>
-								</div>
-							</div>
-							
-							{/* Note privée */}
-							<ClientNoteCard professionalId={professional.id} client={selectedClient} />
-							
-							{/* Historique des rendez-vous */}
+			{/* Fiche détaillée du client sélectionné : panneau latéral */}
+			<Panneau
+				ouvert={ficheOuverte && !!selectedClient}
+				onClose={() => setFicheOuverte(false)}
+				largeur={620}
+				entete={
+					selectedClient && (
+						<div className="mb-3 flex items-center gap-3">
+							<Avatar nom={selectedClient.full_name || 'Client'} url={selectedClient.avatar_url} taille={52} ton="encre" />
 							<div>
-								<h3 className="text-base font-bold text-stone-900 mb-3 flex items-center gap-2">
-									<Clock size={18} className="text-deep-teal-600" />
-									<span>Historique des réservations</span>
-								</h3>
-								<ClientAppointments clientId={selectedClient.id} />
+								<Pastille ton="terre" nu>Client Privilégié</Pastille>
+								<p className="mt-1 flex items-center gap-1.5 text-xs text-dx-gris">
+									<Calendar size={12} /> Inscrit le {inscrit(selectedClient)}
+								</p>
 							</div>
-
-							{/* Messagerie directe */}
-							<div>
-								<div className="flex items-center justify-between mb-3">
-									<h3 className="text-base font-bold text-stone-900 flex items-center gap-2">
-										<MessageSquare size={18} className="text-deep-teal-600" />
-										<span>Fil de discussion direct</span>
-									</h3>
-									<a 
-										href={`${basePath}/dashboard/messages?clientId=${encodeURIComponent(selectedClient.id)}`}
-										className="text-xs font-bold text-deep-teal-600 hover:underline flex items-center gap-1"
-									>
-										<span>Mode plein écran</span>
-										<ExternalLink size={12} />
-									</a>
-								</div>
-								<MessageThread professionalId={professional.id} clientId={selectedClient.id} role="professional" />
-							</div>
-						</>
-					) : (
-						<div className="rounded-2xl border border-dashed border-stone-300 p-12 text-center bg-white shadow-xs">
-							<div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center text-stone-400 mx-auto mb-3">
-								<User size={24} />
-							</div>
-							<p className="text-sm font-bold text-stone-700">Sélectionnez un client</p>
-							<p className="text-xs text-stone-400 mt-1 max-w-sm mx-auto">
-								Cliquez sur un client dans la liste de gauche pour consulter sa fiche détaillée, son historique et lui envoyer un message.
-							</p>
 						</div>
-					)}
-				</div>
-			</div>
-
-			{/* Toast notification */}
-			{editToast && (
-				<div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-stone-900 text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-bold border border-stone-800 animate-in fade-in slide-in-from-bottom-4">
-					<Sparkles size={16} className="text-amber-400" />
-					<span>{editToast}</span>
-				</div>
-			)}
-
-			{/* Modal d'édition des coordonnées client */}
-			{isEditModalOpen && selectedClient && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-					<div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-stone-200 animate-in fade-in zoom-in-95">
-						<div className="flex items-center justify-between pb-4 border-b border-stone-100">
-							<div className="flex items-center gap-2.5">
-								<div className="w-9 h-9 rounded-xl bg-deep-teal-100 text-deep-teal-700 flex items-center justify-center">
-									<Pencil size={18} />
-								</div>
-								<div>
-									<h4 className="font-bold text-stone-900 text-base">Modifier la fiche client</h4>
-									<p className="text-xs text-stone-400">Mise à jour des coordonnées par le professionnel</p>
-								</div>
-							</div>
+					)
+				}
+				titre={selectedClient?.full_name || 'Client'}
+			>
+				{selectedClient && professional ? (
+					<div className="space-y-7">
+						{/* Actions : Modifier informations & ouvrir messagerie */}
+						<div className="flex flex-wrap gap-2">
 							<button
 								type="button"
-								onClick={() => setIsEditModalOpen(false)}
-								className="text-stone-400 hover:text-stone-600 p-1.5 rounded-lg cursor-pointer"
+								onClick={() => handleOpenEdit(selectedClient)}
+								className="dx-btn dx-btn--sm dx-btn--ligne"
+								title="Modifier les coordonnées du client"
 							>
-								<X size={18} />
+								<Pencil size={14} />
+								<span>Modifier la fiche</span>
 							</button>
+							<a
+								href={`${basePath}/dashboard/messages?clientId=${encodeURIComponent(selectedClient.id)}`}
+								className="dx-btn dx-btn--sm"
+							>
+								<MessageSquare size={14} />
+								<span>Ouvrir dans la messagerie</span>
+								<ExternalLink size={12} />
+							</a>
 						</div>
 
-						<form onSubmit={handleSaveEdit} className="mt-4 space-y-4">
-							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Nom complet *
-								</label>
-								<input
-									type="text"
-									required
-									value={editFullName}
-									maxLength={MAX_NAME_LENGTH}
-									onChange={e => setEditFullName(e.target.value)}
-									placeholder="Ex : Sophie Martin"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
-								/>
+						{/* Coordonnées */}
+						<dl className="grid grid-cols-1 divide-y divide-dx-filet rounded-xl border border-dx-filet bg-dx-carte sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+							<div className="flex items-center gap-3 p-4">
+								<Phone size={17} className="flex-none text-dx-terre" />
+								<div className="min-w-0">
+									<dt className="text-xs text-dx-gris">Téléphone</dt>
+									<dd>
+										{selectedClient.phone ? (
+											<a href={`tel:${selectedClient.phone}`} className="dx-tabulaire block truncate font-semibold text-dx-encre hover:text-dx-terre">
+												{selectedClient.phone}
+											</a>
+										) : (
+											<span className="text-sm italic text-dx-gris">Non renseigné</span>
+										)}
+									</dd>
+								</div>
 							</div>
+							<div className="flex items-center gap-3 p-4">
+								<Mail size={17} className="flex-none text-dx-terre" />
+								<div className="min-w-0">
+									<dt className="text-xs text-dx-gris">Email</dt>
+									<dd>
+										{selectedClient.email ? (
+											<a href={`mailto:${selectedClient.email}`} className="block truncate font-semibold text-dx-encre hover:text-dx-terre">
+												{selectedClient.email}
+											</a>
+										) : (
+											<span className="text-sm italic text-dx-gris">Non renseigné</span>
+										)}
+									</dd>
+								</div>
+							</div>
+						</dl>
 
-							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Numéro de téléphone
-								</label>
-								<input
-									type="tel"
-									value={editPhone}
-									onChange={e => setEditPhone(e.target.value)}
-									placeholder="Ex : 06 12 34 56 78"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
-								/>
-							</div>
+						{/* Note privée */}
+						<ClientNoteCard professionalId={professional.id} client={selectedClient} />
 
-							<div>
-								<label className="text-xs font-bold text-stone-700 uppercase tracking-wider block mb-1.5">
-									Adresse Email
-								</label>
-								<input
-									type="email"
-									value={editEmail}
-									onChange={e => setEditEmail(e.target.value)}
-									placeholder="Ex : sophie.martin@email.com"
-									className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-sm focus:border-deep-teal-500 focus:bg-white focus:outline-none transition-all"
-								/>
-							</div>
+						{/* Historique des rendez-vous */}
+						<section>
+							<h3 className="dx-h3 mb-3 flex items-center gap-2">
+								<Clock size={16} className="text-dx-terre" />
+								<span>Historique des réservations</span>
+							</h3>
+							<ClientAppointments clientId={selectedClient.id} />
+						</section>
 
-							<div className="pt-2 flex items-center justify-end gap-2.5">
-								<button
-									type="button"
-									onClick={() => setIsEditModalOpen(false)}
-									className="px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-xs font-bold hover:bg-stone-50 cursor-pointer"
-								>
-									Annuler
-								</button>
-								<button
-									type="submit"
-									disabled={isSavingClient}
-									className="px-5 py-2.5 rounded-xl bg-deep-teal-600 text-white text-xs font-bold hover:bg-deep-teal-700 shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
-								>
-									{isSavingClient ? (
-										<span>Enregistrement...</span>
-									) : (
-										<>
-											<Check size={14} />
-											<span>Enregistrer</span>
-										</>
-									)}
-								</button>
+						{/* Messagerie directe */}
+						<section>
+							<div className="mb-3 flex items-center justify-between gap-3">
+								<h3 className="dx-h3 flex items-center gap-2">
+									<MessageSquare size={16} className="text-dx-terre" />
+									<span>Fil de discussion direct</span>
+								</h3>
+								<a href={`${basePath}/dashboard/messages?clientId=${encodeURIComponent(selectedClient.id)}`} className="dx-lien !text-xs">
+									<span>Mode plein écran</span>
+									<ExternalLink size={12} />
+								</a>
 							</div>
-						</form>
+							<MessageThread professionalId={professional.id} clientId={selectedClient.id} role="professional" />
+						</section>
 					</div>
-				</div>
-			)}
+				) : (
+					<EtatVide
+						dessin="clients"
+						titre="Sélectionnez un client"
+						texte="Cliquez sur un client dans la liste pour consulter sa fiche détaillée, son historique et lui envoyer un message."
+					/>
+				)}
+			</Panneau>
+
+			{/* Fenêtre d'édition des coordonnées client */}
+			<Fenetre
+				ouvert={isEditModalOpen && !!selectedClient}
+				onClose={() => setIsEditModalOpen(false)}
+				icone={<Pencil size={17} />}
+				titre="Modifier la fiche client"
+				sousTitre="Mise à jour des coordonnées par le professionnel"
+				fermerSurVoile={false}
+			>
+				<form onSubmit={handleSaveEdit} className="space-y-4">
+					<div>
+						<label htmlFor="client-edit-nom" className="dx-champ-label">Nom complet *</label>
+						<input
+							id="client-edit-nom"
+							type="text"
+							required
+							value={editFullName}
+							maxLength={MAX_NAME_LENGTH}
+							onChange={e => setEditFullName(e.target.value)}
+							placeholder="Ex : Sophie Martin"
+							className="dx-champ"
+							data-autofocus
+						/>
+					</div>
+					<div>
+						<label htmlFor="client-edit-tel" className="dx-champ-label">Numéro de téléphone</label>
+						<input
+							id="client-edit-tel"
+							type="tel"
+							value={editPhone}
+							onChange={e => setEditPhone(e.target.value)}
+							placeholder="Ex : 06 12 34 56 78"
+							className="dx-champ"
+						/>
+					</div>
+					<div>
+						<label htmlFor="client-edit-email" className="dx-champ-label">Adresse Email</label>
+						<input
+							id="client-edit-email"
+							type="email"
+							value={editEmail}
+							onChange={e => setEditEmail(e.target.value)}
+							placeholder="Ex : sophie.martin@email.com"
+							className="dx-champ"
+						/>
+					</div>
+					<div className="flex items-center justify-end gap-2 pt-2">
+						<button type="button" onClick={() => setIsEditModalOpen(false)} className="dx-btn dx-btn--ligne">
+							Annuler
+						</button>
+						<button type="submit" disabled={isSavingClient} className="dx-btn">
+							{isSavingClient ? (
+								<span>Enregistrement...</span>
+							) : (
+								<>
+									<Check size={15} />
+									<span>Enregistrer</span>
+								</>
+							)}
+						</button>
+					</div>
+				</form>
+			</Fenetre>
 		</div>
 	);
 }

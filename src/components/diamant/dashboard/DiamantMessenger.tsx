@@ -14,7 +14,10 @@ import {
 	type Professional 
 } from '@/lib/queries';
 import { DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
-import { Send, User, ExternalLink, Loader2, Search, MessageSquare, CheckCheck, Sparkles } from 'lucide-react';
+import { Send, ExternalLink, Search, CheckCheck, ArrowLeft } from 'lucide-react';
+import { useReducedMotion } from 'motion/react';
+import { Avatar, EnChargement, EtatVide, Squelette, cx } from './kit/primitives';
+import { publierClients } from './kit/indexClients';
 
 interface Props {
 	isPro: boolean;
@@ -44,6 +47,10 @@ export default function DiamantMessenger({ isPro }: Props) {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [recentSnippets, setRecentSnippets] = useState<Record<string, { body: string; time: string }>>({});
 	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const listeRef = useRef<HTMLDivElement>(null);
+	// Sur téléphone (vue pro) : la liste des conversations, puis le fil choisi.
+	const [filMobile, setFilMobile] = useState(false);
+	const reduit = useReducedMotion();
 
 	// Synchroniser le nom du professionnel (DB / localStorage / cookie)
 	function resolveProName(pro: Professional | null): string {
@@ -93,6 +100,7 @@ export default function DiamantMessenger({ isPro }: Props) {
 					// Vue Professionnel : Charger tous les clients (BDD + RDV + messages + démo)
 					const allClients = await getAllClients(effectiveProId, tag, DEMO_DIAMANT_CLIENTS);
 					setClients(allClients);
+					publierClients(allClients);
 
 					// Charger les compteurs de messages non lus
 					const counts = await getUnreadMessagesCount(effectiveProId);
@@ -123,6 +131,7 @@ export default function DiamantMessenger({ isPro }: Props) {
 					const targetId = urlParams.get('clientId');
 					if (targetId && allClients.some(c => c.id === targetId)) {
 						setActiveClientId(targetId);
+						setFilMobile(true);
 					} else {
 						// Priorité au premier client avec un message non lu, sinon au premier client
 						const firstUnread = allClients.find(c => (counts[c.id] || 0) > 0);
@@ -349,9 +358,11 @@ export default function DiamantMessenger({ isPro }: Props) {
 		}
 	}
 
+	// Défile le fil seulement (pas la page) jusqu'au dernier message.
 	function scrollToBottom() {
 		setTimeout(() => {
-			messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+			const el = listeRef.current;
+			if (el) el.scrollTo({ top: el.scrollHeight, behavior: reduit ? 'auto' : 'smooth' });
 		}, 80);
 	}
 
@@ -468,54 +479,86 @@ export default function DiamantMessenger({ isPro }: Props) {
 		return clients.find(c => c.id === activeClientId) || null;
 	}, [clients, activeClientId]);
 
+	function jourDe(iso: string) {
+		const d = new Date(iso);
+		const auj = new Date();
+		const hier = new Date();
+		hier.setDate(auj.getDate() - 1);
+		if (d.toDateString() === auj.toDateString()) return "Aujourd'hui";
+		if (d.toDateString() === hier.toDateString()) return 'Hier';
+		const t = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+		return t.charAt(0).toUpperCase() + t.slice(1);
+	}
+
+	function heureOuJour(iso: string) {
+		const d = new Date(iso);
+		if (d.toDateString() === new Date().toDateString()) {
+			return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+		}
+		return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+	}
+
+	const hauteur = 'h-[calc(100dvh-15rem)] min-h-[520px] md:h-[min(46rem,calc(100dvh-17rem))]';
+
 	if (loading) {
 		return (
-			<div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-stone-200 shadow-sm">
-				<Loader2 className="animate-spin text-deep-teal-600 mb-3" size={32} />
-				<p className="text-sm font-semibold text-stone-500">Chargement de la messagerie...</p>
-			</div>
+			<EnChargement label="Chargement de la messagerie..." className={cx('dx-carte flex overflow-hidden', hauteur)}>
+				{isPro && (
+					<div className="hidden w-80 flex-col gap-3 border-r border-dx-filet bg-dx-papier p-4 md:flex">
+						<Squelette className="h-10 w-full !rounded-full" />
+						{[0, 1, 2, 3, 4].map((i) => (
+							<div key={i} className="flex items-center gap-3 py-2">
+								<Squelette className="h-10 w-10 !rounded-full" />
+								<div className="flex-1 space-y-2">
+									<Squelette className="h-3.5 w-2/3" />
+									<Squelette className="h-3 w-full" />
+								</div>
+							</div>
+						))}
+					</div>
+				)}
+				<div className="flex flex-1 flex-col gap-3 p-6">
+					<Squelette className="h-10 w-1/2 !rounded-2xl" />
+					<Squelette className="ml-auto h-14 w-2/5 !rounded-2xl" />
+					<Squelette className="h-10 w-1/3 !rounded-2xl" />
+				</div>
+			</EnChargement>
 		);
 	}
 
+	// Séparateurs de jour dans le fil
+	let jourPrecedent = '';
+
 	return (
-		<div className="rounded-2xl border border-stone-200 bg-white shadow-sm overflow-hidden flex flex-col md:flex-row h-[680px]">
-			{/* Sidebar Contacts (Vue Pro uniquement) */}
+		<div className={cx('dx-carte flex overflow-hidden', hauteur)}>
+			{/* Liste des conversations (vue pro uniquement) */}
 			{isPro && (
-				<div className="w-full md:w-80 lg:w-96 border-b md:border-b-0 md:border-r border-stone-200 flex flex-col bg-stone-50/70">
-					{/* Header sidebar */}
-					<div className="p-4 border-b border-stone-200 bg-white">
-						<div className="flex items-center justify-between mb-3">
-							<div className="flex items-center gap-2">
-								<MessageSquare size={18} className="text-deep-teal-600" />
-								<h2 className="font-bold text-stone-900 text-base">Conversations</h2>
-							</div>
+				<aside className={cx('w-full flex-col border-dx-filet bg-dx-papier md:flex md:w-80 md:border-r lg:w-[22rem]', filMobile ? 'hidden' : 'flex')}>
+					<div className="border-b border-dx-filet p-4">
+						<div className="mb-3 flex items-center justify-between gap-2">
+							<h2 className="dx-h3">Conversations</h2>
 							{totalUnreadCount > 0 && (
-								<span className="px-2.5 py-0.5 text-xs font-black rounded-full bg-deep-teal-600 text-white shadow-sm animate-pulse flex items-center gap-1">
-									<Sparkles size={11} />
-									<span>{totalUnreadCount} non lu{totalUnreadCount > 1 ? 's' : ''}</span>
+								<span className="dx-nav-badge !h-6 !px-2.5">
+									{totalUnreadCount} non lu{totalUnreadCount > 1 ? 's' : ''}
 								</span>
 							)}
 						</div>
-
-						{/* Recherche client */}
-						<div className="relative">
-							<Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+						<div className="dx-recherche">
+							<Search size={15} />
 							<input
-								type="text"
+								type="search"
 								value={searchQuery}
 								onChange={e => setSearchQuery(e.target.value)}
 								placeholder="Rechercher un client..."
-								className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-stone-100 border border-transparent focus:border-deep-teal-400 focus:bg-white focus:outline-none transition-all placeholder:text-stone-400"
+								aria-label="Rechercher un client"
+								className="dx-champ !min-h-10 !text-sm"
 							/>
 						</div>
 					</div>
 
-					{/* Liste des conversations clients */}
-					<div className="flex-1 overflow-y-auto p-2 space-y-1">
+					<div className="flex-1 overflow-y-auto p-2">
 						{filteredClients.length === 0 ? (
-							<div className="p-8 text-center text-stone-400 text-xs">
-								Aucun client trouvé.
-							</div>
+							<p className="p-8 text-center text-sm text-dx-gris">Aucun client trouvé.</p>
 						) : (
 							filteredClients.map(client => {
 								const unread = unreadCounts[client.id] || 0;
@@ -525,191 +568,155 @@ export default function DiamantMessenger({ isPro }: Props) {
 								return (
 									<button
 										key={client.id}
-										onClick={() => setActiveClientId(client.id)}
-										className={`w-full text-left p-3 rounded-xl flex items-center gap-3 transition-all relative cursor-pointer ${
-											isSelected
-												? 'bg-white border border-deep-teal-300 shadow-sm ring-1 ring-deep-teal-200'
-												: unread > 0
-													? 'bg-deep-teal-50/70 border border-deep-teal-200 hover:bg-deep-teal-50'
-													: 'hover:bg-white/80 border border-transparent'
-										}`}
+										type="button"
+										onClick={() => {
+											setActiveClientId(client.id);
+											setFilMobile(true);
+										}}
+										aria-current={isSelected ? 'true' : undefined}
+										className={cx(
+											'relative flex w-full items-center gap-3 rounded-xl p-3 text-left transition-colors',
+											isSelected ? 'bg-dx-carte shadow-[0_0_0_1px_var(--dx-filet),0_8px_18px_-14px_rgb(31_24_19/0.45)]' : 'hover:bg-dx-carte/70'
+										)}
 									>
-										{/* Avatar avec badge de notification */}
-										<div className="relative shrink-0">
-											<div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-sm overflow-hidden ${
-												isSelected 
-													? 'bg-deep-teal-600 text-white ring-2 ring-deep-teal-200' 
-													: unread > 0
-														? 'bg-deep-teal-100 text-deep-teal-800 ring-2 ring-deep-teal-400'
-														: 'bg-stone-200 text-stone-600'
-											}`}>
-												{client.avatar_url && client.avatar_url.startsWith('http') ? (
-													<img src={client.avatar_url} alt="" className="w-full h-full object-cover" />
-												) : client.full_name ? (
-													client.full_name.charAt(0).toUpperCase()
-												) : (
-													<User size={18} />
-												)}
-											</div>
-											{unread > 0 && (
-												<span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full animate-pulse" />
-											)}
-										</div>
-
-										{/* Informations et aperçu */}
-										<div className="flex-1 min-w-0">
-											<div className="flex items-center justify-between gap-1">
-												<p className={`font-bold text-sm truncate ${unread > 0 ? 'text-deep-teal-950 font-black' : 'text-stone-900'}`}>
+										{isSelected && <span className="absolute inset-y-3 left-0 w-[3px] rounded-r bg-dx-terre" aria-hidden="true" />}
+										<span className="relative">
+											<Avatar nom={client.full_name || 'Client'} url={client.avatar_url} taille={42} ton={isSelected ? 'encre' : unread > 0 ? 'terre' : undefined} />
+											{unread > 0 && <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-dx-papier bg-dx-terre" aria-hidden="true" />}
+										</span>
+										<span className="min-w-0 flex-1">
+											<span className="flex items-baseline justify-between gap-2">
+												<span className={cx('truncate text-sm text-dx-encre', unread > 0 ? 'font-bold' : 'font-semibold')}>
 													{client.full_name || 'Client'}
-												</p>
+												</span>
 												{snippet?.time && (
-													<span className="text-[10px] text-stone-400 whitespace-nowrap">
-														{new Date(snippet.time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-													</span>
+													<span className="dx-tabulaire shrink-0 text-[11px] text-dx-gris">{heureOuJour(snippet.time)}</span>
 												)}
-											</div>
-
-											<div className="flex items-center justify-between gap-2 mt-0.5">
-												<p className={`text-xs truncate ${unread > 0 ? 'font-semibold text-deep-teal-800' : 'text-stone-500'}`}>
+											</span>
+											<span className="mt-0.5 flex items-center justify-between gap-2">
+												<span className={cx('truncate text-xs', unread > 0 ? 'font-semibold text-dx-encre-2' : 'text-dx-gris')}>
 													{snippet?.body || (client.phone ? client.phone : 'Aucun message échangé')}
-												</p>
+												</span>
 												{unread > 0 && (
-													<span className="shrink-0 px-2 py-0.5 text-[10px] font-black rounded-full bg-deep-teal-600 text-white shadow-xs">
-														{unread} nouveau{unread > 1 ? 'x' : ''}
+													<span className="dx-nav-badge shrink-0">
+														{unread}<span className="sr-only"> nouveau{unread > 1 ? 'x' : ''}</span>
 													</span>
 												)}
-											</div>
-										</div>
+											</span>
+										</span>
 									</button>
 								);
 							})
 						)}
 					</div>
-				</div>
+				</aside>
 			)}
 
 			{/* Zone de discussion principale */}
-			<div className="flex-1 flex flex-col relative bg-stone-50/50">
+			<section className={cx('min-w-0 flex-1 flex-col bg-dx-ivoire', isPro && !filMobile ? 'hidden md:flex' : 'flex')}>
 				{/* En-tête de conversation */}
-				<div className="p-4 border-b border-stone-200 flex items-center justify-between bg-white z-10 sticky top-0 shadow-xs">
+				<div className="flex items-center gap-3 border-b border-dx-filet bg-dx-carte px-4 py-3 sm:px-5">
 					{isPro && activeClientId ? (
-						<div className="flex items-center justify-between w-full">
-							<a 
+						<>
+							<button type="button" onClick={() => setFilMobile(false)} className="dx-icone-btn -ml-1 md:hidden" aria-label="Retour aux conversations">
+								<ArrowLeft size={18} />
+							</button>
+							<a
 								href={`/demo-diamant/dashboard/clients?clientId=${encodeURIComponent(activeClientId)}`}
-								className="flex items-center gap-3.5 group cursor-pointer"
+								className="group flex min-w-0 flex-1 items-center gap-3"
 								title="Voir la fiche complète de ce client"
 							>
-								<div className="w-10 h-10 rounded-full bg-deep-teal-100 flex items-center justify-center border border-deep-teal-200 text-deep-teal-700 group-hover:border-deep-teal-400 group-hover:scale-105 transition-all">
-									<User size={20} />
-								</div>
-								<div className="min-w-0">
-									<div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-										<h2 className="text-stone-900 font-bold text-base break-words group-hover:text-deep-teal-600 transition-colors">
-											{activeClient?.full_name || 'Client'}
-										</h2>
-										<span className="text-[10px] bg-stone-100 text-stone-600 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider group-hover:bg-deep-teal-50 group-hover:text-deep-teal-700 transition-colors">
-											Fiche client
-										</span>
-									</div>
-									<p className="text-deep-teal-600 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
-										<span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-										Client inscrit • Disponible
-									</p>
-								</div>
+								<Avatar nom={activeClient?.full_name || 'Client'} url={activeClient?.avatar_url} taille={40} ton="terre" />
+								<span className="min-w-0">
+									<span className="flex flex-wrap items-baseline gap-x-2">
+										<span className="dx-h3 truncate group-hover:text-dx-terre">{activeClient?.full_name || 'Client'}</span>
+										<span className="text-xs text-dx-gris">Fiche client</span>
+									</span>
+									<span className="block text-xs text-dx-gris">Client inscrit • Disponible</span>
+								</span>
 							</a>
-
-							<a 
+							<a
 								href={`/demo-diamant/dashboard/clients?clientId=${encodeURIComponent(activeClientId)}`}
-								className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 text-stone-600 hover:text-deep-teal-600 hover:border-deep-teal-300 hover:bg-deep-teal-50 text-xs font-bold transition-all shadow-2xs"
+								className="dx-btn dx-btn--sm dx-btn--ligne hidden sm:inline-flex"
 							>
 								<span>Accéder aux infos</span>
 								<ExternalLink size={13} />
 							</a>
-						</div>
+						</>
 					) : (
-						<div className="flex items-center gap-3.5">
-							<div className="w-10 h-10 rounded-full bg-gradient-to-br from-deep-teal-500 to-deep-teal-700 text-white flex items-center justify-center shadow-xs">
-								<User size={20} />
-							</div>
+						<div className="flex items-center gap-3">
+							<span className="dx-monogramme">{(proName || 'O').charAt(0).toUpperCase()}</span>
 							<div>
-								<h2 className="text-stone-900 font-black text-base" data-diamant-business-name>{proName}</h2>
-								<p className="text-deep-teal-600 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
-									<span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-									Artisan Coiffeur • En ligne
-								</p>
+								<h2 className="dx-h3" data-diamant-business-name>{proName}</h2>
+								<p className="text-xs text-dx-gris">Artisan Coiffeur • En ligne</p>
 							</div>
 						</div>
 					)}
 				</div>
 
 				{/* Corps des messages */}
-				<div className="flex-1 overflow-y-auto p-6 space-y-4">
+				<div ref={listeRef} className="flex-1 overflow-y-auto px-4 py-6 sm:px-8" aria-live="polite">
 					{messages.length === 0 ? (
-						<div className="flex flex-col items-center justify-center h-full py-16 text-center text-stone-400">
-							<div className="w-14 h-14 rounded-2xl bg-white border border-stone-200 flex items-center justify-center text-stone-300 mb-3 shadow-2xs">
-								<MessageSquare size={24} />
-							</div>
-							<p className="text-sm font-bold text-stone-700">Aucun message pour le moment</p>
-							<p className="text-xs text-stone-400 mt-1 max-w-xs">
-								Démarrez la conversation dès maintenant en envoyant un message direct ci-dessous.
-							</p>
-						</div>
+						<EtatVide
+							dessin="messages"
+							className="h-full"
+							titre="Aucun message pour le moment"
+							texte="Démarrez la conversation dès maintenant en envoyant un message direct ci-dessous."
+						/>
 					) : (
-						messages.map((msg, idx) => {
-							const isMine = (isPro && msg.sender === 'professional') || (!isPro && msg.sender === 'client');
-							const time = new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+						<div className="flex flex-col gap-1.5">
+							{messages.map((msg, idx) => {
+								const isMine = (isPro && msg.sender === 'professional') || (!isPro && msg.sender === 'client');
+								const time = new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+								const jour = jourDe(msg.created_at);
+								const nouveauJour = jour !== jourPrecedent;
+								jourPrecedent = jour;
+								const suivant = messages[idx + 1];
+								const finDeGroupe = !suivant || suivant.sender !== msg.sender || jourDe(suivant.created_at) !== jour;
 
-							return (
-								<div 
-									key={msg.id || idx} 
-									className={`flex items-end gap-2.5 max-w-[85%] sm:max-w-[75%] ${isMine ? 'ml-auto flex-row-reverse' : ''}`}
-								>
-									<div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-xs shadow-2xs border ${
-										isMine 
-											? 'bg-deep-teal-600 text-white border-deep-teal-700' 
-											: 'bg-white text-stone-600 border-stone-200'
-									}`}>
-										{isMine ? (isPro ? 'P' : 'C') : (isPro ? 'C' : 'P')}
-									</div>
-									<div className={`p-4 shadow-xs transition-all ${
-										isMine 
-											? 'bg-deep-teal-600 text-white rounded-2xl rounded-br-sm' 
-											: 'bg-white text-stone-900 border border-stone-200 rounded-2xl rounded-bl-sm'
-									}`}>
-										<p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.body}</p>
-										<div className={`flex items-center gap-1.5 mt-1.5 ${isMine ? 'justify-end text-deep-teal-100' : 'justify-start text-stone-400'}`}>
-											<span className="text-[10px] font-medium">{time}</span>
-											{isMine && <CheckCheck size={12} className="opacity-80" />}
+								return (
+									<React.Fragment key={msg.id || idx}>
+										{nouveauJour && <p className="dx-separateur-jour my-4">{jour}</p>}
+										<div className={cx('flex flex-col', isMine ? 'items-end' : 'items-start')}>
+											<p className={cx('dx-bulle', isMine ? 'dx-bulle--moi' : 'dx-bulle--autre')}>{msg.body}</p>
+											{finDeGroupe && (
+												<p className="mb-2 mt-1 flex items-center gap-1 px-1 text-[11px] text-dx-gris">
+													<span className="dx-tabulaire">{time}</span>
+													{isMine && <CheckCheck size={12} className="text-dx-terre" aria-label="Envoyé" />}
+												</p>
+											)}
 										</div>
-									</div>
-								</div>
-							);
-						})
+									</React.Fragment>
+								);
+							})}
+						</div>
 					)}
 					<div ref={messagesEndRef} />
 				</div>
 
-				{/* Barre de saisie (sans bouton image non fonctionnel) */}
-				<div className="p-4 border-t border-stone-200 bg-white">
-					<form onSubmit={handleSend} className="flex gap-2.5">
-						<input 
-							type="text" 
+				{/* Barre de saisie */}
+				<div className="border-t border-dx-filet bg-dx-carte p-3 sm:p-4">
+					<form onSubmit={handleSend} className="flex items-center gap-2 rounded-full border border-dx-filet-fort bg-dx-ivoire p-1.5 pl-4 transition-colors focus-within:border-dx-terre focus-within:shadow-[0_0_0_3px_rgb(168_75_37/0.14)]">
+						<label htmlFor="dx-composer" className="sr-only">{isPro ? 'Répondre au client' : 'Écrire à votre artisan'}</label>
+						<input
+							id="dx-composer"
+							type="text"
 							value={newMessage}
 							onChange={e => setNewMessage(e.target.value)}
-							placeholder={isPro ? "Répondre au client..." : "Écrivez votre message à votre artisan..."} 
-							className="flex-1 bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-900 focus:outline-none focus:border-deep-teal-500 focus:bg-white focus:ring-2 focus:ring-deep-teal-500/20 transition-all placeholder:text-stone-400"
+							placeholder={isPro ? "Répondre au client..." : "Écrivez votre message à votre artisan..."}
+							className="min-w-0 flex-1 bg-transparent py-2 text-[0.9375rem] text-dx-encre placeholder:text-dx-gris focus:outline-none"
 						/>
-						<button 
-							type="submit" 
-							disabled={sending || !newMessage.trim()} 
-							className="px-6 rounded-xl bg-deep-teal-600 text-white font-bold hover:bg-deep-teal-700 transition-all shrink-0 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-xs cursor-pointer"
+						<button
+							type="submit"
+							disabled={sending || !newMessage.trim()}
+							className="dx-btn !min-h-10 !px-4"
 						>
 							<span className="hidden sm:inline">Envoyer</span>
-							<Send size={16} />
+							<Send size={15} />
 						</button>
 					</form>
 				</div>
-			</div>
+			</section>
 		</div>
 	);
 }

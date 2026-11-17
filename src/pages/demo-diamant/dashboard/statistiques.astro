@@ -3,16 +3,14 @@ import DiamantDashboardLayout from '@/layouts/diamant/DiamantDashboardLayout.ast
 import DiamantDashboardNav from '@/components/diamant/dashboard/DiamantDashboardNav';
 import DiamantPerformancePanel from '@/components/diamant/dashboard/DiamantPerformancePanel';
 import DiamantAdminOnlyGuard from '@/components/diamant/dashboard/DiamantAdminOnlyGuard';
+import DiamantPageHead from '@/components/diamant/dashboard/kit/DiamantPageHead.astro';
 ---
 
 <DiamantDashboardLayout title="Performances">
 	<DiamantDashboardNav slot="sidebar" basePath="/demo-diamant" client:load />
-	
+
 	<DiamantAdminOnlyGuard client:load pageName="Performances & Statistiques Financières">
-		<div class="mb-8">
-			<h1 class="text-3xl font-black text-stone-800 tracking-tight">Performances & Statistiques</h1>
-			<p class="text-stone-500 mt-1">Analysez les résultats et la clientèle de votre salon Prestige.</p>
-		</div>
+		<DiamantPageHead titre="Performances" accent="& statistiques" sousTitre="Analysez les résultats et la clientèle du salon : recettes, prestations les plus demandées, clients qui reviennent." />
 
 		<DiamantPerformancePanel client:load />
 	</DiamantAdminOnlyGuard>

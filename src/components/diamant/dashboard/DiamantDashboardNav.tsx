@@ -1,4 +1,6 @@
 import React from 'react';
+import { motion, useReducedMotion } from 'motion/react';
+import { Avatar, Pastille } from './kit/primitives';
 import { supabase } from '@/lib/supabase';
 import { 
 	Home, 
@@ -26,6 +28,7 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 	const [role, setRole] = React.useState<ProRole>('admin');
 	const [realRole, setRealRole] = React.useState<ProRole | null>(null);
 	const [proUser, setProUser] = React.useState<ReturnType<typeof getProSession>>(null);
+	const reduit = useReducedMotion();
 
 	// Espace pro réservé aux comptes connectés : sans session, renvoi vers la connexion (qui propose
 	// l'accès au compte de démonstration) ; compte client connecté, renvoi vers son espace client.
@@ -77,6 +80,8 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 			if (e.detail?.role) setRole(e.detail.role);
 			setProUser(getProSession());
 			setRealRole(getRealProRole());
+			// La session (nom, email) est enregistrée juste après l'événement : relecture au tour suivant.
+			window.setTimeout(() => setProUser(getProSession()), 0);
 		};
 
 		window.addEventListener('diamant:new-message', onMsgUpdate);
@@ -133,119 +138,120 @@ export default function DiamantDashboardNav({ basePath }: DiamantDashboardNavPro
 		window.location.href = `${basePath}/connexion`;
 	}
 
+	const groupes: { titre: string; hrefs: string[] }[] = [
+		{ titre: 'Pilotage', hrefs: [`${basePath}/dashboard`, `${basePath}/dashboard/statistiques`] },
+		{ titre: 'Au quotidien', hrefs: [`${basePath}/dashboard/disponibilites`, `${basePath}/dashboard/clients`, `${basePath}/dashboard/messages`, `${basePath}/dashboard/recherche`] },
+		{ titre: 'La maison', hrefs: [`${basePath}/dashboard/services`, `${basePath}/dashboard/profil`, `${basePath}/dashboard/droits`] },
+	];
+
+	const libelleRole = role === 'admin' ? 'Gérant' : role === 'demo' ? 'Démo' : 'Employé';
+
 	return (
-		<nav className="flex flex-col gap-1">
-			{/* Sélecteur & Indicateur de Rôle Actif */}
-			<div className="mx-1 mb-4 p-3 rounded-2xl border border-stone-200 bg-stone-50/90 shadow-2xs">
-				{proUser && (
-					<div className="mb-2.5 pb-2 border-b border-stone-200/80">
-						<p className="text-xs font-bold text-stone-900 truncate">{proUser.name}</p>
-						<p className="text-[11px] text-stone-500 truncate">{proUser.email}</p>
+		<nav className="flex flex-col gap-6" aria-label="Espace pro">
+			{/* Identité et aperçu du rôle (le rôle réel vient de my_pro_context) */}
+			<div className="dx-si-deplie rounded-[14px] border border-dx-filet bg-dx-carte p-3">
+				<div className="flex items-center gap-3">
+					<Avatar nom={proUser?.name || 'Équipe'} taille={36} ton="encre" />
+					<div className="min-w-0 flex-1">
+						<p className="truncate text-sm font-semibold text-dx-encre">{proUser?.name || 'Espace pro'}</p>
+						<p className="truncate text-xs text-dx-gris">{proUser?.email || libelleRole}</p>
+					</div>
+					<Pastille ton={role === 'admin' ? 'terre' : role === 'demo' ? 'encre' : 'neutre'} nu>
+						{libelleRole}
+					</Pastille>
+				</div>
+				{realRole === 'admin' && (
+					<div className="mt-3 border-t border-dx-filet pt-3">
+						<p id="dx-nav-role" className="mb-2 text-xs font-semibold text-dx-gris">Voir l'espace en tant que</p>
+						<div role="radiogroup" aria-labelledby="dx-nav-role" className="dx-segments grid w-full grid-cols-3">
+							{([
+								{ r: 'admin', label: 'Admin', title: 'Accès Administrateur complet' },
+								{ r: 'employee', label: 'Employé', title: 'Accès Employé opérationnel' },
+								{ r: 'demo', label: 'Démo', title: 'Mode Démo découverte (Lecture seule pour prospects)' },
+							] as const).map((o) => {
+								const actif = role === o.r;
+								return (
+									<button
+										key={o.r}
+										type="button"
+										role="radio"
+										aria-checked={actif}
+										title={o.title}
+										onClick={() => handleSwitchRole(o.r)}
+										className="dx-segment !px-1 text-center"
+									>
+										{actif && (
+											<motion.span
+												layoutId="dx-nav-role-fond"
+												className="dx-segment-fond"
+												transition={reduit ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 36 }}
+											/>
+										)}
+										{o.label}
+									</button>
+								);
+							})}
+						</div>
 					</div>
 				)}
-				{realRole === 'admin' && (<>
-				<div className="flex items-center justify-between mb-2">
-					<span className="text-[10px] font-black uppercase tracking-wider text-stone-400">Rôle Actif</span>
-					<span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
-						role === 'admin' 
-							? 'bg-amber-100 text-amber-800 border-amber-200' 
-							: role === 'demo'
-							? 'bg-purple-100 text-purple-800 border-purple-200'
-							: 'bg-secondary text-secondary-foreground border-border'
-					}`}>
-						{role === 'admin' ? 'Gérant' : role === 'demo' ? 'Mode Démo' : 'Employé'}
-					</span>
-				</div>
-				<div className="grid grid-cols-3 gap-1 p-0.5 bg-stone-200/70 rounded-xl">
-					<button
-						type="button"
-						onClick={() => handleSwitchRole('admin')}
-						className={`py-1 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
-							role === 'admin' 
-								? 'bg-white text-stone-900 shadow-2xs' 
-								: 'text-stone-500 hover:text-stone-900'
-						}`}
-						title="Accès Administrateur complet"
-					>
-						Admin
-					</button>
-					<button
-						type="button"
-						onClick={() => handleSwitchRole('employee')}
-						className={`py-1 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
-							role === 'employee' 
-								? 'bg-white text-stone-900 shadow-2xs'
-								: 'text-stone-500 hover:text-stone-900'
-						}`}
-						title="Accès Employé opérationnel"
-					>
-						Employé
-					</button>
-					<button
-						type="button"
-						onClick={() => handleSwitchRole('demo')}
-						className={`py-1 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
-							role === 'demo' 
-								? 'bg-purple-600 text-white shadow-2xs' 
-								: 'text-stone-500 hover:text-stone-900'
-						}`}
-						title="Mode Démo découverte (Lecture seule pour prospects)"
-					>
-						Démo
-					</button>
-				</div>
-				</>)}
+			</div>
+
+			{/* Barre repliée : seul l'avatar reste */}
+			<div className="dx-si-replie flex justify-center" title={`${proUser?.name || 'Espace pro'} · ${libelleRole}`}>
+				<Avatar nom={proUser?.name || 'Équipe'} taille={36} ton="encre" />
 			</div>
 
 			{role === 'demo' && (
-				<div className="mx-1 mb-3 p-2.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-900 text-[11px] leading-snug">
-					<span className="font-bold flex items-center gap-1 text-purple-950 mb-0.5">
-						Mode Découverte Commerciale
-					</span>
-					Consultation complète en lecture seule. Les modifications et suppressions sont désactivées.
+				<div className="dx-si-deplie dx-bandeau !py-3 text-xs leading-snug" data-ton="lecture">
+					<Lock size={15} className="mt-0.5 flex-none text-dx-terre-clair" />
+					<p>
+						<b className="block">Mode découverte</b>
+						Consultation complète en lecture seule. Les modifications et suppressions sont désactivées.
+					</p>
 				</div>
 			)}
 
-			<div className="mb-2 px-2">
-				<p className="text-xs font-bold text-stone-400 uppercase tracking-widest">
-					{role === 'admin' ? 'Espace Administrateur' : role === 'demo' ? 'Espace Découverte Démo' : 'Espace Employé'}
-				</p>
-			</div>
-
-			{visibleLinks.map((link) => {
-				const isActive = currentPath === link.href || currentPath === `${link.href}/`;
-				const Icon = link.icon;
-
+			{groupes.map((g) => {
+				const liens = visibleLinks.filter((l) => g.hrefs.includes(l.href));
+				if (liens.length === 0) return null;
 				return (
-					<a
-						key={link.href}
-						href={link.href}
-						aria-current={isActive ? 'page' : undefined}
-						className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-							isActive
-								? 'bg-secondary text-secondary-foreground border border-border shadow-2xs'
-								: 'text-stone-600 hover:bg-stone-50 hover:text-stone-900 border border-transparent'
-						}`}
-					>
-						<Icon size={17} className={isActive ? 'text-primary' : 'text-stone-400'} />
-						<span className="flex-1">{link.label}</span>
-						{link.badge && link.badge > 0 ? (
-							<span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-stone-900 text-white shadow-2xs">
-								{link.badge}
-							</span>
-						) : null}
-					</a>
+					<div key={g.titre} className="flex flex-col gap-0.5">
+						<p className="dx-rubrique dx-label mb-1.5">{g.titre}</p>
+						{liens.map((link) => {
+							const isActive = currentPath === link.href || currentPath === `${link.href}/`;
+							const Icon = link.icon;
+							return (
+								<a
+									key={link.href}
+									href={link.href}
+									aria-current={isActive ? 'page' : undefined}
+									title={link.label}
+									className="dx-nav-lien"
+								>
+									{isActive && <span className="dx-nav-actif" aria-hidden="true" />}
+									<Icon size={18} />
+									<span className="dx-label flex-1 truncate">{link.label}</span>
+									{link.badge && link.badge > 0 ? (
+										<span className="dx-nav-badge" aria-label={`${link.badge} non lu${link.badge > 1 ? 's' : ''}`}>
+											{link.badge}
+										</span>
+									) : null}
+								</a>
+							);
+						})}
+					</div>
 				);
 			})}
 
-			<div className="mt-6 pt-6 border-t border-stone-100 px-2 flex flex-col gap-2">
+			<div className="border-t border-dx-filet pt-4">
 				<button
 					type="button"
 					onClick={handleLogout}
-					className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-stone-500 hover:bg-rose-50 hover:text-rose-600 transition-colors border border-transparent cursor-pointer text-left"
+					title="Déconnexion"
+					className="dx-nav-lien w-full cursor-pointer text-left hover:!text-dx-alerte"
 				>
-					<LogOut size={17} />
-					Déconnexion
+					<LogOut size={18} />
+					<span className="dx-label">Déconnexion</span>
 				</button>
 			</div>
 		</nav>

@@ -1,10 +1,12 @@
-import React, { lazy, Suspense, useState, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useMemo } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { supabase } from '@/lib/supabase';
 import { getPrimaryProfessional, getDemoTag, type Appointment } from '@/lib/queries';
 import { generateDiamantDemoAppointments, DEMO_DIAMANT_CLIENTS } from '@/lib/diamantDemoData';
 import DiamantNewClientsModal, { type PeriodClientDetail } from './DiamantNewClientsModal';
-import { ArrowUpRight, Users, Calendar, TrendingUp, Clock, MapPin, ChevronDown } from 'lucide-react';
-import { formatEuros, roundMoney } from '@/lib/money';
+import { ArrowRight, ArrowUpRight, MessageSquare, CalendarClock, Check } from 'lucide-react';
+import { roundMoney } from '@/lib/money';
+import { Avatar, Chiffre, Courbe, EASE, EnChargement, Pastille, Segments, Squelette, PastilleStatut } from './kit/primitives';
 
 // recharts (~350 Ko) n'est chargé que lorsque le graphique est affiché.
 const DiamantRevenueChart = lazy(() => import('./DiamantRevenueChart'));
@@ -19,19 +21,59 @@ export default function DiamantDashboardOverview() {
 	const [range, setRange] = useState<TimeRange>('month');
 	const [customStart, setCustomStart] = useState('');
 	const [customEnd, setCustomEnd] = useState('');
-	
+
 	const [loading, setLoading] = useState(true);
+	const [pret, setPret] = useState(false);
 	const [stats, setStats] = useState({ ca: 0, rdv: 0, newClients: 0, panier: 0 });
+	const [vus, setVus] = useState({ ca: 0, rdv: 0, newClients: 0, panier: 0 });
 	const [appointments, setAppointments] = useState<AppointmentWithService[]>([]);
 	const [periodClients, setPeriodClients] = useState<PeriodClientDetail[]>([]);
 	const [showNewClientsModal, setShowNewClientsModal] = useState(false);
-	
+	const [nonLus, setNonLus] = useState(0);
+	const [aujourdhui, setAujourdhui] = useState('');
+	const reduit = useReducedMotion();
+
 	// Pour afficher les RDV "Prochains" ou "Derniers" si aucun prochain
 	const [displayAppointments, setDisplayAppointments] = useState<{ type: 'prochains' | 'derniers', list: AppointmentWithService[] }>({ type: 'prochains', list: [] });
 
 	useEffect(() => {
 		fetchDashboardData();
 	}, [range, customStart, customEnd]);
+
+	// Les chiffres partent de zéro puis roulent jusqu'à leur valeur (NumberFlow).
+	useEffect(() => {
+		if (!pret) return;
+		const id = window.requestAnimationFrame(() => setVus(stats));
+		return () => window.cancelAnimationFrame(id);
+	}, [stats, pret]);
+
+	// Messages non lus (même source que la navigation : métadonnées locales des conversations).
+	useEffect(() => {
+		const d = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+		setAujourdhui(d.charAt(0).toUpperCase() + d.slice(1));
+		function compter() {
+			try {
+				let total = 0;
+				const saved = localStorage.getItem('diamant_conversations_meta');
+				if (saved) {
+					const parsed = JSON.parse(saved);
+					for (const k in parsed) {
+						if (parsed[k]?.unread_by_pro) total += parsed[k].unread_by_pro;
+					}
+				}
+				setNonLus(total);
+			} catch (e) {}
+		}
+		compter();
+		window.addEventListener('diamant:new-message', compter);
+		window.addEventListener('diamant:messages-read', compter);
+		window.addEventListener('storage', compter);
+		return () => {
+			window.removeEventListener('diamant:new-message', compter);
+			window.removeEventListener('diamant:messages-read', compter);
+			window.removeEventListener('storage', compter);
+		};
+	}, []);
 
 	function getRangeLabel(r: TimeRange): string {
 		switch (r) {
@@ -92,7 +134,7 @@ export default function DiamantDashboardOverview() {
 				});
 
 			const completed = rdvs.filter(r => r.status !== 'cancelled');
-			
+
 			// Fix : stocker les rendez-vous dans le state pour alimenter DiamantRevenueChart
 			setAppointments(completed);
 
@@ -173,6 +215,7 @@ export default function DiamantDashboardOverview() {
 			console.error(err);
 		} finally {
 			setLoading(false);
+			setPret(true);
 		}
 	}
 
@@ -189,162 +232,240 @@ export default function DiamantDashboardOverview() {
 		return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 	}
 
+	// Courbe du chiffre d'affaires (vue calculée sur les rendez-vous déjà chargés)
+	const courbe = useMemo(() => {
+		const tri = [...appointments].sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+		const groupes = new Map<string, number>();
+		for (const a of tri) {
+			const d = new Date(a.start_time);
+			const cle = range === 'year' ? `${d.getFullYear()}-${d.getMonth()}` : d.toDateString();
+			groupes.set(cle, (groupes.get(cle) || 0) + (a.services?.price || 0));
+		}
+		return Array.from(groupes.values());
+	}, [appointments, range]);
+
+	const aConfirmer = displayAppointments.type === 'prochains' ? displayAppointments.list.filter((a) => a.status === 'pending').length : 0;
+
+	const apparition = (i: number) =>
+		reduit
+			? {}
+			: {
+				initial: { opacity: 0, y: 14 },
+				animate: { opacity: 1, y: 0 },
+				transition: { duration: 0.6, ease: EASE, delay: 0.05 * i },
+			};
+
 	return (
-		<div className="space-y-8">
-			{/* Filtres de date */}
-			<div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-2xl border border-stone-200 shadow-sm w-fit">
-				<button 
-					onClick={() => setRange('week')}
-					className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${range === 'week' ? 'bg-deep-teal-50 text-deep-teal-600 border border-deep-teal-200' : 'text-stone-500 hover:bg-stone-50 border border-transparent'}`}
-				>
-					7 derniers jours
-				</button>
-				<button 
-					onClick={() => setRange('month')}
-					className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${range === 'month' ? 'bg-deep-teal-50 text-deep-teal-600 border border-deep-teal-200' : 'text-stone-500 hover:bg-stone-50 border border-transparent'}`}
-				>
-					30 derniers jours
-				</button>
-				<button 
-					onClick={() => setRange('year')}
-					className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${range === 'year' ? 'bg-deep-teal-50 text-deep-teal-600 border border-deep-teal-200' : 'text-stone-500 hover:bg-stone-50 border border-transparent'}`}
-				>
-					1 an
-				</button>
-				<div className="h-6 w-px bg-stone-200 mx-1"></div>
-				<button 
-					onClick={() => setRange('custom')}
-					className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${range === 'custom' ? 'bg-deep-teal-50 text-deep-teal-600 border border-deep-teal-200' : 'text-stone-500 hover:bg-stone-50 border border-transparent'}`}
-				>
-					Personnalisé
-				</button>
-				
-				{range === 'custom' && (
-					<div className="flex items-center gap-2 ml-2">
-						<input type="date" value={customStart} onChange={(e) => setCustomStart(e.target.value)} className="text-sm border border-stone-200 rounded-lg px-2 py-1 text-stone-600 outline-none focus:border-deep-teal-400" />
-						<span className="text-stone-400">à</span>
-						<input type="date" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} className="text-sm border border-stone-200 rounded-lg px-2 py-1 text-stone-600 outline-none focus:border-deep-teal-400" />
-					</div>
-				)}
+		<div className="space-y-6">
+			{/* Ce qui demande une action, puis le choix de la période */}
+			<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+				<div className="flex flex-wrap items-center gap-2" aria-live="polite">
+					<span className="mr-1 text-sm font-semibold text-dx-encre">À traiter</span>
+					{nonLus > 0 && (
+						<a href="/demo-diamant/dashboard/messages" className="dx-btn dx-btn--sm dx-btn--ligne gap-2">
+							<MessageSquare size={14} className="text-dx-terre" />
+							{nonLus} message{nonLus > 1 ? 's' : ''} non lu{nonLus > 1 ? 's' : ''}
+						</a>
+					)}
+					{aConfirmer > 0 && (
+						<a href="/demo-diamant/dashboard/disponibilites" className="dx-btn dx-btn--sm dx-btn--ligne gap-2">
+							<CalendarClock size={14} className="text-dx-attente" />
+							{aConfirmer} rendez-vous à confirmer
+						</a>
+					)}
+					{pret && nonLus === 0 && aConfirmer === 0 && (
+						<span className="inline-flex items-center gap-2 text-sm text-dx-gris">
+							<Check size={15} className="text-dx-ok" /> Rien n'attend de réponse.
+						</span>
+					)}
+				</div>
+
+				<div className="flex flex-wrap items-center gap-3">
+					<Segments<TimeRange>
+						label="Période"
+						value={range}
+						onChange={setRange}
+						options={[
+							{ value: 'week', label: '7 derniers jours' },
+							{ value: 'month', label: '30 derniers jours' },
+							{ value: 'year', label: '1 an' },
+							{ value: 'custom', label: 'Personnalisé' },
+						]}
+					/>
+					{range === 'custom' && (
+						<div className="flex items-center gap-2">
+							<input type="date" aria-label="Début de la période" value={customStart} onChange={(e) => setCustomStart(e.target.value)} className="dx-champ !min-h-9 !w-auto !py-1.5 text-sm" />
+							<span className="text-sm text-dx-gris">à</span>
+							<input type="date" aria-label="Fin de la période" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} className="dx-champ !min-h-9 !w-auto !py-1.5 text-sm" />
+						</div>
+					)}
+				</div>
 			</div>
 
-			{loading ? (
-				<div className="py-12 text-center text-stone-400 font-medium">Chargement des données...</div>
-			) : (
-				<>
-					{/* KPIs */}
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-						<a href="/demo-diamant/dashboard/statistiques" className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-deep-teal-200 hover:shadow-md transition-all card-hover group">
-							<div className="flex items-center justify-between mb-3">
-								<div className="w-9 h-9 rounded-xl bg-deep-teal-50 border border-deep-teal-100 flex items-center justify-center text-deep-teal-500">
-									<TrendingUp size={18} />
-								</div>
-								<span className="text-xs font-bold text-stone-400 group-hover:text-deep-teal-500 transition-colors flex items-center gap-1">Détails <ArrowUpRight size={12}/></span>
-							</div>
-							<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Chiffre d'Affaires</p>
-							<p className="text-2xl font-black text-stone-800 font-heading">{formatEuros(stats.ca)}</p>
-						</a>
-
-						<a href="/demo-diamant/dashboard/disponibilites" className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-jasmine-200 hover:shadow-md transition-all card-hover group">
-							<div className="flex items-center justify-between mb-3">
-								<div className="w-9 h-9 rounded-xl bg-jasmine-50 border border-jasmine-100 flex items-center justify-center text-jasmine-600">
-									<Calendar size={18} />
-								</div>
-								<span className="text-xs font-bold text-stone-400 group-hover:text-jasmine-600 transition-colors flex items-center gap-1">Détails <ArrowUpRight size={12}/></span>
-							</div>
-							<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">RDV de la période</p>
-							<p className="text-2xl font-black text-stone-800 font-heading">{stats.rdv}</p>
-						</a>
-
-						<button 
-							type="button"
-							onClick={() => setShowNewClientsModal(true)} 
-							className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-deep-teal-300 hover:shadow-md transition-all card-hover group text-left cursor-pointer"
-						>
-							<div className="flex items-center justify-between mb-3">
-								<div className="w-9 h-9 rounded-xl bg-deep-teal-50 border border-deep-teal-100 flex items-center justify-center text-deep-teal-500 group-hover:scale-105 group-hover:bg-deep-teal-500 group-hover:text-white transition-all">
-									<Users size={18} />
-								</div>
-								<span className="text-xs font-bold text-stone-400 group-hover:text-deep-teal-600 transition-colors flex items-center gap-1">Voir liste <ArrowUpRight size={12}/></span>
-							</div>
-							<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Nouveaux Clients</p>
-							<p className="text-2xl font-black text-stone-800 font-heading">{stats.newClients}</p>
-						</button>
-
-						<a href="/demo-diamant/dashboard/statistiques" className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm hover:border-jasmine-200 hover:shadow-md transition-all card-hover group">
-							<div className="flex items-center justify-between mb-3">
-								<div className="w-9 h-9 rounded-xl bg-jasmine-50 border border-jasmine-100 flex items-center justify-center text-jasmine-600">
-									<span className="font-black text-base">€</span>
-								</div>
-								<span className="text-xs font-bold text-stone-400 group-hover:text-jasmine-600 transition-colors flex items-center gap-1">Détails <ArrowUpRight size={12}/></span>
-							</div>
-							<p className="text-stone-400 text-xs font-bold uppercase tracking-widest mb-1">Panier Moyen</p>
-							<p className="text-2xl font-black text-stone-800 font-heading">{formatEuros(stats.panier)}</p>
-						</a>
+			{!pret ? (
+				<EnChargement label="Chargement des données…" className="grid gap-4 lg:grid-cols-12">
+					<Squelette className="h-[420px] !rounded-[14px] lg:col-span-7 lg:row-span-2" />
+					<Squelette className="h-[220px] !rounded-[14px] lg:col-span-5" />
+					<div className="grid grid-cols-2 gap-4 lg:col-span-5">
+						<Squelette className="h-[184px] !rounded-[14px]" />
+						<Squelette className="h-[184px] !rounded-[14px]" />
 					</div>
-
-					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-						{/* Chart */}
-						<div className="lg:col-span-2 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
-							<div className="flex items-center justify-between mb-5">
-								<h2 className="text-base font-bold text-stone-800 font-heading">Évolution du CA</h2>
-								<a href="/demo-diamant/dashboard/statistiques" className="text-xs font-bold uppercase tracking-widest text-deep-teal-500 hover:text-deep-teal-400">Rapport complet →</a>
+					<Squelette className="h-[380px] !rounded-[14px] lg:col-span-8" />
+					<Squelette className="h-[380px] !rounded-[14px] lg:col-span-4" />
+				</EnChargement>
+			) : (
+				<div className="grid gap-4 lg:grid-cols-12" aria-busy={loading}>
+					{/* Carte dominante : aujourd'hui et prochains rendez-vous */}
+					<motion.section {...apparition(0)} className="dx-carte dx-carte--nuit flex flex-col overflow-hidden p-6 sm:p-8 lg:col-span-7 lg:row-span-2">
+						<div className="flex items-start justify-between gap-4">
+							<div>
+								<p className="text-sm text-dx-sable">Aujourd'hui</p>
+								<p className="mt-1 font-heading text-[clamp(1.9rem,3.2vw,2.75rem)] font-light leading-none tracking-[-0.035em] text-dx-creme">{aujourdhui || ' '}</p>
 							</div>
-							{/* On utilise les données dynamiques */}
-							{/* Graphique chargé à la demande : jamais pendant le rendu serveur (loading y vaut true). */}
-							{loading ? (
-								<div className="animate-pulse h-64 bg-stone-100 rounded-xl"></div>
-							) : (
-								<Suspense fallback={<div className="animate-pulse h-64 bg-stone-100 rounded-xl"></div>}>
-									<DiamantRevenueChart appointments={appointments} range={range} />
-								</Suspense>
+							{displayAppointments.type === 'derniers' && (
+								<span className="rounded-full border border-dx-filet-nuit px-3 py-1 text-xs font-semibold text-dx-sable">Aucun RDV à venir</span>
 							)}
 						</div>
 
-						{/* Prochains RDV / Derniers RDV */}
-						<div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
-							<div className="flex items-center justify-between mb-5">
-								<h2 className="text-base font-bold text-stone-800 font-heading">
-									{displayAppointments.type === 'prochains' ? 'Prochains RDV' : 'Derniers RDV'}
-								</h2>
-								{displayAppointments.type === 'derniers' && (
-									<span className="text-[10px] font-bold uppercase tracking-widest text-stone-400 bg-stone-100 px-2 py-1 rounded-full">Aucun RDV à venir</span>
-								)}
-							</div>
-							
-							<div className="space-y-3">
-								{displayAppointments.list.length === 0 ? (
-									<p className="text-sm text-stone-500 italic text-center py-4">Aucun rendez-vous trouvé.</p>
-								) : (
-									displayAppointments.list.map((rdv) => (
-										<div key={rdv.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${displayAppointments.type === 'prochains' ? 'border-stone-100 bg-stone-50 hover:border-deep-teal-200' : 'border-stone-100 bg-white opacity-70 hover:opacity-100'}`}>
-											<div className="w-10 h-10 rounded-full bg-stone-200 border border-stone-300 overflow-hidden shrink-0 flex items-center justify-center font-bold text-stone-500">
-												{/* Simple Initial Avatar */}
-												{rdv.client_name?.charAt(0).toUpperCase()}
-											</div>
-											<div className="flex-1 min-w-0">
-												<p className="text-stone-800 font-bold text-sm truncate">{rdv.client_name}</p>
-												<p className="text-stone-500 text-xs truncate">{rdv.services?.name || 'Prestation'}</p>
-											</div>
-											<div className="text-right shrink-0">
-												<p className={`font-bold text-sm ${displayAppointments.type === 'prochains' ? 'text-deep-teal-600' : 'text-stone-500'}`}>{formatTime(rdv.start_time)}</p>
-												<p className="text-stone-400 text-xs">{formatDateShort(rdv.start_time)}</p>
+						<div className="mt-8 flex items-baseline justify-between gap-4 border-b border-dx-filet-nuit pb-3">
+							<h2 className="font-heading text-xl font-normal text-dx-creme">
+								{displayAppointments.type === 'prochains' ? 'Prochains RDV' : 'Derniers RDV'}
+							</h2>
+							<span className="text-xs text-dx-sable">{displayAppointments.list.length} affiché{displayAppointments.list.length > 1 ? 's' : ''}</span>
+						</div>
+
+						<ol className="flex-1">
+							{displayAppointments.list.length === 0 ? (
+								<li className="py-10 text-center text-sm text-dx-sable">Aucun rendez-vous trouvé.</li>
+							) : (
+								displayAppointments.list.map((rdv, i) => (
+									<motion.li
+										key={rdv.id}
+										initial={reduit ? false : { opacity: 0, x: -10 }}
+										animate={{ opacity: 1, x: 0 }}
+										transition={{ duration: 0.5, ease: EASE, delay: 0.15 + i * 0.08 }}
+										className={`grid grid-cols-[4.5rem_1fr_auto] items-center gap-4 border-b border-dx-filet-nuit py-4 last:border-b-0 sm:grid-cols-[5.5rem_1fr_auto] ${displayAppointments.type === 'derniers' ? 'opacity-75' : ''}`}
+									>
+										<div>
+											<p className="dx-chiffre text-[1.9rem] text-dx-creme sm:text-[2.2rem]">{formatTime(rdv.start_time)}</p>
+											<p className="mt-1 text-xs text-dx-sable">{formatDateShort(rdv.start_time)}</p>
+										</div>
+										<div className="flex min-w-0 items-center gap-3">
+											<Avatar nom={rdv.client_name} taille={38} ton="terre" className="hidden sm:inline-grid" />
+											<div className="min-w-0">
+												<p className="truncate font-semibold text-dx-creme">{rdv.client_name}</p>
+												<p className="truncate text-sm text-dx-sable">
+													{rdv.services?.name || 'Prestation'}
+													{rdv.services?.duration_minutes ? ` · ${rdv.services.duration_minutes} min` : ''}
+												</p>
 											</div>
 										</div>
-									))
-								)}
-							</div>
-							
-							<a href="/demo-diamant/dashboard/disponibilites" className="block w-full text-center mt-5 text-xs font-bold uppercase tracking-widest text-stone-400 hover:text-deep-teal-500 transition-colors pt-4 border-t border-stone-100">
-								Voir l'agenda complet →
-							</a>
+										<div className="text-right">
+											{rdv.status === 'pending' ? (
+												<Pastille ton="attente">À confirmer</Pastille>
+											) : (
+												<PastilleStatut statut={rdv.status} />
+											)}
+										</div>
+									</motion.li>
+								))
+							)}
+						</ol>
+
+						<a href="/demo-diamant/dashboard/disponibilites" className="dx-lien mt-6 self-start">
+							Voir l'agenda complet <ArrowRight size={15} />
+						</a>
+					</motion.section>
+
+					{/* Chiffre d'affaires */}
+					<motion.a {...apparition(1)} href="/demo-diamant/dashboard/statistiques" className="dx-carte group flex flex-col p-6 lg:col-span-5">
+						<div className="flex items-center justify-between gap-3">
+							<p className="text-sm font-semibold text-dx-encre">Chiffre d'affaires</p>
+							<span className="inline-flex items-center gap-1 text-xs font-semibold text-dx-gris transition-colors group-hover:text-dx-terre">
+								Détails <ArrowUpRight size={13} />
+							</span>
 						</div>
+						<p className="dx-meta mt-0.5">{getRangeLabel(range)}</p>
+						<Chiffre valeur={vus.ca} euros className="mt-5 text-[clamp(2.8rem,5vw,4.25rem)] text-dx-encre" />
+						<div className="mt-auto pt-5">
+							{courbe.length > 1 ? (
+								<Courbe valeurs={courbe} hauteur={56} />
+							) : (
+								<div className="h-14 border-b border-dashed border-dx-filet-fort" />
+							)}
+						</div>
+					</motion.a>
+
+					{/* Rendez-vous et panier moyen */}
+					<div className="grid grid-cols-2 gap-4 lg:col-span-5">
+						<motion.a {...apparition(2)} href="/demo-diamant/dashboard/disponibilites" className="dx-carte group flex flex-col p-5">
+							<p className="text-sm font-semibold text-dx-encre">RDV de la période</p>
+							<Chiffre valeur={vus.rdv} className="mt-4 text-[clamp(2.4rem,4vw,3.25rem)] text-dx-encre" />
+							<span className="mt-auto inline-flex items-center gap-1 pt-4 text-xs font-semibold text-dx-gris transition-colors group-hover:text-dx-terre">
+								Agenda <ArrowUpRight size={13} />
+							</span>
+						</motion.a>
+						<motion.a {...apparition(3)} href="/demo-diamant/dashboard/statistiques" className="dx-carte group flex flex-col p-5">
+							<p className="text-sm font-semibold text-dx-encre">Panier moyen</p>
+							<Chiffre valeur={vus.panier} euros className="mt-4 text-[clamp(2.4rem,4vw,3.25rem)] text-dx-encre" />
+							<span className="mt-auto inline-flex items-center gap-1 pt-4 text-xs font-semibold text-dx-gris transition-colors group-hover:text-dx-terre">
+								Détails <ArrowUpRight size={13} />
+							</span>
+						</motion.a>
 					</div>
-				</>
+
+					{/* Graphique */}
+					<motion.section {...apparition(4)} className="dx-carte p-6 lg:col-span-8">
+						<div className="mb-5 flex items-start justify-between gap-4">
+							<div>
+								<h2 className="dx-h2">Évolution du CA</h2>
+								<p className="dx-meta mt-1">{getRangeLabel(range)}</p>
+							</div>
+							<a href="/demo-diamant/dashboard/statistiques" className="dx-lien shrink-0">Rapport complet <ArrowRight size={14} /></a>
+						</div>
+						{/* Graphique chargé à la demande : jamais pendant le rendu serveur (pret y vaut false). */}
+						<div className={loading ? 'opacity-50 transition-opacity' : 'transition-opacity'}>
+							<Suspense fallback={<Squelette className="h-[300px] w-full !rounded-xl" />}>
+								<DiamantRevenueChart appointments={appointments} range={range} />
+							</Suspense>
+						</div>
+					</motion.section>
+
+					{/* Nouveaux clients */}
+					<motion.button
+						{...apparition(5)}
+						type="button"
+						onClick={() => setShowNewClientsModal(true)}
+						className="dx-carte group flex flex-col p-6 text-left lg:col-span-4"
+					>
+						<div className="flex w-full items-center justify-between gap-3">
+							<p className="text-sm font-semibold text-dx-encre">Nouveaux clients</p>
+							<span className="inline-flex items-center gap-1 text-xs font-semibold text-dx-gris transition-colors group-hover:text-dx-terre">
+								Voir liste <ArrowUpRight size={13} />
+							</span>
+						</div>
+						<p className="dx-meta mt-0.5">{getRangeLabel(range)}</p>
+						<Chiffre valeur={vus.newClients} className="mt-5 text-[clamp(2.8rem,5vw,4rem)] text-dx-encre" />
+						<div className="mt-6 flex -space-x-2">
+							{periodClients.slice(0, 6).map((c) => (
+								<Avatar key={c.id} nom={c.name} taille={34} ton="terre" className="ring-2 ring-dx-carte" />
+							))}
+						</div>
+						<ul className="mt-6 w-full divide-y divide-dx-filet border-t border-dx-filet">
+							{periodClients.slice(0, 4).map((c) => (
+								<li key={c.id} className="flex items-baseline justify-between gap-3 py-2.5 text-sm">
+									<span className="truncate font-medium text-dx-encre">{c.name}</span>
+									<span className="shrink-0 text-xs text-dx-gris">{c.serviceName}</span>
+								</li>
+							))}
+							{periodClients.length === 0 && <li className="py-3 text-sm text-dx-gris">Aucun client sur la période.</li>}
+						</ul>
+					</motion.button>
+				</div>
 			)}
 
 			{/* Modale de détail des nouveaux clients */}
-			<DiamantNewClientsModal 
+			<DiamantNewClientsModal
 				isOpen={showNewClientsModal}
 				onClose={() => setShowNewClientsModal(false)}
 				clients={periodClients}

@@ -1,14 +1,19 @@
 ---
 // Layout de l'espace pro et de l'espace client Diamant. Il reprend les polices (Fraunces, Hanken Grotesk)
-// et la palette du site public ; la logique (garde de bannissement, nom du salon, tiroir mobile) est inchangée.
+// et la palette du site public (jetons dx-* de diamant.css, section « Espaces connectés »).
+// Coque : barre latérale repliable sur bureau (état mémorisé dans localStorage), tiroir sur mobile,
+// barre du haut avec la palette de commandes (espace pro). La logique (garde de bannissement,
+// nom du salon synchronisé, tiroir mobile) est inchangée.
 import '@fontsource-variable/fraunces/opsz.css';
 import '@fontsource-variable/fraunces/opsz-italic.css';
 import '@fontsource-variable/hanken-grotesk/index.css';
 import '../../styles/diamant.css';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { getSiteConfig } from '@/config/site';
 
 import DiamantClientBanGuard from '@/components/diamant/dashboard/DiamantClientBanGuard';
+import DiamantToaster from '@/components/diamant/dashboard/kit/DiamantToaster';
+import DiamantCommandPalette from '@/components/diamant/dashboard/kit/DiamantCommandPalette';
 
 const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
 
@@ -22,6 +27,8 @@ const currentPath = Astro.url.pathname;
 const basePathMatch = currentPath.match(/^\/(demo-[^/]+)/);
 const basePath = basePathMatch ? `/${basePathMatch[1]}` : '';
 const isClientSpace = currentPath.includes('/espace-client');
+const espace = isClientSpace ? 'Espace client' : 'Espace pro';
+const initiale = (siteConfig.business.name || 'O').trim().charAt(0).toUpperCase();
 ---
 
 <!doctype html>
@@ -33,6 +40,11 @@ const isClientSpace = currentPath.includes('/espace-client');
 		<title>{title} — {siteConfig.business.name}</title>
 		<meta name="theme-color" content="#f5efe6" />
 		<script is:inline>
+			// Barre latérale repliée (préférence d'affichage) : posée avant le premier rendu, sans saut.
+			try {
+				if (localStorage.getItem('diamant_dash_replie') === '1') document.documentElement.setAttribute('data-dx-replie', 'true');
+			} catch (e) {}
+
 			function syncDiamantBusinessName() {
 				try {
 					var saved = localStorage.getItem('diamant_pro_profile');
@@ -48,6 +60,9 @@ const isClientSpace = currentPath.includes('/espace-client');
 					if (name) {
 						document.querySelectorAll('[data-diamant-business-name]').forEach(function(el) {
 							el.textContent = name;
+						});
+						document.querySelectorAll('[data-diamant-business-initial]').forEach(function(el) {
+							el.textContent = name.trim().charAt(0).toUpperCase();
 						});
 					}
 				} catch (e) {}
@@ -84,53 +99,66 @@ const isClientSpace = currentPath.includes('/espace-client');
 			} catch (e) {}
 		</script>
 	</head>
-	<body class="bg-[#f5efe6] text-stone-800 overflow-hidden">
-		<div class="flex h-screen relative">
-			{/* Sidebar */}
-			<aside id="dash-drawer" data-open="false" class="dash-drawer w-64 flex-shrink-0 border-r border-[#e2d8cb] bg-[#fbf8f3] flex flex-col z-10 relative" aria-label="Navigation de l’espace">
-				<div class="p-5 border-b border-[#e2d8cb] flex items-center gap-3">
-					<a href={`${basePath}/`} aria-label="Accueil" class="flex items-center gap-3 group">
-						<span class="font-heading text-[1.5rem] leading-none tracking-[-0.02em] text-[#1f1813] transition-colors group-hover:text-[#a84b25]" data-diamant-business-name>{siteConfig.business.name}</span>
+	<body>
+		<a href="#dashboard-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[90] focus:rounded-full focus:bg-dx-encre focus:px-4 focus:py-2 focus:text-sm focus:text-white">Aller au contenu</a>
+		<div class="relative flex min-h-dvh">
+			{/* Barre latérale (tiroir sur mobile, repliable sur bureau) */}
+			<aside id="dash-drawer" data-open="false" class="dash-drawer dx-side relative z-10 flex shrink-0 flex-col md:sticky md:top-0 md:h-dvh md:self-start" aria-label="Navigation de l’espace">
+				<div class="flex h-16 flex-none items-center gap-3 border-b border-dx-filet px-[18px]">
+					<a href={`${basePath}/`} aria-label="Accueil du site" class="group flex min-w-0 items-center gap-3">
+						<span class="dx-monogramme" aria-hidden="true" data-diamant-business-initial>{initiale}</span>
+						<span class="dx-label dx-marque truncate text-[1.4rem] transition-colors group-hover:text-dx-terre" data-diamant-business-name>{siteConfig.business.name}</span>
 					</a>
 				</div>
-				<div class="flex-1 overflow-y-auto p-4">
+				<div class="flex-1 overflow-y-auto overflow-x-hidden px-3 py-5">
 					<slot name="sidebar" />
 				</div>
-				<div class="p-4 border-t border-[#e2d8cb]">
-					<a href={`${basePath}/`} class="flex items-center justify-center gap-2 rounded-full border border-[#d9cfc1] px-4 py-2.5 text-sm font-semibold text-[#4a3f37] transition-colors hover:border-[#1f1813] hover:text-[#1f1813]">
-						<ArrowLeft size={15} />
-						Retour au site
+				<div class="flex flex-none flex-col gap-1 border-t border-dx-filet p-3">
+					<a href={`${basePath}/`} class="dx-nav-lien" title="Retour au site">
+						<ArrowLeft size={17} />
+						<span class="dx-label">Retour au site</span>
 					</a>
+					<button id="dx-replier" type="button" class="dx-nav-lien hidden w-full md:flex" aria-controls="dash-drawer" aria-expanded="true" title="Replier la barre latérale">
+						<PanelLeftClose size={17} className="dx-si-deplie" />
+						<PanelLeftOpen size={17} className="dx-si-replie" />
+						<span class="dx-label">Replier le menu</span>
+					</button>
 				</div>
 			</aside>
 
-			{/* Main Content */}
-			<main class="flex-1 overflow-y-auto bg-[#f5efe6] relative z-10">
-				{/* Mobile Header */}
-				<header class="md:hidden sticky top-0 z-50 border-b border-[#e2d8cb] bg-[#fbf8f3] px-6 py-4 flex items-center justify-between">
-					<a href={`${basePath}/`} aria-label="Retour au site" class="flex items-center gap-3">
-						<span class="font-heading text-[1.35rem] leading-none tracking-[-0.02em] text-[#1f1813]" data-diamant-business-name>{siteConfig.business.name}</span>
-					</a>
-					<button id="dash-menu-btn" type="button" class="dash-burger text-stone-800" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="dash-drawer">
+			{/* Contenu */}
+			<main id="dx-main" class="relative min-w-0 flex-1 overflow-x-clip">
+				<header class="dx-topbar">
+					<button id="dash-menu-btn" type="button" class="dash-burger -ml-1.5 text-dx-encre md:hidden" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="dash-drawer">
 						<span></span><span></span><span></span>
 					</button>
+					<a href={`${basePath}/`} class="dx-marque min-w-0 truncate text-[1.25rem] md:hidden" data-diamant-business-name>{siteConfig.business.name}</a>
+					<p class="hidden min-w-0 items-baseline gap-2 truncate text-sm md:flex">
+						<span class="text-dx-gris">{espace}</span>
+						<span class="text-dx-sable" aria-hidden="true">/</span>
+						<span class="truncate font-semibold text-dx-encre">{title}</span>
+					</p>
+					<div class="ml-auto flex items-center gap-3">
+						{!isClientSpace && <DiamantCommandPalette client:idle basePath={basePath} />}
+					</div>
 				</header>
 
-				<div class="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-10">
-				<div id="dashboard-content">
-					{isClientSpace ? (
-						<DiamantClientBanGuard client:load basePath={basePath}>
+				<div class="mx-auto w-full max-w-[1280px] px-4 pb-32 pt-7 sm:px-6 md:px-10 md:pb-16 md:pt-10">
+					<div id="dashboard-content">
+						{isClientSpace ? (
+							<DiamantClientBanGuard client:load basePath={basePath}>
+								<slot />
+							</DiamantClientBanGuard>
+						) : (
 							<slot />
-						</DiamantClientBanGuard>
-					) : (
-						<slot />
-					)}
-				</div>
+						)}
+					</div>
 				</div>
 			</main>
 			<div id="dash-backdrop" class="dash-backdrop" data-open="false" aria-hidden="true"></div>
 		</div>
 
+		<DiamantToaster client:load />
 	</body>
 </html>
 
@@ -146,7 +174,7 @@ const isClientSpace = currentPath.includes('/espace-client');
 			transform: translateX(-100%);
 			transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 		}
-		.dash-drawer[data-open='true'] { transform: none; }
+		.dash-drawer[data-open='true'] { transform: none; box-shadow: 0 30px 80px -30px rgb(26 20 17 / 0.5); }
 		.dash-backdrop {
 			position: fixed;
 			inset: 0;
@@ -160,22 +188,22 @@ const isClientSpace = currentPath.includes('/espace-client');
 	}
 	@media (min-width: 768px) { .dash-backdrop { display: none; } }
 
-	.dash-burger { position: relative; width: 40px; height: 40px; border-radius: 10px; }
+	.dash-burger { position: relative; width: 40px; height: 40px; border-radius: 999px; flex: none; }
 	.dash-burger span {
 		position: absolute;
-		left: 10px;
-		width: 20px;
-		height: 2px;
+		left: 11px;
+		width: 18px;
+		height: 1.5px;
 		border-radius: 2px;
 		background: currentColor;
 		transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
 	}
-	.dash-burger span:nth-child(1) { top: 13px; }
-	.dash-burger span:nth-child(2) { top: 19px; }
+	.dash-burger span:nth-child(1) { top: 14px; }
+	.dash-burger span:nth-child(2) { top: 19.5px; }
 	.dash-burger span:nth-child(3) { top: 25px; }
-	.dash-burger[aria-expanded='true'] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+	.dash-burger[aria-expanded='true'] span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
 	.dash-burger[aria-expanded='true'] span:nth-child(2) { opacity: 0; }
-	.dash-burger[aria-expanded='true'] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+	.dash-burger[aria-expanded='true'] span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
 
 	@media (prefers-reduced-motion: reduce) {
 		.dash-drawer, .dash-backdrop, .dash-burger span { transition-duration: 0.01ms !important; }
@@ -200,6 +228,28 @@ const isClientSpace = currentPath.includes('/espace-client');
 		});
 		document.addEventListener('keydown', (e) => {
 			if (e.key === 'Escape') setOpen(false);
+		});
+	}
+
+	// Barre latérale repliable (bureau) : préférence d'affichage seulement.
+	const replier = document.getElementById('dx-replier');
+	if (replier) {
+		const html = document.documentElement;
+		const maj = () => {
+			const replie = html.getAttribute('data-dx-replie') === 'true';
+			replier.setAttribute('aria-expanded', String(!replie));
+			replier.setAttribute('title', replie ? 'Déplier la barre latérale' : 'Replier la barre latérale');
+			replier.setAttribute('aria-label', replie ? 'Déplier la barre latérale' : 'Replier la barre latérale');
+		};
+		maj();
+		replier.addEventListener('click', () => {
+			const replie = html.getAttribute('data-dx-replie') !== 'true';
+			if (replie) html.setAttribute('data-dx-replie', 'true');
+			else html.removeAttribute('data-dx-replie');
+			try {
+				localStorage.setItem('diamant_dash_replie', replie ? '1' : '0');
+			} catch (e) {}
+			maj();
 		});
 	}
 </script>

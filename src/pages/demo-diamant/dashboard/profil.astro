@@ -2,18 +2,13 @@
 import DiamantDashboardLayout from '@/layouts/diamant/DiamantDashboardLayout.astro';
 import DiamantDashboardNav from '@/components/diamant/dashboard/DiamantDashboardNav';
 import DiamantProProfile from '@/components/diamant/dashboard/DiamantProProfile';
-import { getSiteConfig } from '@/config/site';
-
-const siteConfig = await getSiteConfig(Astro.url.pathname, Astro.cookies);
+import DiamantPageHead from '@/components/diamant/dashboard/kit/DiamantPageHead.astro';
 ---
 
 <DiamantDashboardLayout title="Profil Maison">
 	<DiamantDashboardNav slot="sidebar" basePath="/demo-diamant" client:load />
-	
-	<div class="mb-8">
-		<h1 class="text-3xl font-black text-stone-800 tracking-tight">Profil Maison</h1>
-		<p class="text-stone-500 mt-1">Paramètres et informations de votre établissement.</p>
-	</div>
+
+	<DiamantPageHead titre="Profil" accent="Maison" sousTitre="Paramètres et informations de votre établissement : nom affiché sur le site, adresse, téléphone, abonnement." />
 
 	<DiamantProProfile client:load />
 

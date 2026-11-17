@@ -26,28 +26,31 @@ export default function DiamantAdminOnlyGuard({ children, pageName = "cette sect
 
 	if (role === 'employee') {
 		return (
-			<div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-8 md:p-12 text-center shadow-xs max-w-2xl mx-auto my-10">
-				<div className="w-16 h-16 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-800 mx-auto mb-4 shadow-xs">
-					<Lock size={28} />
-				</div>
-				<h2 className="text-xl font-bold text-stone-900 tracking-tight">Accès Réservé à l'Administrateur</h2>
-				<p className="text-sm text-amber-900 mt-2 max-w-md mx-auto leading-relaxed">
-					L'onglet <strong>{pageName}</strong> est confidentiel et réservé au gérant / propriétaire de l'établissement. En tant qu'employé, vous avez accès uniquement au <strong>Planning & RDV, à la Clientèle, à la Messagerie et à la Recherche</strong>.
-				</p>
-				<div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-					<a
-						href="/demo-diamant/dashboard/disponibilites"
-						className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-deep-teal-600 text-white font-bold text-xs hover:bg-deep-teal-700 transition-all shadow-xs"
-					>
-						<span>Accéder au Planning & RDV</span>
-						<ArrowRight size={14} />
-					</a>
-					<a
-						href="/demo-diamant/dashboard/clients"
-						className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-700 font-bold text-xs hover:bg-stone-50 transition-all"
-					>
-						<span>Accéder à la Clientèle</span>
-					</a>
+			<div className="mx-auto my-6 max-w-2xl md:my-12">
+				<div className="dx-carte overflow-hidden">
+					<div className="flex items-center gap-4 border-b border-dx-filet bg-dx-papier px-6 py-5 sm:px-8">
+						<span className="inline-grid h-11 w-11 flex-none place-items-center rounded-full bg-dx-encre text-dx-creme">
+							<Lock size={18} />
+						</span>
+						<div>
+							<p className="text-sm text-dx-gris">Accès réservé</p>
+							<h2 className="dx-h2">Accès Réservé à l'Administrateur</h2>
+						</div>
+					</div>
+					<div className="px-6 py-6 sm:px-8 sm:py-7">
+						<p className="text-[0.9375rem] leading-relaxed text-dx-encre-2">
+							L'onglet <strong className="font-semibold text-dx-encre">{pageName}</strong> est confidentiel et réservé au gérant / propriétaire de l'établissement. En tant qu'employé, vous avez accès uniquement au <strong className="font-semibold text-dx-encre">Planning & RDV, à la Clientèle, à la Messagerie et à la Recherche</strong>.
+						</p>
+						<div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
+							<a href="/demo-diamant/dashboard/disponibilites" className="dx-btn">
+								<span>Accéder au Planning & RDV</span>
+								<ArrowRight size={15} />
+							</a>
+							<a href="/demo-diamant/dashboard/clients" className="dx-btn dx-btn--ligne">
+								<span>Accéder à la Clientèle</span>
+							</a>
+						</div>
+					</div>
 				</div>
 			</div>
 		);

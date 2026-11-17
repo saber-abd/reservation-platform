@@ -1,0 +1,26 @@
+---
+// En-tête des pages des espaces connectés : grand titre Fraunces calé à gauche, sous-titre concret,
+// actions à droite (slot « actions »).
+interface Props {
+	titre: string;
+	/** Fin du titre en italique terre cuite (facultatif), à la manière du site public. */
+	accent?: string;
+	sousTitre?: string;
+}
+const { titre, accent, sousTitre } = Astro.props;
+const aDesActions = Astro.slots.has('actions');
+---
+
+<div class="mb-8 flex flex-col gap-5 md:mb-10 md:flex-row md:items-end md:justify-between">
+	<div class="min-w-0">
+		<h1 class="dx-titre">
+			{titre}{accent && <> <em>{accent}</em></>}
+		</h1>
+		{sousTitre && <p class="dx-sous-titre">{sousTitre}</p>}
+	</div>
+	{aDesActions && (
+		<div class="flex shrink-0 flex-wrap items-center gap-2">
+			<slot name="actions" />
+		</div>
+	)}
+</div>
