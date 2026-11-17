@@ -5,7 +5,7 @@ import ClientsPanel from '@/components/standard/dashboard/StandardClientsPanel';
 ---
 
 <DashboardLayout title="Mes clients">
-	<DashboardNav basePath="/demo-standard" client:load />
+	<DashboardNav slot="nav" basePath="/demo-standard" currentPath={Astro.url.pathname} client:load />
 	<ClientsPanel client:load />
 </DashboardLayout>
 

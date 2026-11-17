@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { toast } from 'sonner';
 import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
 import { updateProfessional } from '@/lib/queries';
 import AvatarPicker, { type AvatarKey } from '@/components/standard/ui/StandardAvatarPicker';
+import { PageHeader, PageSkeleton, Panel } from '@/components/standard/ui/StandardKit';
 
 const schema = z.object({
 	businessName: z.string().min(2, 'Nom trop court'),
@@ -27,7 +29,7 @@ export default function ProfilePanel() {
 		register,
 		handleSubmit,
 		reset,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 	} = useForm<FormValues>({ resolver: zodResolver(schema) });
 
 	useEffect(() => {
@@ -58,95 +60,76 @@ export default function ProfilePanel() {
 				avatar_url: avatarKey,
 			});
 			setSaved(true);
+			toast.success('Profil mis à jour.');
 		} catch (err) {
 			setFormError(err instanceof Error ? err.message : 'Erreur lors de la mise à jour.');
 		}
 	}
 
-	if (loading) return <p className="text-sm text-muted-foreground">Chargement...</p>;
-	if (error) return <p className="text-sm text-red-600">{error}</p>;
+	if (loading) return <PageSkeleton rows={4} figures={false} />;
+	if (error) return <p className="sa-alert">{error}</p>;
 
 	return (
 		<div>
-			<h1 className="text-2xl font-bold text-foreground">Mon profil</h1>
+			<PageHeader
+				title="Mon profil"
+				subtitle="Les informations de votre activité : nom, coordonnées et présentation utilisées dans vos échanges avec les clients."
+			/>
 
-			<form onSubmit={handleSubmit(onSubmit)} className="mt-6 mx-auto max-w-md space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm">
-				<div>
-					<label className="block text-sm font-medium text-stone-700" htmlFor="businessName">
-						Nom de l'activité
-					</label>
-					<input
-						id="businessName"
-						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
-						{...register('businessName')}
-					/>
-					{errors.businessName && <p className="mt-1 text-xs text-red-600">{errors.businessName.message}</p>}
+			<form onSubmit={handleSubmit(onSubmit)} className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+				<Panel title="Établissement" bodyClassName="sa-panel-body grid gap-5 sm:grid-cols-2">
+					<div>
+						<label className="sa-label" htmlFor="businessName">
+							Nom de l'activité
+						</label>
+						<input id="businessName" className="sa-input" {...register('businessName')} />
+						{errors.businessName && <p className="sa-error">{errors.businessName.message}</p>}
+					</div>
+					<div>
+						<label className="sa-label" htmlFor="activity">
+							Activité
+						</label>
+						<input id="activity" placeholder="Dépannage informatique, réparation de smartphones..." className="sa-input" {...register('activity')} />
+					</div>
+					<div className="sm:col-span-2">
+						<label className="sa-label" htmlFor="description">
+							Description
+						</label>
+						<textarea id="description" rows={4} className="sa-input" {...register('description')} />
+					</div>
+					<div>
+						<label className="sa-label" htmlFor="phone">
+							Téléphone
+						</label>
+						<input id="phone" type="tel" className="sa-input sa-num" {...register('phone')} />
+					</div>
+					<div>
+						<label className="sa-label" htmlFor="email">
+							Email de contact
+						</label>
+						<input id="email" type="email" className="sa-input" {...register('email')} />
+						{errors.email && <p className="sa-error">{errors.email.message}</p>}
+					</div>
+					<div className="sm:col-span-2">
+						<label className="sa-label" htmlFor="address">
+							Adresse
+						</label>
+						<input id="address" className="sa-input" {...register('address')} />
+					</div>
+				</Panel>
+
+				<div className="grid gap-6 lg:sticky lg:top-6">
+					<Panel title="Photo de profil">
+						<AvatarPicker value={avatarKey} onChange={(k: AvatarKey) => setAvatarKey(k)} />
+					</Panel>
+					<div className="grid gap-3">
+						{formError && <p className="sa-alert">{formError}</p>}
+						{saved && !formError && <p className="sa-success">Profil mis à jour.</p>}
+						<button type="submit" disabled={isSubmitting} className="sa-btn sa-btn--primary sa-btn--block">
+							{isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
+						</button>
+					</div>
 				</div>
-				<div>
-					<label className="block text-sm font-medium text-stone-700" htmlFor="activity">
-						Activité
-					</label>
-					<input
-						id="activity"
-						placeholder="Dépannage informatique, réparation de smartphones..."
-						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
-						{...register('activity')}
-					/>
-				</div>
-				<div>
-					<label className="block text-sm font-medium text-stone-700" htmlFor="description">
-						Description
-					</label>
-					<textarea
-						id="description"
-						rows={4}
-						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
-						{...register('description')}
-					/>
-				</div>
-				<div>
-					<label className="block text-sm font-medium text-stone-700" htmlFor="phone">
-						Téléphone
-					</label>
-					<input
-						id="phone"
-						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
-						{...register('phone')}
-					/>
-				</div>
-				<div>
-					<label className="block text-sm font-medium text-stone-700" htmlFor="email">
-						Email de contact
-					</label>
-					<input
-						id="email"
-						type="email"
-						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
-						{...register('email')}
-					/>
-					{errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
-				</div>
-				<div>
-					<label className="block text-sm font-medium text-stone-700" htmlFor="address">
-						Adresse
-					</label>
-					<input
-						id="address"
-						className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400"
-						{...register('address')}
-					/>
-				</div>
-				<div>
-					<AvatarPicker value={avatarKey} onChange={(k: AvatarKey) => setAvatarKey(k)} />
-				</div>
-				{formError && <p className="text-sm text-red-600">{formError}</p>}
-				{saved && <p className="text-sm text-green-700">Profil mis à jour.</p>}
-				<button
-					type="submit"
-					className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700"
-				>
-					Enregistrer
-				</button>
 			</form>
 		</div>
 	);

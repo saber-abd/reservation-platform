@@ -1,14 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
 import { getMessages, sendMessage, type Message } from '@/lib/queries';
 import { getSession } from '@/lib/auth';
+import { SendHorizontal } from 'lucide-react';
+import { Busy, EmptyState, Skeleton } from '@/components/standard/ui/StandardKit';
 
 interface Props {
 	professionalId: string;
 	clientId: string;
 	role: 'professional' | 'client';
+	/** Fil plus haut (page Messages de l'espace client) */
+	tall?: boolean;
 }
 
-export default function MessageThread({ professionalId, clientId, role }: Props) {
+/** Libellé de jour pour les séparateurs du fil (« Aujourd'hui », « Hier », « lundi 16 novembre »). */
+function dayLabel(iso: string) {
+	const d = new Date(iso);
+	const today = new Date();
+	const yesterday = new Date();
+	yesterday.setDate(today.getDate() - 1);
+	if (d.toDateString() === today.toDateString()) return "Aujourd'hui";
+	if (d.toDateString() === yesterday.toDateString()) return 'Hier';
+	return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+export default function MessageThread({ professionalId, clientId, role, tall = false }: Props) {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [body, setBody] = useState('');
 	const [loading, setLoading] = useState(true);
@@ -59,8 +74,10 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 		};
 	}, [professionalId, clientId]);
 
+	// Fait défiler le fil (et lui seul, pas la page) jusqu'au dernier message.
 	useEffect(() => {
-		bottomRef.current?.scrollIntoView({ block: 'nearest' });
+		const scroller = bottomRef.current?.parentElement;
+		if (scroller) scroller.scrollTop = scroller.scrollHeight;
 	}, [messages]);
 
 	async function handleSend(e: React.FormEvent) {
@@ -119,47 +136,55 @@ export default function MessageThread({ professionalId, clientId, role }: Props)
 	}
 
 	return (
-		<div className="flex flex-col rounded-xl border border-border bg-white">
-			<div className="max-h-80 min-h-40 flex-1 overflow-y-auto p-4">
-				{loading && <p className="text-sm text-stone-500">Chargement des messages...</p>}
+		<div className={`sa-thread${tall ? ' sa-thread--tall' : ''}`}>
+			<div className="sa-thread-scroll" aria-live="polite">
+				{loading && messages.length === 0 && (
+					<Busy label="Chargement des messages…">
+						<div className="flex flex-col gap-3">
+							<Skeleton className="h-12 w-2/3 self-start rounded-[10px]" />
+							<Skeleton className="h-10 w-1/2 self-end rounded-[10px]" />
+						</div>
+					</Busy>
+				)}
 				{!loading && messages.length === 0 && (
-					<p className="text-sm text-stone-500">Aucun message pour le moment. Démarrez la conversation !</p>
+					<EmptyState kind="chat" title="Aucun message pour le moment.">
+						{role === 'client' ? 'Posez votre question : le technicien vous répond ici.' : 'Démarrez la conversation : le client la retrouvera dans son espace.'}
+					</EmptyState>
 				)}
 				<div className="flex flex-col gap-2">
-					{messages.map((message) => (
-						<div
-							key={message.id}
-							className={`max-w-[75%] rounded-xl px-3 py-2 text-sm ${
-								message.sender === role ? 'self-end bg-rose-600 text-white' : 'self-start bg-stone-100 text-stone-800'
-							}`}
-						>
-							<p>{message.body}</p>
-							<p className={`mt-1 text-[10px] ${message.sender === role ? 'text-rose-100' : 'text-stone-400'}`}>
-								{new Date(message.created_at).toLocaleString('fr-FR', {
-									day: 'numeric',
-									month: 'short',
-									hour: '2-digit',
-									minute: '2-digit',
-								})}
-							</p>
-						</div>
-					))}
+					{messages.map((message, i) => {
+						const mine = message.sender === role;
+						const showDay = i === 0 || new Date(messages[i - 1].created_at).toDateString() !== new Date(message.created_at).toDateString();
+						return (
+							<div key={message.id} className="contents">
+								{showDay && <p className="sa-thread-day first-letter:uppercase">{dayLabel(message.created_at)}</p>}
+								<div className={`sa-bubble ${mine ? 'sa-bubble--mine' : 'sa-bubble--theirs'}`}>
+									<p>{message.body}</p>
+									<time dateTime={message.created_at}>
+										{new Date(message.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+									</time>
+								</div>
+							</div>
+						);
+					})}
 				</div>
 				<div ref={bottomRef} />
 			</div>
-			<form onSubmit={handleSend} className="flex gap-2 border-t border-border p-3">
+			<form onSubmit={handleSend} className="sa-thread-form">
+				<label htmlFor={`sa-msg-${clientId}`} className="sr-only">
+					Votre message
+				</label>
 				<input
+					id={`sa-msg-${clientId}`}
 					value={body}
 					onChange={(e) => setBody(e.target.value)}
 					placeholder="Écrire un message..."
-					className="flex-1 rounded-lg border border-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+					autoComplete="off"
+					className="sa-input flex-1"
 				/>
-				<button
-					type="submit"
-					disabled={sending || !body.trim()}
-					className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700 disabled:opacity-50"
-				>
-					Envoyer
+				<button type="submit" disabled={sending || !body.trim()} className="sa-btn sa-btn--primary">
+					<SendHorizontal size={16} aria-hidden="true" />
+					<span className="max-sm:sr-only">Envoyer</span>
 				</button>
 			</form>
 		</div>

@@ -5,7 +5,7 @@ import StatsPanel from '@/components/standard/dashboard/StandardStatsPanel';
 ---
 
 <DashboardLayout title="Statistiques">
-	<DashboardNav basePath="/demo-standard" client:load />
+	<DashboardNav slot="nav" basePath="/demo-standard" currentPath={Astro.url.pathname} client:load />
 	<StatsPanel client:load />
 </DashboardLayout>
 

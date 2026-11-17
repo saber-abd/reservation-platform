@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 
 interface Props {
 	/** Valeur au format "HH:MM" */
@@ -51,19 +52,20 @@ function ScrollColumn({
 		<ul
 			ref={listRef}
 			onScroll={handleScroll}
-			className="h-[108px] overflow-y-scroll scroll-smooth rounded-lg border border-border bg-white"
+			className="h-[108px] w-14 overflow-y-scroll scroll-smooth rounded-[5px] border border-[var(--sa-line)] bg-white"
 			style={{ scrollbarWidth: 'none' }}
+			role="listbox"
 		>
 			{/* Padding spacers so first/last item can be centered */}
 			<li className="h-9" aria-hidden />
 			{items.map((item) => (
 				<li
 					key={item}
+					role="option"
+					aria-selected={selected === item}
 					onClick={() => onSelect(item)}
-					className={`flex h-9 cursor-pointer items-center justify-center text-sm font-medium transition-colors select-none ${
-						selected === item
-							? 'bg-rose-600 text-white'
-							: 'text-stone-600 hover:bg-stone-50'
+					className={`sa-num flex h-9 cursor-pointer select-none items-center justify-center text-sm font-semibold transition-colors ${
+						selected === item ? 'bg-brand text-white' : 'text-ink-soft hover:bg-[var(--sa-hover)]'
 					}`}
 				>
 					{formatItem(item)}
@@ -104,7 +106,7 @@ export default function TimePicker({ value, onChange, label, id }: Props) {
 	return (
 		<div ref={containerRef} className="relative">
 			{label && (
-				<label htmlFor={id} className="block text-sm text-stone-700">
+				<label htmlFor={id} className="sa-label">
 					{label}
 				</label>
 			)}
@@ -112,16 +114,26 @@ export default function TimePicker({ value, onChange, label, id }: Props) {
 				id={id}
 				type="button"
 				onClick={() => setOpen((v) => !v)}
-				className="mt-1 flex w-full items-center justify-between rounded-lg border border-border bg-white px-3 py-2 text-sm text-stone-900 focus:outline-none focus:ring-2 focus:ring-rose-600"
+				aria-expanded={open}
+				aria-label={label ? `${label} : ${value || 'non définie'}` : undefined}
+				className="sa-input flex items-center justify-between text-left"
 			>
-				<span className="font-mono">{value || '-- : --'}</span>
-				<span className="ml-2 text-stone-400">▾</span>
+				<span className={`sa-num ${value ? 'text-ink' : 'text-ink-mute'}`}>{value || '-- : --'}</span>
+				<ChevronDown size={16} className="ml-2 text-ink-mute" aria-hidden="true" />
 			</button>
 
 			{open && (
-				<div className="absolute z-50 mt-1 flex gap-1 rounded-xl border border-border bg-white p-2 shadow-lg">
+				<div
+					className="sa-timepop"
+					onKeyDown={(e) => {
+						if (e.key === 'Escape') {
+							e.preventDefault();
+							setOpen(false);
+						}
+					}}
+				>
 					<div className="flex flex-col items-center gap-1">
-						<span className="text-xs text-stone-500">H</span>
+						<span className="text-xs font-semibold text-ink-mute">H</span>
 						<ScrollColumn
 							items={HOURS}
 							selected={selectedHour}
@@ -129,9 +141,9 @@ export default function TimePicker({ value, onChange, label, id }: Props) {
 							formatItem={pad}
 						/>
 					</div>
-					<div className="flex items-center font-bold text-stone-400">:</div>
+					<div className="flex items-center pt-5 font-bold text-ink-mute">:</div>
 					<div className="flex flex-col items-center gap-1">
-						<span className="text-xs text-stone-500">Min</span>
+						<span className="text-xs font-semibold text-ink-mute">Min</span>
 						<ScrollColumn
 							items={MINUTES}
 							selected={selectedMinute}
@@ -142,7 +154,7 @@ export default function TimePicker({ value, onChange, label, id }: Props) {
 					<button
 						type="button"
 						onClick={() => setOpen(false)}
-						className="ml-2 self-end rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700"
+						className="sa-btn sa-btn--primary sa-btn--sm ml-2 self-end"
 					>
 						OK
 					</button>

@@ -5,7 +5,7 @@ import MessagesClientPanel from '@/components/standard/client/StandardMessagesCl
 ---
 
 <DashboardLayout title="Messagerie">
-	<ClientNav basePath="/demo-standard" client:load />
+	<ClientNav slot="nav" basePath="/demo-standard" currentPath={Astro.url.pathname} client:load />
 	<MessagesClientPanel client:load />
 </DashboardLayout>
 

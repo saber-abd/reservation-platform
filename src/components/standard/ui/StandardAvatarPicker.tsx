@@ -382,24 +382,27 @@ export function AvatarDisplay({
 export default function AvatarPicker({ value, onChange }: AvatarPickerProps) {
 	return (
 		<div>
-			<p className="text-sm font-medium text-stone-700">Photo de profil</p>
-			<p className="mt-0.5 text-xs text-stone-500">Choisissez un avatar prédéfini</p>
-			<div className="mt-3 grid grid-cols-6 gap-2 sm:grid-cols-6">
-				{AVATARS.map((avatar) => (
-					<button
-						key={avatar.key}
-						type="button"
-						title={avatar.label}
-						onClick={() => onChange(avatar.key)}
-						className={`overflow-hidden rounded-full transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-2 ${
-							value === avatar.key
-								? 'ring-2 ring-rose-600 ring-offset-2 scale-110'
-								: 'opacity-70 hover:opacity-100'
-						}`}
-						style={{ width: 52, height: 52 }}
-						dangerouslySetInnerHTML={{ __html: avatar.svg }}
-					/>
-				))}
+			<p className="text-sm text-ink-mute">Choisissez un avatar prédéfini.</p>
+			<div className="mt-4 grid grid-cols-6 gap-2.5" role="group" aria-label="Avatars disponibles">
+				{AVATARS.map((avatar) => {
+					const selected = value === avatar.key;
+					return (
+						<button
+							key={avatar.key}
+							type="button"
+							title={avatar.label}
+							aria-label={avatar.label}
+							aria-pressed={selected}
+							onClick={() => onChange(avatar.key)}
+							className={`aspect-square w-full max-w-[52px] overflow-hidden rounded-full [&>svg]:block [&>svg]:h-full [&>svg]:w-full transition-[opacity,box-shadow] duration-200 focus-visible:outline-none ${
+								selected
+									? 'opacity-100 shadow-[0_0_0_2px_var(--sa-panel),0_0_0_4px_var(--color-brand)]'
+									: 'opacity-75 hover:opacity-100 focus-visible:shadow-[0_0_0_2px_var(--sa-panel),0_0_0_4px_var(--color-brand)]'
+							}`}
+							dangerouslySetInnerHTML={{ __html: avatar.svg }}
+						/>
+					);
+				})}
 			</div>
 		</div>
 	);

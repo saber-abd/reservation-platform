@@ -5,7 +5,7 @@ import LoyaltyClientPanel from '@/components/standard/client/StandardLoyaltyClie
 ---
 
 <DashboardLayout title="Ma Fidélité">
-	<ClientNav basePath="/demo-standard" client:load />
+	<ClientNav slot="nav" basePath="/demo-standard" currentPath={Astro.url.pathname} client:load />
 	<LoyaltyClientPanel client:load />
 </DashboardLayout>
 

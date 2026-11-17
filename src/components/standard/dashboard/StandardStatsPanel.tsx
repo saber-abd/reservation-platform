@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
+import { ChevronRight } from 'lucide-react';
 import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
 import { getAppointmentsForProfessional, getAllServices, type Appointment, type Service } from '@/lib/queries';
 import { formatEuros, roundMoney } from '@/lib/money';
+import { Busy, EmptyState, PageHeader, PageSkeleton, Panel, Sheet, Skeleton, Tabs, useLastDefined } from '@/components/standard/ui/StandardKit';
 
 type PeriodPreset = '7d' | '30d' | '365d' | 'custom';
 
@@ -32,39 +34,34 @@ function isoDaysAgo(days: number) {
 	return d.toISOString().slice(0, 10);
 }
 
-/** Liste détaillée en modale, réutilisée pour les différents "voir le détail" des cartes stats. */
-function DetailModal({
-	title,
-	appointments,
+/** Liste détaillée en panneau latéral, réutilisée pour les différents « voir le détail » des chiffres. */
+function DetailSheet({
+	detail,
 	onClose,
 }: {
-	title: string;
-	appointments: Appointment[];
+	detail: { title: string; appointments: Appointment[] } | null;
 	onClose: () => void;
 }) {
+	const d = useLastDefined(detail);
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-			<div
-				className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-card p-6 shadow-lg"
-				onClick={(e) => e.stopPropagation()}
-			>
-				<div className="flex items-start justify-between">
-					<h2 className="text-lg font-semibold text-foreground">{title}</h2>
-					<button onClick={onClose} className="text-sm text-stone-400 hover:text-muted-foreground">
-						✕
-					</button>
-				</div>
-				<div className="mt-4 space-y-2">
-					{appointments.length === 0 && <p className="text-sm text-muted-foreground">Aucun rendez-vous.</p>}
-					{appointments.map((a) => (
-						<div key={a.id} className="rounded-lg border border-border p-3 text-sm">
-							<p className="font-medium text-foreground">{a.client_name}</p>
-							<p className="text-muted-foreground">{formatDate(a.start_time)}</p>
-						</div>
+		<Sheet
+			open={detail !== null}
+			onClose={onClose}
+			title={d?.title ?? ''}
+			description={d ? `${d.appointments.length} rendez-vous` : undefined}
+		>
+			{d && d.appointments.length === 0 && <EmptyState kind="calendar" title="Aucun rendez-vous." />}
+			{d && d.appointments.length > 0 && (
+				<ul className="border-t border-[var(--sa-line-soft)]">
+					{d.appointments.map((a) => (
+						<li key={a.id} className="flex items-center justify-between gap-4 border-b border-[var(--sa-line-soft)] py-3">
+							<span className="font-semibold text-ink">{a.client_name}</span>
+							<span className="sa-num text-sm text-ink-soft">{formatDate(a.start_time)}</span>
+						</li>
 					))}
-				</div>
-			</div>
-		</div>
+				</ul>
+			)}
+		</Sheet>
 	);
 }
 
@@ -72,6 +69,7 @@ export default function StatsPanel() {
 	const { loading, professional, error } = useAuthedProfessional();
 	const [appointments, setAppointments] = useState<Appointment[]>([]);
 	const [services, setServices] = useState<Service[]>([]);
+	const [loadingData, setLoadingData] = useState(true);
 	const [preset, setPreset] = useState<PeriodPreset>('30d');
 	const [customStart, setCustomStart] = useState(isoDaysAgo(30));
 	const [customEnd, setCustomEnd] = useState(todayISO());
@@ -79,12 +77,12 @@ export default function StatsPanel() {
 
 	useEffect(() => {
 		if (!professional) return;
-		Promise.all([getAppointmentsForProfessional(professional.id), getAllServices(professional.id)]).then(
-			([appointmentsData, servicesData]) => {
+		Promise.all([getAppointmentsForProfessional(professional.id), getAllServices(professional.id)])
+			.then(([appointmentsData, servicesData]) => {
 				setAppointments(appointmentsData);
 				setServices(servicesData);
-			},
-		);
+			})
+			.finally(() => setLoadingData(false));
 	}, [professional]);
 
 	const { rangeStart, rangeEnd } = useMemo(() => {
@@ -125,6 +123,12 @@ export default function StatsPanel() {
 		}
 		const topService = services.find((s) => s.id === topServiceId);
 
+		// Répartition par prestation sur la période (vue calculée, sans requête supplémentaire).
+		const breakdown = services
+			.map((s) => ({ service: s, count: countByService.get(s.id) ?? 0 }))
+			.filter((row) => row.count > 0)
+			.sort((a, b) => b.count - a.count);
+
 		return {
 			inRange,
 			upcoming,
@@ -132,15 +136,22 @@ export default function StatsPanel() {
 			revenueInRange,
 			topService,
 			topCount,
+			breakdown,
 		};
 	}, [appointments, services, rangeStart, rangeEnd]);
 
-	if (loading) return <p className="text-sm text-muted-foreground">Chargement...</p>;
-	if (error) return <p className="text-sm text-red-600">{error}</p>;
+	if (loading) return <PageSkeleton rows={2} />;
+	if (error) return <p className="sa-alert">{error}</p>;
+
+	const periodLabel = presetLabels[preset].toLowerCase();
+	const rangeText =
+		preset === 'custom'
+			? `du ${rangeStart.toLocaleDateString('fr-FR')} au ${rangeEnd.toLocaleDateString('fr-FR')}`
+			: `sur ${periodLabel}`;
 
 	const cards = [
 		{
-			label: `Rendez-vous (${presetLabels[preset].toLowerCase()})`,
+			label: `Rendez-vous (${periodLabel})`,
 			value: stats.inRange.length,
 			onClick: () => setDetail({ title: 'Rendez-vous sur la période', appointments: stats.inRange }),
 		},
@@ -150,92 +161,141 @@ export default function StatsPanel() {
 			onClick: () => setDetail({ title: 'Clients avec un rendez-vous à venir', appointments: stats.upcoming }),
 		},
 		{
-			label: `Chiffre d'affaires estimé (${presetLabels[preset].toLowerCase()})`,
-			value: formatEuros(stats.revenueInRange),
-		},
-		{
-			label: `Annulations (${presetLabels[preset].toLowerCase()})`,
+			label: `Annulations (${periodLabel})`,
 			value: stats.cancelledInRange.length,
 			onClick: () => setDetail({ title: 'Rendez-vous annulés sur la période', appointments: stats.cancelledInRange }),
 		},
-		{
-			label: 'Prestation la plus demandée',
-			value: stats.topService ? `${stats.topService.name} (${stats.topCount})` : '—',
-		},
 	];
+	const maxCount = Math.max(1, ...stats.breakdown.map((r) => r.count));
 
 	return (
 		<div>
-			<h1 className="text-2xl font-bold text-foreground">Statistiques</h1>
-			<p className="mt-1 text-sm text-muted-foreground">Un suivi rapide de votre activité. Cliquez sur une carte pour voir le détail.</p>
+			<PageHeader title="Statistiques" subtitle="Un suivi rapide de votre activité. Cliquez sur un chiffre pour voir le détail des rendez-vous." />
 
-			<div className="mt-6 flex flex-wrap items-end gap-3">
-				<div className="flex flex-wrap gap-2">
-					{(Object.keys(presetLabels) as PeriodPreset[])
-						.filter((p) => p !== 'custom')
-						.map((p) => (
-							<button
-								key={p}
-								type="button"
-								onClick={() => setPreset(p)}
-								className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
-									preset === p
-										? 'border-rose-600 bg-rose-600 text-white'
-										: 'border-border bg-card text-muted-foreground hover:border-rose-300'
-								}`}
-							>
-								{presetLabels[p]}
-							</button>
-						))}
+			<div className="mb-8 flex flex-wrap items-end gap-x-6 gap-y-4">
+				<div>
+					<span className="sa-label">Période</span>
+					<Tabs
+						variant="segmented"
+						label="Période"
+						value={preset}
+						onChange={setPreset}
+						items={(['7d', '30d', '365d'] as PeriodPreset[]).map((p) => ({ value: p, label: presetLabels[p] }))}
+					/>
 				</div>
 				<div className="flex flex-wrap items-end gap-2">
 					<div>
-						<label className="text-xs text-muted-foreground">Du</label>
+						<label className="sa-label" htmlFor="sa-stats-from">
+							Du
+						</label>
 						<input
+							id="sa-stats-from"
 							type="date"
 							value={customStart}
 							onChange={(e) => {
 								setCustomStart(e.target.value);
 								setPreset('custom');
 							}}
-							className="mt-1 block rounded-lg border border-border bg-card px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+							className="sa-input sa-num w-auto"
 						/>
 					</div>
 					<div>
-						<label className="text-xs text-muted-foreground">Au</label>
+						<label className="sa-label" htmlFor="sa-stats-to">
+							Au
+						</label>
 						<input
+							id="sa-stats-to"
 							type="date"
 							value={customEnd}
 							onChange={(e) => {
 								setCustomEnd(e.target.value);
 								setPreset('custom');
 							}}
-							className="mt-1 block rounded-lg border border-border bg-card px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-600"
+							className="sa-input sa-num w-auto"
 						/>
 					</div>
+					{preset === 'custom' && <span className="pb-2.5 text-sm font-semibold text-brand">Période personnalisée</span>}
 				</div>
 			</div>
 
-			<div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{cards.map((card) => (
-					<button
-						key={card.label}
-						type="button"
-						onClick={card.onClick}
-						disabled={!card.onClick}
-						className={`rounded-xl border border-border bg-card p-6 text-left shadow-sm ${
-							card.onClick ? 'transition-colors hover:border-rose-300 cursor-pointer' : 'cursor-default'
-						}`}
-					>
-						<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{card.label}</p>
-						<p className="mt-2 text-2xl font-bold text-foreground">{card.value}</p>
-						{card.onClick && <p className="mt-1 text-xs text-rose-600">Voir le détail →</p>}
-					</button>
-				))}
-			</div>
+			{loadingData ? (
+				<Busy>
+					<div className="grid gap-6 lg:grid-cols-3">
+						<Skeleton className="h-44 lg:col-span-2" />
+						<Skeleton className="h-44" />
+						<Skeleton className="h-28 lg:col-span-3" />
+					</div>
+				</Busy>
+			) : (
+				<div className="grid gap-6 lg:grid-cols-3">
+					{/* Chiffre principal */}
+					<section className="sa-panel flex flex-col justify-between gap-6 p-6 lg:col-span-2">
+						<div>
+							<h2 className="sa-fig-label">Chiffre d'affaires estimé ({periodLabel})</h2>
+							<p className="sa-num mt-3 text-[clamp(2.75rem,2rem+3vw,4.25rem)] font-semibold leading-none tracking-[-0.045em] text-ink">
+								{formatEuros(stats.revenueInRange)}
+							</p>
+						</div>
+						<p className="text-sm text-ink-mute">
+							Somme des tarifs des {stats.inRange.length} rendez-vous non annulés {rangeText}.
+						</p>
+					</section>
 
-			{detail && <DetailModal title={detail.title} appointments={detail.appointments} onClose={() => setDetail(null)} />}
+					<section className="sa-panel flex flex-col justify-between gap-4 p-6">
+						<h2 className="sa-fig-label">Prestation la plus demandée</h2>
+						{stats.topService ? (
+							<div>
+								<p className="text-xl font-semibold leading-tight tracking-tight text-ink">{stats.topService.name}</p>
+								<p className="sa-num mt-1 text-sm text-ink-mute">
+									{stats.topCount} rendez-vous {rangeText}
+								</p>
+							</div>
+						) : (
+							<p className="text-2xl font-semibold text-ink-mute">—</p>
+						)}
+					</section>
+
+					{/* Chiffres cliquables */}
+					<div className="sa-panel sa-figs overflow-hidden lg:col-span-3">
+						{cards.map((card) => (
+							<button
+								key={card.label}
+								type="button"
+								onClick={card.onClick}
+								className="group text-left transition-colors hover:bg-[var(--sa-hover)]"
+							>
+								<span className="sa-fig-label block">{card.label}</span>
+								<span className="sa-fig-value">{card.value}</span>
+								<span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand">
+									Voir le détail
+									<ChevronRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+								</span>
+							</button>
+						))}
+					</div>
+
+					{/* Répartition par prestation */}
+					<Panel title="Répartition par prestation" description={`Rendez-vous non annulés ${rangeText}.`} className="lg:col-span-3">
+						{stats.breakdown.length === 0 ? (
+							<p className="text-sm text-ink-mute">Aucun rendez-vous sur cette période.</p>
+						) : (
+							<ul className="grid gap-4">
+								{stats.breakdown.map((row, i) => (
+									<li key={row.service.id} className="grid gap-1.5 sm:grid-cols-[14rem_minmax(0,1fr)_3rem] sm:items-center sm:gap-4">
+										<span className="truncate text-sm font-medium text-ink">{row.service.name}</span>
+										<span className="sa-hbar" aria-hidden="true">
+											<i style={{ width: `${(row.count / maxCount) * 100}%`, animationDelay: `${i * 60}ms` }} />
+										</span>
+										<span className="sa-num text-sm font-semibold text-ink-soft sm:text-right">{row.count}</span>
+									</li>
+								))}
+							</ul>
+						)}
+					</Panel>
+				</div>
+			)}
+
+			<DetailSheet detail={detail} onClose={() => setDetail(null)} />
 		</div>
 	);
 }
-

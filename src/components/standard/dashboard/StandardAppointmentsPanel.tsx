@@ -1,7 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import NumberFlow from '@number-flow/react';
+import { toast } from 'sonner';
 import { useAuthedProfessional } from '@/lib/useAuthedProfessional';
 import { isRoleReadOnly } from '@/lib/permissions';
 import { getAppointmentsForProfessional, updateAppointmentStatus, type Appointment } from '@/lib/queries';
+import {
+	DateBlock,
+	EmptyState,
+	PageHeader,
+	PageSkeleton,
+	Sheet,
+	StatusPill,
+	TableSkeleton,
+	Tabs,
+	statusTone,
+	useLastDefined,
+	Busy,
+} from '@/components/standard/ui/StandardKit';
 
 type AppointmentWithService = Appointment & {
 	services: { name: string; duration_minutes: number; price: number } | null;
@@ -17,18 +32,20 @@ function formatDate(iso: string) {
 	});
 }
 
+function formatTime(iso: string) {
+	return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatDay(iso: string) {
+	const s = new Date(iso).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+	return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 const statusLabels: Record<Appointment['status'], string> = {
 	pending: 'En attente',
 	confirmed: 'Confirmé',
 	cancelled: 'Annulé',
 	completed: 'Terminé',
-};
-
-const statusStyles: Record<Appointment['status'], string> = {
-	pending: 'bg-amber-50 text-amber-700 border border-amber-200',
-	confirmed: 'bg-rose-50 text-rose-700 border border-rose-200',
-	cancelled: 'bg-stone-50 text-stone-600 border border-stone-200',
-	completed: 'bg-green-50 text-green-700 border border-green-200',
 };
 
 type Tab = 'pending' | 'confirmed' | 'history';
@@ -39,106 +56,128 @@ const tabLabels: Record<Tab, string> = {
 	history: 'Historique passé',
 };
 
-function AppointmentDetailModal({
+const READ_ONLY = 'Action désactivée : cette démonstration est en lecture seule.';
+const WEEK_LETTERS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+
+const sameDay = (a: Date, b: Date) =>
+	a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+/** Détail d'un rendez-vous dans le panneau latéral, avec les mêmes actions que l'ancienne modale. */
+function AppointmentDetail({
 	appointment,
+	open,
 	onClose,
 	onCancel,
 	onConfirm,
 	onComplete,
 }: {
-	appointment: AppointmentWithService;
+	appointment: AppointmentWithService | null;
+	open: boolean;
 	onClose: () => void;
 	onCancel: (id: string) => void;
 	onConfirm: (id: string) => void;
 	onComplete: (id: string) => void;
 }) {
-	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-			<div
-				className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-2xl"
-				onClick={(e) => e.stopPropagation()}
-			>
-				<div className="flex items-start justify-between">
-					<h2 className="text-lg font-bold text-stone-900">Détail du rendez-vous</h2>
-					<button onClick={onClose} className="text-sm text-stone-400 hover:text-stone-600 transition-colors">
-						✕
+	const a = useLastDefined(appointment);
+	if (!a) return null;
+	const isPast = new Date(a.start_time) < new Date();
+
+	let footer: React.ReactNode = null;
+	if (a.status === 'confirmed') {
+		footer = (
+			<>
+				{isPast && (
+					<button
+						type="button"
+						onClick={() => {
+							onComplete(a.id);
+							onClose();
+						}}
+						className="sa-btn sa-btn--primary"
+					>
+						Terminer la prestation (ajoute les points)
 					</button>
+				)}
+				<button
+					type="button"
+					onClick={() => {
+						onCancel(a.id);
+						onClose();
+					}}
+					className="sa-btn sa-btn--danger"
+				>
+					Annuler ce rendez-vous
+				</button>
+			</>
+		);
+	} else if (a.status === 'pending') {
+		footer = (
+			<>
+				<button
+					type="button"
+					onClick={() => {
+						onConfirm(a.id);
+						onClose();
+					}}
+					className="sa-btn sa-btn--primary"
+				>
+					Confirmer
+				</button>
+				<button
+					type="button"
+					onClick={() => {
+						onCancel(a.id);
+						onClose();
+					}}
+					className="sa-btn sa-btn--danger"
+				>
+					Refuser
+				</button>
+			</>
+		);
+	}
+
+	return (
+		<Sheet open={open} onClose={onClose} title="Détail du rendez-vous" description={formatDay(a.start_time)} footer={footer}>
+			<div className="mb-5 flex items-center gap-3">
+				<DateBlock iso={a.start_time} />
+				<div className="min-w-0">
+					<p className="sa-num text-2xl font-semibold tracking-tight text-ink">{formatTime(a.start_time)}</p>
+					<StatusPill tone={statusTone[a.status]}>{statusLabels[a.status]}</StatusPill>
 				</div>
-				<dl className="mt-4 space-y-3 text-sm">
-					<div>
-						<dt className="text-xs font-bold tracking-wider uppercase text-stone-400">Client</dt>
-						<dd className="font-medium text-stone-900 break-words">{appointment.client_name}</dd>
-						<dd className="text-stone-500 break-all">{appointment.client_email}</dd>
-						{appointment.client_phone && <dd className="text-stone-500">{appointment.client_phone}</dd>}
-					</div>
-					<div>
-						<dt className="text-xs uppercase text-stone-400">Prestation</dt>
-						<dd className="text-stone-700">
-							{appointment.services?.name ?? '—'}
-							{appointment.services && ` (${appointment.services.duration_minutes} min — ${appointment.services.price} €)`}
-						</dd>
-					</div>
-					<div>
-						<dt className="text-xs uppercase text-stone-400">Créneau</dt>
-						<dd className="text-stone-700">{formatDate(appointment.start_time)}</dd>
-					</div>
-					<div>
-						<dt className="text-xs font-bold tracking-wider uppercase text-stone-400">Statut</dt>
-						<dd>
-							<span className={`rounded-full px-2 py-1 text-xs font-medium ${statusStyles[appointment.status]}`}>
-								{statusLabels[appointment.status]}
-							</span>
-						</dd>
-					</div>
-				</dl>
-				{appointment.status === 'confirmed' && (
-					<div className="mt-6 flex flex-col gap-3">
-						{new Date(appointment.start_time) < new Date() && (
-							<button
-								onClick={() => {
-									onComplete(appointment.id);
-									onClose();
-								}}
-								className="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700"
-							>
-								Terminer la prestation (Ajoute les points)
-							</button>
-						)}
-						<button
-							onClick={() => {
-								onCancel(appointment.id);
-								onClose();
-							}}
-							className="text-sm font-medium text-red-600 hover:underline self-start"
-						>
-							Annuler ce rendez-vous
-						</button>
-					</div>
-				)}
-				{appointment.status === 'pending' && (
-					<div className="mt-6 flex gap-4">
-						<button
-							onClick={() => {
-								onConfirm(appointment.id);
-								onClose();
-							}}
-							className="text-sm font-medium text-green-700 hover:underline"
-						>
-							Confirmer
-						</button>
-						<button
-							onClick={() => {
-								onCancel(appointment.id);
-								onClose();
-							}}
-							className="text-sm font-medium text-red-600 hover:underline"
-						>
-							Refuser
-						</button>
-					</div>
-				)}
 			</div>
-		</div>
+			<dl className="sa-dl">
+				<div>
+					<dt>Client</dt>
+					<dd>
+						<span className="block font-semibold">{a.client_name}</span>
+						<a href={`mailto:${a.client_email}`} className="block break-all text-ink-soft hover:text-brand">
+							{a.client_email}
+						</a>
+						{a.client_phone && (
+							<a href={`tel:${a.client_phone}`} className="block text-ink-soft hover:text-brand">
+								{a.client_phone}
+							</a>
+						)}
+					</dd>
+				</div>
+				<div>
+					<dt>Prestation</dt>
+					<dd>
+						{a.services?.name ?? '—'}
+						{a.services && (
+							<span className="sa-num block text-sm text-ink-mute">
+								{a.services.duration_minutes} min — {a.services.price} €
+							</span>
+						)}
+					</dd>
+				</div>
+				<div>
+					<dt>Créneau</dt>
+					<dd className="sa-num">{formatDate(a.start_time)}</dd>
+				</div>
+			</dl>
+		</Sheet>
 	);
 }
 
@@ -148,6 +187,7 @@ export default function AppointmentsPanel() {
 	const [loadingAppointments, setLoadingAppointments] = useState(true);
 	const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithService | null>(null);
 	const [tab, setTab] = useState<Tab>('pending');
+	const listRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		if (!professional) return;
@@ -156,35 +196,52 @@ export default function AppointmentsPanel() {
 			.finally(() => setLoadingAppointments(false));
 	}, [professional]);
 
-	async function handleCancel(id: string) {
+	async function changeStatus(id: string, status: Appointment['status'], done: string) {
 		if (isRoleReadOnly()) {
-			alert("Action désactivée : cette démonstration est en lecture seule.");
+			toast(READ_ONLY);
 			return;
 		}
-		const updated = await updateAppointmentStatus(id, 'cancelled');
-		setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, ...updated } : a)));
-	}
-
-	async function handleConfirm(id: string) {
-		if (isRoleReadOnly()) {
-			alert("Action désactivée : cette démonstration est en lecture seule.");
-			return;
+		try {
+			const updated = await updateAppointmentStatus(id, status);
+			setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, ...updated } : a)));
+			toast.success(done);
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : 'La mise à jour du rendez-vous a échoué.');
 		}
-		const updated = await updateAppointmentStatus(id, 'confirmed');
-		setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, ...updated } : a)));
 	}
 
-	async function handleComplete(id: string) {
-		if (isRoleReadOnly()) {
-			alert("Action désactivée : cette démonstration est en lecture seule.");
-			return;
+	const handleCancel = (id: string) => changeStatus(id, 'cancelled', 'Rendez-vous annulé.');
+	const handleConfirm = (id: string) => changeStatus(id, 'confirmed', 'Rendez-vous confirmé.');
+	const handleComplete = (id: string) => changeStatus(id, 'completed', 'Prestation terminée, points ajoutés au client.');
+
+	// Vues calculées à partir des rendez-vous déjà chargés.
+	const summary = useMemo(() => {
+		const now = new Date();
+		const pending = appointments.filter((a) => a.status === 'pending');
+		const upcoming = appointments
+			.filter((a) => (a.status === 'confirmed' || a.status === 'pending') && new Date(a.start_time) >= now)
+			.sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+		const monday = new Date(now);
+		monday.setHours(0, 0, 0, 0);
+		monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+		const week = Array.from({ length: 7 }, (_, i) => {
+			const day = new Date(monday);
+			day.setDate(monday.getDate() + i);
+			const count = appointments.filter((a) => a.status !== 'cancelled' && sameDay(new Date(a.start_time), day)).length;
+			return { day, count, today: sameDay(day, now) };
+		});
+		const counts: Record<Tab, number> = { pending: 0, confirmed: 0, history: 0 };
+		for (const a of appointments) {
+			const isPast = new Date(a.start_time) < now;
+			if (a.status === 'pending') counts.pending++;
+			if (a.status === 'confirmed' && !isPast) counts.confirmed++;
+			if (isPast || a.status === 'cancelled' || a.status === 'completed') counts.history++;
 		}
-		const updated = await updateAppointmentStatus(id, 'completed');
-		setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, ...updated } : a)));
-	}
+		return { pending, next: upcoming[0] ?? null, week, weekTotal: week.reduce((s, d) => s + d.count, 0), counts };
+	}, [appointments]);
 
-	if (loading) return <p className="text-sm text-muted-foreground">Chargement...</p>;
-	if (error) return <p className="text-sm text-red-600">{error}</p>;
+	if (loading) return <PageSkeleton rows={3} />;
+	if (error) return <p className="sa-alert">{error}</p>;
 
 	const now = new Date();
 	const filteredAppointments = appointments.filter((a) => {
@@ -194,128 +251,243 @@ export default function AppointmentsPanel() {
 		return isPast || a.status === 'cancelled' || a.status === 'completed';
 	});
 
+	const pendingCount = summary.pending.length;
+	const maxDay = Math.max(1, ...summary.week.map((d) => d.count));
+	const next = summary.next;
+
+	function showPending() {
+		setTab('pending');
+		listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	}
+
 	return (
 		<div>
-			<h1 className="text-2xl font-black text-stone-900 uppercase tracking-widest font-[var(--font-heading)]">Rendez-vous</h1>
-			<p className="mt-1 text-sm text-stone-500">Bienvenue, {professional?.business_name}.</p>
+			<PageHeader
+				title="Rendez-vous"
+				subtitle={
+					<>
+						Bienvenue, {professional?.business_name}.{' '}
+						{!loadingAppointments &&
+							(pendingCount > 0
+								? `${pendingCount} demande${pendingCount > 1 ? 's attendent' : ' attend'} votre réponse.`
+								: 'Aucune demande en attente de réponse.')}
+					</>
+				}
+			/>
 
-			<div className="mt-6 flex flex-wrap gap-2">
-				{(Object.keys(tabLabels) as Tab[]).map((t) => (
-					<button
-						key={t}
-						type="button"
-						onClick={() => setTab(t)}
-						className={`rounded-lg border px-4 py-2 text-sm font-bold transition-colors shadow-sm ${
-							tab === t
-								? 'border-primary bg-primary text-white shadow-primary/20'
-								: 'border-stone-200 bg-white text-stone-500 hover:border-primary hover:text-primary'
-						}`}
-					>
-						{tabLabels[t]}
-					</button>
-				))}
-			</div>
+			{/* Ce qui demande une action, puis le prochain passage et la semaine */}
+			<section aria-label="Résumé" className="sa-panel sa-figs mb-8" style={{ '--sa-figs-cols': 'minmax(0,1fr) minmax(0,1.5fr) minmax(0,1fr)' } as React.CSSProperties}>
+				<div>
+					<p className="sa-fig-label">À confirmer</p>
+					{loadingAppointments ? (
+						<span className="sa-skel mt-2 h-10 w-16" aria-hidden="true" />
+					) : (
+						<p className="sa-fig-value" style={{ color: pendingCount > 0 ? 'var(--color-brand)' : undefined }}>
+							<NumberFlow value={pendingCount} />
+							<small>demande{pendingCount > 1 ? 's' : ''}</small>
+						</p>
+					)}
+					{pendingCount > 0 ? (
+						<button type="button" onClick={showPending} className="sa-textlink mt-3 text-sm">
+							Répondre aux demandes
+						</button>
+					) : (
+						<p className="sa-fig-note">Tout est à jour.</p>
+					)}
+				</div>
 
-			<div className="mt-8 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
-				<table className="w-full text-left text-sm">
-					<thead className="bg-stone-50 text-xs font-bold uppercase tracking-wider text-stone-500 border-b border-stone-200">
-						<tr>
-							<th className="px-6 py-4">Client</th>
-							<th className="px-6 py-4">Créneau</th>
-							<th className="px-6 py-4">Statut</th>
-							<th className="px-6 py-4" />
-						</tr>
-					</thead>
-					<tbody className="divide-y divide-stone-100">
-						{loadingAppointments && (
-							<tr>
-								<td className="px-4 py-4 text-muted-foreground" colSpan={4}>
-									Chargement des rendez-vous...
-								</td>
-							</tr>
-						)}
-						{!loadingAppointments && appointments.length === 0 && (
-							<tr>
-								<td className="px-4 py-4 text-muted-foreground" colSpan={4}>
-									Aucun rendez-vous pour le moment.
-								</td>
-							</tr>
-						)}
-						{!loadingAppointments && appointments.length > 0 && filteredAppointments.length === 0 && (
-							<tr>
-								<td className="px-4 py-4 text-muted-foreground" colSpan={4}>
-									Aucun rendez-vous dans cet onglet.
-								</td>
-							</tr>
-						)}
-						{filteredAppointments.map((appointment) => (
-							<tr
-								key={appointment.id}
-								onClick={() => setSelectedAppointment(appointment)}
-								className="cursor-pointer hover:bg-stone-50 transition-colors"
-							>
-								<td className="px-6 py-4 max-w-[16rem] sm:max-w-xs">
-									<p className="font-bold text-stone-900 break-words">{appointment.client_name}</p>
-									<p className="text-xs text-stone-500 mt-1 break-all">{appointment.client_email}</p>
-								</td>
-								<td className="px-6 py-4 text-stone-600 font-medium">{formatDate(appointment.start_time)}</td>
-								<td className="px-6 py-4">
-									<span
-										className={`rounded-full px-2 py-1 text-xs font-medium ${statusStyles[appointment.status]}`}
-									>
-										{statusLabels[appointment.status]}
-									</span>
-								</td>
-								<td className="px-6 py-4 text-right">
-									{appointment.status === 'confirmed' && new Date(appointment.start_time) < now && (
-										<button
-											onClick={(e) => {
-												e.stopPropagation();
-												handleComplete(appointment.id);
-											}}
-											className="mr-3 text-xs font-bold text-green-600 hover:underline"
-										>
-											Terminer
-										</button>
-									)}
-									{appointment.status === 'pending' && (
-										<button
-											onClick={(e) => {
-												e.stopPropagation();
-												handleConfirm(appointment.id);
-											}}
-											className="mr-3 text-xs font-medium text-green-700 hover:underline"
-										>
-											Confirmer
-										</button>
-									)}
-									{(appointment.status === 'confirmed' || appointment.status === 'pending') && (
-										<button
-											onClick={(e) => {
-												e.stopPropagation();
-												handleCancel(appointment.id);
-											}}
-											className="text-xs font-medium text-red-600 hover:underline"
-										>
-											{appointment.status === 'pending' ? 'Refuser' : 'Annuler'}
-										</button>
-									)}
-								</td>
-							</tr>
+				<div>
+					<p className="sa-fig-label">Prochain rendez-vous</p>
+					{loadingAppointments ? (
+						<div className="mt-3 flex gap-3">
+							<span className="sa-skel h-12 w-11" aria-hidden="true" />
+							<div className="grid flex-1 gap-2">
+								<span className="sa-skel h-4 w-32" aria-hidden="true" />
+								<span className="sa-skel h-3 w-48" aria-hidden="true" />
+							</div>
+						</div>
+					) : next ? (
+						<button type="button" onClick={() => setSelectedAppointment(next)} className="mt-3 flex w-full items-center gap-3 text-left">
+							<DateBlock iso={next.start_time} />
+							<span className="min-w-0">
+								<span className="block truncate font-semibold text-ink">
+									<span className="sa-num">{formatTime(next.start_time)}</span> · {next.client_name}
+								</span>
+								<span className="block truncate text-sm text-ink-mute">
+									{next.services?.name ?? 'Prestation'} · {formatDay(next.start_time).toLowerCase()}
+								</span>
+							</span>
+						</button>
+					) : (
+						<p className="sa-fig-note mt-3">Aucun rendez-vous à venir.</p>
+					)}
+				</div>
+
+				<div>
+					<p className="sa-fig-label">
+						Cette semaine <span className="sa-num text-ink-mute">· {summary.weekTotal} rendez-vous</span>
+					</p>
+					<div className="sa-bars" aria-hidden="true">
+						{summary.week.map((d, i) => (
+							<div key={i}>
+								<div>
+									<i
+										data-on={d.count > 0 ? '' : undefined}
+										style={{ height: `${d.count === 0 ? 3 : Math.max(18, (d.count / maxDay) * 100)}%`, animationDelay: `${i * 40}ms` }}
+									/>
+								</div>
+								<span data-today={d.today ? '' : undefined}>{WEEK_LETTERS[i]}</span>
+							</div>
 						))}
-					</tbody>
-				</table>
+					</div>
+				</div>
+			</section>
+
+			<div ref={listRef} className="scroll-mt-20">
+				<Tabs
+					label="Filtrer les rendez-vous"
+					value={tab}
+					onChange={setTab}
+					panelId="sa-rdv-panel"
+					items={(Object.keys(tabLabels) as Tab[]).map((t) => ({
+						value: t,
+						label: tabLabels[t],
+						count: loadingAppointments ? undefined : summary.counts[t],
+					}))}
+				/>
+
+				<div id="sa-rdv-panel" role="tabpanel" className="mt-5">
+					{loadingAppointments ? (
+						<Busy>
+							<TableSkeleton rows={3} />
+						</Busy>
+					) : appointments.length === 0 ? (
+						<div className="sa-panel">
+							<EmptyState kind="calendar" title="Aucun rendez-vous pour le moment.">
+								Les demandes de réservation faites sur le site arriveront ici, dans l'onglet « En attente de validation ».
+							</EmptyState>
+						</div>
+					) : filteredAppointments.length === 0 ? (
+						<div className="sa-panel">
+							<EmptyState kind={tab === 'pending' ? 'calendar' : 'list'} title="Aucun rendez-vous dans cet onglet.">
+								{tab === 'pending' ? 'Toutes les demandes ont reçu une réponse.' : 'Les autres onglets contiennent peut-être ce que vous cherchez.'}
+							</EmptyState>
+						</div>
+					) : (
+						<div className="sa-panel overflow-hidden">
+							<table className="sa-table sa-table--stack">
+								<thead>
+									<tr>
+										<th scope="col">Client</th>
+										<th scope="col">Prestation</th>
+										<th scope="col">Créneau</th>
+										<th scope="col">Statut</th>
+										<th scope="col">
+											<span className="sr-only">Actions</span>
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									{filteredAppointments.map((appointment) => {
+										const isPast = new Date(appointment.start_time) < now;
+										return (
+											<tr
+												key={appointment.id}
+												data-clickable=""
+												tabIndex={0}
+												aria-label={`Voir le détail : ${appointment.client_name}, ${formatDate(appointment.start_time)}`}
+												onClick={() => setSelectedAppointment(appointment)}
+												onKeyDown={(e) => {
+													if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+														e.preventDefault();
+														setSelectedAppointment(appointment);
+													}
+												}}
+											>
+												<td data-cell="main" className="max-w-[16rem]">
+													<p className="sa-cell-strong break-words">{appointment.client_name}</p>
+													<p className="mt-0.5 break-all text-xs text-ink-mute">{appointment.client_email}</p>
+												</td>
+												<td data-cell="full">
+													<span className="text-ink">{appointment.services?.name ?? '—'}</span>
+													{appointment.services && (
+														<span className="sa-num block text-xs text-ink-mute">
+															{appointment.services.duration_minutes} min · {appointment.services.price} €
+														</span>
+													)}
+												</td>
+												<td data-cell="full">
+													<span className="flex items-center gap-2.5">
+														<DateBlock iso={appointment.start_time} />
+														<span className="sa-num">
+															<span className="block font-semibold text-ink">{formatTime(appointment.start_time)}</span>
+															<span className="block text-xs text-ink-mute">
+																{new Date(appointment.start_time).toLocaleDateString('fr-FR', { weekday: 'long' })}
+															</span>
+														</span>
+													</span>
+												</td>
+												<td data-cell="side">
+													<StatusPill tone={statusTone[appointment.status]}>{statusLabels[appointment.status]}</StatusPill>
+												</td>
+												<td data-cell="full" className="sa-cell-end">
+													<span className="inline-flex flex-wrap justify-end gap-1.5 max-md:justify-start">
+														{appointment.status === 'pending' && (
+															<button
+																type="button"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	handleConfirm(appointment.id);
+																}}
+																className="sa-btn sa-btn--primary sa-btn--sm"
+															>
+																Confirmer
+															</button>
+														)}
+														{appointment.status === 'confirmed' && isPast && (
+															<button
+																type="button"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	handleComplete(appointment.id);
+																}}
+																className="sa-btn sa-btn--secondary sa-btn--sm"
+															>
+																Terminer
+															</button>
+														)}
+														{(appointment.status === 'confirmed' || appointment.status === 'pending') && (
+															<button
+																type="button"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	handleCancel(appointment.id);
+																}}
+																className="sa-btn sa-btn--danger sa-btn--sm"
+															>
+																{appointment.status === 'pending' ? 'Refuser' : 'Annuler'}
+															</button>
+														)}
+													</span>
+												</td>
+											</tr>
+										);
+									})}
+								</tbody>
+							</table>
+						</div>
+					)}
+				</div>
 			</div>
 
-			{selectedAppointment && (
-				<AppointmentDetailModal
-					appointment={selectedAppointment}
-					onClose={() => setSelectedAppointment(null)}
-					onCancel={handleCancel}
-					onConfirm={handleConfirm}
-					onComplete={handleComplete}
-				/>
-			)}
+			<AppointmentDetail
+				appointment={selectedAppointment}
+				open={selectedAppointment !== null}
+				onClose={() => setSelectedAppointment(null)}
+				onCancel={handleCancel}
+				onConfirm={handleConfirm}
+				onComplete={handleComplete}
+			/>
 		</div>
 	);
 }

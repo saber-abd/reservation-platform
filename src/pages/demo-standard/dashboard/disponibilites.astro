@@ -5,7 +5,7 @@ import AvailabilitiesPanel from '@/components/standard/dashboard/StandardAvailab
 ---
 
 <DashboardLayout title="Mes disponibilités">
-	<DashboardNav basePath="/demo-standard" client:load />
+	<DashboardNav slot="nav" basePath="/demo-standard" currentPath={Astro.url.pathname} client:load />
 	<AvailabilitiesPanel client:load />
 </DashboardLayout>
 

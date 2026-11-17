@@ -5,7 +5,7 @@ import ServicesPanel from '@/components/standard/dashboard/StandardServicesPanel
 ---
 
 <DashboardLayout title="Mes prestations">
-	<DashboardNav basePath="/demo-standard" client:load />
+	<DashboardNav slot="nav" basePath="/demo-standard" currentPath={Astro.url.pathname} client:load />
 	<ServicesPanel client:load />
 </DashboardLayout>
 

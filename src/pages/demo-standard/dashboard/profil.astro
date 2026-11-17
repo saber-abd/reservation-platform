@@ -5,7 +5,7 @@ import ProfilePanel from '@/components/standard/dashboard/StandardProfilePanel';
 ---
 
 <DashboardLayout title="Mon profil">
-	<DashboardNav basePath="/demo-standard" client:load />
+	<DashboardNav slot="nav" basePath="/demo-standard" currentPath={Astro.url.pathname} client:load />
 	<ProfilePanel client:load />
 </DashboardLayout>
 

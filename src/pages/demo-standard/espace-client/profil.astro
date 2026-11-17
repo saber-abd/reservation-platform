@@ -6,8 +6,10 @@ import AccountPrivacyActions from '@/components/shared/AccountPrivacyActions';
 ---
 
 <DashboardLayout title="Mon profil">
-	<ClientNav basePath="/demo-standard" client:load />
+	<ClientNav slot="nav" basePath="/demo-standard" currentPath={Astro.url.pathname} client:load />
 	<ClientProfilePanel client:load />
-	<AccountPrivacyActions basePath="/demo-standard" client:idle />
+	<div class="sa-privacy">
+		<AccountPrivacyActions basePath="/demo-standard" client:idle />
+	</div>
 </DashboardLayout>
 
