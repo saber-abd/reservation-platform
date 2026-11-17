@@ -69,7 +69,7 @@ export default function LoyaltyClientPanel() {
 				<article className="pe-card pe-card--sombre pe-b-7">
 					<div className="grid items-center gap-6 p-5 sm:grid-cols-[minmax(0,240px)_minmax(0,1fr)] md:p-8">
 						<div className="mx-auto w-full max-w-[240px]">
-							<Gauge value={data.progressPercent / 100} ariaLabel={`${data.points} points, ${Math.round(data.progressPercent)} % du grade suivant`}>
+							<Gauge value={Math.min(data.points, 600) / 600} ariaLabel={`${data.points} points sur une échelle de 600 (grade Or)`}>
 								<span className="block text-[2.6rem]">
 									<Rolling value={data.points} />
 								</span>
@@ -79,7 +79,7 @@ export default function LoyaltyClientPanel() {
 						<div className="grid gap-4">
 							<div>
 								<p className="pe-tech">Grade actuel</p>
-								<p className="mt-1 text-[clamp(2.6rem,5vw,3.8rem)] font-extrabold uppercase leading-none tracking-[-0.02em] [font-stretch:125%]">
+								<p className="mt-1 break-words text-[clamp(2.2rem,3.6vw,3.2rem)] font-extrabold uppercase leading-none tracking-[-0.02em] [font-stretch:120%]">
 									{data.tier}
 								</p>
 							</div>

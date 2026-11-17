@@ -247,18 +247,18 @@ export default function AppointmentsClientPanel() {
 						<span className="pe-skel" style={{ height: 14, width: '40%' }} />
 					</div>
 				) : prochain ? (
-					<div className="grid md:grid-cols-[minmax(0,auto)_minmax(0,1fr)]">
+					<div className="grid grid-cols-1 md:grid-cols-[minmax(0,auto)_minmax(0,1fr)]">
 						{/* Feuillet date */}
-						<div className="flex items-center gap-5 border-b border-pe-filet-sombre p-5 md:block md:border-b-0 md:border-r md:p-8">
+						<div className="flex min-w-0 flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-pe-filet-sombre p-5 md:block md:border-b-0 md:border-r md:p-8">
 							<p className="pe-tech">{new Date(prochain.start_time).toLocaleDateString('fr-FR', { weekday: 'long' })}</p>
-							<p className="text-[clamp(4.5rem,11vw,8rem)] font-extrabold leading-[0.85] tracking-[-0.04em] tabular-nums [font-stretch:115%] md:mt-3">
+							<p className="text-[clamp(3.6rem,11vw,8rem)] font-extrabold leading-[0.85] tracking-[-0.04em] tabular-nums [font-stretch:115%] md:mt-3">
 								{new Date(prochain.start_time).getDate()}
 							</p>
 							<p className="text-xl font-extrabold uppercase [font-stretch:120%] md:mt-2">
 								{new Date(prochain.start_time).toLocaleDateString('fr-FR', { month: 'long' })}
 							</p>
 						</div>
-						<div className="flex flex-col gap-5 p-5 md:p-8">
+						<div className="flex min-w-0 flex-col gap-5 p-5 md:p-8">
 							<div className="flex flex-wrap items-center justify-between gap-3">
 								<p className="pe-tech">Prochain rendez-vous</p>
 								<StatusTag status={prochain.status} label={statusLabels[prochain.status]} />
@@ -270,7 +270,7 @@ export default function AppointmentsClientPanel() {
 									</span>
 									<span className="pe-tech !text-pe-blanc">{delaiRelatif(new Date(prochain.start_time), now)}</span>
 								</p>
-								<p className="mt-4 text-[clamp(1.25rem,2.2vw,1.7rem)] font-extrabold uppercase leading-tight tracking-[-0.01em] [font-stretch:118%]">
+								<p className="mt-4 break-words text-[clamp(1.2rem,2.2vw,1.7rem)] font-extrabold uppercase leading-tight tracking-[-0.01em] [font-stretch:118%]">
 									{prochain.services?.name ?? '—'}
 								</p>
 							</div>

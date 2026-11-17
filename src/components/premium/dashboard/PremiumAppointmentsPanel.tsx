@@ -92,7 +92,7 @@ function AppointmentDetail({ appointment }: { appointment: AppointmentWithServic
 				</div>
 				<div className="grid gap-1 p-4">
 					<dt className="pe-tech">Créneau</dt>
-					<dd className="capitalize">{formatDate(appointment.start_time)}</dd>
+					<dd className="first-letter:uppercase">{formatDate(appointment.start_time)}</dd>
 				</div>
 			</dl>
 		</div>
@@ -529,7 +529,7 @@ export default function AppointmentsPanel() {
 											<p className="pe-ligne-nom break-words">{appointment.client_name}</p>
 											<p className="mt-0.5 break-all text-xs text-pe-acier">{appointment.client_email}</p>
 										</td>
-										<td className="whitespace-nowrap font-medium tabular-nums capitalize">{formatDate(appointment.start_time)}</td>
+										<td className="whitespace-nowrap font-medium tabular-nums first-letter:uppercase">{formatDate(appointment.start_time)}</td>
 										<td className="text-pe-acier">{appointment.services?.name ?? '—'}</td>
 										<td>
 											<StatusTag status={appointment.status} />

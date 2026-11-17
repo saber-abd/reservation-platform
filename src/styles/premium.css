@@ -1242,12 +1242,13 @@ textarea.pe-input { resize: vertical; min-height: 88px; }
 .pe-tampon { animation: pe-tampon 0.5s var(--pe-ease) both; }
 @keyframes pe-tampon { from { opacity: 0; transform: scale(0.6) rotate(-8deg); } }
 
-/* Données personnelles (composant partagé AccountPrivacyActions, habillé ici). */
-.pe-donnees > section { margin-top: 28px; border-radius: 2px; border-color: var(--pe-filet); background: var(--pe-carte); }
-.pe-donnees > section h2 { font-weight: 800; font-stretch: 118%; text-transform: uppercase; letter-spacing: -0.01em; }
-.pe-donnees > section button, .pe-donnees > section input { border-radius: 2px; }
-
 } /* fin @layer components (espaces connectés) */
+
+/* Données personnelles (composant partagé AccountPrivacyActions, habillé ici, hors couche pour
+ * passer devant ses utilitaires Tailwind). */
+.dashboard-premium .pe-donnees section { margin-top: 16px; border-radius: 2px; border-color: var(--pe-filet); background: var(--pe-carte); }
+.dashboard-premium .pe-donnees h2 { font-weight: 800; font-stretch: 118%; text-transform: uppercase; letter-spacing: -0.01em; font-size: 1.05rem; }
+.dashboard-premium .pe-donnees button, .dashboard-premium .pe-donnees input { border-radius: 2px; min-height: 40px; }
 
 @media (prefers-reduced-motion: reduce) {
     .pe-side, .pe-fond, .pe-burger span, .pe-jauge__val, .pe-jauge__aiguille, .pe-barre > i, .pe-switch__piste::after { transition-duration: 0.01ms !important; }
